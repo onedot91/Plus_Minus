@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Sword, Heart, Zap, RotateCcw, Play, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Howl } from 'howler';
 import { VisualCalculator } from './components/VisualCalculator';
 
 type GameState = 'start' | 'playing' | 'win' | 'lose';
@@ -9,6 +8,385 @@ type GameState = 'start' | 'playing' | 'win' | 'lose';
 interface Problem {
   text: string;
   answer: number;
+}
+
+type SoundEffectName =
+  | 'correct'
+  | 'wrong'
+  | 'win'
+  | 'lose'
+  | 'start'
+  | 'alert'
+  | 'enemyHit'
+  | 'playerHit'
+  | 'levelUp'
+  | 'tick'
+  | 'ui';
+
+interface SoundLayerBase {
+  startAt?: number;
+  duration: number;
+  gain: number;
+  attack?: number;
+  release?: number;
+  pan?: number;
+  panJitter?: number;
+  reverbSend?: number;
+  delaySend?: number;
+  filter?: {
+    type: BiquadFilterType;
+    frequency: number;
+    q?: number;
+    gain?: number;
+    sweepTo?: number;
+  };
+}
+
+interface OscillatorLayer extends SoundLayerBase {
+  kind: 'oscillator';
+  wave: OscillatorType;
+  frequency: number;
+  glideTo?: number;
+  detune?: number;
+  detuneJitter?: number;
+}
+
+interface NoiseLayer extends SoundLayerBase {
+  kind: 'noise';
+  playbackRate?: number;
+}
+
+type SoundLayer = OscillatorLayer | NoiseLayer;
+
+interface SoundEffectDefinition {
+  output?: number;
+  layers: SoundLayer[];
+}
+
+interface AudioEngine {
+  context: AudioContext;
+  noiseBuffer: AudioBuffer;
+  output: GainNode;
+  reverbSend: GainNode;
+  delaySend: GainNode;
+}
+
+type CompatibleWindow = Window & typeof globalThis & {
+  webkitAudioContext?: typeof AudioContext;
+};
+
+const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
+  start: {
+    output: 0.95,
+    layers: [
+      { kind: 'noise', duration: 0.09, gain: 0.016, attack: 0.002, release: 0.06, filter: { type: 'highpass', frequency: 1400, sweepTo: 4200, q: 0.8 }, reverbSend: 0.05, delaySend: 0.03 },
+      { kind: 'oscillator', wave: 'triangle', frequency: 280, glideTo: 420, duration: 0.14, gain: 0.05, attack: 0.003, release: 0.1, filter: { type: 'lowpass', frequency: 4200, q: 0.7 }, reverbSend: 0.07 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.05, frequency: 523.25, glideTo: 659.25, duration: 0.22, gain: 0.055, attack: 0.005, release: 0.18, delaySend: 0.08, reverbSend: 0.15, pan: 0.1 },
+    ],
+  },
+  correct: {
+    layers: [
+      { kind: 'noise', duration: 0.06, gain: 0.014, attack: 0.001, release: 0.045, filter: { type: 'highpass', frequency: 2600, sweepTo: 7200, q: 0.8 }, reverbSend: 0.04 },
+      { kind: 'oscillator', wave: 'square', frequency: 720, glideTo: 1120, duration: 0.12, gain: 0.045, attack: 0.002, release: 0.09, detuneJitter: 6, filter: { type: 'lowpass', frequency: 5200, sweepTo: 2600, q: 0.8 }, delaySend: 0.04, reverbSend: 0.08, pan: -0.1, panJitter: 0.08 },
+      { kind: 'oscillator', wave: 'triangle', frequency: 380, glideTo: 560, duration: 0.18, gain: 0.05, attack: 0.002, release: 0.12, detuneJitter: 8, filter: { type: 'bandpass', frequency: 1400, sweepTo: 2100, q: 2.5 }, delaySend: 0.05, reverbSend: 0.09, pan: 0.15, panJitter: 0.08 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.015, frequency: 1046.5, duration: 0.12, gain: 0.018, attack: 0.001, release: 0.09, reverbSend: 0.1 },
+    ],
+  },
+  alert: {
+    output: 0.9,
+    layers: [
+      { kind: 'noise', duration: 0.18, gain: 0.012, attack: 0.002, release: 0.15, filter: { type: 'bandpass', frequency: 1800, sweepTo: 2600, q: 1.4 }, delaySend: 0.05, reverbSend: 0.08 },
+      { kind: 'oscillator', wave: 'sawtooth', frequency: 460, glideTo: 780, duration: 0.14, gain: 0.03, attack: 0.002, release: 0.08, filter: { type: 'bandpass', frequency: 1200, sweepTo: 1800, q: 3 }, reverbSend: 0.06, pan: -0.25 },
+      { kind: 'oscillator', wave: 'square', startAt: 0.08, frequency: 880, glideTo: 720, duration: 0.16, gain: 0.032, attack: 0.002, release: 0.12, filter: { type: 'lowpass', frequency: 4200, sweepTo: 2400, q: 0.8 }, delaySend: 0.08, reverbSend: 0.12, pan: 0.2 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.08, frequency: 220, glideTo: 180, duration: 0.18, gain: 0.028, attack: 0.002, release: 0.14, reverbSend: 0.05 },
+    ],
+  },
+  enemyHit: {
+    output: 0.92,
+    layers: [
+      { kind: 'noise', duration: 0.09, gain: 0.02, attack: 0.001, release: 0.07, filter: { type: 'lowpass', frequency: 2100, sweepTo: 500, q: 0.9 }, reverbSend: 0.03, pan: 0.12 },
+      { kind: 'oscillator', wave: 'square', frequency: 190, glideTo: 108, duration: 0.11, gain: 0.026, attack: 0.002, release: 0.08, filter: { type: 'bandpass', frequency: 650, sweepTo: 280, q: 2.4 }, pan: -0.1 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.01, frequency: 98, glideTo: 62, duration: 0.2, gain: 0.05, attack: 0.002, release: 0.16, filter: { type: 'lowpass', frequency: 900, sweepTo: 180, q: 0.8 }, reverbSend: 0.02 },
+    ],
+  },
+  playerHit: {
+    output: 0.95,
+    layers: [
+      { kind: 'noise', duration: 0.12, gain: 0.022, attack: 0.001, release: 0.09, filter: { type: 'bandpass', frequency: 1100, sweepTo: 320, q: 1.7 }, reverbSend: 0.04, pan: -0.18 },
+      { kind: 'oscillator', wave: 'sawtooth', frequency: 210, glideTo: 120, duration: 0.16, gain: 0.03, attack: 0.002, release: 0.1, filter: { type: 'lowpass', frequency: 1500, sweepTo: 260, q: 0.9 }, pan: 0.16 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.015, frequency: 120, glideTo: 74, duration: 0.22, gain: 0.052, attack: 0.002, release: 0.18, filter: { type: 'lowpass', frequency: 720, sweepTo: 130, q: 0.8 }, reverbSend: 0.03 },
+    ],
+  },
+  wrong: {
+    layers: [
+      { kind: 'noise', duration: 0.12, gain: 0.016, attack: 0.001, release: 0.1, filter: { type: 'lowpass', frequency: 1200, sweepTo: 300, q: 0.8 }, reverbSend: 0.04 },
+      { kind: 'oscillator', wave: 'sawtooth', frequency: 240, glideTo: 110, duration: 0.24, gain: 0.05, attack: 0.002, release: 0.16, detuneJitter: 10, filter: { type: 'lowpass', frequency: 1800, sweepTo: 320, q: 0.7 }, reverbSend: 0.03 },
+      { kind: 'oscillator', wave: 'square', startAt: 0.02, frequency: 160, glideTo: 80, duration: 0.28, gain: 0.035, attack: 0.003, release: 0.18, filter: { type: 'bandpass', frequency: 500, sweepTo: 220, q: 2.2 }, delaySend: 0.02 },
+    ],
+  },
+  levelUp: {
+    output: 0.95,
+    layers: [
+      { kind: 'noise', duration: 0.16, gain: 0.012, attack: 0.002, release: 0.12, filter: { type: 'highpass', frequency: 3200, sweepTo: 7800, q: 0.8 }, reverbSend: 0.16 },
+      { kind: 'oscillator', wave: 'triangle', frequency: 587.33, duration: 0.11, gain: 0.028, attack: 0.003, release: 0.08, delaySend: 0.06, reverbSend: 0.12, pan: -0.2 },
+      { kind: 'oscillator', wave: 'triangle', startAt: 0.1, frequency: 783.99, duration: 0.12, gain: 0.032, attack: 0.003, release: 0.09, delaySend: 0.07, reverbSend: 0.13, pan: 0.15 },
+      { kind: 'oscillator', wave: 'triangle', startAt: 0.22, frequency: 987.77, duration: 0.14, gain: 0.034, attack: 0.003, release: 0.1, delaySend: 0.08, reverbSend: 0.14, pan: -0.05 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.22, frequency: 1975.53, duration: 0.18, gain: 0.015, attack: 0.002, release: 0.12, reverbSend: 0.16, pan: 0.1 },
+    ],
+  },
+  tick: {
+    output: 0.78,
+    layers: [
+      { kind: 'oscillator', wave: 'square', frequency: 1180, glideTo: 1040, duration: 0.07, gain: 0.018, attack: 0.001, release: 0.05, filter: { type: 'lowpass', frequency: 4200, sweepTo: 2500, q: 0.8 }, delaySend: 0.02, pan: -0.04 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.01, frequency: 620, duration: 0.1, gain: 0.014, attack: 0.001, release: 0.07, reverbSend: 0.04, pan: 0.04 },
+    ],
+  },
+  ui: {
+    output: 0.7,
+    layers: [
+      { kind: 'noise', duration: 0.03, gain: 0.008, attack: 0.001, release: 0.02, filter: { type: 'highpass', frequency: 2400, sweepTo: 6200, q: 0.8 } },
+      { kind: 'oscillator', wave: 'triangle', frequency: 760, glideTo: 980, duration: 0.055, gain: 0.016, attack: 0.001, release: 0.04, filter: { type: 'bandpass', frequency: 1600, sweepTo: 2200, q: 2.2 }, pan: -0.04 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.01, frequency: 1320, duration: 0.045, gain: 0.01, attack: 0.001, release: 0.035, reverbSend: 0.03, pan: 0.04 },
+    ],
+  },
+  lose: {
+    layers: [
+      { kind: 'noise', duration: 0.5, gain: 0.018, attack: 0.003, release: 0.32, filter: { type: 'lowpass', frequency: 900, sweepTo: 180, q: 0.7 }, reverbSend: 0.08 },
+      { kind: 'oscillator', wave: 'sawtooth', frequency: 220, glideTo: 160, duration: 0.18, gain: 0.04, attack: 0.003, release: 0.12, filter: { type: 'lowpass', frequency: 1800, sweepTo: 500, q: 0.9 }, pan: -0.2 },
+      { kind: 'oscillator', wave: 'triangle', startAt: 0.12, frequency: 174.61, glideTo: 130.81, duration: 0.22, gain: 0.042, attack: 0.003, release: 0.16, filter: { type: 'lowpass', frequency: 1400, sweepTo: 380, q: 0.8 }, pan: 0.1 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.28, frequency: 130.81, glideTo: 87.31, duration: 0.34, gain: 0.05, attack: 0.004, release: 0.24, filter: { type: 'lowpass', frequency: 1200, sweepTo: 240, q: 0.7 }, reverbSend: 0.08, delaySend: 0.04 },
+    ],
+  },
+  win: {
+    layers: [
+      { kind: 'noise', duration: 0.4, gain: 0.013, attack: 0.002, release: 0.26, filter: { type: 'highpass', frequency: 2600, sweepTo: 7200, q: 0.8 }, reverbSend: 0.18 },
+      { kind: 'oscillator', wave: 'triangle', frequency: 523.25, duration: 0.16, gain: 0.038, attack: 0.004, release: 0.12, delaySend: 0.06, reverbSend: 0.14, pan: -0.2 },
+      { kind: 'oscillator', wave: 'sine', frequency: 1046.5, duration: 0.12, gain: 0.014, attack: 0.002, release: 0.09, reverbSend: 0.16, pan: -0.1 },
+      { kind: 'oscillator', wave: 'triangle', startAt: 0.12, frequency: 659.25, duration: 0.16, gain: 0.04, attack: 0.004, release: 0.12, delaySend: 0.07, reverbSend: 0.14, pan: 0.1 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.12, frequency: 1318.5, duration: 0.1, gain: 0.015, attack: 0.002, release: 0.08, reverbSend: 0.16, pan: 0.2 },
+      { kind: 'oscillator', wave: 'triangle', startAt: 0.24, frequency: 783.99, duration: 0.18, gain: 0.042, attack: 0.004, release: 0.14, delaySend: 0.08, reverbSend: 0.15, pan: -0.05 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.24, frequency: 1567.98, duration: 0.12, gain: 0.016, attack: 0.002, release: 0.09, reverbSend: 0.18, pan: 0.05 },
+      { kind: 'oscillator', wave: 'triangle', startAt: 0.38, frequency: 1046.5, duration: 0.32, gain: 0.05, attack: 0.006, release: 0.24, delaySend: 0.1, reverbSend: 0.2, pan: 0 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.38, frequency: 2093, duration: 0.24, gain: 0.02, attack: 0.003, release: 0.18, reverbSend: 0.24 },
+    ],
+  },
+};
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function randomCentered(amount = 0) {
+  return (Math.random() * 2 - 1) * amount;
+}
+
+function createNoiseBuffer(context: AudioContext, duration = 1.5) {
+  const frameCount = Math.floor(context.sampleRate * duration);
+  const buffer = context.createBuffer(1, frameCount, context.sampleRate);
+  const data = buffer.getChannelData(0);
+
+  for (let i = 0; i < frameCount; i += 1) {
+    data[i] = Math.random() * 2 - 1;
+  }
+
+  return buffer;
+}
+
+function createImpulseResponse(context: AudioContext, duration = 1.8, decay = 2.6) {
+  const frameCount = Math.floor(context.sampleRate * duration);
+  const impulse = context.createBuffer(2, frameCount, context.sampleRate);
+
+  for (let channel = 0; channel < impulse.numberOfChannels; channel += 1) {
+    const channelData = impulse.getChannelData(channel);
+
+    for (let i = 0; i < frameCount; i += 1) {
+      const decayAmount = Math.pow(1 - i / frameCount, decay);
+      channelData[i] = (Math.random() * 2 - 1) * decayAmount;
+    }
+  }
+
+  return impulse;
+}
+
+function createAudioEngine(): AudioEngine | null {
+  if (typeof window === 'undefined') return null;
+
+  const compatibleWindow = window as CompatibleWindow;
+  const AudioContextCtor = compatibleWindow.AudioContext ?? compatibleWindow.webkitAudioContext;
+
+  if (!AudioContextCtor) return null;
+
+  const context = new AudioContextCtor();
+  const output = context.createGain();
+  const compressor = context.createDynamicsCompressor();
+  const reverbSend = context.createGain();
+  const delaySend = context.createGain();
+  const convolver = context.createConvolver();
+  const reverbHighPass = context.createBiquadFilter();
+  const reverbLowPass = context.createBiquadFilter();
+  const reverbReturn = context.createGain();
+  const delay = context.createDelay(1);
+  const delayFeedback = context.createGain();
+  const delayLowPass = context.createBiquadFilter();
+  const delayReturn = context.createGain();
+
+  output.gain.value = 0.9;
+  compressor.threshold.value = -20;
+  compressor.knee.value = 16;
+  compressor.ratio.value = 4;
+  compressor.attack.value = 0.003;
+  compressor.release.value = 0.2;
+  output.connect(compressor);
+  compressor.connect(context.destination);
+
+  convolver.buffer = createImpulseResponse(context);
+  reverbHighPass.type = 'highpass';
+  reverbHighPass.frequency.value = 180;
+  reverbLowPass.type = 'lowpass';
+  reverbLowPass.frequency.value = 4200;
+  reverbReturn.gain.value = 0.35;
+  reverbSend.connect(convolver);
+  convolver.connect(reverbHighPass);
+  reverbHighPass.connect(reverbLowPass);
+  reverbLowPass.connect(reverbReturn);
+  reverbReturn.connect(output);
+
+  delay.delayTime.value = 0.18;
+  delayFeedback.gain.value = 0.28;
+  delayLowPass.type = 'lowpass';
+  delayLowPass.frequency.value = 2600;
+  delayReturn.gain.value = 0.25;
+  delaySend.connect(delay);
+  delay.connect(delayLowPass);
+  delayLowPass.connect(delayReturn);
+  delayLowPass.connect(delayFeedback);
+  delayFeedback.connect(delay);
+  delayReturn.connect(output);
+
+  return {
+    context,
+    noiseBuffer: createNoiseBuffer(context),
+    output,
+    reverbSend,
+    delaySend,
+  };
+}
+
+function applyEnvelope(param: AudioParam, startAt: number, duration: number, attack: number, release: number, peak: number) {
+  const safeAttack = Math.max(attack, 0.001);
+  const safeRelease = clamp(release, 0.02, duration);
+  const attackEnd = Math.min(startAt + safeAttack, startAt + duration * 0.35);
+  const releaseStart = Math.max(attackEnd, startAt + duration - safeRelease);
+
+  param.cancelScheduledValues(startAt);
+  param.setValueAtTime(0.0001, startAt);
+  param.linearRampToValueAtTime(peak, attackEnd);
+
+  if (releaseStart > attackEnd) {
+    param.exponentialRampToValueAtTime(Math.max(peak * 0.6, 0.0001), releaseStart);
+  }
+
+  param.exponentialRampToValueAtTime(0.0001, startAt + duration);
+}
+
+function createLayerInput(engine: AudioEngine, layer: SoundLayer, startAt: number, effectOutput: number) {
+  const { context } = engine;
+  const gainNode = context.createGain();
+  const pannerNode = context.createStereoPanner();
+  const pan = clamp((layer.pan ?? 0) + randomCentered(layer.panJitter ?? 0), -1, 1);
+
+  pannerNode.pan.value = pan;
+  gainNode.connect(pannerNode);
+  pannerNode.connect(engine.output);
+
+  if (layer.reverbSend) {
+    const reverbGain = context.createGain();
+    reverbGain.gain.value = layer.reverbSend;
+    gainNode.connect(reverbGain);
+    reverbGain.connect(engine.reverbSend);
+  }
+
+  if (layer.delaySend) {
+    const delayGain = context.createGain();
+    delayGain.gain.value = layer.delaySend;
+    gainNode.connect(delayGain);
+    delayGain.connect(engine.delaySend);
+  }
+
+  applyEnvelope(
+    gainNode.gain,
+    startAt,
+    layer.duration,
+    layer.attack ?? 0.003,
+    layer.release ?? Math.max(0.08, layer.duration * 0.75),
+    layer.gain * effectOutput,
+  );
+
+  if (!layer.filter) {
+    return gainNode;
+  }
+
+  const filterNode = context.createBiquadFilter();
+  filterNode.type = layer.filter.type;
+  filterNode.frequency.setValueAtTime(layer.filter.frequency, startAt);
+  filterNode.Q.value = layer.filter.q ?? 0.7;
+
+  if (layer.filter.gain !== undefined) {
+    filterNode.gain.value = layer.filter.gain;
+  }
+
+  if (layer.filter.sweepTo) {
+    filterNode.frequency.exponentialRampToValueAtTime(layer.filter.sweepTo, startAt + layer.duration);
+  }
+
+  filterNode.connect(gainNode);
+  return filterNode;
+}
+
+function scheduleOscillatorLayer(engine: AudioEngine, layer: OscillatorLayer, effectOutput: number, baseTime: number) {
+  const startAt = baseTime + (layer.startAt ?? 0);
+  const endAt = startAt + layer.duration;
+  const oscillator = engine.context.createOscillator();
+  const detune = (layer.detune ?? 0) + randomCentered(layer.detuneJitter ?? 0);
+  const inputNode = createLayerInput(engine, layer, startAt, effectOutput);
+
+  oscillator.type = layer.wave;
+  oscillator.frequency.setValueAtTime(layer.frequency, startAt);
+  oscillator.detune.value = detune;
+
+  if (layer.glideTo) {
+    oscillator.frequency.exponentialRampToValueAtTime(layer.glideTo, endAt);
+  }
+
+  oscillator.connect(inputNode);
+  oscillator.start(startAt);
+  oscillator.stop(endAt + 0.05);
+}
+
+function scheduleNoiseLayer(engine: AudioEngine, layer: NoiseLayer, effectOutput: number, baseTime: number) {
+  const startAt = baseTime + (layer.startAt ?? 0);
+  const noise = engine.context.createBufferSource();
+  const inputNode = createLayerInput(engine, layer, startAt, effectOutput);
+
+  noise.buffer = engine.noiseBuffer;
+  noise.playbackRate.value = layer.playbackRate ?? 1;
+  noise.connect(inputNode);
+  noise.start(startAt);
+  noise.stop(startAt + layer.duration + 0.02);
+}
+
+function playEffect(engine: AudioEngine, effectName: SoundEffectName) {
+  const effect = SOUND_EFFECTS[effectName];
+  const baseTime = engine.context.currentTime + 0.005;
+  const effectOutput = effect.output ?? 1;
+
+  for (const layer of effect.layers) {
+    if (layer.kind === 'oscillator') {
+      scheduleOscillatorLayer(engine, layer, effectOutput, baseTime);
+    } else {
+      scheduleNoiseLayer(engine, layer, effectOutput, baseTime);
+    }
+  }
 }
 
 const CHARACTER_NAMES = ["몬스터 A", "몬스터 B", "몬스터 C", "몬스터 D", "몬스터 E", "몬스터 F", "몬스터 G"];
@@ -61,13 +439,7 @@ function generateProblem(level: number): Problem {
 }
 
 export default function App() {
-  const sounds = useMemo(() => ({
-    correct: new Howl({ src: ['https://actions.google.com/sounds/v1/ui/positive_button.ogg'], html5: true }),
-    wrong: new Howl({ src: ['https://actions.google.com/sounds/v1/ui/negative_button.ogg'], html5: true }),
-    win: new Howl({ src: ['https://actions.google.com/sounds/v1/ui/menu_tap.ogg'], html5: true }),
-    lose: new Howl({ src: ['https://actions.google.com/sounds/v1/ui/error.ogg'], html5: true }),
-    start: new Howl({ src: ['https://actions.google.com/sounds/v1/ui/button_toggle.ogg'], html5: true }),
-  }), []);
+  const audioEngineRef = useRef<AudioEngine | null>(null);
   const [gameState, setGameState] = useState<GameState>('start');
   const [level, setLevel] = useState(1);
   const [problem, setProblem] = useState<Problem>(generateProblem(1));
@@ -87,6 +459,35 @@ export default function App() {
     const timer = setTimeout(() => setShowMsg(false), 2000);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => () => {
+    if (audioEngineRef.current && audioEngineRef.current.context.state !== 'closed') {
+      void audioEngineRef.current.context.close();
+    }
+  }, []);
+
+  const playSound = (effectName: SoundEffectName) => {
+    if (!audioEngineRef.current || audioEngineRef.current.context.state === 'closed') {
+      audioEngineRef.current = createAudioEngine();
+    }
+
+    const engine = audioEngineRef.current;
+    if (!engine) return;
+
+    const startPlayback = () => playEffect(engine, effectName);
+
+    if (engine.context.state === 'suspended') {
+      void engine.context.resume().then(startPlayback).catch(() => undefined);
+      return;
+    }
+
+    startPlayback();
+  };
+
+  const queueSound = (effectName: SoundEffectName, delayMs: number) => {
+    window.setTimeout(() => playSound(effectName), delayMs);
+  };
+
   const [startTime, setStartTime] = useState(Date.now());
   const [isCritical, setIsCritical] = useState(false);
 
@@ -107,12 +508,25 @@ export default function App() {
 
   useEffect(() => {
     if (isEstimation && timeLeft > 0) {
+      if (timeLeft <= 3) {
+        playSound('tick');
+      }
       const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
       return () => clearTimeout(timer);
     } else if (isEstimation && timeLeft === 0) {
       checkEstimation(0); // Time out
     }
   }, [isEstimation, timeLeft]);
+
+  const toggleHint = () => {
+    playSound('ui');
+    setShowHint(prev => !prev);
+  };
+
+  const selectEstimationOption = (selected: number) => {
+    playSound('ui');
+    checkEstimation(selected);
+  };
 
   const triggerEstimation = () => {
     const a = Math.floor(Math.random() * 800) + 100;
@@ -137,24 +551,59 @@ export default function App() {
     // 옵션도 양수만 포함하도록 필터링
     const options = [roundedAnswer - 100, roundedAnswer, roundedAnswer + 100].filter(o => o > 0).sort(() => Math.random() - 0.5);
     
+    playSound('alert');
     setEstimationProblem({ question, options, answer: roundedAnswer });
     setIsEstimation(true);
     setTimeLeft(10);
-    setMessage('갑작스러운 어림잡기 도전!');
+    updateMessage('갑작스러운 어림잡기 도전!');
   };
 
   const checkEstimation = (selected: number) => {
     setIsEstimation(false);
     if (selected === estimationProblem?.answer) {
-      setMessage('정확한 어림잡기! 공격 성공!');
-      setIsOpponentHit(true);
-      setTimeout(() => setIsOpponentHit(false), 500);
-      setOpponentHP(Math.max(0, opponentHP - 40));
+      playSound('correct');
+      setIsAttacking(true);
+      setTimeout(() => {
+        setIsAttacking(false);
+        setIsOpponentHit(true);
+        playSound('enemyHit');
+        setTimeout(() => setIsOpponentHit(false), 500);
+
+        const newOpponentHP = Math.max(0, opponentHP - 40);
+        setOpponentHP(newOpponentHP);
+        updateMessage('정확한 어림잡기! 공격 성공!');
+
+        if (newOpponentHP === 0) {
+          if (level < 7) {
+            setLevel(l => l + 1);
+            setOpponentHP(100);
+            setProblem(generateProblem(level + 1));
+            queueSound('levelUp', 180);
+            updateMessage(`다음 몬스터 ${CHARACTER_NAMES[level % CHARACTER_NAMES.length]} 등장!`);
+          } else {
+            setGameState('win');
+            playSound('win');
+          }
+        }
+      }, 500);
     } else {
-      setMessage('어림잡기 실패! 반격당했다!');
-      setIsPlayerHit(true);
-      setTimeout(() => setIsPlayerHit(false), 500);
-      setPlayerHP(Math.max(0, playerHP - 30));
+      playSound('wrong');
+      setIsOpponentAttacking(true);
+      setTimeout(() => {
+        setIsOpponentAttacking(false);
+        setIsPlayerHit(true);
+        playSound('playerHit');
+        setTimeout(() => setIsPlayerHit(false), 500);
+
+        const newPlayerHP = Math.max(0, playerHP - 30);
+        setPlayerHP(newPlayerHP);
+        updateMessage('어림잡기 실패! 반격당했다!');
+
+        if (newPlayerHP === 0) {
+          setGameState('lose');
+          playSound('lose');
+        }
+      }, 500);
     }
   };
 
@@ -166,11 +615,12 @@ export default function App() {
     const isCorrect = parseInt(inputValue) === problem.answer;
     
     if (isCorrect) {
-      sounds.correct.play();
+      playSound('correct');
       setIsAttacking(true);
       setTimeout(() => {
         setIsAttacking(false);
         setIsOpponentHit(true);
+        playSound('enemyHit');
         setTimeout(() => setIsOpponentHit(false), 500);
         
         const damage = 25; // Fixed damage
@@ -183,21 +633,23 @@ export default function App() {
             setLevel(l => l + 1);
             setOpponentHP(100);
             setProblem(generateProblem(level + 1));
+            queueSound('levelUp', 180);
             updateMessage(`다음 몬스터 ${CHARACTER_NAMES[level % CHARACTER_NAMES.length]} 등장!`);
           } else {
             setGameState('win');
-            sounds.win.play();
+            playSound('win');
           }
         } else {
           setProblem(generateProblem(level));
         }
       }, 500);
     } else {
-      sounds.wrong.play();
+      playSound('wrong');
       setIsOpponentAttacking(true);
       setTimeout(() => {
         setIsOpponentAttacking(false);
         setIsPlayerHit(true);
+        playSound('playerHit');
         setTimeout(() => setIsPlayerHit(false), 500);
         
         const newPlayerHP = Math.max(0, playerHP - 15);
@@ -205,7 +657,7 @@ export default function App() {
         updateMessage('앗! 공격이 빗나갔다! 상대의 반격!');
         if (newPlayerHP === 0) {
           setGameState('lose');
-          sounds.lose.play();
+          playSound('lose');
         }
       }, 500);
     }
@@ -213,7 +665,7 @@ export default function App() {
   };
 
   const startGame = () => {
-    sounds.start.play();
+    playSound('start');
     setGameState('playing');
     setLevel(1);
     setPlayerHP(100);
@@ -234,9 +686,9 @@ export default function App() {
       )}
 
       {gameState === 'playing' && (
-        <div className="w-full max-w-7xl bg-slate-800 p-6 rounded-3xl shadow-2xl border-4 border-slate-700 flex gap-6 h-[90vh]">
+        <div className="w-full max-w-7xl bg-slate-800 p-6 rounded-3xl shadow-2xl border-4 border-slate-700 flex gap-4 h-[90vh]">
           {/* Left: Character Visuals & Messages */}
-          <div className="w-1/3 flex flex-col items-center justify-between bg-slate-900 rounded-2xl p-4 border-2 border-slate-600 relative">
+          <div className="w-[29%] flex flex-col items-center justify-between bg-slate-900 rounded-2xl p-4 border-2 border-slate-600 relative">
             <div className="text-center w-full">
               <p className="font-bold text-base text-slate-400 mb-1">상대</p>
               <div className="w-full bg-slate-700 h-3 rounded-full"><motion.div className="bg-red-500 h-3 rounded-full" animate={{ width: `${opponentHP}%` }} /></div>
@@ -309,39 +761,38 @@ export default function App() {
           </div>
 
           {/* Right: Math Problem & Input */}
-          <div className="w-2/3 flex flex-col justify-between gap-4">
-            <div className="flex flex-col gap-2 bg-slate-900 p-4 rounded-2xl border-2 border-slate-700">
-              <div className="flex justify-between items-center text-sm font-bold text-slate-400">
-                <span>진척도</span>
-                <span>{level} / 10</span>
-              </div>
-              <div className="flex gap-1">
+          <div className="flex-1 min-w-0 flex flex-col gap-3 min-h-0">
+            <div className="bg-slate-900 px-3 py-2 rounded-2xl border-2 border-slate-700 shrink-0">
+              <div className="flex items-center gap-3">
+                <p className="min-w-0 max-w-[38%] truncate text-sm font-black text-yellow-400" title={LEVEL_DESCRIPTIONS[level]}>{LEVEL_DESCRIPTIONS[level]}</p>
+                <div className="flex flex-1 gap-1 min-w-0">
                 {[...Array(10)].map((_, i) => (
-                  <div key={i} className={`h-3 flex-1 rounded-full ${i < level ? 'bg-yellow-500' : 'bg-slate-700'}`} />
+                    <div key={i} className={`h-2 flex-1 rounded-full ${i < level ? 'bg-yellow-500' : 'bg-slate-700'}`} />
                 ))}
+                </div>
+                <span className="shrink-0 text-sm font-bold text-slate-300">{level} / 10</span>
               </div>
-              <span className="text-lg font-bold text-yellow-400 text-center mt-1">{LEVEL_DESCRIPTIONS[level]}</span>
             </div>
 
             {isEstimation ? (
-              <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4, ease: "easeOut" }} className="bg-slate-900 border-4 border-yellow-500 rounded-3xl p-8 flex flex-col items-center text-center text-slate-100 shadow-inner flex-grow justify-center">
+              <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4, ease: "easeOut" }} className="bg-slate-900 border-4 border-yellow-500 rounded-3xl p-8 flex flex-col items-center text-center text-slate-100 shadow-inner flex-1 min-h-0 justify-center">
                 <h2 className="text-4xl font-black text-yellow-400 mb-4">어림잡기 도전! ({timeLeft}초)</h2>
                 <p className="text-6xl font-mono font-bold mb-8">{estimationProblem?.question} = ?</p>
                 <div className="grid grid-cols-3 gap-4 w-full">
                   {estimationProblem?.options.map(opt => (
-                    <button key={opt} onClick={() => checkEstimation(opt)} className="bg-slate-700 hover:bg-slate-600 text-3xl font-bold p-6 rounded-2xl border-2 border-slate-500">{opt}쯤</button>
+                    <button key={opt} onClick={() => selectEstimationOption(opt)} className="bg-slate-700 hover:bg-slate-600 text-3xl font-bold p-6 rounded-2xl border-2 border-slate-500">{opt}쯤</button>
                   ))}
                 </div>
               </motion.div>
             ) : showHint ? (
-              <VisualCalculator problemText={problem.text} />
+              <VisualCalculator problemText={problem.text} onControlSound={() => playSound('ui')} />
             ) : (
               <motion.div 
                 key={problem.text} 
                 initial={{ opacity: 0, scale: 0.9, y: 10 }} 
                 animate={{ opacity: 1, scale: 1, y: 0 }} 
                 transition={{ duration: 0.4, ease: "easeOut" }} 
-                className="bg-white border-8 border-slate-200 rounded-3xl p-8 flex flex-col items-center text-[8rem] leading-none font-black font-mono text-slate-900 shadow-inner flex-grow justify-center"
+                className="bg-white border-8 border-slate-200 rounded-3xl p-8 flex flex-col items-center text-[8rem] leading-none font-black font-mono text-slate-900 shadow-inner flex-1 min-h-0 justify-center"
               >
                 <div className="flex flex-col items-end">
                   <span>{problem.text.split(' ')[0]}</span>
@@ -355,18 +806,20 @@ export default function App() {
             )}
 
             {!isEstimation && (
-              <div className="flex flex-col gap-3">
-                <input 
-                type="number" 
-                value={inputValue} 
-                onChange={e => setInputValue(e.target.value)} 
-                onKeyDown={e => { if (e.key === 'Enter') checkAnswer(); }}
-                className="w-full text-center text-4xl font-black p-4 rounded-2xl bg-slate-700 border-4 border-slate-500 outline-none focus:border-emerald-500" 
-                placeholder="정답 입력" 
-              />
-                <button onClick={checkAnswer} className="w-full py-4 bg-emerald-600 text-white font-black text-2xl rounded-2xl hover:bg-emerald-500 flex items-center justify-center gap-2 shadow-lg"><Sword size={24} /> 공격!</button>
+              <div className="flex flex-col gap-3 shrink-0">
+                <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 items-stretch">
+                  <input 
+                  type="number" 
+                  value={inputValue} 
+                  onChange={e => setInputValue(e.target.value)} 
+                  onKeyDown={e => { if (e.key === 'Enter') checkAnswer(); }}
+                  className="min-w-0 text-center text-3xl font-black px-4 py-3 rounded-2xl bg-slate-700 border-4 border-slate-500 outline-none focus:border-emerald-500" 
+                  placeholder="정답 입력" 
+                />
+                  <button onClick={checkAnswer} className="min-w-[170px] px-6 py-3 bg-emerald-600 text-white font-black text-xl rounded-2xl hover:bg-emerald-500 flex items-center justify-center gap-2 shadow-lg"><Sword size={22} /> 공격!</button>
+                </div>
                 {!isHintForced && (
-                  <button onClick={() => setShowHint(!showHint)} className="w-full py-2 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-500">
+                  <button onClick={toggleHint} className="w-full py-2 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-500 text-sm">
                     {showHint ? '힌트 닫기' : '힌트 보기'}
                   </button>
                 )}
