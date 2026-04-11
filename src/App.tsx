@@ -640,8 +640,8 @@ const LEVEL_DESCRIPTIONS = [
   "5단계: 받아올림 2~3번 덧셈",
   "6단계: 받아내림 2번 뺄셈",
   "7단계: 덧셈과 뺄셈 종합",
-  "8단계: 텍스트 해석형 문항",
-  "9단계: 텍스트 해석형 문항",
+  "8단계: 해석형 문항",
+  "9단계: 해석형 문항",
 ];
 
 const TOTAL_LEVELS = LEVEL_DESCRIPTIONS.length - 1;
@@ -1143,8 +1143,8 @@ function createBuilderProblem(level: number): Problem {
       break;
     case 8:
       builder = {
-        title: '이야기 문제 만들기',
-        instruction: '이야기식 덧셈 만들기',
+        title: '해석형 문항 만들기',
+        instruction: '해석형 덧셈 만들기',
         helperText: '0~9',
         op: '+',
         topTemplate: '37[a]',
@@ -1153,15 +1153,15 @@ function createBuilderProblem(level: number): Problem {
           createBuilderSlot('a', '윗수의 일의 자리', 0, 9),
           createBuilderSlot('b', '아랫수의 일의 자리', 0, 9),
         ],
-        invalidMessage: '빈칸에 숫자를 넣어 이야기식 문제를 완성해 주세요.',
+        invalidMessage: '빈칸에 숫자를 넣어 해석형 문항을 완성해 주세요.',
         validate: (left, right) => left + right <= 999,
       };
       break;
     case 9:
     default:
       builder = {
-        title: '이야기 문제 만들기',
-        instruction: '이야기식 뺄셈 만들기',
+        title: '해석형 문항 만들기',
+        instruction: '해석형 뺄셈 만들기',
         helperText: '0~9',
         op: '-',
         topTemplate: '94[a]',
@@ -1292,6 +1292,13 @@ function renderPromptWithHighlight(text: string) {
       <React.Fragment key={`${part}-${index}`}>{part}</React.Fragment>
     ),
   );
+}
+
+function getStoryPromptLines(prompt: string) {
+  return prompt
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
 }
 
 function formatDigitChoices(digits: string[]) {
@@ -2115,22 +2122,31 @@ export default function App() {
                 }`}
               >
                 {problem.kind === 'story' ? (
-                  <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 text-left text-slate-900">
-                    <div className="inline-flex w-fit items-center rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-sm font-black tracking-[0.18em] text-sky-700">
-                      이야기 문제
-                    </div>
-                    {problem.prompt.split('\n').map((line, index, lines) => (
-                      <p
-                        key={`${line}-${index}`}
-                        className={`break-keep leading-[1.8] ${
-                          index === lines.length - 1
-                            ? 'text-[2rem] font-black text-slate-900 md:text-[2.25rem]'
-                            : 'text-[1.85rem] font-bold text-slate-700 md:text-[2.1rem]'
-                        }`}
-                      >
-                        {renderPromptWithHighlight(line)}
-                      </p>
-                    ))}
+                  <div className="mx-auto flex w-full max-w-[52rem] flex-col gap-6 text-left text-slate-900">
+                    {getStoryPromptLines(problem.prompt).map((line, index, lines) => {
+                      const isQuestionLine = lines.length === 1 || index === lines.length - 1;
+
+                      return (
+                        <div
+                          key={`${line}-${index}`}
+                          className={`rounded-[2rem] border px-6 py-6 shadow-sm md:px-8 md:py-7 ${
+                            isQuestionLine
+                              ? 'border-amber-200 bg-amber-50/80'
+                              : 'border-slate-200 bg-slate-50/85'
+                          }`}
+                        >
+                          <p
+                            className={`break-keep tracking-[-0.01em] ${
+                              isQuestionLine
+                                ? 'text-[2.1rem] font-black leading-[1.55] text-slate-900 md:text-[2.45rem]'
+                                : 'text-[1.75rem] font-bold leading-[1.72] text-slate-700 md:text-[2rem]'
+                            }`}
+                          >
+                            {renderPromptWithHighlight(line)}
+                          </p>
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : problem.kind === 'builder' && problem.builder ? (
                   <div className="flex h-full w-full flex-col gap-4 text-left text-slate-900">
