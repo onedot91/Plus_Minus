@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Sword, Heart, Zap, RotateCcw, Play, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { VisualCalculator } from './components/VisualCalculator';
+import { VisualCalculator, type VisualControlSound } from './components/VisualCalculator';
 import playerAttackImage from './assets/player-attack.png';
 import playerDefaultImage from './assets/player-default.png';
 import playerHitImage from './assets/player-hit.png';
@@ -80,7 +80,11 @@ type SoundEffectName =
   | 'playerHit'
   | 'levelUp'
   | 'tick'
-  | 'ui';
+  | 'ui'
+  | 'hintStep'
+  | 'hintCarry'
+  | 'hintBorrow'
+  | 'hintResolve';
 
 interface SoundLayerBase {
   startAt?: number;
@@ -136,97 +140,135 @@ type CompatibleWindow = Window & typeof globalThis & {
 
 const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
   start: {
-    output: 0.95,
+    output: 0.88,
     layers: [
-      { kind: 'noise', duration: 0.09, gain: 0.016, attack: 0.002, release: 0.06, filter: { type: 'highpass', frequency: 1400, sweepTo: 4200, q: 0.8 }, reverbSend: 0.05, delaySend: 0.03 },
-      { kind: 'oscillator', wave: 'triangle', frequency: 280, glideTo: 420, duration: 0.14, gain: 0.05, attack: 0.003, release: 0.1, filter: { type: 'lowpass', frequency: 4200, q: 0.7 }, reverbSend: 0.07 },
-      { kind: 'oscillator', wave: 'sine', startAt: 0.05, frequency: 523.25, glideTo: 659.25, duration: 0.22, gain: 0.055, attack: 0.005, release: 0.18, delaySend: 0.08, reverbSend: 0.15, pan: 0.1 },
+      { kind: 'noise', duration: 0.08, gain: 0.01, attack: 0.002, release: 0.05, filter: { type: 'highpass', frequency: 2200, sweepTo: 7200, q: 0.8 }, reverbSend: 0.04, delaySend: 0.02 },
+      { kind: 'oscillator', wave: 'triangle', frequency: 360, glideTo: 540, duration: 0.12, gain: 0.032, attack: 0.003, release: 0.08, filter: { type: 'lowpass', frequency: 3600, sweepTo: 2200, q: 0.7 }, reverbSend: 0.05, delaySend: 0.03, pan: -0.08 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.045, frequency: 523.25, glideTo: 783.99, duration: 0.21, gain: 0.042, attack: 0.004, release: 0.16, delaySend: 0.05, reverbSend: 0.11, pan: 0.08 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.1, frequency: 1046.5, duration: 0.11, gain: 0.012, attack: 0.002, release: 0.08, reverbSend: 0.1 },
     ],
   },
   correct: {
+    output: 0.86,
     layers: [
-      { kind: 'noise', duration: 0.06, gain: 0.014, attack: 0.001, release: 0.045, filter: { type: 'highpass', frequency: 2600, sweepTo: 7200, q: 0.8 }, reverbSend: 0.04 },
-      { kind: 'oscillator', wave: 'square', frequency: 720, glideTo: 1120, duration: 0.12, gain: 0.045, attack: 0.002, release: 0.09, detuneJitter: 6, filter: { type: 'lowpass', frequency: 5200, sweepTo: 2600, q: 0.8 }, delaySend: 0.04, reverbSend: 0.08, pan: -0.1, panJitter: 0.08 },
-      { kind: 'oscillator', wave: 'triangle', frequency: 380, glideTo: 560, duration: 0.18, gain: 0.05, attack: 0.002, release: 0.12, detuneJitter: 8, filter: { type: 'bandpass', frequency: 1400, sweepTo: 2100, q: 2.5 }, delaySend: 0.05, reverbSend: 0.09, pan: 0.15, panJitter: 0.08 },
-      { kind: 'oscillator', wave: 'sine', startAt: 0.015, frequency: 1046.5, duration: 0.12, gain: 0.018, attack: 0.001, release: 0.09, reverbSend: 0.1 },
+      { kind: 'noise', duration: 0.04, gain: 0.007, attack: 0.001, release: 0.03, filter: { type: 'highpass', frequency: 3400, sweepTo: 9000, q: 0.8 }, reverbSend: 0.02 },
+      { kind: 'oscillator', wave: 'triangle', frequency: 660, glideTo: 990, duration: 0.09, gain: 0.032, attack: 0.0015, release: 0.06, detuneJitter: 5, filter: { type: 'lowpass', frequency: 4800, sweepTo: 2800, q: 0.8 }, delaySend: 0.03, reverbSend: 0.05, pan: -0.08, panJitter: 0.04 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.012, frequency: 990, glideTo: 1318.5, duration: 0.12, gain: 0.028, attack: 0.0015, release: 0.08, reverbSend: 0.06, pan: 0.1, panJitter: 0.04 },
+      { kind: 'oscillator', wave: 'triangle', startAt: 0.022, frequency: 495, glideTo: 659.25, duration: 0.16, gain: 0.024, attack: 0.002, release: 0.11, filter: { type: 'bandpass', frequency: 1800, sweepTo: 2400, q: 2.2 }, reverbSend: 0.04 },
     ],
   },
   alert: {
-    output: 0.9,
+    output: 0.84,
     layers: [
-      { kind: 'noise', duration: 0.18, gain: 0.012, attack: 0.002, release: 0.15, filter: { type: 'bandpass', frequency: 1800, sweepTo: 2600, q: 1.4 }, delaySend: 0.05, reverbSend: 0.08 },
-      { kind: 'oscillator', wave: 'sawtooth', frequency: 460, glideTo: 780, duration: 0.14, gain: 0.03, attack: 0.002, release: 0.08, filter: { type: 'bandpass', frequency: 1200, sweepTo: 1800, q: 3 }, reverbSend: 0.06, pan: -0.25 },
-      { kind: 'oscillator', wave: 'square', startAt: 0.08, frequency: 880, glideTo: 720, duration: 0.16, gain: 0.032, attack: 0.002, release: 0.12, filter: { type: 'lowpass', frequency: 4200, sweepTo: 2400, q: 0.8 }, delaySend: 0.08, reverbSend: 0.12, pan: 0.2 },
-      { kind: 'oscillator', wave: 'sine', startAt: 0.08, frequency: 220, glideTo: 180, duration: 0.18, gain: 0.028, attack: 0.002, release: 0.14, reverbSend: 0.05 },
+      { kind: 'noise', duration: 0.12, gain: 0.008, attack: 0.002, release: 0.1, filter: { type: 'bandpass', frequency: 2200, sweepTo: 3400, q: 1.3 }, delaySend: 0.02, reverbSend: 0.04 },
+      { kind: 'oscillator', wave: 'triangle', frequency: 440, glideTo: 660, duration: 0.09, gain: 0.022, attack: 0.002, release: 0.06, filter: { type: 'bandpass', frequency: 1100, sweepTo: 1700, q: 2.6 }, reverbSend: 0.04, pan: -0.18 },
+      { kind: 'oscillator', wave: 'square', startAt: 0.075, frequency: 880, glideTo: 740, duration: 0.11, gain: 0.018, attack: 0.002, release: 0.08, filter: { type: 'lowpass', frequency: 2600, sweepTo: 1400, q: 0.8 }, delaySend: 0.04, reverbSend: 0.06, pan: 0.16 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.075, frequency: 220, glideTo: 196, duration: 0.12, gain: 0.018, attack: 0.002, release: 0.08, reverbSend: 0.03 },
     ],
   },
   enemyHit: {
-    output: 0.92,
+    output: 0.88,
     layers: [
-      { kind: 'noise', duration: 0.09, gain: 0.02, attack: 0.001, release: 0.07, filter: { type: 'lowpass', frequency: 2100, sweepTo: 500, q: 0.9 }, reverbSend: 0.03, pan: 0.12 },
-      { kind: 'oscillator', wave: 'square', frequency: 190, glideTo: 108, duration: 0.11, gain: 0.026, attack: 0.002, release: 0.08, filter: { type: 'bandpass', frequency: 650, sweepTo: 280, q: 2.4 }, pan: -0.1 },
-      { kind: 'oscillator', wave: 'sine', startAt: 0.01, frequency: 98, glideTo: 62, duration: 0.2, gain: 0.05, attack: 0.002, release: 0.16, filter: { type: 'lowpass', frequency: 900, sweepTo: 180, q: 0.8 }, reverbSend: 0.02 },
+      { kind: 'noise', duration: 0.055, gain: 0.013, attack: 0.001, release: 0.04, filter: { type: 'bandpass', frequency: 1500, sweepTo: 650, q: 1.1 }, reverbSend: 0.02, pan: 0.12 },
+      { kind: 'oscillator', wave: 'triangle', frequency: 240, glideTo: 160, duration: 0.09, gain: 0.022, attack: 0.0015, release: 0.06, filter: { type: 'lowpass', frequency: 1800, sweepTo: 420, q: 0.9 }, pan: -0.08 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.008, frequency: 110, glideTo: 72, duration: 0.15, gain: 0.032, attack: 0.001, release: 0.1, filter: { type: 'lowpass', frequency: 820, sweepTo: 180, q: 0.8 }, reverbSend: 0.015 },
+      { kind: 'oscillator', wave: 'triangle', startAt: 0.012, frequency: 880, glideTo: 620, duration: 0.05, gain: 0.008, attack: 0.001, release: 0.03, filter: { type: 'lowpass', frequency: 2600, sweepTo: 1200, q: 0.8 }, pan: 0.18 },
     ],
   },
   playerHit: {
-    output: 0.95,
+    output: 0.84,
     layers: [
-      { kind: 'noise', duration: 0.12, gain: 0.022, attack: 0.001, release: 0.09, filter: { type: 'bandpass', frequency: 1100, sweepTo: 320, q: 1.7 }, reverbSend: 0.04, pan: -0.18 },
-      { kind: 'oscillator', wave: 'sawtooth', frequency: 210, glideTo: 120, duration: 0.16, gain: 0.03, attack: 0.002, release: 0.1, filter: { type: 'lowpass', frequency: 1500, sweepTo: 260, q: 0.9 }, pan: 0.16 },
-      { kind: 'oscillator', wave: 'sine', startAt: 0.015, frequency: 120, glideTo: 74, duration: 0.22, gain: 0.052, attack: 0.002, release: 0.18, filter: { type: 'lowpass', frequency: 720, sweepTo: 130, q: 0.8 }, reverbSend: 0.03 },
+      { kind: 'noise', duration: 0.07, gain: 0.014, attack: 0.001, release: 0.055, filter: { type: 'bandpass', frequency: 900, sweepTo: 320, q: 1.4 }, reverbSend: 0.03, pan: -0.14 },
+      { kind: 'oscillator', wave: 'triangle', frequency: 180, glideTo: 120, duration: 0.12, gain: 0.024, attack: 0.0015, release: 0.08, filter: { type: 'lowpass', frequency: 1200, sweepTo: 260, q: 0.9 }, pan: 0.12 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.012, frequency: 96, glideTo: 62, duration: 0.19, gain: 0.036, attack: 0.0015, release: 0.13, filter: { type: 'lowpass', frequency: 620, sweepTo: 140, q: 0.8 }, reverbSend: 0.025 },
+      { kind: 'oscillator', wave: 'triangle', startAt: 0.004, frequency: 520, glideTo: 360, duration: 0.045, gain: 0.006, attack: 0.001, release: 0.025, filter: { type: 'lowpass', frequency: 1400, sweepTo: 700, q: 0.8 }, pan: 0.08 },
     ],
   },
   wrong: {
+    output: 0.82,
     layers: [
-      { kind: 'noise', duration: 0.12, gain: 0.016, attack: 0.001, release: 0.1, filter: { type: 'lowpass', frequency: 1200, sweepTo: 300, q: 0.8 }, reverbSend: 0.04 },
-      { kind: 'oscillator', wave: 'sawtooth', frequency: 240, glideTo: 110, duration: 0.24, gain: 0.05, attack: 0.002, release: 0.16, detuneJitter: 10, filter: { type: 'lowpass', frequency: 1800, sweepTo: 320, q: 0.7 }, reverbSend: 0.03 },
-      { kind: 'oscillator', wave: 'square', startAt: 0.02, frequency: 160, glideTo: 80, duration: 0.28, gain: 0.035, attack: 0.003, release: 0.18, filter: { type: 'bandpass', frequency: 500, sweepTo: 220, q: 2.2 }, delaySend: 0.02 },
+      { kind: 'noise', duration: 0.09, gain: 0.009, attack: 0.001, release: 0.07, filter: { type: 'lowpass', frequency: 1600, sweepTo: 450, q: 0.8 }, reverbSend: 0.02 },
+      { kind: 'oscillator', wave: 'triangle', frequency: 320, glideTo: 220, duration: 0.18, gain: 0.028, attack: 0.002, release: 0.12, detuneJitter: 6, filter: { type: 'lowpass', frequency: 1500, sweepTo: 520, q: 0.7 }, reverbSend: 0.02, pan: -0.08 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.02, frequency: 246.94, glideTo: 174.61, duration: 0.22, gain: 0.026, attack: 0.002, release: 0.16, filter: { type: 'bandpass', frequency: 540, sweepTo: 280, q: 1.8 }, delaySend: 0.015, pan: 0.06 },
     ],
   },
   levelUp: {
-    output: 0.95,
+    output: 0.88,
     layers: [
-      { kind: 'noise', duration: 0.16, gain: 0.012, attack: 0.002, release: 0.12, filter: { type: 'highpass', frequency: 3200, sweepTo: 7800, q: 0.8 }, reverbSend: 0.16 },
-      { kind: 'oscillator', wave: 'triangle', frequency: 587.33, duration: 0.11, gain: 0.028, attack: 0.003, release: 0.08, delaySend: 0.06, reverbSend: 0.12, pan: -0.2 },
-      { kind: 'oscillator', wave: 'triangle', startAt: 0.1, frequency: 783.99, duration: 0.12, gain: 0.032, attack: 0.003, release: 0.09, delaySend: 0.07, reverbSend: 0.13, pan: 0.15 },
-      { kind: 'oscillator', wave: 'triangle', startAt: 0.22, frequency: 987.77, duration: 0.14, gain: 0.034, attack: 0.003, release: 0.1, delaySend: 0.08, reverbSend: 0.14, pan: -0.05 },
-      { kind: 'oscillator', wave: 'sine', startAt: 0.22, frequency: 1975.53, duration: 0.18, gain: 0.015, attack: 0.002, release: 0.12, reverbSend: 0.16, pan: 0.1 },
+      { kind: 'noise', duration: 0.14, gain: 0.009, attack: 0.002, release: 0.1, filter: { type: 'highpass', frequency: 4000, sweepTo: 9000, q: 0.8 }, reverbSend: 0.12 },
+      { kind: 'oscillator', wave: 'triangle', frequency: 523.25, duration: 0.1, gain: 0.022, attack: 0.002, release: 0.07, delaySend: 0.03, reverbSend: 0.09, pan: -0.16 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.09, frequency: 659.25, duration: 0.11, gain: 0.024, attack: 0.002, release: 0.08, delaySend: 0.04, reverbSend: 0.1, pan: 0.12 },
+      { kind: 'oscillator', wave: 'triangle', startAt: 0.18, frequency: 783.99, duration: 0.13, gain: 0.026, attack: 0.002, release: 0.09, delaySend: 0.05, reverbSend: 0.11, pan: -0.04 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.28, frequency: 1046.5, duration: 0.18, gain: 0.018, attack: 0.002, release: 0.12, delaySend: 0.06, reverbSend: 0.14, pan: 0.08 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.28, frequency: 1567.98, duration: 0.14, gain: 0.008, attack: 0.001, release: 0.09, reverbSend: 0.14, pan: 0.16 },
     ],
   },
   tick: {
-    output: 0.78,
+    output: 0.66,
     layers: [
-      { kind: 'oscillator', wave: 'square', frequency: 1180, glideTo: 1040, duration: 0.07, gain: 0.018, attack: 0.001, release: 0.05, filter: { type: 'lowpass', frequency: 4200, sweepTo: 2500, q: 0.8 }, delaySend: 0.02, pan: -0.04 },
-      { kind: 'oscillator', wave: 'sine', startAt: 0.01, frequency: 620, duration: 0.1, gain: 0.014, attack: 0.001, release: 0.07, reverbSend: 0.04, pan: 0.04 },
+      { kind: 'oscillator', wave: 'square', frequency: 1320, glideTo: 1180, duration: 0.04, gain: 0.012, attack: 0.001, release: 0.03, filter: { type: 'lowpass', frequency: 3600, sweepTo: 2100, q: 0.8 }, pan: -0.03 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.008, frequency: 740, duration: 0.06, gain: 0.01, attack: 0.001, release: 0.04, reverbSend: 0.01, pan: 0.03 },
     ],
   },
   ui: {
-    output: 0.52,
+    output: 0.42,
     layers: [
-      { kind: 'oscillator', wave: 'triangle', frequency: 560, glideTo: 410, duration: 0.045, gain: 0.012, attack: 0.001, release: 0.03, filter: { type: 'lowpass', frequency: 1700, sweepTo: 900, q: 0.8 }, pan: -0.02 },
-      { kind: 'oscillator', wave: 'sine', frequency: 260, glideTo: 185, duration: 0.055, gain: 0.011, attack: 0.001, release: 0.038, filter: { type: 'lowpass', frequency: 820, sweepTo: 480, q: 0.7 } },
-      { kind: 'oscillator', wave: 'square', startAt: 0.002, frequency: 1080, glideTo: 760, duration: 0.018, gain: 0.0035, attack: 0.001, release: 0.012, filter: { type: 'lowpass', frequency: 2000, sweepTo: 1100, q: 0.8 }, pan: 0.02 },
+      { kind: 'oscillator', wave: 'triangle', frequency: 640, glideTo: 470, duration: 0.035, gain: 0.008, attack: 0.001, release: 0.024, filter: { type: 'lowpass', frequency: 1500, sweepTo: 900, q: 0.8 }, pan: -0.02 },
+      { kind: 'oscillator', wave: 'sine', frequency: 320, glideTo: 240, duration: 0.045, gain: 0.007, attack: 0.001, release: 0.03, filter: { type: 'lowpass', frequency: 900, sweepTo: 540, q: 0.7 } },
+      { kind: 'oscillator', wave: 'square', startAt: 0.002, frequency: 1180, glideTo: 860, duration: 0.014, gain: 0.0025, attack: 0.001, release: 0.01, filter: { type: 'lowpass', frequency: 1800, sweepTo: 1100, q: 0.8 }, pan: 0.02 },
+    ],
+  },
+  hintStep: {
+    output: 0.38,
+    layers: [
+      { kind: 'oscillator', wave: 'triangle', frequency: 760, glideTo: 640, duration: 0.05, gain: 0.0065, attack: 0.001, release: 0.03, filter: { type: 'lowpass', frequency: 1800, sweepTo: 1100, q: 0.8 }, pan: -0.03 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.006, frequency: 420, duration: 0.06, gain: 0.0052, attack: 0.001, release: 0.04, reverbSend: 0.02, pan: 0.03 },
+    ],
+  },
+  hintCarry: {
+    output: 0.46,
+    layers: [
+      { kind: 'noise', duration: 0.03, gain: 0.0035, attack: 0.001, release: 0.02, filter: { type: 'highpass', frequency: 3000, sweepTo: 7000, q: 0.8 }, reverbSend: 0.02 },
+      { kind: 'oscillator', wave: 'triangle', frequency: 520, glideTo: 780, duration: 0.08, gain: 0.008, attack: 0.001, release: 0.05, delaySend: 0.02, pan: -0.06 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.015, frequency: 780, glideTo: 1046.5, duration: 0.11, gain: 0.007, attack: 0.0015, release: 0.07, reverbSend: 0.04, pan: 0.08 },
+    ],
+  },
+  hintBorrow: {
+    output: 0.44,
+    layers: [
+      { kind: 'noise', duration: 0.05, gain: 0.004, attack: 0.001, release: 0.03, filter: { type: 'bandpass', frequency: 1200, sweepTo: 600, q: 1.2 }, reverbSend: 0.02 },
+      { kind: 'oscillator', wave: 'triangle', frequency: 480, glideTo: 360, duration: 0.08, gain: 0.007, attack: 0.001, release: 0.05, filter: { type: 'lowpass', frequency: 1500, sweepTo: 800, q: 0.8 }, pan: -0.05 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.016, frequency: 330, glideTo: 392, duration: 0.1, gain: 0.006, attack: 0.0015, release: 0.07, reverbSend: 0.03, pan: 0.06 },
+    ],
+  },
+  hintResolve: {
+    output: 0.42,
+    layers: [
+      { kind: 'noise', duration: 0.02, gain: 0.002, attack: 0.001, release: 0.015, filter: { type: 'highpass', frequency: 3400, sweepTo: 7600, q: 0.8 }, reverbSend: 0.015 },
+      { kind: 'oscillator', wave: 'triangle', frequency: 660, glideTo: 720, duration: 0.06, gain: 0.007, attack: 0.001, release: 0.04, delaySend: 0.015, reverbSend: 0.02, pan: -0.05 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.012, frequency: 990, duration: 0.08, gain: 0.0055, attack: 0.0015, release: 0.05, reverbSend: 0.05, pan: 0.06 },
     ],
   },
   lose: {
+    output: 0.82,
     layers: [
-      { kind: 'noise', duration: 0.5, gain: 0.018, attack: 0.003, release: 0.32, filter: { type: 'lowpass', frequency: 900, sweepTo: 180, q: 0.7 }, reverbSend: 0.08 },
-      { kind: 'oscillator', wave: 'sawtooth', frequency: 220, glideTo: 160, duration: 0.18, gain: 0.04, attack: 0.003, release: 0.12, filter: { type: 'lowpass', frequency: 1800, sweepTo: 500, q: 0.9 }, pan: -0.2 },
-      { kind: 'oscillator', wave: 'triangle', startAt: 0.12, frequency: 174.61, glideTo: 130.81, duration: 0.22, gain: 0.042, attack: 0.003, release: 0.16, filter: { type: 'lowpass', frequency: 1400, sweepTo: 380, q: 0.8 }, pan: 0.1 },
-      { kind: 'oscillator', wave: 'sine', startAt: 0.28, frequency: 130.81, glideTo: 87.31, duration: 0.34, gain: 0.05, attack: 0.004, release: 0.24, filter: { type: 'lowpass', frequency: 1200, sweepTo: 240, q: 0.7 }, reverbSend: 0.08, delaySend: 0.04 },
+      { kind: 'noise', duration: 0.32, gain: 0.01, attack: 0.003, release: 0.22, filter: { type: 'lowpass', frequency: 1200, sweepTo: 260, q: 0.7 }, reverbSend: 0.05 },
+      { kind: 'oscillator', wave: 'triangle', frequency: 261.63, glideTo: 196, duration: 0.16, gain: 0.026, attack: 0.003, release: 0.11, filter: { type: 'lowpass', frequency: 1500, sweepTo: 500, q: 0.9 }, pan: -0.12 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.1, frequency: 220, glideTo: 174.61, duration: 0.22, gain: 0.03, attack: 0.003, release: 0.16, filter: { type: 'lowpass', frequency: 1200, sweepTo: 300, q: 0.8 }, reverbSend: 0.06, pan: 0.08 },
+      { kind: 'oscillator', wave: 'triangle', startAt: 0.26, frequency: 196, glideTo: 220, duration: 0.18, gain: 0.016, attack: 0.004, release: 0.12, filter: { type: 'lowpass', frequency: 1000, sweepTo: 420, q: 0.8 }, reverbSend: 0.08, delaySend: 0.03, pan: 0.02 },
     ],
   },
   win: {
+    output: 0.9,
     layers: [
-      { kind: 'noise', duration: 0.4, gain: 0.013, attack: 0.002, release: 0.26, filter: { type: 'highpass', frequency: 2600, sweepTo: 7200, q: 0.8 }, reverbSend: 0.18 },
-      { kind: 'oscillator', wave: 'triangle', frequency: 523.25, duration: 0.16, gain: 0.038, attack: 0.004, release: 0.12, delaySend: 0.06, reverbSend: 0.14, pan: -0.2 },
-      { kind: 'oscillator', wave: 'sine', frequency: 1046.5, duration: 0.12, gain: 0.014, attack: 0.002, release: 0.09, reverbSend: 0.16, pan: -0.1 },
-      { kind: 'oscillator', wave: 'triangle', startAt: 0.12, frequency: 659.25, duration: 0.16, gain: 0.04, attack: 0.004, release: 0.12, delaySend: 0.07, reverbSend: 0.14, pan: 0.1 },
-      { kind: 'oscillator', wave: 'sine', startAt: 0.12, frequency: 1318.5, duration: 0.1, gain: 0.015, attack: 0.002, release: 0.08, reverbSend: 0.16, pan: 0.2 },
-      { kind: 'oscillator', wave: 'triangle', startAt: 0.24, frequency: 783.99, duration: 0.18, gain: 0.042, attack: 0.004, release: 0.14, delaySend: 0.08, reverbSend: 0.15, pan: -0.05 },
-      { kind: 'oscillator', wave: 'sine', startAt: 0.24, frequency: 1567.98, duration: 0.12, gain: 0.016, attack: 0.002, release: 0.09, reverbSend: 0.18, pan: 0.05 },
-      { kind: 'oscillator', wave: 'triangle', startAt: 0.38, frequency: 1046.5, duration: 0.32, gain: 0.05, attack: 0.006, release: 0.24, delaySend: 0.1, reverbSend: 0.2, pan: 0 },
-      { kind: 'oscillator', wave: 'sine', startAt: 0.38, frequency: 2093, duration: 0.24, gain: 0.02, attack: 0.003, release: 0.18, reverbSend: 0.24 },
+      { kind: 'noise', duration: 0.28, gain: 0.009, attack: 0.002, release: 0.18, filter: { type: 'highpass', frequency: 3200, sweepTo: 8800, q: 0.8 }, reverbSend: 0.15 },
+      { kind: 'oscillator', wave: 'triangle', frequency: 523.25, duration: 0.12, gain: 0.026, attack: 0.003, release: 0.08, delaySend: 0.04, reverbSend: 0.1, pan: -0.18 },
+      { kind: 'oscillator', wave: 'sine', frequency: 1046.5, duration: 0.09, gain: 0.01, attack: 0.002, release: 0.06, reverbSend: 0.12, pan: -0.08 },
+      { kind: 'oscillator', wave: 'triangle', startAt: 0.11, frequency: 659.25, duration: 0.12, gain: 0.028, attack: 0.003, release: 0.08, delaySend: 0.04, reverbSend: 0.11, pan: 0.08 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.11, frequency: 1318.5, duration: 0.09, gain: 0.011, attack: 0.002, release: 0.06, reverbSend: 0.12, pan: 0.18 },
+      { kind: 'oscillator', wave: 'triangle', startAt: 0.22, frequency: 783.99, duration: 0.15, gain: 0.03, attack: 0.003, release: 0.1, delaySend: 0.05, reverbSend: 0.12, pan: -0.04 },
+      { kind: 'oscillator', wave: 'triangle', startAt: 0.34, frequency: 1046.5, duration: 0.22, gain: 0.034, attack: 0.004, release: 0.14, delaySend: 0.06, reverbSend: 0.15, pan: 0.02 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.34, frequency: 1567.98, duration: 0.16, gain: 0.012, attack: 0.002, release: 0.1, reverbSend: 0.18 },
     ],
   },
 };
