@@ -1888,7 +1888,6 @@ export const VisualCalculator: React.FC<VisualCalculatorProps> = ({
     [op, steps],
   );
   const [stepIdx, setStepIdx] = useState(0);
-
   useEffect(() => {
     setStepIdx(0);
   }, [problemText]);
