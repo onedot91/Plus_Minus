@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useEffectEvent } from 'react';
 import { Sword, Heart, Zap, RotateCcw, Play, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { VisualCalculator, type VisualControlSound } from './components/VisualCalculator';
@@ -39,6 +39,7 @@ type ProblemKind = 'equation' | 'story' | 'builder';
 
 interface BuildSlotConfig {
   id: string;
+  label: string;
   digits: string[];
 }
 
@@ -67,6 +68,13 @@ interface CharacterSpriteSet {
   attack: string;
   default: string;
   hit: string;
+}
+
+type StoryTemplate = (a: number, b: number) => string;
+
+interface StoryTemplatePool {
+  '+': StoryTemplate[];
+  '-': StoryTemplate[];
 }
 
 type SoundEffectName =
@@ -617,27 +625,92 @@ function digitRange(min: number, max: number) {
   return Array.from({ length: max - min + 1 }, (_, index) => String(min + index));
 }
 
-const ADD_STORY_TEMPLATES = [
-  (a: number, b: number) =>
-    `연지네 집에서 학교까지 가려면 ${a}걸음을, 학교에서 도서관까지 가려면 ${b}걸음을 걸어야 합니다.\n연지가 집에서 학교를 지나 도서관까지 가려면 모두 몇 걸음을 걸어야 하는지 구해 봅시다.`,
-  (a: number, b: number) =>
-    `도서관 책 정리 봉사에 오전에는 ${a}권, 오후에는 ${b}권의 책을 제자리에 꽂았습니다.\n하루 동안 모두 몇 권의 책을 정리했는지 구해 봅시다.`,
-  (a: number, b: number) =>
-    `운동회 응원 점수를 1반은 ${a}점, 2반은 ${b}점 얻었습니다.\n두 반이 얻은 점수는 모두 몇 점인지 구해 봅시다.`,
-  (a: number, b: number) =>
-    `민준이는 아침에 색종이 ${a}장을 접고, 방과 후에 ${b}장을 더 접었습니다.\n민준이가 접은 색종이는 모두 몇 장인지 구해 봅시다.`,
-];
+function createBuilderSlot(id: string, label: string, min: number, max: number): BuildSlotConfig {
+  return {
+    id,
+    label,
+    digits: digitRange(min, max),
+  };
+}
 
-const SUB_STORY_TEMPLATES = [
-  (a: number, b: number) =>
-    `도윤이네 학교 누리집은 오늘 ${a}명이 방문했고, 어제는 ${b}명이 방문했습니다.\n오늘 누리집을 방문한 사람은 어제보다 몇 명 더 많은지 구해 봅시다.`,
-  (a: number, b: number) =>
-    `학급문고에 책이 ${a}권 있었는데, 친구들이 ${b}권을 빌려 갔습니다.\n지금 남아 있는 책은 몇 권인지 구해 봅시다.`,
-  (a: number, b: number) =>
-    `준호는 스티커를 ${a}장 가지고 있었는데, 동생에게 ${b}장을 나누어 주었습니다.\n준호에게 남은 스티커는 몇 장인지 구해 봅시다.`,
-  (a: number, b: number) =>
-    `체육 시간에 준비한 공은 ${a}개였고, 그중 ${b}개를 사용했습니다.\n아직 사용하지 않은 공은 몇 개인지 구해 봅시다.`,
-];
+const STORY_TEMPLATE_POOLS: Record<number, StoryTemplatePool> = {
+  8: {
+    '+': [
+      (a, b) =>
+        `연지네 집에서 학교까지 가려면 ${a}걸음을, 학교에서 도서관까지 가려면 ${b}걸음을 걸어야 합니다.\n연지가 집에서 학교를 지나 도서관까지 가려면 모두 몇 걸음을 걸어야 하는지 구해 봅시다.`,
+      (a, b) =>
+        `도서관 책 정리 봉사에 오전에는 ${a}권, 오후에는 ${b}권의 책을 제자리에 꽂았습니다.\n하루 동안 모두 몇 권의 책을 정리했는지 구해 봅시다.`,
+      (a, b) =>
+        `운동회 응원 점수를 1반은 ${a}점, 2반은 ${b}점 얻었습니다.\n두 반이 얻은 점수는 모두 몇 점인지 구해 봅시다.`,
+      (a, b) =>
+        `민준이는 아침에 색종이 ${a}장을 접고, 방과 후에 ${b}장을 더 접었습니다.\n민준이가 접은 색종이는 모두 몇 장인지 구해 봅시다.`,
+      (a, b) =>
+        `학교 텃밭에서 토마토를 1구역에서 ${a}개, 2구역에서 ${b}개 땄습니다.\n오늘 모두 몇 개의 토마토를 수확했는지 구해 봅시다.`,
+      (a, b) =>
+        `학급 나눔 상자에 1모둠이 연필 ${a}자루를 넣고, 2모둠이 ${b}자루를 더 넣었습니다.\n상자 안에는 모두 몇 자루의 연필이 있는지 구해 봅시다.`,
+      (a, b) =>
+        `급식실 우유 상자를 오전에 ${a}개 정리하고, 점심시간 뒤에 ${b}개를 더 정리했습니다.\n정리한 우유 상자는 모두 몇 개인지 구해 봅시다.`,
+      (a, b) =>
+        `과학실 관찰 기록지를 월요일에 ${a}장, 화요일에 ${b}장 모았습니다.\n이틀 동안 모은 기록지는 모두 몇 장인지 구해 봅시다.`,
+    ],
+    '-': [
+      (a, b) =>
+        `도윤이네 학교 누리집은 오늘 ${a}명이 방문했고, 어제는 ${b}명이 방문했습니다.\n오늘 누리집을 방문한 사람은 어제보다 몇 명 더 많은지 구해 봅시다.`,
+      (a, b) =>
+        `학급문고에 책이 ${a}권 있었는데, 친구들이 ${b}권을 빌려 갔습니다.\n지금 남아 있는 책은 몇 권인지 구해 봅시다.`,
+      (a, b) =>
+        `준호는 스티커를 ${a}장 가지고 있었는데, 동생에게 ${b}장을 나누어 주었습니다.\n준호에게 남은 스티커는 몇 장인지 구해 봅시다.`,
+      (a, b) =>
+        `체육 시간에 준비한 공은 ${a}개였고, 그중 ${b}개를 사용했습니다.\n아직 사용하지 않은 공은 몇 개인지 구해 봅시다.`,
+      (a, b) =>
+        `미술 시간에 크레파스를 ${a}개 준비했는데, 친구들이 ${b}개를 먼저 사용했습니다.\n지금 남아 있는 크레파스는 몇 개인지 구해 봅시다.`,
+      (a, b) =>
+        `봉사 활동용 장갑이 ${a}켤레 있었는데, 그중 ${b}켤레를 나누어 주었습니다.\n남은 장갑은 몇 켤레인지 구해 봅시다.`,
+      (a, b) =>
+        `학교 화단에 심은 꽃모종이 ${a}개였는데, 운동장 쪽 화단으로 ${b}개를 옮겼습니다.\n처음 화단에 남은 꽃모종은 몇 개인지 구해 봅시다.`,
+      (a, b) =>
+        `급식 도우미 배지가 ${a}개 있었는데, 오늘 ${b}개를 사용했습니다.\n보관함에 남은 배지는 몇 개인지 구해 봅시다.`,
+    ],
+  },
+  9: {
+    '+': [
+      (a, b) =>
+        `재활용 캠페인에서 월요일에는 종이 ${a}장을, 화요일에는 ${b}장을 모았습니다.\n이틀 동안 모두 몇 장을 모았는지 구해 봅시다.`,
+      (a, b) =>
+        `학교 박람회 체험 부스에 오전에는 ${a}명, 오후에는 ${b}명이 참여했습니다.\n하루 동안 참여한 학생은 모두 몇 명인지 구해 봅시다.`,
+      (a, b) =>
+        `교내 바자회 쿠폰을 쉬는 시간마다 나누어 주었더니 1교시에 ${a}장, 2교시에 ${b}장을 사용했습니다.\n사용한 쿠폰은 모두 몇 장인지 구해 봅시다.`,
+      (a, b) =>
+        `별자리 관찰 행사에서 1조가 별 스티커를 ${a}장, 2조가 ${b}장 모았습니다.\n두 조가 모은 스티커는 모두 몇 장인지 구해 봅시다.`,
+      (a, b) =>
+        `수영장 입장 기록을 보니 오전반은 ${a}명, 오후반은 ${b}명이었습니다.\n이날 수영장을 이용한 학생은 모두 몇 명인지 구해 봅시다.`,
+      (a, b) =>
+        `학교 축제 초대장을 3학년은 ${a}장, 4학년은 ${b}장 완성했습니다.\n완성한 초대장은 모두 몇 장인지 구해 봅시다.`,
+      (a, b) =>
+        `환경 동아리에서 페트병 뚜껑을 지난주에 ${a}개, 이번 주에 ${b}개 더 모았습니다.\n지금까지 모두 몇 개를 모았는지 구해 봅시다.`,
+      (a, b) =>
+        `교실 뒤 게시판에 작품 사진을 첫째 줄에 ${a}장, 둘째 줄에 ${b}장 붙였습니다.\n게시판에 붙인 사진은 모두 몇 장인지 구해 봅시다.`,
+    ],
+    '-': [
+      (a, b) =>
+        `현장체험학습 간식 꾸러미를 ${a}개 준비했는데, 출발 전에 ${b}개를 나누어 주었습니다.\n남은 간식 꾸러미는 몇 개인지 구해 봅시다.`,
+      (a, b) =>
+        `온라인 퀴즈에 ${a}명이 참여했고, 그중 ${b}명이 이미 답을 제출했습니다.\n아직 제출하지 않은 사람은 몇 명인지 구해 봅시다.`,
+      (a, b) =>
+        `미술 전시회 입장권이 ${a}장 있었는데, 오전에 ${b}장이 사용되었습니다.\n남아 있는 입장권은 몇 장인지 구해 봅시다.`,
+      (a, b) =>
+        `학교 방송을 들은 학생이 이번 주에는 ${a}명, 지난주에는 ${b}명이었습니다.\n이번 주에 더 많이 들은 학생은 몇 명인지 구해 봅시다.`,
+      (a, b) =>
+        `달리기 기록표를 ${a}장 준비했는데, 그중 ${b}장을 먼저 배부했습니다.\n기록표는 몇 장 남았는지 구해 봅시다.`,
+      (a, b) =>
+        `과학관 체험 신청자는 ${a}명이었는데, 그중 ${b}명이 먼저 입장했습니다.\n아직 기다리는 학생은 몇 명인지 구해 봅시다.`,
+      (a, b) =>
+        `학급 회의 자료를 ${a}부 인쇄했는데, 발표 모둠에 ${b}부를 나누어 주었습니다.\n책상 위에 남은 자료는 몇 부인지 구해 봅시다.`,
+      (a, b) =>
+        `우산 꽂이에 우산이 ${a}개 있었는데, 비가 그친 뒤 ${b}개가 먼저 가져가졌습니다.\n남아 있는 우산은 몇 개인지 구해 봅시다.`,
+    ],
+  },
+};
 
 function sample<T>(items: T[]): T {
   return items[Math.floor(Math.random() * items.length)];
@@ -648,9 +721,9 @@ function createEquationProblem(a: number, b: number, op: '+' | '-', answer: numb
   return { text, prompt: text, answer, kind: 'equation' };
 }
 
-function createStoryProblem(a: number, b: number, op: '+' | '-', answer: number): Problem {
+function createStoryProblem(level: number, a: number, b: number, op: '+' | '-', answer: number): Problem {
   const text = `${a} ${op} ${b}`;
-  const prompt = (op === '+' ? sample(ADD_STORY_TEMPLATES) : sample(SUB_STORY_TEMPLATES))(a, b);
+  const prompt = sample(STORY_TEMPLATE_POOLS[level]?.[op] ?? STORY_TEMPLATE_POOLS[9][op])(a, b);
   return { text, prompt, answer, kind: 'story' };
 }
 
@@ -674,8 +747,8 @@ function countBorrows(a: number, b: number): number {
   return borrows;
 }
 
-function isFinalBuilderTurn(opponentHP: number) {
-  return opponentHP <= FINAL_BUILDER_HP;
+function isFinalBuilderTurn(level: number, opponentHP: number) {
+  return level <= 7 && opponentHP <= FINAL_BUILDER_HP;
 }
 
 function canOfferEstimation(opponentHP: number) {
@@ -688,113 +761,307 @@ function createBuilderProblem(level: number): Problem {
 
   switch (level) {
     case 1:
-      builder = {
-        title: baseTitle,
-        instruction: '받아올림 없는 덧셈',
-        helperText: '0~4',
-        op: '+',
-        topTemplate: '24[a]',
-        bottomTemplate: '31[b]',
-        slots: [
-          { id: 'a', digits: digitRange(0, 4) },
-          { id: 'b', digits: digitRange(0, 4) },
-        ],
-        invalidMessage: '받아올림이 생기지 않도록 빈칸의 수를 다시 골라 주세요.',
-        validate: (left, right) => left + right <= 999 && countCarries(left, right) === 0,
-      };
+      builder = sample([
+        {
+          title: baseTitle,
+          instruction: '받아올림 없는 덧셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '+',
+          topTemplate: '2[a]4',
+          bottomTemplate: '3[b]1',
+          slots: [
+            createBuilderSlot('a', '윗수의 십의 자리', 0, 4),
+            createBuilderSlot('b', '아랫수의 십의 자리', 0, 4),
+          ],
+          invalidMessage: '받아올림이 생기지 않도록 빈칸의 수를 다시 골라 주세요.',
+          validate: (left, right) => left + right <= 999 && countCarries(left, right) === 0,
+        },
+        {
+          title: baseTitle,
+          instruction: '받아올림 없는 덧셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '+',
+          topTemplate: '[a]42',
+          bottomTemplate: '3[b]1',
+          slots: [
+            createBuilderSlot('a', '윗수의 백의 자리', 1, 4),
+            createBuilderSlot('b', '아랫수의 십의 자리', 0, 4),
+          ],
+          invalidMessage: '받아올림이 생기지 않도록 빈칸의 수를 다시 골라 주세요.',
+          validate: (left, right) => left + right <= 999 && countCarries(left, right) === 0,
+        },
+        {
+          title: baseTitle,
+          instruction: '받아올림 없는 덧셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '+',
+          topTemplate: '24[a]',
+          bottomTemplate: '[b]31',
+          slots: [
+            createBuilderSlot('a', '윗수의 일의 자리', 0, 4),
+            createBuilderSlot('b', '아랫수의 백의 자리', 1, 4),
+          ],
+          invalidMessage: '받아올림이 생기지 않도록 빈칸의 수를 다시 골라 주세요.',
+          validate: (left, right) => left + right <= 999 && countCarries(left, right) === 0,
+        },
+      ]);
       break;
     case 2:
-      builder = {
-        title: baseTitle,
-        instruction: '받아내림 없는 뺄셈',
-        helperText: '5~9 / 0~4',
-        op: '-',
-        topTemplate: '86[a]',
-        bottomTemplate: '41[b]',
-        slots: [
-          { id: 'a', digits: digitRange(5, 9) },
-          { id: 'b', digits: digitRange(0, 4) },
-        ],
-        invalidMessage: '받아내림이 생기지 않도록 제시된 범위 안에서 다시 만들어 주세요.',
-        validate: (left, right) => left > right && countBorrows(left, right) === 0,
-      };
+      builder = sample([
+        {
+          title: baseTitle,
+          instruction: '받아내림 없는 뺄셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '-',
+          topTemplate: '8[a]6',
+          bottomTemplate: '4[b]1',
+          slots: [
+            createBuilderSlot('a', '윗수의 십의 자리', 5, 9),
+            createBuilderSlot('b', '아랫수의 십의 자리', 0, 4),
+          ],
+          invalidMessage: '받아내림이 생기지 않도록 제시된 범위 안에서 다시 만들어 주세요.',
+          validate: (left, right) => left > right && countBorrows(left, right) === 0,
+        },
+        {
+          title: baseTitle,
+          instruction: '받아내림 없는 뺄셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '-',
+          topTemplate: '[a]64',
+          bottomTemplate: '4[b]1',
+          slots: [
+            createBuilderSlot('a', '윗수의 백의 자리', 5, 9),
+            createBuilderSlot('b', '아랫수의 십의 자리', 0, 4),
+          ],
+          invalidMessage: '받아내림이 생기지 않도록 제시된 범위 안에서 다시 만들어 주세요.',
+          validate: (left, right) => left > right && countBorrows(left, right) === 0,
+        },
+        {
+          title: baseTitle,
+          instruction: '받아내림 없는 뺄셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '-',
+          topTemplate: '86[a]',
+          bottomTemplate: '[b]21',
+          slots: [
+            createBuilderSlot('a', '윗수의 일의 자리', 5, 9),
+            createBuilderSlot('b', '아랫수의 백의 자리', 1, 4),
+          ],
+          invalidMessage: '받아내림이 생기지 않도록 제시된 범위 안에서 다시 만들어 주세요.',
+          validate: (left, right) => left > right && countBorrows(left, right) === 0,
+        },
+      ]);
       break;
     case 3:
-      builder = {
-        title: baseTitle,
-        instruction: '받아올림 1번 덧셈',
-        helperText: '5~9',
-        op: '+',
-        topTemplate: '24[a]',
-        bottomTemplate: '31[b]',
-        slots: [
-          { id: 'a', digits: digitRange(5, 9) },
-          { id: 'b', digits: digitRange(5, 9) },
-        ],
-        invalidMessage: '받아올림이 꼭 1번만 생기도록 다시 만들어 주세요.',
-        validate: (left, right) => left + right <= 999 && countCarries(left, right) === 1,
-      };
+      builder = sample([
+        {
+          title: baseTitle,
+          instruction: '받아올림 1번 덧셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '+',
+          topTemplate: '2[a]4',
+          bottomTemplate: '3[b]1',
+          slots: [
+            createBuilderSlot('a', '윗수의 십의 자리', 5, 9),
+            createBuilderSlot('b', '아랫수의 십의 자리', 5, 9),
+          ],
+          invalidMessage: '받아올림이 꼭 1번만 생기도록 다시 만들어 주세요.',
+          validate: (left, right) => left + right <= 999 && countCarries(left, right) === 1,
+        },
+        {
+          title: baseTitle,
+          instruction: '받아올림 1번 덧셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '+',
+          topTemplate: '[a]48',
+          bottomTemplate: '31[b]',
+          slots: [
+            createBuilderSlot('a', '윗수의 백의 자리', 1, 6),
+            createBuilderSlot('b', '아랫수의 일의 자리', 5, 9),
+          ],
+          invalidMessage: '받아올림이 꼭 1번만 생기도록 다시 만들어 주세요.',
+          validate: (left, right) => left + right <= 999 && countCarries(left, right) === 1,
+        },
+        {
+          title: baseTitle,
+          instruction: '받아올림 1번 덧셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '+',
+          topTemplate: '24[a]',
+          bottomTemplate: '[b]15',
+          slots: [
+            createBuilderSlot('a', '윗수의 일의 자리', 5, 9),
+            createBuilderSlot('b', '아랫수의 백의 자리', 1, 4),
+          ],
+          invalidMessage: '받아올림이 꼭 1번만 생기도록 다시 만들어 주세요.',
+          validate: (left, right) => left + right <= 999 && countCarries(left, right) === 1,
+        },
+      ]);
       break;
     case 4:
-      builder = {
-        title: baseTitle,
-        instruction: '받아내림 1번 뺄셈',
-        helperText: '0~4 / 5~9',
-        op: '-',
-        topTemplate: '63[a]',
-        bottomTemplate: '41[b]',
-        slots: [
-          { id: 'a', digits: digitRange(0, 4) },
-          { id: 'b', digits: digitRange(5, 9) },
-        ],
-        invalidMessage: '받아내림이 정확히 1번 생기도록 다시 만들어 주세요.',
-        validate: (left, right) => left > right && countBorrows(left, right) === 1,
-      };
+      builder = sample([
+        {
+          title: baseTitle,
+          instruction: '받아내림 1번 뺄셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '-',
+          topTemplate: '6[a]8',
+          bottomTemplate: '4[b]1',
+          slots: [
+            createBuilderSlot('a', '윗수의 십의 자리', 0, 4),
+            createBuilderSlot('b', '아랫수의 십의 자리', 5, 9),
+          ],
+          invalidMessage: '받아내림이 정확히 1번 생기도록 다시 만들어 주세요.',
+          validate: (left, right) => left > right && countBorrows(left, right) === 1,
+        },
+        {
+          title: baseTitle,
+          instruction: '받아내림 1번 뺄셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '-',
+          topTemplate: '[a]30',
+          bottomTemplate: '41[b]',
+          slots: [
+            createBuilderSlot('a', '윗수의 백의 자리', 5, 9),
+            createBuilderSlot('b', '아랫수의 일의 자리', 5, 9),
+          ],
+          invalidMessage: '받아내림이 정확히 1번 생기도록 다시 만들어 주세요.',
+          validate: (left, right) => left > right && countBorrows(left, right) === 1,
+        },
+        {
+          title: baseTitle,
+          instruction: '받아내림 1번 뺄셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '-',
+          topTemplate: '6[a]8',
+          bottomTemplate: '[b]51',
+          slots: [
+            createBuilderSlot('a', '윗수의 십의 자리', 0, 4),
+            createBuilderSlot('b', '아랫수의 백의 자리', 1, 4),
+          ],
+          invalidMessage: '받아내림이 정확히 1번 생기도록 다시 만들어 주세요.',
+          validate: (left, right) => left > right && countBorrows(left, right) === 1,
+        },
+      ]);
       break;
     case 5:
-      builder = {
-        title: baseTitle,
-        instruction: '받아올림 2번 이상 덧셈',
-        helperText: '5~9',
-        op: '+',
-        topTemplate: '48[a]',
-        bottomTemplate: '37[b]',
-        slots: [
-          { id: 'a', digits: digitRange(5, 9) },
-          { id: 'b', digits: digitRange(5, 9) },
-        ],
-        invalidMessage: '받아올림이 2번 이상 생기도록 다시 만들어 주세요.',
-        validate: (left, right) => countCarries(left, right) >= 2,
-      };
+      builder = sample([
+        {
+          title: baseTitle,
+          instruction: '받아올림 2번 이상 덧셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '+',
+          topTemplate: '4[a]8',
+          bottomTemplate: '3[b]5',
+          slots: [
+            createBuilderSlot('a', '윗수의 십의 자리', 5, 9),
+            createBuilderSlot('b', '아랫수의 십의 자리', 5, 9),
+          ],
+          invalidMessage: '받아올림이 2번 이상 생기도록 다시 만들어 주세요.',
+          validate: (left, right) => countCarries(left, right) >= 2,
+        },
+        {
+          title: baseTitle,
+          instruction: '받아올림 2번 이상 덧셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '+',
+          topTemplate: '[a]87',
+          bottomTemplate: '3[b]8',
+          slots: [
+            createBuilderSlot('a', '윗수의 백의 자리', 5, 9),
+            createBuilderSlot('b', '아랫수의 십의 자리', 5, 9),
+          ],
+          invalidMessage: '받아올림이 2번 이상 생기도록 다시 만들어 주세요.',
+          validate: (left, right) => countCarries(left, right) >= 2,
+        },
+        {
+          title: baseTitle,
+          instruction: '받아올림 2번 이상 덧셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '+',
+          topTemplate: '48[a]',
+          bottomTemplate: '[b]75',
+          slots: [
+            createBuilderSlot('a', '윗수의 일의 자리', 5, 9),
+            createBuilderSlot('b', '아랫수의 백의 자리', 5, 9),
+          ],
+          invalidMessage: '받아올림이 2번 이상 생기도록 다시 만들어 주세요.',
+          validate: (left, right) => countCarries(left, right) >= 2,
+        },
+      ]);
       break;
     case 6:
-      builder = {
-        title: baseTitle,
-        instruction: '받아내림 2번 뺄셈',
-        helperText: '0~7 / 3~9',
-        op: '-',
-        topTemplate: '53[a]',
-        bottomTemplate: '2[b]8',
-        slots: [
-          { id: 'a', digits: digitRange(0, 7) },
-          { id: 'b', digits: digitRange(3, 9) },
-        ],
-        invalidMessage: '받아내림이 2번 생기도록 다시 만들어 주세요.',
-        validate: (left, right) => left > right && countBorrows(left, right) === 2,
-      };
+      builder = sample([
+        {
+          title: baseTitle,
+          instruction: '받아내림 2번 뺄셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '-',
+          topTemplate: '5[a]3',
+          bottomTemplate: '[b]48',
+          slots: [
+            createBuilderSlot('a', '윗수의 십의 자리', 0, 4),
+            createBuilderSlot('b', '아랫수의 백의 자리', 2, 4),
+          ],
+          invalidMessage: '받아내림이 2번 생기도록 다시 만들어 주세요.',
+          validate: (left, right) => left > right && countBorrows(left, right) === 2,
+        },
+        {
+          title: baseTitle,
+          instruction: '받아내림 2번 뺄셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '-',
+          topTemplate: '[a]30',
+          bottomTemplate: '[b]48',
+          slots: [
+            createBuilderSlot('a', '윗수의 백의 자리', 5, 9),
+            createBuilderSlot('b', '아랫수의 백의 자리', 2, 4),
+          ],
+          invalidMessage: '받아내림이 2번 생기도록 다시 만들어 주세요.',
+          validate: (left, right) => left > right && countBorrows(left, right) === 2,
+        },
+        {
+          title: baseTitle,
+          instruction: '받아내림 2번 뺄셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '-',
+          topTemplate: '6[a]2',
+          bottomTemplate: '3[b]7',
+          slots: [
+            createBuilderSlot('a', '윗수의 십의 자리', 0, 4),
+            createBuilderSlot('b', '아랫수의 십의 자리', 5, 9),
+          ],
+          invalidMessage: '받아내림이 2번 생기도록 다시 만들어 주세요.',
+          validate: (left, right) => left > right && countBorrows(left, right) === 2,
+        },
+      ]);
       break;
     case 7:
       builder = sample([
         {
           title: baseTitle,
           instruction: '자유롭게 덧셈 만들기',
-          helperText: '0~9',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '+',
+          topTemplate: '[a]64',
+          bottomTemplate: '2[b]7',
+          slots: [
+            createBuilderSlot('a', '윗수의 백의 자리', 1, 6),
+            createBuilderSlot('b', '아랫수의 십의 자리', 0, 9),
+          ],
+          invalidMessage: '빈칸을 채워 덧셈 문제를 완성해 주세요.',
+          validate: (left, right) => left + right <= 999,
+        },
+        {
+          title: baseTitle,
+          instruction: '자유롭게 덧셈 만들기',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
           op: '+',
           topTemplate: '36[a]',
-          bottomTemplate: '27[b]',
+          bottomTemplate: '[b]74',
           slots: [
-            { id: 'a', digits: digitRange(0, 9) },
-            { id: 'b', digits: digitRange(0, 9) },
+            createBuilderSlot('a', '윗수의 일의 자리', 0, 9),
+            createBuilderSlot('b', '아랫수의 백의 자리', 1, 5),
           ],
           invalidMessage: '빈칸을 채워 덧셈 문제를 완성해 주세요.',
           validate: (left, right) => left + right <= 999,
@@ -802,13 +1069,27 @@ function createBuilderProblem(level: number): Problem {
         {
           title: baseTitle,
           instruction: '자유롭게 뺄셈 만들기',
-          helperText: '0~9 / 0~7',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
           op: '-',
-          topTemplate: '84[a]',
-          bottomTemplate: '3[b]5',
+          topTemplate: '[a]45',
+          bottomTemplate: '3[b]2',
           slots: [
-            { id: 'a', digits: digitRange(0, 9) },
-            { id: 'b', digits: digitRange(0, 7) },
+            createBuilderSlot('a', '윗수의 백의 자리', 4, 9),
+            createBuilderSlot('b', '아랫수의 십의 자리', 0, 4),
+          ],
+          invalidMessage: '뺄셈이 되도록 알맞은 수를 넣어 주세요.',
+          validate: (left, right) => left > right,
+        },
+        {
+          title: baseTitle,
+          instruction: '자유롭게 뺄셈 만들기',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '-',
+          topTemplate: '8[a]4',
+          bottomTemplate: '[b]35',
+          slots: [
+            createBuilderSlot('a', '윗수의 십의 자리', 0, 9),
+            createBuilderSlot('b', '아랫수의 백의 자리', 1, 7),
           ],
           invalidMessage: '뺄셈이 되도록 알맞은 수를 넣어 주세요.',
           validate: (left, right) => left > right,
@@ -824,8 +1105,8 @@ function createBuilderProblem(level: number): Problem {
         topTemplate: '37[a]',
         bottomTemplate: '24[b]',
         slots: [
-          { id: 'a', digits: digitRange(0, 9) },
-          { id: 'b', digits: digitRange(0, 9) },
+          createBuilderSlot('a', '윗수의 일의 자리', 0, 9),
+          createBuilderSlot('b', '아랫수의 일의 자리', 0, 9),
         ],
         invalidMessage: '빈칸에 숫자를 넣어 이야기식 문제를 완성해 주세요.',
         validate: (left, right) => left + right <= 999,
@@ -841,8 +1122,8 @@ function createBuilderProblem(level: number): Problem {
         topTemplate: '94[a]',
         bottomTemplate: '3[b]6',
         slots: [
-          { id: 'a', digits: digitRange(0, 9) },
-          { id: 'b', digits: digitRange(0, 9) },
+          createBuilderSlot('a', '윗수의 일의 자리', 0, 9),
+          createBuilderSlot('b', '아랫수의 십의 자리', 0, 9),
         ],
         invalidMessage: '뺄셈이 되도록 빈칸의 수를 다시 골라 주세요.',
         validate: (left, right) => left > right,
@@ -884,7 +1165,7 @@ function generateRegularProblem(level: number): Problem {
       }
     }
 
-    return createStoryProblem(a, b, op, answer);
+    return createStoryProblem(level, a, b, op, answer);
   }
 
   while (!valid) {
@@ -901,7 +1182,7 @@ function generateRegularProblem(level: number): Problem {
 }
 
 function getProblemForTurn(level: number, opponentHP: number): Problem {
-  return isFinalBuilderTurn(opponentHP) ? createBuilderProblem(level) : generateRegularProblem(level);
+  return isFinalBuilderTurn(level, opponentHP) ? createBuilderProblem(level) : generateRegularProblem(level);
 }
 
 function fillBuilderTemplate(template: string, slotValues: Record<string, string>, emptyValue = '') {
@@ -1007,9 +1288,9 @@ function BuilderNumberRow({
               value={slotValues[slotId] ?? ''}
               onChange={(event) => onSlotChange(slotId, event.target.value)}
               placeholder="?"
-              aria-label={`${slotId} 빈칸`}
+              aria-label={slot.label}
               className="h-20 w-20 rounded-[28px] border-4 border-sky-200 bg-sky-50 text-center text-5xl font-black text-sky-700 outline-none transition focus:border-sky-500 md:h-24 md:w-24 md:text-6xl"
-              title={`${formatDigitChoices(slot.digits)} 중에서 넣기`}
+              title={`${slot.label}: ${formatDigitChoices(slot.digits)} 중에서 넣기`}
             />
           );
         }
@@ -1059,6 +1340,7 @@ function createEstimationChoices(answer: number) {
 
 export default function App() {
   const audioEngineRef = useRef<AudioEngine | null>(null);
+  const isDeveloperShortcutEnabled = import.meta.env.DEV;
   const [gameState, setGameState] = useState<GameState>('start');
   const [playerName, setPlayerName] = useState(DEFAULT_PLAYER_NAME);
   const [pendingPlayerName, setPendingPlayerName] = useState('');
@@ -1155,7 +1437,8 @@ export default function App() {
   const [estimationProblem, setEstimationProblem] = useState<{question: string, options: number[], answer: number} | null>(null);
   const [timeLeft, setTimeLeft] = useState(ESTIMATION_TIME_LIMIT_SECONDS);
   const [showHint, setShowHint] = useState(false);
-  const isHintForced = opponentHP > 50;
+  const canUseHint = level <= 7;
+  const isHintForced = canUseHint && opponentHP > 50;
   const builderSlotsById =
     problem.kind === 'builder' && problem.builder
       ? Object.fromEntries(problem.builder.slots.map((slot) => [slot.id, slot])) as Record<string, BuildSlotConfig>
@@ -1275,8 +1558,7 @@ export default function App() {
     updateMessage('갑작스러운 어림잡기 도전!');
   };
 
-  const checkEstimation = (selected: number) => {
-    const isCorrectEstimation = selected === estimationProblem?.answer;
+  const resolveEstimationResult = (isCorrectEstimation: boolean) => {
     setIsEstimation(false);
     setEstimationProblem(null);
     if (isCorrectEstimation) {
@@ -1324,19 +1606,11 @@ export default function App() {
     }
   };
 
-  const checkAnswer = () => {
-    let isCorrect = parseInt(inputValue, 10) === problem.answer;
+  const checkEstimation = (selected: number) => {
+    resolveEstimationResult(selected === estimationProblem?.answer);
+  };
 
-    if (problem.kind === 'builder') {
-      if (!builderEvaluation || builderEvaluation.status === 'incomplete' || builderEvaluation.status === 'invalid') {
-        playSound('ui');
-        updateMessage(builderEvaluation?.message ?? '빈칸에 숫자를 먼저 넣어 문제를 완성해 주세요.');
-        return;
-      }
-
-      isCorrect = parseInt(inputValue, 10) === builderEvaluation.answer;
-    }
-    
+  const resolveProblemResult = (isCorrect: boolean) => {
     if (isCorrect) {
       playSound('correct');
       setIsAttacking(true);
@@ -1385,6 +1659,55 @@ export default function App() {
     }
     setInputValue('');
   };
+
+  const checkAnswer = () => {
+    let isCorrect = parseInt(inputValue, 10) === problem.answer;
+
+    if (problem.kind === 'builder') {
+      if (!builderEvaluation || builderEvaluation.status === 'incomplete' || builderEvaluation.status === 'invalid') {
+        playSound('ui');
+        updateMessage(builderEvaluation?.message ?? '빈칸에 숫자를 먼저 넣어 문제를 완성해 주세요.');
+        return;
+      }
+
+      isCorrect = parseInt(inputValue, 10) === builderEvaluation.answer;
+    }
+
+    resolveProblemResult(isCorrect);
+  };
+
+  const triggerDeveloperAutoSolve = useEffectEvent(() => {
+    if (gameState !== 'playing') {
+      return;
+    }
+
+    if (isEstimation) {
+      if (estimationProblem) {
+        resolveEstimationResult(true);
+      }
+      return;
+    }
+
+    resolveProblemResult(true);
+  });
+
+  useEffect(() => {
+    if (!isDeveloperShortcutEnabled) {
+      return;
+    }
+
+    const handleDeveloperShortcut = (event: KeyboardEvent) => {
+      if (event.repeat || event.key !== 'Enter' || !event.ctrlKey || !event.altKey) {
+        return;
+      }
+
+      event.preventDefault();
+      triggerDeveloperAutoSolve();
+    };
+
+    window.addEventListener('keydown', handleDeveloperShortcut);
+    return () => window.removeEventListener('keydown', handleDeveloperShortcut);
+  }, [isDeveloperShortcutEnabled]);
 
   const startGame = () => {
     playSound('start');
@@ -1624,7 +1947,7 @@ export default function App() {
                 </div>
               </div>
 
-              {!isEstimation && !isHintForced && (
+              {!isEstimation && canUseHint && !isHintForced && (
                 <button
                   onClick={toggleHint}
                   className="shrink-0 inline-flex items-center rounded-2xl border border-blue-400/30 bg-blue-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-blue-500"
@@ -1645,7 +1968,7 @@ export default function App() {
                   ))}
                 </div>
               </motion.div>
-            ) : showHint ? (
+            ) : canUseHint && showHint ? (
               hintProblemText ? (
                 <VisualCalculator
                   problemText={hintProblemText}
@@ -1705,31 +2028,33 @@ export default function App() {
 
                     <div className="grid flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
                       <div className="rounded-[34px] border-4 border-slate-200 bg-slate-50 p-8 md:p-10">
-                        <div className="flex h-full flex-col justify-center gap-6">
-                          <BuilderNumberRow
-                            template={problem.builder.topTemplate}
-                            slotsById={builderSlotsById}
-                            slotValues={builderSlotValues}
-                            onSlotChange={handleBuilderSlotChange}
-                          />
-                          <div className="flex items-center justify-end gap-5">
-                            <span className="text-6xl font-black text-slate-500 md:text-7xl">{problem.builder.op}</span>
+                        <div className="flex h-full items-center justify-end">
+                          <div className="inline-flex flex-col items-end gap-6">
                             <BuilderNumberRow
-                              template={problem.builder.bottomTemplate}
+                              template={problem.builder.topTemplate}
                               slotsById={builderSlotsById}
                               slotValues={builderSlotValues}
                               onSlotChange={handleBuilderSlotChange}
                             />
+                            <div className="flex items-center justify-end gap-5">
+                              <span className="text-6xl font-black text-slate-500 md:text-7xl">{problem.builder.op}</span>
+                              <BuilderNumberRow
+                                template={problem.builder.bottomTemplate}
+                                slotsById={builderSlotsById}
+                                slotValues={builderSlotValues}
+                                onSlotChange={handleBuilderSlotChange}
+                              />
+                            </div>
+                            <div className="h-2 w-full rounded-full bg-slate-900" />
                           </div>
                         </div>
-                        <div className="mt-8 h-2 rounded-full bg-slate-900" />
                       </div>
 
                       <div className="rounded-[30px] border border-sky-200 bg-sky-50 p-4 md:p-5">
                         <div className="flex flex-col gap-3">
-                          {problem.builder.slots.map((slot, index) => (
+                          {problem.builder.slots.map((slot) => (
                             <div key={slot.id} className="rounded-2xl border border-sky-200 bg-white px-4 py-4">
-                              <div className="text-sm font-black text-slate-500">빈칸 {index + 1}</div>
+                              <div className="text-sm font-black text-slate-500">{slot.label}</div>
                               <div className="mt-1 text-3xl font-black text-sky-700">{formatDigitChoices(slot.digits)}</div>
                             </div>
                           ))}
@@ -1761,7 +2086,7 @@ export default function App() {
                   type="number" 
                   value={inputValue} 
                   onChange={e => setInputValue(e.target.value)} 
-                  onKeyDown={e => { if (e.key === 'Enter') checkAnswer(); }}
+                  onKeyDown={e => { if (e.key === 'Enter' && !e.ctrlKey && !e.altKey) checkAnswer(); }}
                   className="min-w-0 text-center text-3xl font-black px-4 py-3 rounded-2xl bg-slate-700 border-4 border-slate-500 outline-none focus:border-emerald-500" 
                   placeholder={problem.kind === 'builder' ? '답' : '정답 입력'} 
                 />
