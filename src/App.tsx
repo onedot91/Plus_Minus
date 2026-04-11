@@ -127,9 +127,11 @@ interface SoundEffectDefinition {
 }
 
 interface AudioEngine {
+  version: number;
   context: AudioContext;
   noiseBuffer: AudioBuffer;
   output: GainNode;
+  masterGain: GainNode;
   reverbSend: GainNode;
   delaySend: GainNode;
 }
@@ -137,6 +139,11 @@ interface AudioEngine {
 type CompatibleWindow = Window & typeof globalThis & {
   webkitAudioContext?: typeof AudioContext;
 };
+
+const LAYER_GAIN_BOOST = 1.8;
+const MASTER_EFFECT_GAIN = 3.5;
+const POST_COMPRESSOR_GAIN = 3.2;
+const AUDIO_ENGINE_VERSION = 3;
 
 const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
   start: {
@@ -320,6 +327,8 @@ function createAudioEngine(): AudioEngine | null {
   const context = new AudioContextCtor();
   const output = context.createGain();
   const compressor = context.createDynamicsCompressor();
+  const masterGain = context.createGain();
+  const limiter = context.createDynamicsCompressor();
   const reverbSend = context.createGain();
   const delaySend = context.createGain();
   const convolver = context.createConvolver();
@@ -331,14 +340,22 @@ function createAudioEngine(): AudioEngine | null {
   const delayLowPass = context.createBiquadFilter();
   const delayReturn = context.createGain();
 
-  output.gain.value = 0.86;
-  compressor.threshold.value = -22;
-  compressor.knee.value = 16;
-  compressor.ratio.value = 3.2;
-  compressor.attack.value = 0.003;
-  compressor.release.value = 0.18;
+  output.gain.value = 1.35;
+  compressor.threshold.value = -30;
+  compressor.knee.value = 20;
+  compressor.ratio.value = 10;
+  compressor.attack.value = 0.001;
+  compressor.release.value = 0.12;
+  masterGain.gain.value = POST_COMPRESSOR_GAIN;
+  limiter.threshold.value = -3;
+  limiter.knee.value = 0;
+  limiter.ratio.value = 20;
+  limiter.attack.value = 0.001;
+  limiter.release.value = 0.05;
   output.connect(compressor);
-  compressor.connect(context.destination);
+  compressor.connect(masterGain);
+  masterGain.connect(limiter);
+  limiter.connect(context.destination);
 
   convolver.buffer = createImpulseResponse(context);
   reverbHighPass.type = 'highpass';
@@ -365,12 +382,22 @@ function createAudioEngine(): AudioEngine | null {
   delayReturn.connect(output);
 
   return {
+    version: AUDIO_ENGINE_VERSION,
     context,
     noiseBuffer: createNoiseBuffer(context),
     output,
+    masterGain,
     reverbSend,
     delaySend,
   };
+}
+
+function closeAudioEngine(engine: AudioEngine | null) {
+  if (!engine || engine.context.state === 'closed') {
+    return;
+  }
+
+  void engine.context.close();
 }
 
 function applyEnvelope(param: AudioParam, startAt: number, duration: number, attack: number, release: number, peak: number) {
@@ -479,7 +506,7 @@ function scheduleNoiseLayer(engine: AudioEngine, layer: NoiseLayer, effectOutput
 function playEffect(engine: AudioEngine, effectName: SoundEffectName) {
   const effect = SOUND_EFFECTS[effectName];
   const baseTime = engine.context.currentTime + 0.005;
-  const effectOutput = effect.output ?? 1;
+  const effectOutput = (effect.output ?? 1) * MASTER_EFFECT_GAIN * LAYER_GAIN_BOOST;
 
   for (const layer of effect.layers) {
     if (layer.kind === 'oscillator') {
@@ -1038,13 +1065,16 @@ export default function App() {
   }, []);
 
   useEffect(() => () => {
-    if (audioEngineRef.current && audioEngineRef.current.context.state !== 'closed') {
-      void audioEngineRef.current.context.close();
-    }
+    closeAudioEngine(audioEngineRef.current);
   }, []);
 
   const playSound = (effectName: SoundEffectName) => {
-    if (!audioEngineRef.current || audioEngineRef.current.context.state === 'closed') {
+    if (
+      !audioEngineRef.current ||
+      audioEngineRef.current.context.state === 'closed' ||
+      audioEngineRef.current.version !== AUDIO_ENGINE_VERSION
+    ) {
+      closeAudioEngine(audioEngineRef.current);
       audioEngineRef.current = createAudioEngine();
     }
 
@@ -1328,9 +1358,6 @@ export default function App() {
         if (newPlayerHP === 0) {
           setGameState('lose');
           playSound('lose');
-        } else if (canOfferEstimation(opponentHP) && Math.random() < 0.15) {
-          setProblem(getProblemForTurn(level, opponentHP));
-          queueEstimationChallenge();
         }
       }, ATTACK_POSE_DURATION_MS);
     }
