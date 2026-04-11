@@ -517,7 +517,18 @@ function playEffect(engine: AudioEngine, effectName: SoundEffectName) {
   }
 }
 
-const CHARACTER_NAMES = ["몬스터 A", "몬스터 B", "몬스터 C", "몬스터 D", "몬스터 E", "몬스터 F", "몬스터 G"];
+const LEVEL_OPPONENT_NAMES = [
+  '',
+  '전기츄',
+  '노는펭귄',
+  '로미로미',
+  '코로난',
+  '니이익',
+  '슈뻘보이',
+  '아니즈코',
+  '발오공',
+  '홍홍자',
+];
 
 const LEVEL_OPPONENT_EMOJIS = ['', '👾', '👹', '👺', '🤖', '👻', '🦖', '🐲', '😈', '👿'];
 const LEVEL_OPPONENT_SPRITES: Partial<Record<number, CharacterSpriteSet>> = {
@@ -581,6 +592,7 @@ const LEVEL_DESCRIPTIONS = [
 ];
 
 const TOTAL_LEVELS = LEVEL_DESCRIPTIONS.length - 1;
+const DEFAULT_PLAYER_NAME = '나';
 const FINAL_BUILDER_HP = 25;
 const ESTIMATION_SAFE_HP = 40;
 const ATTACK_POSE_DURATION_MS = 850;
@@ -595,6 +607,10 @@ const ESTIMATION_MAX_RAW_ANSWER = ESTIMATION_MAX_ANSWER + ESTIMATION_ROUNDING_UN
 
 function getOpponentEmojiForLevel(level: number) {
   return LEVEL_OPPONENT_EMOJIS[level] ?? LEVEL_OPPONENT_EMOJIS[LEVEL_OPPONENT_EMOJIS.length - 1];
+}
+
+function getOpponentNameForLevel(level: number) {
+  return LEVEL_OPPONENT_NAMES[level] ?? LEVEL_OPPONENT_NAMES[LEVEL_OPPONENT_NAMES.length - 1];
 }
 
 function digitRange(min: number, max: number) {
@@ -1044,13 +1060,16 @@ function createEstimationChoices(answer: number) {
 export default function App() {
   const audioEngineRef = useRef<AudioEngine | null>(null);
   const [gameState, setGameState] = useState<GameState>('start');
+  const [playerName, setPlayerName] = useState(DEFAULT_PLAYER_NAME);
+  const [pendingPlayerName, setPendingPlayerName] = useState('');
+  const [isNamePromptOpen, setIsNamePromptOpen] = useState(false);
   const [level, setLevel] = useState(1);
   const [problem, setProblem] = useState<Problem>(() => getProblemForTurn(1, 100));
   const [inputValue, setInputValue] = useState('');
   const [builderSlotValues, setBuilderSlotValues] = useState<Record<string, string>>({});
   const [playerHP, setPlayerHP] = useState(100);
   const [opponentHP, setOpponentHP] = useState(100);
-  const [message, setMessage] = useState('야생의 몬스터가 나타났다!');
+  const [message, setMessage] = useState(() => `상대 ${getOpponentNameForLevel(1)} 등장!`);
   const [showMsg, setShowMsg] = useState(true);
 
   const updateMessage = (msg: string) => {
@@ -1128,6 +1147,9 @@ export default function App() {
         ? opponentSpriteSet.attack
         : opponentSpriteSet.default
     : null;
+  const currentOpponentName = getOpponentNameForLevel(level);
+  const displayPlayerName = playerName.trim() || DEFAULT_PLAYER_NAME;
+  const maxHealth = 100;
 
   const [isEstimation, setIsEstimation] = useState(false);
   const [estimationProblem, setEstimationProblem] = useState<{question: string, options: number[], answer: number} | null>(null);
@@ -1209,7 +1231,7 @@ export default function App() {
       setOpponentHP(100);
       setProblem(getProblemForTurn(nextLevel, 100));
       queueSound('levelUp', 180);
-      updateMessage(`다음 몬스터 ${CHARACTER_NAMES[(nextLevel - 1) % CHARACTER_NAMES.length]} 등장!`);
+      updateMessage(`다음 상대 ${getOpponentNameForLevel(nextLevel)} 등장!`);
       if (shouldQueueEstimation) {
         queueEstimationChallenge();
       }
@@ -1376,109 +1398,215 @@ export default function App() {
     setOpponentHP(100);
     setProblem(getProblemForTurn(1, 100));
     setInputValue('');
-    updateMessage('배틀 시작!');
+    updateMessage(`상대 ${getOpponentNameForLevel(1)} 등장!`);
+  };
+
+  const openNamePrompt = () => {
+    setPendingPlayerName(playerName === DEFAULT_PLAYER_NAME ? '' : playerName);
+    setIsNamePromptOpen(true);
+  };
+
+  const closeNamePrompt = () => {
+    setIsNamePromptOpen(false);
+  };
+
+  const confirmPlayerNameAndStart = () => {
+    const trimmedName = pendingPlayerName.trim();
+    if (!trimmedName) return;
+
+    setPlayerName(trimmedName);
+    setIsNamePromptOpen(false);
+    startGame();
   };
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 font-sans text-white overflow-hidden">
       {gameState === 'start' && (
-        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center bg-slate-800 p-12 rounded-3xl shadow-2xl border-4 border-slate-600">
+        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="relative text-center bg-slate-800 p-12 rounded-3xl shadow-2xl border-4 border-slate-600">
           <Zap className="w-24 h-24 text-yellow-400 mx-auto mb-6 animate-pulse" />
-          <h1 className="text-5xl font-black mb-6">수학 몬스터 배틀</h1>
-          <p className="text-xl text-slate-300 mb-10">문제를 풀어 상대 몬스터를 쓰러뜨리세요!</p>
-          <button onClick={startGame} className="px-10 py-5 bg-yellow-500 text-slate-900 font-black text-3xl rounded-full hover:bg-yellow-400 transition-all flex items-center gap-4 mx-auto"><Play /> 배틀 시작!</button>
+          <h1 className="text-5xl font-black mb-6">덧셈과 뺄셈 배틀</h1>
+          <p className="text-xl text-slate-300 mb-10">문제를 풀어 상대를 쓰러뜨리세요!</p>
+          <button onClick={openNamePrompt} className="px-10 py-5 bg-yellow-500 text-slate-900 font-black text-3xl rounded-full hover:bg-yellow-400 transition-all flex items-center gap-4 mx-auto"><Play /> 배틀 시작!</button>
+
+          <AnimatePresence>
+            {isNamePromptOpen && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 z-20 flex items-center justify-center rounded-3xl bg-slate-950/75 p-6 backdrop-blur-sm"
+              >
+                <motion.form
+                  initial={{ opacity: 0, scale: 0.94, y: 12 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.94, y: 12 }}
+                  transition={{ duration: 0.2, ease: 'easeOut' }}
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    confirmPlayerNameAndStart();
+                  }}
+                  className="w-full max-w-md rounded-[2rem] border border-emerald-300/20 bg-slate-900 p-7 text-left shadow-[0_24px_80px_rgba(15,23,42,0.45)]"
+                >
+                  <h2 className="text-3xl font-black text-white">이름 입력</h2>
+                  <input
+                    autoFocus
+                    type="text"
+                    value={pendingPlayerName}
+                    onChange={(event) => setPendingPlayerName(event.target.value.slice(0, 10))}
+                    placeholder="이름"
+                    className="mt-5 w-full rounded-2xl border-2 border-slate-600 bg-slate-950 px-5 py-4 text-2xl font-black text-white outline-none transition focus:border-emerald-400"
+                  />
+                  <div className="mt-5 flex items-center justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={closeNamePrompt}
+                      className="rounded-2xl border border-slate-600 px-5 py-3 text-base font-black text-slate-200 transition hover:bg-slate-800"
+                    >
+                      취소
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={!pendingPlayerName.trim()}
+                      className="rounded-2xl bg-emerald-500 px-6 py-3 text-base font-black text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
+                    >
+                      시작
+                    </button>
+                  </div>
+                </motion.form>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
       )}
 
       {gameState === 'playing' && (
-        <div className="w-full max-w-7xl bg-slate-800 p-6 rounded-3xl shadow-2xl border-4 border-slate-700 flex gap-4 h-[90vh]">
+        <div className="w-full max-w-7xl min-h-0 overflow-hidden bg-slate-800 p-6 rounded-3xl shadow-2xl border-4 border-slate-700 flex gap-4 h-[90vh]">
           {/* Left: Character Visuals & Messages */}
-          <div className="w-[29%] flex flex-col items-center justify-between bg-slate-900 rounded-2xl p-4 border-2 border-slate-600 relative">
-            <div className="text-center w-full">
-              <p className="font-bold text-base text-slate-400 mb-1">상대</p>
-              <div className="w-full bg-slate-700 h-3 rounded-full"><motion.div className="bg-red-500 h-3 rounded-full" animate={{ width: `${opponentHP}%` }} /></div>
+          <div className="w-[29%] min-h-0 overflow-hidden flex flex-col gap-3 bg-slate-900 rounded-2xl p-4 border-2 border-slate-600 relative">
+            <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.75rem] border border-slate-700/80 bg-slate-950/70 p-4 shadow-[inset_0_1px_0_rgba(148,163,184,0.08)]">
+              <div className="flex items-center justify-between gap-3 text-sm">
+                <div className="inline-flex items-center gap-2 font-semibold text-slate-300">
+                  <Heart className="h-4 w-4 text-red-400" />
+                  HP
+                </div>
+                <p className="font-black text-slate-100">{opponentHP} / {maxHealth}</p>
+              </div>
+
+              <div className="mt-2 h-3.5 w-full overflow-hidden rounded-full bg-slate-700/80">
+                <motion.div
+                  className="h-full rounded-full bg-gradient-to-r from-rose-400 via-red-500 to-rose-500 shadow-[0_0_16px_rgba(239,68,68,0.35)]"
+                  animate={{ width: `${opponentHP}%` }}
+                  transition={{ duration: 0.35, ease: "easeOut" }}
+                />
+              </div>
+
+              <div className="relative mt-3 flex h-[clamp(22rem,44vh,31rem)] min-h-0 items-center justify-center overflow-hidden rounded-[1.5rem] border border-red-400/10 bg-[radial-gradient(circle_at_top,rgba(248,113,113,0.14),transparent_52%),linear-gradient(180deg,rgba(15,23,42,0.98),rgba(15,23,42,0.78))] px-2 py-2 sm:px-3 sm:py-3">
+                <p className="pointer-events-none absolute left-4 top-3 z-10 text-sm font-bold text-red-200/85">
+                  {currentOpponentName}
+                </p>
+                <motion.div
+                  animate={{
+                    x: isOpponentAttacking ? [0, 50, -300, 0] : isOpponentHit ? [0, -20, 20, -20, 0] : 0,
+                    rotate: isOpponentAttacking ? [0, 30, -60, 0] : 0,
+                    scale: isOpponentAttacking ? [1, 0.7, 2.5, 1] : isOpponentHit ? [1, 0.9, 1] : 1,
+                    filter: isOpponentAttacking ? 'brightness(1.1) drop-shadow(0 0 5px rgba(239, 68, 68, 0.3))' : isOpponentHit ? 'brightness(2) saturate(2)' : 'brightness(1)'
+                  }}
+                  transition={{ duration: isOpponentAttacking ? ATTACK_MOTION_DURATION_S : HIT_MOTION_DURATION_S, ease: "backOut" }}
+                  className="relative flex h-full max-h-full w-full max-w-full items-center justify-center overflow-visible"
+                >
+                  {opponentSpriteSet && opponentCharacterImage ? (
+                    <img
+                      src={opponentCharacterImage}
+                      alt={`${currentOpponentName} 캐릭터`}
+                      className="h-full max-h-full w-auto max-w-full translate-y-2 object-contain select-none drop-shadow-[0_18px_24px_rgba(15,23,42,0.35)]"
+                      draggable={false}
+                    />
+                  ) : (
+                    <span className="text-[clamp(4rem,10vw,8rem)] leading-none">{getOpponentEmojiForLevel(level)}</span>
+                  )}
+                  {isOpponentAttacking && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 0.5, scale: 1.2 }}
+                      className="pointer-events-none absolute -top-2 -left-2 h-10 w-10 rounded-full bg-red-300 blur-lg"
+                    />
+                  )}
+                </motion.div>
+              </div>
+            </section>
+
+            <div className="shrink-0 py-1">
+              <div className="relative flex items-center justify-center">
+                <div className="absolute inset-x-3 top-1/2 h-px -translate-y-1/2 bg-slate-700" />
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={showMsg ? message : 'vs'}
+                    initial={{ opacity: 0, scale: 0.94 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.94 }}
+                    transition={{ duration: 0.18, ease: "easeOut" }}
+                    className={`relative max-w-[calc(100%-1.5rem)] rounded-full bg-slate-950 text-center ${
+                      showMsg
+                        ? 'border border-yellow-400/45 px-5 py-2 text-sm font-bold leading-relaxed text-yellow-100 shadow-[0_10px_24px_rgba(15,23,42,0.24)]'
+                        : 'border border-yellow-500/40 px-4 py-1 text-xs font-black tracking-[0.35em] text-yellow-300'
+                    }`}
+                  >
+                    {showMsg ? message : 'VS'}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
             </div>
-            
-            {gameState === 'playing' ? (
-              <motion.div 
-                animate={{ 
-                  x: isOpponentAttacking ? [0, 50, -300, 0] : isOpponentHit ? [0, -20, 20, -20, 0] : 0,
-                  rotate: isOpponentAttacking ? [0, 30, -60, 0] : 0,
-                  scale: isOpponentAttacking ? [1, 0.7, 2.5, 1] : isOpponentHit ? [1, 0.9, 1] : 1,
-                  filter: isOpponentAttacking ? 'brightness(1.1) drop-shadow(0 0 5px rgba(239, 68, 68, 0.3))' : isOpponentHit ? 'brightness(2) saturate(2)' : 'brightness(1)'
-                }} 
-                transition={{ duration: isOpponentAttacking ? ATTACK_MOTION_DURATION_S : HIT_MOTION_DURATION_S, ease: "backOut" }}
-                className={opponentSpriteSet
-                  ? "relative my-2 flex h-[13rem] w-full items-center justify-center overflow-visible"
-                  : "text-[8rem] my-2 relative"}
-              >
-                {opponentSpriteSet && opponentCharacterImage ? (
+
+            <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.75rem] border border-slate-700/80 bg-slate-950/70 p-4 shadow-[inset_0_1px_0_rgba(148,163,184,0.08)]">
+              <div className="relative flex h-[clamp(22rem,44vh,31rem)] min-h-0 items-center justify-center overflow-hidden rounded-[1.5rem] border border-emerald-400/10 bg-[radial-gradient(circle_at_bottom,rgba(16,185,129,0.14),transparent_54%),linear-gradient(180deg,rgba(15,23,42,0.78),rgba(15,23,42,0.98))] px-2 py-2 sm:px-3 sm:py-3">
+                <p
+                  className="pointer-events-none absolute left-4 top-3 z-10 max-w-[55%] truncate text-sm font-bold text-emerald-200/85"
+                  title={displayPlayerName}
+                >
+                  {displayPlayerName}
+                </p>
+                <motion.div
+                  animate={{
+                    x: isAttacking ? [0, -100, 300, 0] : isPlayerHit ? [0, -20, 20, -20, 0] : 0,
+                    rotate: isAttacking ? [0, -30, 60, 0] : 0,
+                    scale: isAttacking ? [1, 0.8, 2, 1] : isPlayerHit ? [1, 0.9, 1] : 1,
+                    filter: isAttacking ? 'brightness(5) drop-shadow(0 0 30px rgba(16, 185, 129, 1))' : isPlayerHit ? 'brightness(2) saturate(2)' : 'brightness(1)'
+                  }}
+                  transition={{ duration: isAttacking ? ATTACK_MOTION_DURATION_S : HIT_MOTION_DURATION_S, ease: "backOut" }}
+                  className="relative flex h-full max-h-full w-full max-w-full items-center justify-center overflow-visible"
+                >
                   <img
-                    src={opponentCharacterImage}
-                    alt={`Level ${level} opponent character`}
-                    className="h-full w-auto object-contain select-none drop-shadow-[0_18px_24px_rgba(15,23,42,0.35)]"
+                    src={playerCharacterImage}
+                    alt="플레이어 캐릭터"
+                    className="h-full max-h-full w-auto max-w-full translate-y-2 object-contain select-none drop-shadow-[0_18px_24px_rgba(15,23,42,0.35)]"
                     draggable={false}
                   />
-                ) : (
-                  getOpponentEmojiForLevel(level)
-                )}
-                {isOpponentAttacking && (
-                  <motion.div 
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 0.5, scale: 1.2 }}
-                    className="pointer-events-none absolute -top-2 -left-2 w-10 h-10 bg-red-300 rounded-full blur-lg"
-                  />
-                )}
-              </motion.div>
-            ) : gameState === 'win' ? (
-              <motion.div animate={{ scale: [1, 1.2, 1], rotate: [0, 10, -10, 0] }} transition={{ repeat: Infinity, duration: 1 }} className="text-[12rem]">🏆</motion.div>
-            ) : (
-              <motion.div animate={{ opacity: [1, 0.5, 1], y: [0, 20, 0] }} transition={{ repeat: Infinity, duration: 2 }} className="text-[12rem]">💀</motion.div>
-            )}
-
-            {/* Battle Message Display */}
-            <AnimatePresence>
-              {showMsg && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="text-center text-base font-bold text-yellow-400 bg-slate-800 p-3 rounded-xl border-2 border-yellow-500 w-full"
-                >
-                  {message}
+                  {isAttacking && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0, rotate: 0 }}
+                      animate={{ opacity: 1, scale: 2, rotate: 45 }}
+                      className="pointer-events-none absolute -top-10 -right-10 h-10 w-40 rounded-full bg-emerald-400 blur-xl"
+                    />
+                  )}
                 </motion.div>
-              )}
-            </AnimatePresence>
+              </div>
 
-            <motion.div 
-              animate={{ 
-                x: isAttacking ? [0, -100, 300, 0] : isPlayerHit ? [0, -20, 20, -20, 0] : 0,
-                rotate: isAttacking ? [0, -30, 60, 0] : 0,
-                scale: isAttacking ? [1, 0.8, 2, 1] : isPlayerHit ? [1, 0.9, 1] : 1,
-                filter: isAttacking ? 'brightness(5) drop-shadow(0 0 30px rgba(16, 185, 129, 1))' : isPlayerHit ? 'brightness(2) saturate(2)' : 'brightness(1)'
-              }} 
-              transition={{ duration: isAttacking ? ATTACK_MOTION_DURATION_S : HIT_MOTION_DURATION_S, ease: "backOut" }}
-              className="relative mt-2 flex h-[13rem] w-full items-center justify-center overflow-visible"
-            >
-              <img
-                src={playerCharacterImage}
-                alt="플레이어 캐릭터"
-                className="h-full w-auto object-contain select-none drop-shadow-[0_18px_24px_rgba(15,23,42,0.35)]"
-                draggable={false}
-              />
-              {isAttacking && (
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0, rotate: 0 }}
-                  animate={{ opacity: 1, scale: 2, rotate: 45 }}
-                  className="pointer-events-none absolute -top-10 -right-10 h-10 w-40 rounded-full bg-emerald-400 blur-xl"
+              <div className="mt-4 flex items-center justify-between gap-3 text-sm">
+                <div className="inline-flex items-center gap-2 font-semibold text-slate-300">
+                  <Heart className="h-4 w-4 text-emerald-400" />
+                  HP
+                </div>
+                <p className="font-black text-slate-100">{playerHP} / {maxHealth}</p>
+              </div>
+
+              <div className="mt-2 h-3.5 w-full overflow-hidden rounded-full bg-slate-700/80">
+                <motion.div
+                  className="h-full rounded-full bg-gradient-to-r from-emerald-300 via-emerald-500 to-teal-400 shadow-[0_0_16px_rgba(16,185,129,0.35)]"
+                  animate={{ width: `${playerHP}%` }}
+                  transition={{ duration: 0.35, ease: "easeOut" }}
                 />
-              )}
-            </motion.div>
-
-            <div className="text-center w-full">
-              <p className="font-bold text-base text-slate-400 mb-1">나</p>
-              <div className="w-full bg-slate-700 h-3 rounded-full"><motion.div className="bg-emerald-500 h-3 rounded-full" animate={{ width: `${playerHP}%` }} /></div>
-            </div>
+              </div>
+            </section>
           </div>
 
           {/* Right: Math Problem & Input */}
