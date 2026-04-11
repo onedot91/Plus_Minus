@@ -14,6 +14,7 @@ type StepPhase =
   | 'remove'
   | 'place-complete'
   | 'complete';
+export type VisualControlSound = 'step' | 'regroup' | 'borrow' | 'resolve';
 type CellValue = number | null;
 type BlockTone = 'base' | 'partner' | 'result' | 'remove' | 'accent';
 type ActionTone = 'neutral' | 'focus' | 'success' | 'warning' | 'danger';
@@ -50,7 +51,7 @@ interface VisualStep {
 
 interface VisualCalculatorProps {
   problemText: string;
-  onControlSound?: () => void;
+  onControlSound?: (sound: VisualControlSound) => void;
 }
 
 interface ActionCardData {
@@ -77,6 +78,18 @@ interface SimplePlaceVisual {
   topItems: BlockVisualItem[];
   middleItems: BlockVisualItem[];
   bottomItems: BlockVisualItem[];
+}
+
+interface SimpleTransferVisual {
+  key: string;
+  mode: 'regroup' | 'borrow';
+  phase: 'source' | 'target';
+  source: PlaceKey;
+  target: PlaceKey;
+  sourceCount: number;
+  targetCount: number;
+  chipLabel: string;
+  note: string;
 }
 
 const PLACE_ORDER: PlaceKey[] = ['h', 't', 'o'];
@@ -171,6 +184,22 @@ const PHASE_META: Record<StepPhase, { label: string; tone: string }> = {
   complete: { label: '완료', tone: 'border-yellow-400/30 bg-yellow-500/14 text-yellow-100' },
 };
 
+function getControlSoundForStep(phase: StepPhase): VisualControlSound {
+  if (phase === 'regroup-source' || phase === 'regroup-target') {
+    return 'regroup';
+  }
+
+  if (phase === 'borrow-source' || phase === 'borrow-target') {
+    return 'borrow';
+  }
+
+  if (phase === 'place-complete' || phase === 'complete') {
+    return 'resolve';
+  }
+
+  return 'step';
+}
+
 const ACTION_TONE: Record<ActionTone, string> = {
   neutral: 'border-slate-600/45 bg-slate-900/75 text-slate-200',
   focus: 'border-blue-400/35 bg-blue-500/12 text-blue-100',
@@ -178,6 +207,13 @@ const ACTION_TONE: Record<ActionTone, string> = {
   warning: 'border-amber-400/35 bg-amber-500/12 text-amber-100',
   danger: 'border-rose-400/35 bg-rose-500/12 text-rose-100',
 };
+
+const SIMPLE_CARD_MIN_HEIGHT_CLASS = 'min-h-[240px] md:min-h-[280px]';
+const SIMPLE_CARD_HEADER_CLASS = 'flex min-h-[24px] items-center justify-between gap-2 md:min-h-[28px]';
+const SIMPLE_CARD_BODY_CLASS =
+  'grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_minmax(76px,0.7fr)] gap-2';
+const SIMPLE_OPERAND_ROWS_CLASS =
+  'grid h-full min-h-0 grid-rows-[minmax(0,1fr)_1px_minmax(0,1fr)] gap-2';
 
 function clampCount(value: number) {
   return Math.max(0, value);
@@ -219,6 +255,44 @@ function getPlaceValue(step: VisualStep, place: PlaceKey, group: 'first' | 'seco
 
 function getPlaceCountText(place: PlaceKey, count: number) {
   return `${PLACE_META[place].label} ${count}개`;
+}
+
+function getFocusedPlace(step: VisualStep) {
+  return step.focus === 'all' || step.focus === 'none' ? null : step.focus;
+}
+
+function hasVisibleBlocksInStep(step: VisualStep, op: '+' | '-') {
+  const place = getFocusedPlace(step);
+
+  if (!place) return true;
+
+  const first = clampCount(getPlaceValue(step, place, 'first'));
+  const second = clampCount(getPlaceValue(step, place, 'second'));
+  const result = clampCount(getPlaceValue(step, place, 'result') ?? 0);
+
+  if (step.phase === 'group') {
+    if (op === '+') {
+      const carry = getCarryIntoPlace(step, place);
+      const sourceTotal = first + second + carry;
+      return sourceTotal > 0 || result > 0;
+    }
+
+    return first + second > 0;
+  }
+
+  if (step.phase === 'remove') {
+    return first + second > 0;
+  }
+
+  if (step.phase === 'place-complete') {
+    return result > 0;
+  }
+
+  return true;
+}
+
+function pruneEmptyVisualSteps(steps: VisualStep[], op: '+' | '-') {
+  return steps.filter((step) => hasVisibleBlocksInStep(step, op));
 }
 
 function pushStep(
@@ -306,7 +380,7 @@ function genAdd(n1: number, n2: number) {
 
     pushStep(steps, state, {
       title: '일의 자리 10개를 묶습니다.',
-      detail: '일의 자리 10개는 십 1개와 같습니다.',
+      detail: '일의 자리 10개를 묶으면 십의 자리 1개가 되어 다음 자리로 올라갑니다.',
       focus: 'o',
       phase: 'regroup-source',
     });
@@ -315,8 +389,8 @@ function genAdd(n1: number, n2: number) {
     state.or = sumO % 10;
 
     pushStep(steps, state, {
-      title: '묶은 십 1개를 십의 자리로 옮깁니다.',
-      detail: `일의 자리에는 ${state.or}개가 남고, 십의 자리에 받아올림이 생깁니다.`,
+      title: '묶은 십 1개를 십의 자리에 올립니다.',
+      detail: `일의 자리에는 ${state.or}개가 남고, 묶은 십 1개가 십의 자리에 놓입니다.`,
       focus: 't',
       phase: 'regroup-target',
     });
@@ -355,7 +429,7 @@ function genAdd(n1: number, n2: number) {
 
     pushStep(steps, state, {
       title: '십의 자리 10개를 묶습니다.',
-      detail: '십의 자리 10개는 백 1개와 같습니다.',
+      detail: '십의 자리 10개를 묶으면 백의 자리 1개가 되어 다음 자리로 올라갑니다.',
       focus: 't',
       phase: 'regroup-source',
     });
@@ -364,8 +438,8 @@ function genAdd(n1: number, n2: number) {
     state.tr = sumT % 10;
 
     pushStep(steps, state, {
-      title: '묶은 백 1개를 백의 자리로 옮깁니다.',
-      detail: `십의 자리에는 ${state.tr}개가 남고, 백의 자리에 받아올림이 생깁니다.`,
+      title: '묶은 백 1개를 백의 자리에 올립니다.',
+      detail: `십의 자리에는 ${state.tr}개가 남고, 묶은 백 1개가 백의 자리에 놓입니다.`,
       focus: 'h',
       phase: 'regroup-target',
     });
@@ -649,6 +723,9 @@ function BlockSet({
       <AnimatePresence initial={false}>
         {visualItems.map((item) => {
           const resolvedTone = item.tone ?? tone;
+          const isAccent = resolvedTone === 'accent';
+          const isResultPulse = resolvedTone === 'result' && highlight;
+          const isRemove = resolvedTone === 'remove';
 
           return (
           <motion.div
@@ -658,10 +735,16 @@ function BlockSet({
             initial={false}
             animate={{
               opacity: muted ? 0.46 : 1,
-              y: resolvedTone === 'remove' ? -8 : 0,
+              y: isRemove ? -10 : isAccent || isResultPulse ? [0, -5, 0] : 0,
+              scale: isAccent || isResultPulse ? [1, 1.1, 1] : 1,
+              rotate: isRemove ? -8 : 0,
             }}
-            exit={{ opacity: 0, y: resolvedTone === 'remove' ? -14 : -4 }}
-            transition={{ type: 'spring', stiffness: 260, damping: 28, mass: 0.65 }}
+            exit={{ opacity: 0, y: isRemove ? -16 : -6, scale: isRemove ? 0.84 : 0.94 }}
+            transition={{
+              layout: { type: 'spring', stiffness: 240, damping: 24, mass: 0.7 },
+              duration: isAccent || isResultPulse ? 0.56 : 0.28,
+              ease: [0.22, 1, 0.36, 1],
+            }}
             className={`${meta.blockShape} ${meta.block[resolvedTone]} ${
               highlight ? 'ring-1 ring-white/65' : ''
             }`}
@@ -800,7 +883,7 @@ function getPlaceAction(step: VisualStep, place: PlaceKey, op: '+' | '-'): Actio
       return {
         badge: '10개 묶기',
         title: '일의 자리 10개를 십 1개로 바꿉니다.',
-        detail: '같은 자리 블록 10개는 윗자리 블록 1개가 됩니다.',
+        detail: '일의 자리 블록 10개를 묶어 십의 자리 블록 1개로 올립니다.',
         tone: 'warning',
         from: { place: 'o', count: 10 },
         to: { place: 't', count: step.tc },
@@ -811,7 +894,7 @@ function getPlaceAction(step: VisualStep, place: PlaceKey, op: '+' | '-'): Actio
       return {
         badge: '받아올림',
         title: '일의 자리에서 올라온 십 1개가 도착했습니다.',
-        detail: '받아올림은 숫자가 아니라 블록이 자리 이동한 것입니다.',
+        detail: '받아올림은 일의 자리 블록이 십의 자리로 이동한 것입니다.',
         tone: 'success',
         preview: { place: 't', count: step.tc, tone: 'result' },
       };
@@ -821,7 +904,7 @@ function getPlaceAction(step: VisualStep, place: PlaceKey, op: '+' | '-'): Actio
       return {
         badge: '10개 묶기',
         title: '십의 자리 10개를 백 1개로 바꿉니다.',
-        detail: '십 10개는 백 1개가 됩니다.',
+        detail: '십의 자리 블록 10개를 묶어 백의 자리 블록 1개로 올립니다.',
         tone: 'warning',
         from: { place: 't', count: 10 },
         to: { place: 'h', count: step.hc },
@@ -832,7 +915,7 @@ function getPlaceAction(step: VisualStep, place: PlaceKey, op: '+' | '-'): Actio
       return {
         badge: '받아올림',
         title: '십의 자리에서 올라온 백 1개가 도착했습니다.',
-        detail: '윗자리로 올라온 블록을 함께 더합니다.',
+        detail: '받아올림은 십의 자리 블록이 백의 자리로 이동한 것입니다.',
         tone: 'success',
         preview: { place: 'h', count: step.hc, tone: 'result' },
       };
@@ -1170,10 +1253,18 @@ function getMinimalStepTitle(step: VisualStep) {
       ? '모으기'
       : `${PLACE_META[step.focus].label} 모으기`;
   }
-  if (step.phase === 'regroup-source') return '10→1';
+  if (step.phase === 'regroup-source') {
+    if (step.focus === 'o') return '일→십';
+    if (step.focus === 't') return '십→백';
+    return '백→천';
+  }
   if (step.phase === 'regroup-target') return '올림';
   if (step.phase === 'borrow-source') return '가져오기';
-  if (step.phase === 'borrow-target') return '1→10';
+  if (step.phase === 'borrow-target') {
+    if (step.focus === 'o') return '십→일';
+    if (step.focus === 't') return '백→십';
+    return '풀기';
+  }
   if (step.phase === 'remove') return '빼기';
   if (step.phase === 'place-complete') return '놓기';
   return '완료';
@@ -1181,10 +1272,22 @@ function getMinimalStepTitle(step: VisualStep) {
 
 function getMinimalStepNote(step: VisualStep) {
   if (step.phase === 'intro') return '';
-  if (step.phase === 'regroup-source') return '10개를 묶습니다.';
-  if (step.phase === 'regroup-target') return '윗자리로 옮깁니다.';
+  if (step.phase === 'regroup-source') {
+    if (step.focus === 'o') return '일→십으로 묶어 올립니다.';
+    if (step.focus === 't') return '십→백으로 묶어 올립니다.';
+    return '백 10개를 천 1개로 묶습니다.';
+  }
+  if (step.phase === 'regroup-target') {
+    if (step.focus === 't' && step.tcPos === 't') return '일의 자리에서 십의 자리로 올립니다.';
+    if (step.focus === 'h' && step.hcPos === 'h') return '십의 자리에서 백의 자리로 올립니다.';
+    return '윗자리로 옮깁니다.';
+  }
   if (step.phase === 'borrow-source') return '윗자리 1개를 가져옵니다.';
-  if (step.phase === 'borrow-target') return '10개로 바꿉니다.';
+  if (step.phase === 'borrow-target') {
+    if (step.focus === 'o' && step.borrowTPos === 'o') return '십의 자리에서 일의 자리로 풉니다.';
+    if (step.focus === 't' && step.borrowHPos === 't') return '백의 자리에서 십의 자리로 풉니다.';
+    return '10개로 바꿉니다.';
+  }
   if (step.phase === 'remove' && step.focus !== 'all' && step.focus !== 'none') {
     return `${getPlaceValue(step, step.focus, 'remove')}개를 뺍니다.`;
   }
@@ -1197,15 +1300,15 @@ function getMinimalPlaceStatus(step: VisualStep, place: PlaceKey, op: '+' | '-')
   if (step.focus !== place && step.focus !== 'all') return null;
 
   if (op === '+') {
-    if (place === 'o' && step.tc > 0 && step.tcPos === 'o') return '10→1';
+    if (place === 'o' && step.tc > 0 && step.tcPos === 'o') return '일→십';
     if (place === 't' && step.tc > 0 && step.tcPos === 't') return '올림';
-    if (place === 't' && step.hc > 0 && step.hcPos === 't') return '10→1';
+    if (place === 't' && step.hc > 0 && step.hcPos === 't') return '십→백';
     if (place === 'h' && step.hc > 0 && step.hcPos === 'h') return '올림';
   } else {
     if (place === 't' && step.borrowT > 0 && step.borrowTPos === 't') return '풀기';
-    if (place === 'o' && step.borrowT > 0 && step.borrowTPos === 'o') return '1→10';
+    if (place === 'o' && step.borrowT > 0 && step.borrowTPos === 'o') return '십→일';
     if (place === 'h' && step.borrowH > 0 && step.borrowHPos === 'h') return '풀기';
-    if (place === 't' && step.borrowH > 0 && step.borrowHPos === 't') return '1→10';
+    if (place === 't' && step.borrowH > 0 && step.borrowHPos === 't') return '백→십';
     if (step.phase === 'remove') return '빼기';
   }
 
@@ -1437,10 +1540,22 @@ function getSimpleStepMessage(step: VisualStep, op: '+' | '-', previousStep?: Vi
     }
     return `${PLACE_META[step.focus].fullLabel}를 봅니다.`;
   }
-  if (step.phase === 'regroup-source') return '10개를 묶습니다.';
-  if (step.phase === 'regroup-target') return '윗자리로 옮깁니다.';
+  if (step.phase === 'regroup-source') {
+    if (step.focus === 'o') return '일의 자리 10개를 묶어 십의 자리로 올릴 준비를 합니다.';
+    if (step.focus === 't') return '십의 자리 10개를 묶어 백의 자리로 올릴 준비를 합니다.';
+    return '백 10개를 묶어 천 1개를 만듭니다.';
+  }
+  if (step.phase === 'regroup-target') {
+    if (step.focus === 't' && step.tcPos === 't') return '묶은 십 1개를 십의 자리에 올립니다.';
+    if (step.focus === 'h' && step.hcPos === 'h') return '묶은 백 1개를 백의 자리에 올립니다.';
+    return '윗자리로 옮깁니다.';
+  }
   if (step.phase === 'borrow-source') return '윗자리에서 가져옵니다.';
-  if (step.phase === 'borrow-target') return '1개를 10개로 풉니다.';
+  if (step.phase === 'borrow-target') {
+    if (step.focus === 'o' && step.borrowTPos === 'o') return '가져온 십 1개를 일의 자리 10개로 풉니다.';
+    if (step.focus === 't' && step.borrowHPos === 't') return '가져온 백 1개를 십의 자리 10개로 풉니다.';
+    return '1개를 10개로 풉니다.';
+  }
   if (step.phase === 'remove') return '블록을 뺍니다.';
   if (step.phase === 'place-complete') return '결과를 놓습니다.';
   return '계산이 완료되었습니다!';
@@ -1485,15 +1600,15 @@ function getSimplePlaceStatus(step: VisualStep, place: PlaceKey, op: '+' | '-') 
   if (step.focus !== place && step.focus !== 'all') return null;
   if (step.phase === 'complete') return null;
   if (op === '+') {
-    if (place === 'o' && step.tc > 0 && step.tcPos === 'o') return '10→1';
+    if (place === 'o' && step.tc > 0 && step.tcPos === 'o') return '일→십';
     if (place === 't' && step.tc > 0 && step.tcPos === 't') return '올림';
-    if (place === 't' && step.hc > 0 && step.hcPos === 't') return '10→1';
+    if (place === 't' && step.hc > 0 && step.hcPos === 't') return '십→백';
     if (place === 'h' && step.hc > 0 && step.hcPos === 'h') return '올림';
   } else {
     if (place === 't' && step.borrowT > 0 && step.borrowTPos === 't') return '가져오기';
-    if (place === 'o' && step.borrowT > 0 && step.borrowTPos === 'o') return '1→10';
+    if (place === 'o' && step.borrowT > 0 && step.borrowTPos === 'o') return '십→일';
     if (place === 'h' && step.borrowH > 0 && step.borrowHPos === 'h') return '가져오기';
-    if (place === 't' && step.borrowH > 0 && step.borrowHPos === 't') return '1→10';
+    if (place === 't' && step.borrowH > 0 && step.borrowHPos === 't') return '백→십';
     if (step.phase === 'remove') return '빼기';
   }
 
@@ -1573,19 +1688,332 @@ function getRegroupSourceBundleCount(step: VisualStep, place: PlaceKey) {
   return 0;
 }
 
-function isBorrowSourcePlace(step: VisualStep, place: PlaceKey) {
-  return (
-    step.phase === 'borrow-source' &&
-    ((place === 't' && step.borrowT > 0 && step.borrowTPos === 't') ||
-      (place === 'h' && step.borrowH > 0 && step.borrowHPos === 'h'))
-  );
-}
-
 function getBorrowTargetCount(step: VisualStep, place: PlaceKey) {
   if (step.phase !== 'borrow-target') return 0;
   if (place === 'o' && step.borrowTPos === 'o') return 10;
   if (place === 't' && step.borrowHPos === 't') return 10;
   return 0;
+}
+
+function getSimpleTransferVisual(step: VisualStep, op: '+' | '-'): SimpleTransferVisual | null {
+  if (op === '+') {
+    if (step.phase === 'regroup-source' && step.tc > 0 && step.tcPos === 'o') {
+      return {
+        key: 'o-to-t',
+        mode: 'regroup',
+        phase: 'source',
+        source: 'o',
+        target: 't',
+        sourceCount: 10,
+        targetCount: 1,
+        chipLabel: '일→십',
+        note: '일의 자리 10개를 묶어 십의 자리 1개로 올릴 준비를 합니다.',
+      };
+    }
+
+    if (step.phase === 'regroup-target' && step.tc > 0 && step.tcPos === 't') {
+      return {
+        key: 'o-to-t',
+        mode: 'regroup',
+        phase: 'target',
+        source: 'o',
+        target: 't',
+        sourceCount: 10,
+        targetCount: 1,
+        chipLabel: '일→십',
+        note: '묶은 십 1개가 일의 자리에서 십의 자리로 올라갑니다.',
+      };
+    }
+
+    if (step.phase === 'regroup-source' && step.hc > 0 && step.hcPos === 't') {
+      return {
+        key: 't-to-h',
+        mode: 'regroup',
+        phase: 'source',
+        source: 't',
+        target: 'h',
+        sourceCount: 10,
+        targetCount: 1,
+        chipLabel: '십→백',
+        note: '십의 자리 10개를 묶어 백의 자리 1개로 올릴 준비를 합니다.',
+      };
+    }
+
+    if (step.phase === 'regroup-target' && step.hc > 0 && step.hcPos === 'h') {
+      return {
+        key: 't-to-h',
+        mode: 'regroup',
+        phase: 'target',
+        source: 't',
+        target: 'h',
+        sourceCount: 10,
+        targetCount: 1,
+        chipLabel: '십→백',
+        note: '묶은 백 1개가 십의 자리에서 백의 자리로 올라갑니다.',
+      };
+    }
+  } else {
+    if (step.phase === 'borrow-source' && step.borrowT > 0 && step.borrowTPos === 't') {
+      return {
+        key: 't-to-o',
+        mode: 'borrow',
+        phase: 'source',
+        source: 't',
+        target: 'o',
+        sourceCount: 1,
+        targetCount: 10,
+        chipLabel: '십→일',
+        note: '십의 자리 1개를 가져와 일의 자리로 보낼 준비를 합니다.',
+      };
+    }
+
+    if (step.phase === 'borrow-target' && step.borrowTPos === 'o') {
+      return {
+        key: 't-to-o',
+        mode: 'borrow',
+        phase: 'target',
+        source: 't',
+        target: 'o',
+        sourceCount: 1,
+        targetCount: 10,
+        chipLabel: '십→일',
+        note: '가져온 십 1개를 일의 자리 10개로 풉니다.',
+      };
+    }
+
+    if (step.phase === 'borrow-source' && step.borrowH > 0 && step.borrowHPos === 'h') {
+      return {
+        key: 'h-to-t',
+        mode: 'borrow',
+        phase: 'source',
+        source: 'h',
+        target: 't',
+        sourceCount: 1,
+        targetCount: 10,
+        chipLabel: '백→십',
+        note: '백의 자리 1개를 가져와 십의 자리로 보낼 준비를 합니다.',
+      };
+    }
+
+    if (step.phase === 'borrow-target' && step.borrowHPos === 't') {
+      return {
+        key: 'h-to-t',
+        mode: 'borrow',
+        phase: 'target',
+        source: 'h',
+        target: 't',
+        sourceCount: 1,
+        targetCount: 10,
+        chipLabel: '백→십',
+        note: '가져온 백 1개를 십의 자리 10개로 풉니다.',
+      };
+    }
+  }
+
+  return null;
+}
+
+function getTransferPieceOffsets(count: number, place: PlaceKey) {
+  if (count <= 1) {
+    return [{ x: 0, y: 0 }];
+  }
+
+  const xGap = place === 't' ? 16 : 18;
+  const yGap = place === 'h' ? 20 : 18;
+
+  return Array.from({ length: count }, (_, index) => ({
+    x: ((index % 5) - 2) * xGap,
+    y: (Math.floor(index / 5) - 0.5) * yGap,
+  }));
+}
+
+function getTransferPieceShape(place: PlaceKey, role: 'source' | 'target') {
+  if (place === 'h') {
+    return role === 'target' ? 'h-8 w-8 rounded-[12px]' : 'h-7 w-7 rounded-[10px]';
+  }
+
+  if (place === 't') {
+    return role === 'target' ? 'h-12 w-4 rounded-full' : 'h-10 w-3.5 rounded-full';
+  }
+
+  return role === 'target' ? 'h-7 w-7 rounded-[10px]' : 'h-6 w-6 rounded-[9px]';
+}
+
+function getTransferPieceTone(place: PlaceKey, mode: 'regroup' | 'borrow', role: 'source' | 'target') {
+  const meta = PLACE_META[place];
+  const baseTone =
+    role === 'target'
+      ? mode === 'regroup'
+        ? meta.block.result
+        : meta.block.accent
+      : meta.block.accent;
+
+  return `${baseTone} ring-1 ring-white/65`;
+}
+
+function TransferMorphVisual({
+  transfer,
+  sourceLeft,
+  targetLeft,
+}: {
+  transfer: SimpleTransferVisual;
+  sourceLeft: number;
+  targetLeft: number;
+}) {
+  const isTargetPhase = transfer.phase === 'target';
+  const sourceOffsets = getTransferPieceOffsets(transfer.sourceCount, transfer.source);
+  const targetOffsets = getTransferPieceOffsets(transfer.targetCount, transfer.target);
+  const glowClass =
+    transfer.mode === 'regroup'
+      ? 'bg-[radial-gradient(circle,rgba(110,231,183,0.38),rgba(56,189,248,0.18),transparent_72%)]'
+      : 'bg-[radial-gradient(circle,rgba(253,224,71,0.34),rgba(251,146,60,0.16),transparent_72%)]';
+
+  return (
+    <motion.div
+      initial={false}
+      animate={{
+        left: `${isTargetPhase ? targetLeft : sourceLeft}%`,
+        top: isTargetPhase ? '25%' : '25%',
+        scale: isTargetPhase ? 1.03 : 0.98,
+      }}
+      transition={{ duration: 0.86, ease: [0.22, 1, 0.36, 1] }}
+      className="absolute -translate-x-1/2 -translate-y-1/2"
+    >
+      <div className="relative h-28 w-36">
+        <motion.div
+          initial={false}
+          animate={{
+            opacity: isTargetPhase ? 0.34 : 0.2,
+            scale: isTargetPhase ? 1.16 : 0.94,
+          }}
+          transition={{ duration: 0.68, ease: [0.22, 1, 0.36, 1] }}
+          className={`absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full blur-2xl ${glowClass}`}
+        />
+
+        {sourceOffsets.map((offset, index) => (
+          <motion.div
+            key={`${transfer.key}-source-${index}`}
+            initial={false}
+            animate={{
+              x: isTargetPhase ? offset.x * 0.18 : offset.x,
+              y: isTargetPhase ? offset.y * 0.18 : offset.y,
+              scale: isTargetPhase ? 0.42 : 1,
+              opacity: isTargetPhase ? 0 : 1,
+              rotate: isTargetPhase && transfer.mode === 'borrow' ? -18 : 0,
+            }}
+            transition={{
+              duration: 0.82,
+              delay: Math.min(index, 4) * 0.018,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+            className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 ${getTransferPieceShape(
+              transfer.source,
+              'source',
+            )} ${getTransferPieceTone(transfer.source, transfer.mode, 'source')}`}
+          />
+        ))}
+
+        {targetOffsets.map((offset, index) => (
+          <motion.div
+            key={`${transfer.key}-target-${index}`}
+            initial={false}
+            animate={{
+              x: isTargetPhase ? offset.x : offset.x * 0.14,
+              y: isTargetPhase ? offset.y : offset.y * 0.14,
+              scale: isTargetPhase ? 1 : 0.36,
+              opacity: isTargetPhase ? 1 : 0,
+              rotate: isTargetPhase ? 0 : 12,
+            }}
+            transition={{
+              duration: 0.88,
+              delay: isTargetPhase ? 0.08 + Math.min(index, 4) * 0.018 : 0,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+            className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 ${getTransferPieceShape(
+              transfer.target,
+              'target',
+            )} ${getTransferPieceTone(transfer.target, transfer.mode, 'target')}`}
+          />
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
+function SimpleTransferOverlay({
+  transfer,
+  stepIdx,
+}: {
+  transfer: SimpleTransferVisual | null;
+  stepIdx: number;
+}) {
+  if (!transfer) return null;
+
+  const centers: Record<PlaceKey, number> = { h: 16.667, t: 50, o: 83.333 };
+  const sourceLeft = centers[transfer.source];
+  const targetLeft = centers[transfer.target];
+  const lineLeft = Math.min(sourceLeft, targetLeft);
+  const lineWidth = Math.abs(targetLeft - sourceLeft);
+  const middleLeft = (sourceLeft + targetLeft) / 2;
+  const railClass =
+    transfer.mode === 'regroup'
+      ? 'bg-gradient-to-r from-sky-300/0 via-cyan-200/85 to-emerald-300/0'
+      : 'bg-gradient-to-r from-rose-300/0 via-amber-200/85 to-orange-300/0';
+  const markerClass =
+    transfer.mode === 'regroup'
+      ? 'border-cyan-100/80 bg-cyan-200/85'
+      : 'border-amber-100/80 bg-amber-200/85';
+  const noteClass =
+    transfer.mode === 'regroup'
+      ? 'border-cyan-200/25 bg-slate-950/78 text-cyan-50'
+      : 'border-amber-200/25 bg-slate-950/78 text-amber-50';
+
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={transfer.key}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.22 }}
+        className="pointer-events-none absolute inset-0 z-20"
+      >
+        <motion.div
+          initial={false}
+          animate={{ opacity: 1, scaleX: 1 }}
+          transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+          className={`absolute h-[2px] origin-center rounded-full ${railClass}`}
+          style={{ top: '26%', left: `${lineLeft}%`, width: `${lineWidth}%` }}
+        />
+
+        {[sourceLeft, targetLeft].map((left, index) => (
+          <motion.div
+            key={`${transfer.key}-marker-${index}`}
+            animate={{ scale: [0.92, 1.45, 0.92], opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 1.1, repeat: Infinity, delay: index * 0.12, ease: 'easeInOut' }}
+            className={`absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border ${markerClass}`}
+            style={{ top: '26%', left: `${left}%` }}
+          />
+        ))}
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`${transfer.key}-note-${transfer.phase}-${stepIdx}`}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+            className={`absolute min-w-[148px] -translate-x-1/2 rounded-full border px-3 py-1 text-center text-[11px] font-black backdrop-blur-sm ${noteClass}`}
+            style={{ top: '13%', left: `${middleLeft}%` }}
+          >
+            {transfer.note}
+          </motion.div>
+        </AnimatePresence>
+
+        <TransferMorphVisual transfer={transfer} sourceLeft={sourceLeft} targetLeft={targetLeft} />
+      </motion.div>
+    </AnimatePresence>
+  );
 }
 
 function buildSimplePlaceVisual({
@@ -1703,10 +2131,6 @@ function buildSimplePlaceVisual({
         : ('base' as BlockTone),
   }));
 
-  if (isBorrowSourcePlace(step, place)) {
-    topItems = tintTrailingItems(topItems, 1, 'accent');
-  }
-
   if (borrowTargetCount > 0) {
     topItems = tintTrailingItems(topItems, borrowTargetCount, 'accent');
   }
@@ -1735,31 +2159,51 @@ function SimpleFormulaPanel({
   const digits2 = splitDigits4(n2);
 
   return (
-    <div className="flex min-h-[240px] w-[118px] shrink-0 items-center justify-center rounded-[22px] border border-white/10 bg-slate-800/72 p-3 md:min-h-[280px] md:w-[172px] md:p-4">
-      <div className="grid w-full grid-cols-[16px_repeat(4,minmax(0,1fr))] gap-x-1.5 gap-y-3 text-right md:grid-cols-[20px_repeat(4,minmax(0,1fr))] md:gap-x-2.5 md:gap-y-4">
-        <div />
-        {digits1.map((digit, index) => (
-          <div
-            key={`simple-top-${index}`}
-            className="text-[1.95rem] font-black leading-none text-white md:text-[2.55rem]"
-          >
-            {digit ?? ''}
-          </div>
-        ))}
+    <div
+      className={`flex w-[118px] shrink-0 flex-col rounded-[22px] border border-white/10 bg-slate-800/72 p-2.5 ${SIMPLE_CARD_MIN_HEIGHT_CLASS} md:w-[172px] md:p-3`}
+    >
+      <div aria-hidden="true" className={`${SIMPLE_CARD_HEADER_CLASS} opacity-0`}>
+        <div className="text-center text-xs font-black md:text-sm">백</div>
+      </div>
 
-        <div className="text-[1.95rem] font-black leading-none text-yellow-400 md:text-[2.55rem]">
-          {op}
+      <div className={SIMPLE_CARD_BODY_CLASS}>
+        <div className="min-h-0 p-2.5">
+          <div className={`${SIMPLE_OPERAND_ROWS_CLASS} text-right`}>
+            <div className="grid grid-cols-[16px_repeat(4,minmax(0,1fr))] gap-x-1.5 self-start md:grid-cols-[20px_repeat(4,minmax(0,1fr))] md:gap-x-2.5">
+              <div />
+              {digits1.map((digit, index) => (
+                <div
+                  key={`simple-top-${index}`}
+                  className="text-[1.95rem] font-black leading-none text-white md:text-[2.55rem]"
+                >
+                  {digit ?? ''}
+                </div>
+              ))}
+            </div>
+
+            <div aria-hidden="true" className="h-px opacity-0" />
+
+            <div className="grid grid-cols-[16px_repeat(4,minmax(0,1fr))] gap-x-1.5 self-start md:grid-cols-[20px_repeat(4,minmax(0,1fr))] md:gap-x-2.5">
+              <div className="text-[1.95rem] font-black leading-none text-yellow-400 md:text-[2.55rem]">
+                {op}
+              </div>
+              {digits2.map((digit, index) => (
+                <div
+                  key={`simple-bottom-${index}`}
+                  className="text-[1.95rem] font-black leading-none text-white md:text-[2.55rem]"
+                >
+                  {digit ?? ''}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-        {digits2.map((digit, index) => (
-          <div
-            key={`simple-bottom-${index}`}
-            className="text-[1.95rem] font-black leading-none text-white md:text-[2.55rem]"
-          >
-            {digit ?? ''}
-          </div>
-        ))}
 
-        <div className="col-span-5 h-1 rounded-full bg-slate-600/90" />
+        <div className="min-h-0 p-2.5">
+          <div className="grid grid-cols-[16px_repeat(4,minmax(0,1fr))] gap-x-1.5 md:grid-cols-[20px_repeat(4,minmax(0,1fr))] md:gap-x-2.5">
+            <div className="col-span-5 h-1 rounded-full bg-slate-600/90" />
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -1772,6 +2216,8 @@ function SimplePlaceCard({
   steps,
   stepIdx,
   pools,
+  transferRole,
+  transferMode,
 }: {
   place: PlaceKey;
   step: VisualStep;
@@ -1779,6 +2225,8 @@ function SimplePlaceCard({
   steps: VisualStep[];
   stepIdx: number;
   pools: SimplePlacePools;
+  transferRole?: 'source' | 'target' | null;
+  transferMode?: 'regroup' | 'borrow' | null;
 }) {
   const meta = PLACE_META[place];
   const isFocused = step.focus === place || step.focus === 'all';
@@ -1786,15 +2234,39 @@ function SimplePlaceCard({
   const status = getSimplePlaceStatus(step, place, op);
   const visual = buildSimplePlaceVisual({ steps, stepIdx, step, place, op, pools });
   const resultVisible = visual.bottomItems.length > 0 && visual.topItems.length === 0;
+  const transferShadowClass =
+    transferRole === 'source'
+      ? transferMode === 'regroup'
+        ? 'shadow-[0_0_26px_rgba(34,211,238,0.12)]'
+        : 'shadow-[0_0_26px_rgba(251,146,60,0.14)]'
+      : transferRole === 'target'
+        ? transferMode === 'regroup'
+          ? 'shadow-[0_0_32px_rgba(52,211,153,0.16)]'
+          : 'shadow-[0_0_32px_rgba(251,191,36,0.16)]'
+        : '';
 
   return (
     <motion.section
       layout
-      className={`flex min-h-[240px] min-w-0 flex-col gap-2 rounded-[22px] border p-2.5 transition-all md:min-h-[280px] md:p-3 ${
+      animate={
+        transferRole === 'source'
+          ? { y: [0, -4, 0], scale: [1, 1.01, 1] }
+          : transferRole === 'target'
+            ? { y: [0, -2, 0], scale: [1, 1.015, 1] }
+            : { y: 0, scale: 1 }
+      }
+      transition={{
+        layout: { type: 'spring', stiffness: 240, damping: 24 },
+        duration: transferRole ? 0.6 : 0.24,
+        ease: [0.22, 1, 0.36, 1],
+      }}
+      className={`flex min-w-0 flex-col gap-2 rounded-[22px] border p-2.5 transition-all ${SIMPLE_CARD_MIN_HEIGHT_CLASS} md:p-3 ${
         meta.cardBase
-      } ${isFocused ? meta.cardActive : ''} ${dimmed ? 'opacity-55 saturate-[0.85]' : 'opacity-100'}`}
+      } ${isFocused ? meta.cardActive : ''} ${transferShadowClass} ${
+        dimmed ? 'opacity-55 saturate-[0.85]' : 'opacity-100'
+      }`}
     >
-      <div className="flex items-center justify-between gap-2">
+      <div className={SIMPLE_CARD_HEADER_CLASS}>
         <div className={`text-center text-xs font-black md:text-sm ${meta.kicker}`}>{meta.label}</div>
         {status ? (
           <div className={`rounded-full border px-2 py-0.5 text-[10px] font-black ${meta.actionBg}`}>
@@ -1803,9 +2275,9 @@ function SimplePlaceCard({
         ) : null}
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_minmax(76px,0.7fr)] gap-2">
+      <div className={SIMPLE_CARD_BODY_CLASS}>
         <div className="min-h-0 rounded-[18px] border border-white/8 bg-slate-950/28 p-2.5">
-          <div className="grid h-full min-h-0 grid-rows-[minmax(0,1fr)_1px_minmax(0,1fr)] gap-2">
+          <div className={SIMPLE_OPERAND_ROWS_CLASS}>
             <div className="min-h-0 overflow-visible">
               <BlockSet
                 count={visual.topItems.length}
@@ -1852,7 +2324,10 @@ export const VisualCalculator: React.FC<VisualCalculatorProps> = ({
   onControlSound,
 }) => {
   const { n1, op, n2 } = useMemo(() => parseProblem(problemText), [problemText]);
-  const steps = useMemo(() => (op === '+' ? genAdd(n1, n2) : genSub(n1, n2)), [n1, op, n2]);
+  const steps = useMemo(
+    () => pruneEmptyVisualSteps(op === '+' ? genAdd(n1, n2) : genSub(n1, n2), op),
+    [n1, op, n2],
+  );
   const placePools = useMemo(
     () =>
       PLACE_ORDER.reduce(
@@ -1894,10 +2369,12 @@ export const VisualCalculator: React.FC<VisualCalculatorProps> = ({
 
   const step = steps[stepIdx];
   const previousStep = stepIdx > 0 ? steps[stepIdx - 1] : undefined;
+  const transfer = getSimpleTransferVisual(step, op);
 
   const moveStep = (nextIndex: number) => {
+    const nextStep = steps[nextIndex];
     setStepIdx(nextIndex);
-    onControlSound?.();
+    onControlSound?.(getControlSoundForStep(nextStep.phase));
   };
 
   return (
@@ -1955,7 +2432,10 @@ export const VisualCalculator: React.FC<VisualCalculatorProps> = ({
         <div className="flex min-h-0 flex-1 gap-3">
           <SimpleFormulaPanel n1={n1} n2={n2} op={op} />
 
-          <div className="grid min-h-0 flex-1 grid-cols-3 gap-2.5 md:gap-3">
+          <div className="relative min-h-0 flex-1">
+            <SimpleTransferOverlay transfer={transfer} stepIdx={stepIdx} />
+
+            <div className="grid min-h-0 h-full grid-cols-3 gap-2.5 md:gap-3">
             {PLACE_ORDER.map((place) => (
               <React.Fragment key={place}>
                 <SimplePlaceCard
@@ -1965,9 +2445,14 @@ export const VisualCalculator: React.FC<VisualCalculatorProps> = ({
                   steps={steps}
                   stepIdx={stepIdx}
                   pools={placePools[place]}
+                  transferRole={
+                    transfer ? (transfer.source === place ? 'source' : transfer.target === place ? 'target' : null) : null
+                  }
+                  transferMode={transfer?.mode ?? null}
                 />
               </React.Fragment>
             ))}
+            </div>
           </div>
         </div>
       </LayoutGroup>
