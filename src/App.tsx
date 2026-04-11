@@ -89,6 +89,8 @@ type SoundEffectName =
   | 'levelUp'
   | 'tick'
   | 'ui'
+  | 'submit'
+  | 'dangerPulse'
   | 'hintStep'
   | 'hintCarry'
   | 'hintBorrow'
@@ -134,6 +136,12 @@ interface SoundEffectDefinition {
   layers: SoundLayer[];
 }
 
+interface SoundPlaybackOptions {
+  gainMultiplier?: number;
+  detune?: number;
+  noisePlaybackRateMultiplier?: number;
+}
+
 interface AudioEngine {
   version: number;
   context: AudioContext;
@@ -164,12 +172,13 @@ const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
     ],
   },
   correct: {
-    output: 0.86,
+    output: 0.9,
     layers: [
       { kind: 'noise', duration: 0.04, gain: 0.007, attack: 0.001, release: 0.03, filter: { type: 'highpass', frequency: 3400, sweepTo: 9000, q: 0.8 }, reverbSend: 0.02 },
-      { kind: 'oscillator', wave: 'triangle', frequency: 660, glideTo: 990, duration: 0.09, gain: 0.032, attack: 0.0015, release: 0.06, detuneJitter: 5, filter: { type: 'lowpass', frequency: 4800, sweepTo: 2800, q: 0.8 }, delaySend: 0.03, reverbSend: 0.05, pan: -0.08, panJitter: 0.04 },
-      { kind: 'oscillator', wave: 'sine', startAt: 0.012, frequency: 990, glideTo: 1318.5, duration: 0.12, gain: 0.028, attack: 0.0015, release: 0.08, reverbSend: 0.06, pan: 0.1, panJitter: 0.04 },
-      { kind: 'oscillator', wave: 'triangle', startAt: 0.022, frequency: 495, glideTo: 659.25, duration: 0.16, gain: 0.024, attack: 0.002, release: 0.11, filter: { type: 'bandpass', frequency: 1800, sweepTo: 2400, q: 2.2 }, reverbSend: 0.04 },
+      { kind: 'oscillator', wave: 'triangle', frequency: 660, glideTo: 990, duration: 0.09, gain: 0.034, attack: 0.0015, release: 0.06, detuneJitter: 5, filter: { type: 'lowpass', frequency: 4800, sweepTo: 2800, q: 0.8 }, delaySend: 0.03, reverbSend: 0.05, pan: -0.08, panJitter: 0.04 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.012, frequency: 990, glideTo: 1318.5, duration: 0.13, gain: 0.03, attack: 0.0015, release: 0.085, reverbSend: 0.06, pan: 0.1, panJitter: 0.04 },
+      { kind: 'oscillator', wave: 'triangle', startAt: 0.022, frequency: 495, glideTo: 659.25, duration: 0.17, gain: 0.025, attack: 0.002, release: 0.115, filter: { type: 'bandpass', frequency: 1800, sweepTo: 2400, q: 2.2 }, reverbSend: 0.04 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.048, frequency: 1318.5, glideTo: 1760, duration: 0.12, gain: 0.014, attack: 0.0015, release: 0.09, delaySend: 0.03, reverbSend: 0.08, pan: 0.14 },
     ],
   },
   alert: {
@@ -182,33 +191,36 @@ const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
     ],
   },
   enemyHit: {
-    output: 0.88,
+    output: 0.92,
     layers: [
-      { kind: 'noise', duration: 0.055, gain: 0.013, attack: 0.001, release: 0.04, filter: { type: 'bandpass', frequency: 1500, sweepTo: 650, q: 1.1 }, reverbSend: 0.02, pan: 0.12 },
-      { kind: 'oscillator', wave: 'triangle', frequency: 240, glideTo: 160, duration: 0.09, gain: 0.022, attack: 0.0015, release: 0.06, filter: { type: 'lowpass', frequency: 1800, sweepTo: 420, q: 0.9 }, pan: -0.08 },
-      { kind: 'oscillator', wave: 'sine', startAt: 0.008, frequency: 110, glideTo: 72, duration: 0.15, gain: 0.032, attack: 0.001, release: 0.1, filter: { type: 'lowpass', frequency: 820, sweepTo: 180, q: 0.8 }, reverbSend: 0.015 },
-      { kind: 'oscillator', wave: 'triangle', startAt: 0.012, frequency: 880, glideTo: 620, duration: 0.05, gain: 0.008, attack: 0.001, release: 0.03, filter: { type: 'lowpass', frequency: 2600, sweepTo: 1200, q: 0.8 }, pan: 0.18 },
+      { kind: 'noise', duration: 0.058, gain: 0.015, attack: 0.001, release: 0.04, filter: { type: 'bandpass', frequency: 1500, sweepTo: 650, q: 1.1 }, reverbSend: 0.02, pan: 0.12 },
+      { kind: 'oscillator', wave: 'triangle', frequency: 240, glideTo: 160, duration: 0.095, gain: 0.024, attack: 0.0015, release: 0.06, filter: { type: 'lowpass', frequency: 1800, sweepTo: 420, q: 0.9 }, pan: -0.08 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.008, frequency: 110, glideTo: 72, duration: 0.17, gain: 0.034, attack: 0.001, release: 0.11, filter: { type: 'lowpass', frequency: 820, sweepTo: 180, q: 0.8 }, reverbSend: 0.02 },
+      { kind: 'oscillator', wave: 'triangle', startAt: 0.012, frequency: 880, glideTo: 620, duration: 0.055, gain: 0.009, attack: 0.001, release: 0.03, filter: { type: 'lowpass', frequency: 2600, sweepTo: 1200, q: 0.8 }, pan: 0.18 },
+      { kind: 'oscillator', wave: 'square', startAt: 0.002, frequency: 1460, glideTo: 980, duration: 0.026, gain: 0.004, attack: 0.001, release: 0.018, filter: { type: 'lowpass', frequency: 3000, sweepTo: 1600, q: 0.8 }, pan: 0.22 },
     ],
   },
   playerHit: {
-    output: 0.84,
+    output: 0.88,
     layers: [
-      { kind: 'noise', duration: 0.07, gain: 0.014, attack: 0.001, release: 0.055, filter: { type: 'bandpass', frequency: 900, sweepTo: 320, q: 1.4 }, reverbSend: 0.03, pan: -0.14 },
-      { kind: 'oscillator', wave: 'triangle', frequency: 180, glideTo: 120, duration: 0.12, gain: 0.024, attack: 0.0015, release: 0.08, filter: { type: 'lowpass', frequency: 1200, sweepTo: 260, q: 0.9 }, pan: 0.12 },
-      { kind: 'oscillator', wave: 'sine', startAt: 0.012, frequency: 96, glideTo: 62, duration: 0.19, gain: 0.036, attack: 0.0015, release: 0.13, filter: { type: 'lowpass', frequency: 620, sweepTo: 140, q: 0.8 }, reverbSend: 0.025 },
-      { kind: 'oscillator', wave: 'triangle', startAt: 0.004, frequency: 520, glideTo: 360, duration: 0.045, gain: 0.006, attack: 0.001, release: 0.025, filter: { type: 'lowpass', frequency: 1400, sweepTo: 700, q: 0.8 }, pan: 0.08 },
+      { kind: 'noise', duration: 0.075, gain: 0.015, attack: 0.001, release: 0.06, filter: { type: 'bandpass', frequency: 900, sweepTo: 320, q: 1.4 }, reverbSend: 0.03, pan: -0.14 },
+      { kind: 'oscillator', wave: 'triangle', frequency: 180, glideTo: 120, duration: 0.125, gain: 0.026, attack: 0.0015, release: 0.085, filter: { type: 'lowpass', frequency: 1200, sweepTo: 260, q: 0.9 }, pan: 0.12 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.012, frequency: 96, glideTo: 62, duration: 0.21, gain: 0.038, attack: 0.0015, release: 0.14, filter: { type: 'lowpass', frequency: 620, sweepTo: 140, q: 0.8 }, reverbSend: 0.03 },
+      { kind: 'oscillator', wave: 'triangle', startAt: 0.004, frequency: 520, glideTo: 360, duration: 0.05, gain: 0.0065, attack: 0.001, release: 0.028, filter: { type: 'lowpass', frequency: 1400, sweepTo: 700, q: 0.8 }, pan: 0.08 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.05, frequency: 62, glideTo: 49, duration: 0.14, gain: 0.012, attack: 0.002, release: 0.1, filter: { type: 'lowpass', frequency: 320, sweepTo: 140, q: 0.8 }, reverbSend: 0.04 },
     ],
   },
   wrong: {
-    output: 0.82,
+    output: 0.84,
     layers: [
       { kind: 'noise', duration: 0.09, gain: 0.009, attack: 0.001, release: 0.07, filter: { type: 'lowpass', frequency: 1600, sweepTo: 450, q: 0.8 }, reverbSend: 0.02 },
       { kind: 'oscillator', wave: 'triangle', frequency: 320, glideTo: 220, duration: 0.18, gain: 0.028, attack: 0.002, release: 0.12, detuneJitter: 6, filter: { type: 'lowpass', frequency: 1500, sweepTo: 520, q: 0.7 }, reverbSend: 0.02, pan: -0.08 },
       { kind: 'oscillator', wave: 'sine', startAt: 0.02, frequency: 246.94, glideTo: 174.61, duration: 0.22, gain: 0.026, attack: 0.002, release: 0.16, filter: { type: 'bandpass', frequency: 540, sweepTo: 280, q: 1.8 }, delaySend: 0.015, pan: 0.06 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.028, frequency: 123.47, glideTo: 87.31, duration: 0.18, gain: 0.014, attack: 0.002, release: 0.12, filter: { type: 'lowpass', frequency: 520, sweepTo: 180, q: 0.8 }, reverbSend: 0.03 },
     ],
   },
   levelUp: {
-    output: 0.88,
+    output: 0.92,
     layers: [
       { kind: 'noise', duration: 0.14, gain: 0.009, attack: 0.002, release: 0.1, filter: { type: 'highpass', frequency: 4000, sweepTo: 9000, q: 0.8 }, reverbSend: 0.12 },
       { kind: 'oscillator', wave: 'triangle', frequency: 523.25, duration: 0.1, gain: 0.022, attack: 0.002, release: 0.07, delaySend: 0.03, reverbSend: 0.09, pan: -0.16 },
@@ -216,10 +228,11 @@ const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
       { kind: 'oscillator', wave: 'triangle', startAt: 0.18, frequency: 783.99, duration: 0.13, gain: 0.026, attack: 0.002, release: 0.09, delaySend: 0.05, reverbSend: 0.11, pan: -0.04 },
       { kind: 'oscillator', wave: 'sine', startAt: 0.28, frequency: 1046.5, duration: 0.18, gain: 0.018, attack: 0.002, release: 0.12, delaySend: 0.06, reverbSend: 0.14, pan: 0.08 },
       { kind: 'oscillator', wave: 'sine', startAt: 0.28, frequency: 1567.98, duration: 0.14, gain: 0.008, attack: 0.001, release: 0.09, reverbSend: 0.14, pan: 0.16 },
+      { kind: 'oscillator', wave: 'triangle', startAt: 0.41, frequency: 1318.5, duration: 0.14, gain: 0.014, attack: 0.0015, release: 0.1, delaySend: 0.05, reverbSend: 0.12, pan: 0.02 },
     ],
   },
   tick: {
-    output: 0.66,
+    output: 0.7,
     layers: [
       { kind: 'oscillator', wave: 'square', frequency: 1320, glideTo: 1180, duration: 0.04, gain: 0.012, attack: 0.001, release: 0.03, filter: { type: 'lowpass', frequency: 3600, sweepTo: 2100, q: 0.8 }, pan: -0.03 },
       { kind: 'oscillator', wave: 'sine', startAt: 0.008, frequency: 740, duration: 0.06, gain: 0.01, attack: 0.001, release: 0.04, reverbSend: 0.01, pan: 0.03 },
@@ -231,6 +244,22 @@ const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
       { kind: 'oscillator', wave: 'triangle', frequency: 640, glideTo: 470, duration: 0.035, gain: 0.008, attack: 0.001, release: 0.024, filter: { type: 'lowpass', frequency: 1500, sweepTo: 900, q: 0.8 }, pan: -0.02 },
       { kind: 'oscillator', wave: 'sine', frequency: 320, glideTo: 240, duration: 0.045, gain: 0.007, attack: 0.001, release: 0.03, filter: { type: 'lowpass', frequency: 900, sweepTo: 540, q: 0.7 } },
       { kind: 'oscillator', wave: 'square', startAt: 0.002, frequency: 1180, glideTo: 860, duration: 0.014, gain: 0.0025, attack: 0.001, release: 0.01, filter: { type: 'lowpass', frequency: 1800, sweepTo: 1100, q: 0.8 }, pan: 0.02 },
+    ],
+  },
+  submit: {
+    output: 0.34,
+    layers: [
+      { kind: 'noise', duration: 0.018, gain: 0.0022, attack: 0.001, release: 0.012, filter: { type: 'highpass', frequency: 2800, sweepTo: 6800, q: 0.8 }, reverbSend: 0.01 },
+      { kind: 'oscillator', wave: 'triangle', frequency: 460, glideTo: 620, duration: 0.045, gain: 0.005, attack: 0.001, release: 0.024, filter: { type: 'lowpass', frequency: 2200, sweepTo: 1400, q: 0.8 }, pan: -0.03 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.006, frequency: 700, glideTo: 880, duration: 0.05, gain: 0.0048, attack: 0.001, release: 0.03, reverbSend: 0.015, pan: 0.03 },
+    ],
+  },
+  dangerPulse: {
+    output: 0.36,
+    layers: [
+      { kind: 'noise', duration: 0.05, gain: 0.003, attack: 0.001, release: 0.04, filter: { type: 'bandpass', frequency: 1000, sweepTo: 420, q: 1.3 }, reverbSend: 0.02 },
+      { kind: 'oscillator', wave: 'sine', frequency: 146.83, glideTo: 130.81, duration: 0.18, gain: 0.008, attack: 0.002, release: 0.12, filter: { type: 'lowpass', frequency: 620, sweepTo: 240, q: 0.8 }, reverbSend: 0.04 },
+      { kind: 'oscillator', wave: 'triangle', startAt: 0.018, frequency: 293.66, glideTo: 261.63, duration: 0.12, gain: 0.0045, attack: 0.002, release: 0.08, filter: { type: 'bandpass', frequency: 1100, sweepTo: 620, q: 1.4 }, pan: -0.04 },
     ],
   },
   hintStep: {
@@ -290,6 +319,10 @@ const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
+}
+
+function previewRemainingHP(currentHP: number, damage: number) {
+  return Math.max(0, currentHP - damage);
 }
 
 function randomCentered(amount = 0) {
@@ -479,11 +512,17 @@ function createLayerInput(engine: AudioEngine, layer: SoundLayer, startAt: numbe
   return filterNode;
 }
 
-function scheduleOscillatorLayer(engine: AudioEngine, layer: OscillatorLayer, effectOutput: number, baseTime: number) {
+function scheduleOscillatorLayer(
+  engine: AudioEngine,
+  layer: OscillatorLayer,
+  effectOutput: number,
+  baseTime: number,
+  options: SoundPlaybackOptions,
+) {
   const startAt = baseTime + (layer.startAt ?? 0);
   const endAt = startAt + layer.duration;
   const oscillator = engine.context.createOscillator();
-  const detune = (layer.detune ?? 0) + randomCentered(layer.detuneJitter ?? 0);
+  const detune = (layer.detune ?? 0) + randomCentered(layer.detuneJitter ?? 0) + (options.detune ?? 0);
   const inputNode = createLayerInput(engine, layer, startAt, effectOutput);
 
   oscillator.type = layer.wave;
@@ -499,28 +538,34 @@ function scheduleOscillatorLayer(engine: AudioEngine, layer: OscillatorLayer, ef
   oscillator.stop(endAt + 0.05);
 }
 
-function scheduleNoiseLayer(engine: AudioEngine, layer: NoiseLayer, effectOutput: number, baseTime: number) {
+function scheduleNoiseLayer(
+  engine: AudioEngine,
+  layer: NoiseLayer,
+  effectOutput: number,
+  baseTime: number,
+  options: SoundPlaybackOptions,
+) {
   const startAt = baseTime + (layer.startAt ?? 0);
   const noise = engine.context.createBufferSource();
   const inputNode = createLayerInput(engine, layer, startAt, effectOutput);
 
   noise.buffer = engine.noiseBuffer;
-  noise.playbackRate.value = layer.playbackRate ?? 1;
+  noise.playbackRate.value = (layer.playbackRate ?? 1) * (options.noisePlaybackRateMultiplier ?? 1);
   noise.connect(inputNode);
   noise.start(startAt);
   noise.stop(startAt + layer.duration + 0.02);
 }
 
-function playEffect(engine: AudioEngine, effectName: SoundEffectName) {
+function playEffect(engine: AudioEngine, effectName: SoundEffectName, options: SoundPlaybackOptions = {}) {
   const effect = SOUND_EFFECTS[effectName];
   const baseTime = engine.context.currentTime + 0.005;
-  const effectOutput = (effect.output ?? 1) * MASTER_EFFECT_GAIN * LAYER_GAIN_BOOST;
+  const effectOutput = (effect.output ?? 1) * MASTER_EFFECT_GAIN * LAYER_GAIN_BOOST * (options.gainMultiplier ?? 1);
 
   for (const layer of effect.layers) {
     if (layer.kind === 'oscillator') {
-      scheduleOscillatorLayer(engine, layer, effectOutput, baseTime);
+      scheduleOscillatorLayer(engine, layer, effectOutput, baseTime, options);
     } else {
-      scheduleNoiseLayer(engine, layer, effectOutput, baseTime);
+      scheduleNoiseLayer(engine, layer, effectOutput, baseTime, options);
     }
   }
 }
@@ -1340,6 +1385,8 @@ function createEstimationChoices(answer: number) {
 
 export default function App() {
   const audioEngineRef = useRef<AudioEngine | null>(null);
+  const lowHealthPulsePlayedRef = useRef(false);
+  const countdownDangerPlayedRef = useRef(false);
   const isDeveloperShortcutEnabled = import.meta.env.DEV;
   const [gameState, setGameState] = useState<GameState>('start');
   const [playerName, setPlayerName] = useState(DEFAULT_PLAYER_NAME);
@@ -1369,7 +1416,7 @@ export default function App() {
     closeAudioEngine(audioEngineRef.current);
   }, []);
 
-  const playSound = (effectName: SoundEffectName) => {
+  const playSound = (effectName: SoundEffectName, options: SoundPlaybackOptions = {}) => {
     if (
       !audioEngineRef.current ||
       audioEngineRef.current.context.state === 'closed' ||
@@ -1382,7 +1429,7 @@ export default function App() {
     const engine = audioEngineRef.current;
     if (!engine) return;
 
-    const startPlayback = () => playEffect(engine, effectName);
+    const startPlayback = () => playEffect(engine, effectName, options);
 
     if (engine.context.state === 'suspended') {
       void engine.context.resume().then(startPlayback).catch(() => undefined);
@@ -1392,8 +1439,8 @@ export default function App() {
     startPlayback();
   };
 
-  const queueSound = (effectName: SoundEffectName, delayMs: number) => {
-    window.setTimeout(() => playSound(effectName), delayMs);
+  const queueSound = (effectName: SoundEffectName, delayMs: number, options: SoundPlaybackOptions = {}) => {
+    window.setTimeout(() => playSound(effectName, options), delayMs);
   };
 
   const playVisualControlSound = (sound: VisualControlSound) => {
@@ -1406,7 +1453,13 @@ export default function App() {
             ? 'hintResolve'
             : 'hintStep';
 
-    playSound(effectName);
+    playSound(effectName, sound === 'regroup'
+      ? { gainMultiplier: 1.04, detune: 24 }
+      : sound === 'borrow'
+        ? { gainMultiplier: 1.02, detune: -18 }
+        : sound === 'resolve'
+          ? { gainMultiplier: 1.08, detune: 18 }
+          : { gainMultiplier: 1, detune: 8 });
   };
 
   const [startTime, setStartTime] = useState(Date.now());
@@ -1466,15 +1519,41 @@ export default function App() {
 
   useEffect(() => {
     if (isEstimation && timeLeft > 0) {
+      if (timeLeft === 5 && !countdownDangerPlayedRef.current) {
+        countdownDangerPlayedRef.current = true;
+        playSound('dangerPulse', { gainMultiplier: 0.95, detune: -40 });
+      }
+
       if (timeLeft <= 3) {
-        playSound('tick');
+        playSound('tick', {
+          gainMultiplier: 1 + (3 - timeLeft) * 0.18,
+          detune: (3 - timeLeft) * 80,
+          noisePlaybackRateMultiplier: 1 + (3 - timeLeft) * 0.03,
+        });
       }
       const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
       return () => clearTimeout(timer);
     } else if (isEstimation && timeLeft === 0) {
       checkEstimation(0); // Time out
+    } else {
+      countdownDangerPlayedRef.current = false;
     }
   }, [isEstimation, timeLeft]);
+
+  useEffect(() => {
+    const shouldPulseLowHealth = gameState === 'playing' && !isEstimation && playerHP > 0 && playerHP <= 30;
+    setIsCritical(shouldPulseLowHealth || (isEstimation && timeLeft <= 5));
+
+    if (shouldPulseLowHealth && !lowHealthPulsePlayedRef.current) {
+      lowHealthPulsePlayedRef.current = true;
+      playSound('dangerPulse', { gainMultiplier: 1.05, detune: -70 });
+      return;
+    }
+
+    if (!shouldPulseLowHealth) {
+      lowHealthPulsePlayedRef.current = false;
+    }
+  }, [gameState, isEstimation, playerHP, timeLeft]);
 
   const toggleHint = () => {
     playSound('ui');
@@ -1496,6 +1575,7 @@ export default function App() {
   };
 
   const selectEstimationOption = (selected: number) => {
+    playSound('submit', { gainMultiplier: 0.78, detune: 20 });
     playSound('ui');
     checkEstimation(selected);
   };
@@ -1513,7 +1593,10 @@ export default function App() {
       setLevel(nextLevel);
       setOpponentHP(100);
       setProblem(getProblemForTurn(nextLevel, 100));
-      queueSound('levelUp', 180);
+      queueSound('levelUp', 180, {
+        gainMultiplier: 1 + nextLevel * 0.025,
+        detune: Math.min(nextLevel * 10, 90),
+      });
       updateMessage(`다음 상대 ${getOpponentNameForLevel(nextLevel)} 등장!`);
       if (shouldQueueEstimation) {
         queueEstimationChallenge();
@@ -1547,7 +1630,7 @@ export default function App() {
     
     const estimationChoices = createEstimationChoices(answer);
     
-    playSound('alert');
+    playSound('alert', { gainMultiplier: 1.08, detune: 25 });
     setEstimationProblem({
       question,
       options: estimationChoices.options,
@@ -1562,12 +1645,19 @@ export default function App() {
     setIsEstimation(false);
     setEstimationProblem(null);
     if (isCorrectEstimation) {
-      playSound('correct');
+      playSound('correct', {
+        gainMultiplier: 1.04 + level * 0.02,
+        detune: Math.min(level * 8, 60),
+      });
       setIsAttacking(true);
       setTimeout(() => {
         setIsAttacking(false);
         setIsOpponentHit(true);
-        playSound('enemyHit');
+        playSound('enemyHit', {
+          gainMultiplier: 1.1 + level * 0.02,
+          detune: Math.min(level * 10, 80),
+          noisePlaybackRateMultiplier: 1 + level * 0.01,
+        });
         setTimeout(() => setIsOpponentHit(false), HIT_POSE_DURATION_MS);
 
         const newOpponentHP = Math.max(0, opponentHP - 40);
@@ -1579,19 +1669,26 @@ export default function App() {
             scheduleNextLevelTransition(level + 1);
           } else {
             setGameState('win');
-            playSound('win');
+            playSound('win', { gainMultiplier: 1.08, detune: 20 });
           }
         } else {
           setProblem(getProblemForTurn(level, newOpponentHP));
         }
       }, ATTACK_POSE_DURATION_MS);
     } else {
-      playSound('wrong');
+      playSound('wrong', {
+        gainMultiplier: previewRemainingHP(playerHP, 30) <= 30 ? 1.08 : 1,
+        detune: -30,
+      });
       setIsOpponentAttacking(true);
       setTimeout(() => {
         setIsOpponentAttacking(false);
         setIsPlayerHit(true);
-        playSound('playerHit');
+        playSound('playerHit', {
+          gainMultiplier: previewRemainingHP(playerHP, 30) <= 30 ? 1.12 : 1.04,
+          detune: -Math.min(level * 10, 70),
+          noisePlaybackRateMultiplier: 0.98,
+        });
         setTimeout(() => setIsPlayerHit(false), HIT_POSE_DURATION_MS);
 
         const newPlayerHP = Math.max(0, playerHP - 30);
@@ -1600,7 +1697,7 @@ export default function App() {
 
         if (newPlayerHP === 0) {
           setGameState('lose');
-          playSound('lose');
+          playSound('lose', { gainMultiplier: 1.06, detune: -20 });
         }
       }, ATTACK_POSE_DURATION_MS);
     }
@@ -1612,12 +1709,19 @@ export default function App() {
 
   const resolveProblemResult = (isCorrect: boolean) => {
     if (isCorrect) {
-      playSound('correct');
+      playSound('correct', {
+        gainMultiplier: 1 + level * 0.018,
+        detune: Math.min(level * 7, 55),
+      });
       setIsAttacking(true);
       setTimeout(() => {
         setIsAttacking(false);
         setIsOpponentHit(true);
-        playSound('enemyHit');
+        playSound('enemyHit', {
+          gainMultiplier: 1.06 + level * 0.02,
+          detune: Math.min(level * 10, 80),
+          noisePlaybackRateMultiplier: 1 + level * 0.01,
+        });
         setTimeout(() => setIsOpponentHit(false), HIT_POSE_DURATION_MS);
         
         const damage = 25; // Fixed damage
@@ -1630,7 +1734,7 @@ export default function App() {
             scheduleNextLevelTransition(level + 1, canOfferEstimation(100) && Math.random() < 0.15);
           } else {
             setGameState('win');
-            playSound('win');
+            playSound('win', { gainMultiplier: 1.08, detune: 18 });
           }
         } else {
           setProblem(getProblemForTurn(level, newOpponentHP));
@@ -1640,12 +1744,19 @@ export default function App() {
         }
       }, ATTACK_POSE_DURATION_MS);
     } else {
-      playSound('wrong');
+      playSound('wrong', {
+        gainMultiplier: previewRemainingHP(playerHP, 15) <= 30 ? 1.06 : 1,
+        detune: -24,
+      });
       setIsOpponentAttacking(true);
       setTimeout(() => {
         setIsOpponentAttacking(false);
         setIsPlayerHit(true);
-        playSound('playerHit');
+        playSound('playerHit', {
+          gainMultiplier: previewRemainingHP(playerHP, 15) <= 30 ? 1.1 : 1.03,
+          detune: -Math.min(level * 10, 70),
+          noisePlaybackRateMultiplier: 0.98,
+        });
         setTimeout(() => setIsPlayerHit(false), HIT_POSE_DURATION_MS);
         
         const newPlayerHP = Math.max(0, playerHP - 15);
@@ -1653,7 +1764,7 @@ export default function App() {
         updateMessage('앗! 공격이 빗나갔다! 상대의 반격!');
         if (newPlayerHP === 0) {
           setGameState('lose');
-          playSound('lose');
+          playSound('lose', { gainMultiplier: 1.06, detune: -18 });
         }
       }, ATTACK_POSE_DURATION_MS);
     }
@@ -1673,6 +1784,10 @@ export default function App() {
       isCorrect = parseInt(inputValue, 10) === builderEvaluation.answer;
     }
 
+    playSound('submit', {
+      gainMultiplier: problem.kind === 'builder' ? 0.82 : 0.9,
+      detune: problem.kind === 'builder' ? -10 : 10,
+    });
     resolveProblemResult(isCorrect);
   };
 
@@ -1710,7 +1825,7 @@ export default function App() {
   }, [isDeveloperShortcutEnabled]);
 
   const startGame = () => {
-    playSound('start');
+    playSound('start', { gainMultiplier: 1.04, detune: 12 });
     setGameState('playing');
     setIsAttacking(false);
     setIsOpponentAttacking(false);
