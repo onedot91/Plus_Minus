@@ -666,6 +666,10 @@ function getOpponentNameForLevel(level: number) {
   return LEVEL_OPPONENT_NAMES[level] ?? LEVEL_OPPONENT_NAMES[LEVEL_OPPONENT_NAMES.length - 1];
 }
 
+function getOpponentEntranceMessage(level: number) {
+  return `상대 ${getOpponentNameForLevel(level)} 등장!`;
+}
+
 function digitRange(min: number, max: number) {
   return Array.from({ length: max - min + 1 }, (_, index) => String(min + index));
 }
@@ -720,39 +724,39 @@ const STORY_TEMPLATE_POOLS: Record<number, StoryTemplatePool> = {
   9: {
     '+': [
       (a, b) =>
-        `재활용 캠페인에서 월요일에는 종이 ${a}장을, 화요일에는 ${b}장을 모았습니다.\n이틀 동안 모두 몇 장을 모았는지 구해 봅시다.`,
+        `재활용 캠페인에서 월요일에는 종이 ${a}장을, 화요일에는 ${b}장을 모았습니다. 모은 종이의 수를 활동 기록표에 적어 넣으려고 합니다.\n이틀 동안 모두 몇 장을 모았는지 구해 봅시다.`,
       (a, b) =>
-        `학교 박람회 체험 부스에 오전에는 ${a}명, 오후에는 ${b}명이 참여했습니다.\n하루 동안 참여한 학생은 모두 몇 명인지 구해 봅시다.`,
+        `학교 박람회 체험 부스에 오전에는 ${a}명, 오후에는 ${b}명이 참여했습니다. 진행 도우미가 하루 참여 인원을 정리해 보려고 합니다.\n하루 동안 참여한 학생은 모두 몇 명인지 구해 봅시다.`,
       (a, b) =>
-        `교내 바자회 쿠폰을 쉬는 시간마다 나누어 주었더니 1교시에 ${a}장, 2교시에 ${b}장을 사용했습니다.\n사용한 쿠폰은 모두 몇 장인지 구해 봅시다.`,
+        `교내 바자회 쿠폰을 쉬는 시간마다 나누어 주었더니 1교시에 ${a}장, 2교시에 ${b}장을 사용했습니다. 학생회에서 지금까지 사용한 쿠폰 수를 알아보려 합니다.\n사용한 쿠폰은 모두 몇 장인지 구해 봅시다.`,
       (a, b) =>
-        `별자리 관찰 행사에서 1조가 별 스티커를 ${a}장, 2조가 ${b}장 모았습니다.\n두 조가 모은 스티커는 모두 몇 장인지 구해 봅시다.`,
+        `별자리 관찰 행사에서 1조가 별 스티커를 ${a}장, 2조가 ${b}장 모았습니다. 행사 마무리 시간에 두 조의 결과를 함께 발표하려고 합니다.\n두 조가 모은 스티커는 모두 몇 장인지 구해 봅시다.`,
       (a, b) =>
-        `수영장 입장 기록을 보니 오전반은 ${a}명, 오후반은 ${b}명이었습니다.\n이날 수영장을 이용한 학생은 모두 몇 명인지 구해 봅시다.`,
+        `수영장 입장 기록을 보니 오전반은 ${a}명, 오후반은 ${b}명이었습니다. 체육 선생님이 하루 전체 이용 인원을 확인하려고 합니다.\n이날 수영장을 이용한 학생은 모두 몇 명인지 구해 봅시다.`,
       (a, b) =>
-        `학교 축제 초대장을 3학년은 ${a}장, 4학년은 ${b}장 완성했습니다.\n완성한 초대장은 모두 몇 장인지 구해 봅시다.`,
+        `학교 축제 초대장을 3학년은 ${a}장, 4학년은 ${b}장 완성했습니다. 축제 준비를 맡은 선생님이 완성된 초대장 수를 세어 보려고 합니다.\n완성한 초대장은 모두 몇 장인지 구해 봅시다.`,
       (a, b) =>
-        `환경 동아리에서 페트병 뚜껑을 지난주에 ${a}개, 이번 주에 ${b}개 더 모았습니다.\n지금까지 모두 몇 개를 모았는지 구해 봅시다.`,
+        `환경 동아리에서 페트병 뚜껑을 지난주에 ${a}개, 이번 주에 ${b}개 더 모았습니다. 모은 양을 벽보에 적기 전에 전체 수를 확인하려고 합니다.\n지금까지 모두 몇 개를 모았는지 구해 봅시다.`,
       (a, b) =>
-        `교실 뒤 게시판에 작품 사진을 첫째 줄에 ${a}장, 둘째 줄에 ${b}장 붙였습니다.\n게시판에 붙인 사진은 모두 몇 장인지 구해 봅시다.`,
+        `교실 뒤 게시판에 작품 사진을 첫째 줄에 ${a}장, 둘째 줄에 ${b}장 붙였습니다. 게시판에 전시된 사진 수를 안내문에 적으려고 합니다.\n게시판에 붙인 사진은 모두 몇 장인지 구해 봅시다.`,
     ],
     '-': [
       (a, b) =>
-        `현장체험학습 간식 꾸러미를 ${a}개 준비했는데, 출발 전에 ${b}개를 나누어 주었습니다.\n남은 간식 꾸러미는 몇 개인지 구해 봅시다.`,
+        `현장체험학습 간식 꾸러미를 ${a}개 준비했는데, 출발 전에 ${b}개를 나누어 주었습니다. 아직 버스에 싣지 않은 꾸러미 수를 알아보려 합니다.\n남은 간식 꾸러미는 몇 개인지 구해 봅시다.`,
       (a, b) =>
-        `온라인 퀴즈에 ${a}명이 참여했고, 그중 ${b}명이 이미 답을 제출했습니다.\n아직 제출하지 않은 사람은 몇 명인지 구해 봅시다.`,
+        `온라인 퀴즈에 ${a}명이 참여했고, 그중 ${b}명이 이미 답을 제출했습니다. 담임 선생님이 아직 기다려야 하는 학생 수를 확인하려고 합니다.\n아직 제출하지 않은 사람은 몇 명인지 구해 봅시다.`,
       (a, b) =>
-        `미술 전시회 입장권이 ${a}장 있었는데, 오전에 ${b}장이 사용되었습니다.\n남아 있는 입장권은 몇 장인지 구해 봅시다.`,
+        `미술 전시회 입장권이 ${a}장 있었는데, 오전에 ${b}장이 사용되었습니다. 오후 관람을 위해 남은 입장권 수를 세어 보려고 합니다.\n남아 있는 입장권은 몇 장인지 구해 봅시다.`,
       (a, b) =>
-        `학교 방송을 들은 학생이 이번 주에는 ${a}명, 지난주에는 ${b}명이었습니다.\n이번 주에 더 많이 들은 학생은 몇 명인지 구해 봅시다.`,
+        `학교 방송을 들은 학생이 이번 주에는 ${a}명, 지난주에는 ${b}명이었습니다. 방송부에서 지난주와 비교한 차이를 알아보려 합니다.\n이번 주에 더 많이 들은 학생은 몇 명인지 구해 봅시다.`,
       (a, b) =>
-        `달리기 기록표를 ${a}장 준비했는데, 그중 ${b}장을 먼저 배부했습니다.\n기록표는 몇 장 남았는지 구해 봅시다.`,
+        `달리기 기록표를 ${a}장 준비했는데, 그중 ${b}장을 먼저 배부했습니다. 이어서 사용할 수 있도록 남은 기록표 수를 알아보려 합니다.\n기록표는 몇 장 남았는지 구해 봅시다.`,
       (a, b) =>
-        `과학관 체험 신청자는 ${a}명이었는데, 그중 ${b}명이 먼저 입장했습니다.\n아직 기다리는 학생은 몇 명인지 구해 봅시다.`,
+        `과학관 체험 신청자는 ${a}명이었는데, 그중 ${b}명이 먼저 입장했습니다. 줄을 서서 기다리는 학생이 몇 명인지 확인하려고 합니다.\n아직 기다리는 학생은 몇 명인지 구해 봅시다.`,
       (a, b) =>
-        `학급 회의 자료를 ${a}부 인쇄했는데, 발표 모둠에 ${b}부를 나누어 주었습니다.\n책상 위에 남은 자료는 몇 부인지 구해 봅시다.`,
+        `학급 회의 자료를 ${a}부 인쇄했는데, 발표 모둠에 ${b}부를 나누어 주었습니다. 교실 책상 위에 남아 있는 자료 수를 알아보려 합니다.\n책상 위에 남은 자료는 몇 부인지 구해 봅시다.`,
       (a, b) =>
-        `우산 꽂이에 우산이 ${a}개 있었는데, 비가 그친 뒤 ${b}개가 먼저 가져가졌습니다.\n남아 있는 우산은 몇 개인지 구해 봅시다.`,
+        `우산 꽂이에 우산이 ${a}개 있었는데, 비가 그친 뒤 ${b}개가 먼저 가져가졌습니다. 우산 꽂이에 아직 남은 우산 수를 확인하려고 합니다.\n남아 있는 우산은 몇 개인지 구해 봅시다.`,
     ],
   },
 };
@@ -1282,7 +1286,11 @@ function shuffleNumbers(values: number[]) {
   return next;
 }
 
-function renderPromptWithHighlight(text: string) {
+function renderPromptWithHighlight(text: string, shouldHighlight = true) {
+  if (!shouldHighlight) {
+    return text;
+  }
+
   return text.split(/(\d+)/).map((part, index) =>
     /^\d+$/.test(part) ? (
       <span key={`${part}-${index}`} className="font-black text-sky-600">
@@ -1405,7 +1413,7 @@ export default function App() {
   const [builderSlotValues, setBuilderSlotValues] = useState<Record<string, string>>({});
   const [playerHP, setPlayerHP] = useState(100);
   const [opponentHP, setOpponentHP] = useState(100);
-  const [message, setMessage] = useState(() => `상대 ${getOpponentNameForLevel(1)} 등장!`);
+  const [message, setMessage] = useState(() => getOpponentEntranceMessage(1));
   const [showMsg, setShowMsg] = useState(true);
 
   const updateMessage = (msg: string) => {
@@ -1418,6 +1426,17 @@ export default function App() {
     const timer = setTimeout(() => setShowMsg(false), 2000);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    if (!message.endsWith('등장!')) {
+      return;
+    }
+
+    const nextEntranceMessage = getOpponentEntranceMessage(level);
+    if (message !== nextEntranceMessage) {
+      setMessage(nextEntranceMessage);
+    }
+  }, [level, message]);
 
   useEffect(() => () => {
     closeAudioEngine(audioEngineRef.current);
@@ -1604,7 +1623,7 @@ export default function App() {
         gainMultiplier: 1 + nextLevel * 0.025,
         detune: Math.min(nextLevel * 10, 90),
       });
-      updateMessage(`다음 상대 ${getOpponentNameForLevel(nextLevel)} 등장!`);
+      updateMessage(getOpponentEntranceMessage(nextLevel));
       if (shouldQueueEstimation) {
         queueEstimationChallenge();
       }
@@ -1843,7 +1862,7 @@ export default function App() {
     setOpponentHP(100);
     setProblem(getProblemForTurn(1, 100));
     setInputValue('');
-    updateMessage(`상대 ${getOpponentNameForLevel(1)} 등장!`);
+    updateMessage(getOpponentEntranceMessage(1));
   };
 
   const openNamePrompt = () => {
@@ -2142,7 +2161,7 @@ export default function App() {
                                 : 'text-[1.75rem] font-bold leading-[1.72] text-slate-700 md:text-[2rem]'
                             }`}
                           >
-                            {renderPromptWithHighlight(line)}
+                            {renderPromptWithHighlight(line, level !== 9)}
                           </p>
                         </div>
                       );
