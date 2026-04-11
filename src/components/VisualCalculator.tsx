@@ -103,6 +103,7 @@ const PLACE_META: Record<
   {
     label: string;
     fullLabel: string;
+    modelLabel: string;
     lessonHint: string;
     cardBase: string;
     cardActive: string;
@@ -119,7 +120,8 @@ const PLACE_META: Record<
   th: {
     label: '천',
     fullLabel: '천의 자리',
-    lessonHint: '큰 입체 블록 1개는 1000을 뜻해요.',
+    modelLabel: '천 모형',
+    lessonHint: '큰 입체 천 모형 1개는 1000을 뜻해요.',
     cardBase:
       'border-violet-500/25 bg-[linear-gradient(180deg,rgba(76,29,149,0.36),rgba(15,23,42,0.9))]',
     cardActive: 'ring-2 ring-violet-300/65 shadow-[0_0_24px_rgba(167,139,250,0.2)]',
@@ -141,7 +143,8 @@ const PLACE_META: Record<
   h: {
     label: '백',
     fullLabel: '백의 자리',
-    lessonHint: '큰 정사각형 1개는 100을 뜻해요.',
+    modelLabel: '백 모형',
+    lessonHint: '큰 정사각형 백 모형 1개는 100을 뜻해요.',
     cardBase:
       'border-sky-500/25 bg-[linear-gradient(180deg,rgba(8,47,73,0.42),rgba(15,23,42,0.9))]',
     cardActive: 'ring-2 ring-sky-300/65 shadow-[0_0_24px_rgba(56,189,248,0.18)]',
@@ -163,7 +166,8 @@ const PLACE_META: Record<
   t: {
     label: '십',
     fullLabel: '십의 자리',
-    lessonHint: '긴 막대 1개는 10을 뜻해요.',
+    modelLabel: '십 모형',
+    lessonHint: '긴 막대 십 모형 1개는 10을 뜻해요.',
     cardBase:
       'border-emerald-500/25 bg-[linear-gradient(180deg,rgba(6,78,59,0.36),rgba(15,23,42,0.9))]',
     cardActive: 'ring-2 ring-emerald-300/65 shadow-[0_0_24px_rgba(52,211,153,0.18)]',
@@ -185,7 +189,8 @@ const PLACE_META: Record<
   o: {
     label: '일',
     fullLabel: '일의 자리',
-    lessonHint: '작은 큐브 1개는 1을 뜻해요.',
+    modelLabel: '일 모형',
+    lessonHint: '작은 큐브 일 모형 1개는 1을 뜻해요.',
     cardBase:
       'border-amber-500/25 bg-[linear-gradient(180deg,rgba(120,53,15,0.28),rgba(15,23,42,0.9))]',
     cardActive: 'ring-2 ring-amber-300/65 shadow-[0_0_24px_rgba(251,191,36,0.2)]',
@@ -355,8 +360,12 @@ function getPlaceValue(step: VisualStep, place: PlaceKey, group: 'first' | 'seco
   return place === 'h' ? step.hr : place === 't' ? step.tr : step.or;
 }
 
+function getPlaceModelLabel(place: DisplayPlaceKey) {
+  return PLACE_META[place].modelLabel;
+}
+
 function getPlaceCountText(place: PlaceKey, count: number) {
-  return `${PLACE_META[place].label} ${count}개`;
+  return `${getPlaceModelLabel(place)} ${count}개`;
 }
 
 function getFocusedPlace(step: VisualStep) {
@@ -394,7 +403,46 @@ function hasVisibleBlocksInStep(step: VisualStep, op: '+' | '-') {
 }
 
 function pruneEmptyVisualSteps(steps: VisualStep[], op: '+' | '-') {
-  return steps.filter((step) => hasVisibleBlocksInStep(step, op));
+  return steps.reduce<VisualStep[]>((pruned, step) => {
+    if (!hasVisibleBlocksInStep(step, op)) return pruned;
+
+    const previousStep = pruned.at(-1);
+
+    if (
+      op === '+' &&
+      previousStep &&
+      previousStep.phase === 'group' &&
+      step.phase === 'group' &&
+      previousStep.focus === step.focus &&
+      previousStep.focus !== 'all' &&
+      previousStep.focus !== 'none' &&
+      previousStep.focus !== 'th'
+    ) {
+      const previousPlace = previousStep.focus;
+      const previousFirst = clampCount(getPlaceValue(previousStep, previousPlace, 'first'));
+      const previousPartner =
+        clampCount(getPlaceValue(previousStep, previousPlace, 'second')) +
+        getCarryIntoPlace(previousStep, previousPlace);
+      const currentFirst = clampCount(getPlaceValue(step, previousPlace, 'first'));
+      const currentPartner =
+        clampCount(getPlaceValue(step, previousPlace, 'second')) +
+        getCarryIntoPlace(step, previousPlace);
+      const currentResult = clampCount(getPlaceValue(step, previousPlace, 'result') ?? 0);
+
+      if (
+        previousFirst > 0 &&
+        previousPartner === 0 &&
+        currentFirst === 0 &&
+        currentPartner === 0 &&
+        currentResult === previousFirst
+      ) {
+        return pruned;
+      }
+    }
+
+    pruned.push(step);
+    return pruned;
+  }, []);
 }
 
 function pushStep(
@@ -458,7 +506,7 @@ function genAdd(n1: number, n2: number) {
   });
 
   pushStep(steps, state, {
-    title: '일의 자리 블록을 먼저 살펴봅니다.',
+    title: '일 모형을 먼저 살펴봅니다.',
     detail: `${getPlaceCountText('o', state.o1)}와 ${getPlaceCountText('o', state.o2)}를 모아 봅니다.`,
     focus: 'o',
     phase: 'group',
@@ -470,8 +518,8 @@ function genAdd(n1: number, n2: number) {
   state.or = sumO;
 
   pushStep(steps, state, {
-    title: '일의 자리 블록을 한곳에 모읍니다.',
-    detail: `일의 자리에는 모두 ${sumO}개가 모였습니다.`,
+    title: '일 모형을 한곳에 모읍니다.',
+    detail: `일의 자리에는 모두 ${sumO}개의 일 모형이 모였습니다.`,
     focus: 'o',
     phase: 'group',
   });
@@ -499,14 +547,14 @@ function genAdd(n1: number, n2: number) {
   }
 
   pushStep(steps, state, {
-    title: '일의 자리에 남은 블록을 놓습니다.',
+    title: '일의 자리에 남은 일 모형을 놓습니다.',
     detail: `일의 자리 결과는 ${state.or ?? 0}입니다.`,
     focus: 'o',
     phase: 'place-complete',
   });
 
   pushStep(steps, state, {
-    title: '십의 자리 블록을 살펴봅니다.',
+    title: '십 모형을 살펴봅니다.',
     detail: `${getPlaceCountText('t', state.t1)}와 ${getPlaceCountText('t', state.t2)}에 받아올림을 더해 봅니다.`,
     focus: 't',
     phase: 'group',
@@ -519,8 +567,8 @@ function genAdd(n1: number, n2: number) {
   state.tr = sumT;
 
   pushStep(steps, state, {
-    title: '십의 자리 블록을 한곳에 모읍니다.',
-    detail: `십의 자리에는 모두 ${sumT}개가 모였습니다.`,
+    title: '십 모형을 한곳에 모읍니다.',
+    detail: `십의 자리에는 모두 ${sumT}개의 십 모형이 모였습니다.`,
     focus: 't',
     phase: 'group',
   });
@@ -548,14 +596,14 @@ function genAdd(n1: number, n2: number) {
   }
 
   pushStep(steps, state, {
-    title: '십의 자리에 남은 블록을 놓습니다.',
+    title: '십의 자리에 남은 십 모형을 놓습니다.',
     detail: `십의 자리 결과는 ${state.tr ?? 0}입니다.`,
     focus: 't',
     phase: 'place-complete',
   });
 
   pushStep(steps, state, {
-    title: '백의 자리 블록을 살펴봅니다.',
+    title: '백 모형을 살펴봅니다.',
     detail: `${getPlaceCountText('h', state.h1)}와 ${getPlaceCountText('h', state.h2)}에 받아올림을 더해 봅니다.`,
     focus: 'h',
     phase: 'group',
@@ -568,8 +616,8 @@ function genAdd(n1: number, n2: number) {
   state.hr = sumH;
 
   pushStep(steps, state, {
-    title: '백의 자리 블록을 한곳에 모읍니다.',
-    detail: `백의 자리에는 모두 ${sumH}개가 모였습니다.`,
+    title: '백 모형을 한곳에 모읍니다.',
+    detail: `백의 자리에는 모두 ${sumH}개의 백 모형이 모였습니다.`,
     focus: 'h',
     phase: 'group',
   });
@@ -594,7 +642,7 @@ function genAdd(n1: number, n2: number) {
   }
 
   pushStep(steps, state, {
-    title: '백의 자리에 남은 블록을 놓습니다.',
+    title: '백의 자리에 남은 백 모형을 놓습니다.',
     detail: `백의 자리 결과는 ${state.hr ?? 0}입니다.`,
     focus: 'h',
     phase: 'place-complete',
@@ -602,7 +650,7 @@ function genAdd(n1: number, n2: number) {
 
   if (sumH >= 10) {
     pushStep(steps, state, {
-      title: '천의 자리에 놓인 블록을 결과 칸에 정리합니다.',
+      title: '천의 자리에 놓인 천 모형을 결과 칸에 정리합니다.',
       detail: `천의 자리 결과는 ${state.thousands}입니다.`,
       focus: 'th',
       phase: 'place-complete',
@@ -611,7 +659,7 @@ function genAdd(n1: number, n2: number) {
 
   pushStep(steps, state, {
     title: '모든 자리 계산이 끝났습니다.',
-    detail: '이제 결과 자리의 블록을 읽으면 최종 답을 알 수 있습니다.',
+    detail: '이제 결과 자리의 모형을 읽으면 최종 답을 알 수 있습니다.',
     focus: 'all',
     phase: 'complete',
   });
@@ -690,7 +738,7 @@ function genSub(n1: number, n2: number) {
   state.removeO = state.o2;
 
   pushStep(steps, state, {
-    title: '일의 자리에서 뺄 블록을 고릅니다.',
+    title: '일의 자리에서 뺄 일 모형을 고릅니다.',
     detail: `${state.o2}개를 골라서 빼 봅니다.`,
     focus: 'o',
     phase: 'remove',
@@ -701,7 +749,7 @@ function genSub(n1: number, n2: number) {
   state.or = state.o1;
 
   pushStep(steps, state, {
-    title: '일의 자리에 남은 블록을 놓습니다.',
+    title: '일의 자리에 남은 일 모형을 놓습니다.',
     detail: `${state.o2}개를 빼고 ${state.or}개가 남았습니다.`,
     focus: 'o',
     phase: 'place-complete',
@@ -743,7 +791,7 @@ function genSub(n1: number, n2: number) {
   state.removeT = state.t2;
 
   pushStep(steps, state, {
-    title: '십의 자리에서 뺄 블록을 고릅니다.',
+    title: '십의 자리에서 뺄 십 모형을 고릅니다.',
     detail: `${state.t2}개를 골라서 빼 봅니다.`,
     focus: 't',
     phase: 'remove',
@@ -754,7 +802,7 @@ function genSub(n1: number, n2: number) {
   state.tr = state.t1;
 
   pushStep(steps, state, {
-    title: '십의 자리에 남은 블록을 놓습니다.',
+    title: '십의 자리에 남은 십 모형을 놓습니다.',
     detail: `${state.t2}개를 빼고 ${state.tr}개가 남았습니다.`,
     focus: 't',
     phase: 'place-complete',
@@ -770,7 +818,7 @@ function genSub(n1: number, n2: number) {
   state.removeH = state.h2;
 
   pushStep(steps, state, {
-    title: '백의 자리에서 뺄 블록을 고릅니다.',
+    title: '백의 자리에서 뺄 백 모형을 고릅니다.',
     detail: `${state.h2}개를 골라서 빼 봅니다.`,
     focus: 'h',
     phase: 'remove',
@@ -781,7 +829,7 @@ function genSub(n1: number, n2: number) {
   state.hr = state.h1;
 
   pushStep(steps, state, {
-    title: '백의 자리에 남은 블록을 놓습니다.',
+    title: '백의 자리에 남은 백 모형을 놓습니다.',
     detail: `${state.h2}개를 빼고 ${state.hr}개가 남았습니다.`,
     focus: 'h',
     phase: 'place-complete',
@@ -789,7 +837,7 @@ function genSub(n1: number, n2: number) {
 
   pushStep(steps, state, {
     title: '모든 자리 계산이 끝났습니다.',
-    detail: '남아 있는 블록을 읽으면 최종 답을 알 수 있습니다.',
+    detail: '남아 있는 모형을 읽으면 최종 답을 알 수 있습니다.',
     focus: 'all',
     phase: 'complete',
   });
@@ -999,6 +1047,7 @@ function ActionPreview({
 
 function getPlaceAction(step: VisualStep, place: PlaceKey, op: '+' | '-'): ActionCardData {
   const fullLabel = PLACE_META[place].fullLabel;
+  const modelLabel = PLACE_META[place].modelLabel;
   const resultCount = getPlaceValue(step, place, 'result');
   const removeCount = getPlaceValue(step, place, 'remove');
   const sourceCount = getPlaceValue(step, place, 'first');
@@ -1009,7 +1058,7 @@ function getPlaceAction(step: VisualStep, place: PlaceKey, op: '+' | '-'): Actio
       return {
         badge: '10개 묶기',
         title: '일의 자리 10개를 십 1개로 바꿉니다.',
-        detail: '일의 자리 블록 10개를 묶어 십의 자리 블록 1개로 올립니다.',
+        detail: '일 모형 10개를 묶어 십 모형 1개로 올립니다.',
         tone: 'warning',
         from: { place: 'o', count: 10 },
         to: { place: 't', count: step.tc },
@@ -1020,7 +1069,7 @@ function getPlaceAction(step: VisualStep, place: PlaceKey, op: '+' | '-'): Actio
       return {
         badge: '받아올림',
         title: '일의 자리에서 올라온 십 1개가 도착했습니다.',
-        detail: '받아올림은 일의 자리 블록이 십의 자리로 이동한 것입니다.',
+        detail: '받아올림은 일 모형이 십의 자리로 이동한 것입니다.',
         tone: 'success',
         preview: { place: 't', count: step.tc, tone: 'result' },
       };
@@ -1030,7 +1079,7 @@ function getPlaceAction(step: VisualStep, place: PlaceKey, op: '+' | '-'): Actio
       return {
         badge: '10개 묶기',
         title: '십의 자리 10개를 백 1개로 바꿉니다.',
-        detail: '십의 자리 블록 10개를 묶어 백의 자리 블록 1개로 올립니다.',
+        detail: '십 모형 10개를 묶어 백 모형 1개로 올립니다.',
         tone: 'warning',
         from: { place: 't', count: 10 },
         to: { place: 'h', count: step.hc },
@@ -1041,7 +1090,7 @@ function getPlaceAction(step: VisualStep, place: PlaceKey, op: '+' | '-'): Actio
       return {
         badge: '받아올림',
         title: '십의 자리에서 올라온 백 1개가 도착했습니다.',
-        detail: '받아올림은 십의 자리 블록이 백의 자리로 이동한 것입니다.',
+        detail: '받아올림은 십 모형이 백의 자리로 이동한 것입니다.',
         tone: 'success',
         preview: { place: 'h', count: step.hc, tone: 'result' },
       };
@@ -1061,8 +1110,8 @@ function getPlaceAction(step: VisualStep, place: PlaceKey, op: '+' | '-'): Actio
     if (step.focus === place && step.phase === 'group') {
       return {
         badge: '모으기',
-        title: `${fullLabel} 블록을 한곳에 모읍니다.`,
-        detail: `${sourceCount}개와 ${partnerCount}개를 같은 자리에서 함께 봅니다.`,
+        title: `${modelLabel}을 한곳에 모읍니다.`,
+        detail: `${sourceCount}개의 ${modelLabel}과 ${partnerCount}개의 ${modelLabel}을 같은 자리에서 함께 봅니다.`,
         tone: 'focus',
         preview: { place, count: Math.max(1, sourceCount + partnerCount), tone: 'accent' },
       };
@@ -1072,7 +1121,7 @@ function getPlaceAction(step: VisualStep, place: PlaceKey, op: '+' | '-'): Actio
       return {
         badge: '결과 놓기',
         title: `${fullLabel} 결과를 정리합니다.`,
-        detail: `남은 블록 ${resultCount ?? 0}개를 결과 칸에 놓습니다.`,
+        detail: `남은 ${modelLabel} ${resultCount ?? 0}개를 결과 칸에 놓습니다.`,
         tone: 'success',
         preview: { place, count: Math.max(0, resultCount ?? 0), tone: 'result' },
       };
@@ -1082,7 +1131,7 @@ function getPlaceAction(step: VisualStep, place: PlaceKey, op: '+' | '-'): Actio
       return {
         badge: '풀기 준비',
         title: '십 1개를 풀어서 일의 자리로 보낼 준비를 합니다.',
-        detail: '일의 자리가 부족할 때는 윗자리 블록 1개를 가져와 풉니다.',
+        detail: '일의 자리가 부족할 때는 윗자리 모형 1개를 가져와 풉니다.',
         tone: 'danger',
         preview: { place: 't', count: 1, tone: 'accent' },
       };
@@ -1124,7 +1173,7 @@ function getPlaceAction(step: VisualStep, place: PlaceKey, op: '+' | '-'): Actio
       return {
         badge: '빼기',
         title: `${removeCount}개를 골라서 뺍니다.`,
-        detail: '뺄 블록을 먼저 눈으로 확인한 뒤, 빠지고 남는 수를 봅니다.',
+        detail: `뺄 ${modelLabel}을 먼저 눈으로 확인한 뒤, 빠지고 남는 수를 봅니다.`,
         tone: 'danger',
         preview: { place, count: Math.max(0, removeCount), tone: 'remove' },
       };
@@ -1134,7 +1183,7 @@ function getPlaceAction(step: VisualStep, place: PlaceKey, op: '+' | '-'): Actio
       return {
         badge: '남은 수',
         title: `${fullLabel}에 ${resultCount ?? 0}개가 남았습니다.`,
-        detail: '제거된 블록을 빼고 남은 양이 결과가 됩니다.',
+        detail: `제거된 ${modelLabel}을 빼고 남은 양이 결과가 됩니다.`,
         tone: 'success',
         preview: { place, count: Math.max(0, resultCount ?? 0), tone: 'result' },
       };
@@ -1154,7 +1203,7 @@ function getPlaceAction(step: VisualStep, place: PlaceKey, op: '+' | '-'): Actio
   if (step.phase === 'complete') {
     return {
       badge: '읽기',
-      title: '결과 칸의 블록을 읽어 답을 말합니다.',
+      title: '결과 칸의 모형을 읽어 답을 말합니다.',
       detail: '백, 십, 일을 차례대로 읽으면 숫자가 됩니다.',
       tone: 'success',
       preview: { place, count: Math.max(0, resultCount ?? 0), tone: 'result' },
@@ -1185,8 +1234,8 @@ function PlaceCard({
   const partnerCount = getPlaceValue(step, place, 'second');
   const resultCount = getPlaceValue(step, place, 'result');
   const action = getPlaceAction(step, place, op);
-  const currentHint = op === '+' ? '첫 번째 수의 블록' : '지금 남아 있는 블록';
-  const partnerHint = op === '+' ? '더해질 블록' : '빼야 할 블록';
+  const currentHint = op === '+' ? '첫 번째 수의 모형' : '지금 남아 있는 모형';
+  const partnerHint = op === '+' ? '더해질 모형' : '빼야 할 모형';
 
   return (
     <motion.section
@@ -1238,7 +1287,7 @@ function PlaceCard({
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
             <p className="text-[11px] font-black tracking-[0.24em] text-slate-200">결과 자리</p>
-            <p className="text-[11px] text-slate-400">계산 후 남는 블록을 모아 둡니다.</p>
+            <p className="text-[11px] text-slate-400">계산 후 남는 {meta.modelLabel}을 모아 둡니다.</p>
           </div>
           <div className={`rounded-full border px-2.5 py-1 text-[11px] font-black ${meta.actionBg}`}>
             {resultCount ?? 0}개
@@ -1662,9 +1711,9 @@ function getSimpleStepMessage(step: VisualStep, op: '+' | '-', previousStep?: Vi
   if (step.phase === 'intro') return '계산을 시작합니다.';
   if (step.phase === 'group' && step.focus !== 'all' && step.focus !== 'none') {
     if (previousStep?.phase === 'group' && previousStep.focus === step.focus) {
-      return op === '+' ? '블록을 모읍니다.' : '블록을 확인합니다.';
+      return op === '+' ? `${PLACE_META[step.focus].modelLabel}을 모읍니다.` : `${PLACE_META[step.focus].modelLabel}을 확인합니다.`;
     }
-    return `${PLACE_META[step.focus].fullLabel}를 봅니다.`;
+    return `${PLACE_META[step.focus].modelLabel}을 봅니다.`;
   }
   if (step.phase === 'regroup-source') {
     if (step.focus === 'o') return '일의 자리 10개를 묶어 십의 자리로 올릴 준비를 합니다.';
@@ -1683,7 +1732,9 @@ function getSimpleStepMessage(step: VisualStep, op: '+' | '-', previousStep?: Vi
     if (step.focus === 't' && step.borrowHPos === 't') return '가져온 백 1개를 십의 자리 10개로 풉니다.';
     return '1개를 10개로 풉니다.';
   }
-  if (step.phase === 'remove') return '블록을 뺍니다.';
+  if (step.phase === 'remove' && step.focus !== 'all' && step.focus !== 'none' && step.focus !== 'th') {
+    return `${PLACE_META[step.focus].modelLabel}을 뺍니다.`;
+  }
   if (step.phase === 'place-complete') {
     if (step.focus === 'th') return '천의 자리에 결과를 놓습니다.';
     return '결과를 놓습니다.';
