@@ -2098,7 +2098,7 @@ export default function App() {
                 >
                   <div className="max-w-2xl">
                     <p className="text-3xl font-black">빈칸에 숫자를 먼저 넣어 주세요.</p>
-                    <p className="mt-3 text-lg font-bold leading-8 text-slate-600">문제를 완성하면 단계별 힌트와 블록 계산 화면을 바로 볼 수 있어요.</p>
+                    <p className="mt-3 text-lg font-bold leading-8 text-slate-600">문제를 완성하면 단계별 힌트와 모형 계산 화면을 바로 볼 수 있어요.</p>
                   </div>
                 </motion.div>
               )
