@@ -128,7 +128,7 @@ const PLACE_META: Record<
     },
     emptyTone: 'border-sky-200/12 bg-sky-950/18 text-sky-100/30',
     blockShape: 'h-5 w-5 rounded-md md:h-6 md:w-6',
-    gridClass: 'grid-cols-4',
+    gridClass: 'grid-cols-5',
   },
   t: {
     label: '십',
@@ -148,7 +148,7 @@ const PLACE_META: Record<
     },
     emptyTone: 'border-emerald-200/12 bg-emerald-950/18 text-emerald-100/30',
     blockShape: 'h-8 w-[10px] rounded-full md:h-9 md:w-3',
-    gridClass: 'grid-cols-6',
+    gridClass: 'grid-cols-5',
   },
   o: {
     label: '일',
