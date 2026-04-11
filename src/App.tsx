@@ -293,7 +293,7 @@ function createNoiseBuffer(context: AudioContext, duration = 1.5) {
   return buffer;
 }
 
-function createImpulseResponse(context: AudioContext, duration = 1.8, decay = 2.6) {
+function createImpulseResponse(context: AudioContext, duration = 1.4, decay = 2.2) {
   const frameCount = Math.floor(context.sampleRate * duration);
   const impulse = context.createBuffer(2, frameCount, context.sampleRate);
 
@@ -331,32 +331,32 @@ function createAudioEngine(): AudioEngine | null {
   const delayLowPass = context.createBiquadFilter();
   const delayReturn = context.createGain();
 
-  output.gain.value = 0.9;
-  compressor.threshold.value = -20;
+  output.gain.value = 0.86;
+  compressor.threshold.value = -22;
   compressor.knee.value = 16;
-  compressor.ratio.value = 4;
+  compressor.ratio.value = 3.2;
   compressor.attack.value = 0.003;
-  compressor.release.value = 0.2;
+  compressor.release.value = 0.18;
   output.connect(compressor);
   compressor.connect(context.destination);
 
   convolver.buffer = createImpulseResponse(context);
   reverbHighPass.type = 'highpass';
-  reverbHighPass.frequency.value = 180;
+  reverbHighPass.frequency.value = 220;
   reverbLowPass.type = 'lowpass';
-  reverbLowPass.frequency.value = 4200;
-  reverbReturn.gain.value = 0.35;
+  reverbLowPass.frequency.value = 3600;
+  reverbReturn.gain.value = 0.28;
   reverbSend.connect(convolver);
   convolver.connect(reverbHighPass);
   reverbHighPass.connect(reverbLowPass);
   reverbLowPass.connect(reverbReturn);
   reverbReturn.connect(output);
 
-  delay.delayTime.value = 0.18;
-  delayFeedback.gain.value = 0.28;
+  delay.delayTime.value = 0.14;
+  delayFeedback.gain.value = 0.22;
   delayLowPass.type = 'lowpass';
-  delayLowPass.frequency.value = 2600;
-  delayReturn.gain.value = 0.25;
+  delayLowPass.frequency.value = 2200;
+  delayReturn.gain.value = 0.18;
   delaySend.connect(delay);
   delay.connect(delayLowPass);
   delayLowPass.connect(delayReturn);
@@ -1065,6 +1065,19 @@ export default function App() {
     window.setTimeout(() => playSound(effectName), delayMs);
   };
 
+  const playVisualControlSound = (sound: VisualControlSound) => {
+    const effectName: SoundEffectName =
+      sound === 'regroup'
+        ? 'hintCarry'
+        : sound === 'borrow'
+          ? 'hintBorrow'
+          : sound === 'resolve'
+            ? 'hintResolve'
+            : 'hintStep';
+
+    playSound(effectName);
+  };
+
   const [startTime, setStartTime] = useState(Date.now());
   const [isCritical, setIsCritical] = useState(false);
 
@@ -1479,7 +1492,10 @@ export default function App() {
               </motion.div>
             ) : showHint ? (
               hintProblemText ? (
-                <VisualCalculator problemText={hintProblemText} onControlSound={() => playSound('ui')} />
+                <VisualCalculator
+                  problemText={hintProblemText}
+                  onControlSound={playVisualControlSound}
+                />
               ) : (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.96 }}
