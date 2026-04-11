@@ -288,7 +288,7 @@ const THOUSAND_CUBE_COLORS: Record<
   },
 };
 
-const SIMPLE_CARD_MIN_HEIGHT_CLASS = 'min-h-[240px] md:min-h-[280px]';
+const SIMPLE_CARD_MIN_HEIGHT_CLASS = 'min-h-[200px] sm:min-h-[220px] md:min-h-[280px]';
 const SIMPLE_CARD_HEADER_CLASS = 'flex min-h-[24px] items-center justify-between gap-2 md:min-h-[28px]';
 const SIMPLE_CARD_BODY_CLASS =
   'grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_minmax(76px,0.7fr)] gap-2';
@@ -1609,7 +1609,7 @@ function CompactPlaceCard({
   return (
     <motion.section
       layout
-      className={`flex min-h-[300px] min-w-0 flex-col gap-2 overflow-hidden rounded-[26px] border p-3 ${
+      className={`flex min-h-[240px] min-w-0 flex-col gap-2 overflow-hidden rounded-[26px] border p-3 sm:min-h-[260px] md:min-h-[300px] ${
         meta.cardBase
       } ${isFocused ? meta.cardActive : ''} ${dimmed ? 'opacity-55 saturate-[0.85]' : 'opacity-100'}`}
     >
@@ -2268,6 +2268,39 @@ function SimpleTransferOverlay({
   );
 }
 
+function CompactTransferBanner({
+  transfer,
+}: {
+  transfer: SimpleTransferVisual;
+}) {
+  const containerClass =
+    transfer.mode === 'regroup'
+      ? 'border-cyan-300/20 bg-cyan-500/10 text-cyan-50'
+      : 'border-amber-300/20 bg-amber-500/10 text-amber-50';
+  const badgeClass =
+    transfer.mode === 'regroup'
+      ? 'border-cyan-200/35 bg-cyan-200/10 text-cyan-100'
+      : 'border-amber-200/35 bg-amber-200/10 text-amber-100';
+
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -4 }}
+      transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+      className={`rounded-[22px] border px-4 py-3 shadow-inner ${containerClass}`}
+    >
+      <div className="flex flex-wrap items-center gap-2">
+        <span className={`rounded-full border px-2.5 py-1 text-[10px] font-black ${badgeClass}`}>
+          {transfer.chipLabel}
+        </span>
+        <p className="text-sm font-bold leading-6">{transfer.note}</p>
+      </div>
+    </motion.div>
+  );
+}
+
 function SimpleThousandsCard({
   step,
   compactLayout = false,
@@ -2517,13 +2550,13 @@ function SimpleFormulaPanel({
 }) {
   const digits1 = splitDigits4(n1);
   const digits2 = splitDigits4(n2);
-  const panelWidthClass = compactLayout ? 'w-[104px] md:w-[152px]' : 'w-[118px] md:w-[172px]';
+  const panelWidthClass = compactLayout ? 'w-full sm:w-[104px] md:w-[152px]' : 'w-full sm:w-[118px] md:w-[172px]';
   const digitClass = compactLayout
-    ? 'text-[1.75rem] font-black leading-none text-white md:text-[2.3rem]'
-    : 'text-[1.95rem] font-black leading-none text-white md:text-[2.55rem]';
+    ? 'text-[1.35rem] font-black leading-none text-white sm:text-[1.75rem] md:text-[2.3rem]'
+    : 'text-[1.5rem] font-black leading-none text-white sm:text-[1.95rem] md:text-[2.55rem]';
   const operatorClass = compactLayout
-    ? 'text-[1.75rem] font-black leading-none text-yellow-400 md:text-[2.3rem]'
-    : 'text-[1.95rem] font-black leading-none text-yellow-400 md:text-[2.55rem]';
+    ? 'text-[1.35rem] font-black leading-none text-yellow-400 sm:text-[1.75rem] md:text-[2.3rem]'
+    : 'text-[1.5rem] font-black leading-none text-yellow-400 sm:text-[1.95rem] md:text-[2.55rem]';
 
   return (
     <div
@@ -2786,7 +2819,7 @@ export const VisualCalculator: React.FC<VisualCalculatorProps> = ({
       className="flex h-full min-h-0 flex-col gap-3 rounded-[28px] border-4 border-slate-700 bg-[linear-gradient(180deg,rgba(15,23,42,0.96),rgba(2,6,23,0.98))] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]"
     >
       <div className="rounded-[22px] border border-white/10 bg-slate-900/78 px-3 py-2.5">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <AnimatePresence mode="wait">
             <motion.p
               key={`${stepIdx}-${step.title}`}
@@ -2794,13 +2827,13 @@ export const VisualCalculator: React.FC<VisualCalculatorProps> = ({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.14 }}
-              className="min-w-0 truncate text-base font-black text-yellow-300"
+              className="min-w-0 text-sm font-black leading-5 text-yellow-300 sm:truncate sm:text-base sm:leading-normal"
             >
               {getSimpleStepMessage(step, op, previousStep)}
             </motion.p>
           </AnimatePresence>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 self-end sm:self-auto">
             <button
               type="button"
               onClick={() => moveStep(stepIdx - 1, 'backward')}
@@ -2832,7 +2865,22 @@ export const VisualCalculator: React.FC<VisualCalculatorProps> = ({
       </div>
 
       <LayoutGroup id="visual-calculator-blocks">
-        <div className="flex min-h-0 flex-1 gap-3">
+        <div className="flex min-h-0 flex-1 flex-col gap-3 xl:hidden">
+          <CompactProblemBoard n1={n1} n2={n2} op={op} step={step} />
+
+          {transfer ? <CompactTransferBanner transfer={transfer} /> : null}
+
+          <div className="grid min-h-0 gap-3 sm:grid-cols-2">
+            {showThousandsSection ? <SimpleThousandsCard step={step} compactLayout /> : null}
+            {PLACE_ORDER.map((place) => (
+              <React.Fragment key={place}>
+                <CompactPlaceCard place={place} step={step} op={op} />
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+
+        <div className="hidden min-h-0 flex-1 gap-3 xl:flex">
           <SimpleFormulaPanel n1={n1} n2={n2} op={op} compactLayout={showThousandsSection} />
 
           <div className="relative min-h-0 flex-1">
