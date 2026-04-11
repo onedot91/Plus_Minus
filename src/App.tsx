@@ -1331,7 +1331,7 @@ function BuilderNumberRow({
   const tokens = template.match(/\[[a-z]+\]|./g) ?? [];
 
   return (
-    <div className="flex flex-wrap items-center justify-end gap-3">
+    <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
       {tokens.map((token, index) => {
         const slotMatch = token.match(/^\[([a-z]+)\]$/);
 
@@ -1349,7 +1349,7 @@ function BuilderNumberRow({
               onChange={(event) => onSlotChange(slotId, event.target.value)}
               placeholder="?"
               aria-label={slot.label}
-              className="h-20 w-20 rounded-[28px] border-4 border-sky-200 bg-sky-50 text-center text-5xl font-black text-sky-700 outline-none transition focus:border-sky-500 md:h-24 md:w-24 md:text-6xl"
+              className="h-14 w-14 rounded-[22px] border-4 border-sky-200 bg-sky-50 text-center text-3xl font-black text-sky-700 outline-none transition focus:border-sky-500 sm:h-20 sm:w-20 sm:rounded-[28px] sm:text-5xl md:h-24 md:w-24 md:text-6xl"
               title={`${slot.label}: ${formatDigitChoices(slot.digits)} 중에서 넣기`}
             />
           );
@@ -1358,7 +1358,7 @@ function BuilderNumberRow({
         return (
           <span
             key={`${token}-${index}`}
-            className="flex h-20 w-20 items-center justify-center rounded-[28px] border-4 border-slate-200 bg-slate-50 text-5xl font-black text-slate-900 md:h-24 md:w-24 md:text-6xl"
+            className="flex h-14 w-14 items-center justify-center rounded-[22px] border-4 border-slate-200 bg-slate-50 text-3xl font-black text-slate-900 sm:h-20 sm:w-20 sm:rounded-[28px] sm:text-5xl md:h-24 md:w-24 md:text-6xl"
           >
             {token}
           </span>
@@ -1884,10 +1884,10 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 font-sans text-white overflow-hidden">
+    <div className="flex min-h-[100svh] flex-col items-center justify-start overflow-x-hidden overflow-y-auto bg-slate-950 p-3 font-sans text-white sm:p-4 lg:justify-center">
       {gameState === 'start' && (
-        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="relative text-center bg-slate-800 p-12 rounded-3xl shadow-2xl border-4 border-slate-600">
-          <Zap className="w-24 h-24 text-yellow-400 mx-auto mb-6 animate-pulse" />
+        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="relative w-full max-w-2xl rounded-3xl border-4 border-slate-600 bg-slate-800 px-5 py-8 text-center shadow-2xl sm:px-8 sm:py-10 lg:px-12 lg:py-12">
+          <Zap className="mx-auto mb-5 h-20 w-20 animate-pulse text-yellow-400 sm:mb-6 sm:h-24 sm:w-24" />
           <h1 className="text-5xl font-black mb-6">덧셈과 뺄셈 배틀</h1>
           <p className="text-xl text-slate-300 mb-10">문제를 풀어 상대를 쓰러뜨리세요!</p>
           <button onClick={openNamePrompt} className="px-10 py-5 bg-yellow-500 text-slate-900 font-black text-3xl rounded-full hover:bg-yellow-400 transition-all flex items-center gap-4 mx-auto"><Play /> 배틀 시작!</button>
@@ -1898,7 +1898,7 @@ export default function App() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 z-20 flex items-center justify-center rounded-3xl bg-slate-950/75 p-6 backdrop-blur-sm"
+                className="absolute inset-0 z-20 flex items-center justify-center rounded-3xl bg-slate-950/75 p-4 backdrop-blur-sm sm:p-6"
               >
                 <motion.form
                   initial={{ opacity: 0, scale: 0.94, y: 12 }}
@@ -1909,7 +1909,7 @@ export default function App() {
                     event.preventDefault();
                     confirmPlayerNameAndStart();
                   }}
-                  className="w-full max-w-md rounded-[2rem] border border-emerald-300/20 bg-slate-900 p-7 text-left shadow-[0_24px_80px_rgba(15,23,42,0.45)]"
+                  className="w-full max-w-md rounded-[2rem] border border-emerald-300/20 bg-slate-900 p-5 text-left shadow-[0_24px_80px_rgba(15,23,42,0.45)] sm:p-7"
                 >
                   <h2 className="text-3xl font-black text-white">이름 입력</h2>
                   <input
@@ -1918,20 +1918,20 @@ export default function App() {
                     value={pendingPlayerName}
                     onChange={(event) => setPendingPlayerName(event.target.value.slice(0, 10))}
                     placeholder="이름"
-                    className="mt-5 w-full rounded-2xl border-2 border-slate-600 bg-slate-950 px-5 py-4 text-2xl font-black text-white outline-none transition focus:border-emerald-400"
+                    className="mt-4 w-full rounded-2xl border-2 border-slate-600 bg-slate-950 px-4 py-3 text-xl font-black text-white outline-none transition focus:border-emerald-400 sm:mt-5 sm:px-5 sm:py-4 sm:text-2xl"
                   />
-                  <div className="mt-5 flex items-center justify-end gap-3">
+                  <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
                     <button
                       type="button"
                       onClick={closeNamePrompt}
-                      className="rounded-2xl border border-slate-600 px-5 py-3 text-base font-black text-slate-200 transition hover:bg-slate-800"
+                      className="w-full rounded-2xl border border-slate-600 px-5 py-3 text-base font-black text-slate-200 transition hover:bg-slate-800 sm:w-auto"
                     >
                       취소
                     </button>
                     <button
                       type="submit"
                       disabled={!pendingPlayerName.trim()}
-                      className="rounded-2xl bg-emerald-500 px-6 py-3 text-base font-black text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
+                      className="w-full rounded-2xl bg-emerald-500 px-6 py-3 text-base font-black text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400 sm:w-auto"
                     >
                       시작
                     </button>
@@ -1944,10 +1944,10 @@ export default function App() {
       )}
 
       {gameState === 'playing' && (
-        <div className="w-full max-w-7xl min-h-0 overflow-hidden bg-slate-800 p-6 rounded-3xl shadow-2xl border-4 border-slate-700 flex gap-4 h-[90vh]">
+        <div className="flex w-full max-w-7xl min-h-0 flex-col gap-3 overflow-visible rounded-3xl border-4 border-slate-700 bg-slate-800 p-3 shadow-2xl sm:p-4 lg:h-[90vh] lg:flex-row lg:gap-4 lg:overflow-hidden lg:p-6">
           {/* Left: Character Visuals & Messages */}
-          <div className="w-[29%] min-h-0 overflow-hidden flex flex-col gap-3 bg-slate-900 rounded-2xl p-4 border-2 border-slate-600 relative">
-            <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.75rem] border border-slate-700/80 bg-slate-950/70 p-4 shadow-[inset_0_1px_0_rgba(148,163,184,0.08)]">
+          <div className="relative flex w-full min-h-0 flex-col gap-3 overflow-visible rounded-2xl border-2 border-slate-600 bg-slate-900 p-3 lg:w-[29%] lg:overflow-hidden lg:p-4">
+            <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.75rem] border border-slate-700/80 bg-slate-950/70 p-3 shadow-[inset_0_1px_0_rgba(148,163,184,0.08)] sm:p-4">
               <div className="flex items-center justify-between gap-3 text-sm">
                 <div className="inline-flex items-center gap-2 font-semibold text-slate-300">
                   <Heart className="h-4 w-4 text-red-400" />
@@ -1964,7 +1964,7 @@ export default function App() {
                 />
               </div>
 
-              <div className="relative mt-3 flex h-[clamp(22rem,44vh,31rem)] min-h-0 items-center justify-center overflow-hidden rounded-[1.5rem] border border-red-400/10 bg-[radial-gradient(circle_at_top,rgba(248,113,113,0.14),transparent_52%),linear-gradient(180deg,rgba(15,23,42,0.98),rgba(15,23,42,0.78))] px-2 py-2 sm:px-3 sm:py-3">
+              <div className="relative mt-3 flex h-[clamp(10rem,28vh,15rem)] min-h-0 items-center justify-center overflow-hidden rounded-[1.5rem] border border-red-400/10 bg-[radial-gradient(circle_at_top,rgba(248,113,113,0.14),transparent_52%),linear-gradient(180deg,rgba(15,23,42,0.98),rgba(15,23,42,0.78))] px-2 py-2 sm:h-[clamp(13rem,30vh,18rem)] sm:px-3 sm:py-3 lg:h-[clamp(22rem,44vh,31rem)]">
                 <p className="pointer-events-none absolute left-4 top-3 z-10 text-sm font-bold text-red-200/85">
                   {currentOpponentName}
                 </p>
@@ -2011,8 +2011,8 @@ export default function App() {
                     transition={{ duration: 0.18, ease: "easeOut" }}
                     className={`relative max-w-[calc(100%-1.5rem)] rounded-full bg-slate-950 text-center ${
                       showMsg
-                        ? 'border border-yellow-400/45 px-5 py-2 text-sm font-bold leading-relaxed text-yellow-100 shadow-[0_10px_24px_rgba(15,23,42,0.24)]'
-                        : 'border border-yellow-500/40 px-4 py-1 text-xs font-black tracking-[0.35em] text-yellow-300'
+                        ? 'border border-yellow-400/45 px-4 py-2 text-xs font-bold leading-relaxed text-yellow-100 shadow-[0_10px_24px_rgba(15,23,42,0.24)] sm:px-5 sm:text-sm'
+                        : 'border border-yellow-500/40 px-3 py-1 text-[10px] font-black tracking-[0.28em] text-yellow-300 sm:px-4 sm:text-xs sm:tracking-[0.35em]'
                     }`}
                   >
                     {showMsg ? message : 'VS'}
@@ -2021,10 +2021,10 @@ export default function App() {
               </div>
             </div>
 
-            <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.75rem] border border-slate-700/80 bg-slate-950/70 p-4 shadow-[inset_0_1px_0_rgba(148,163,184,0.08)]">
-              <div className="relative flex h-[clamp(22rem,44vh,31rem)] min-h-0 items-center justify-center overflow-hidden rounded-[1.5rem] border border-emerald-400/10 bg-[radial-gradient(circle_at_bottom,rgba(16,185,129,0.14),transparent_54%),linear-gradient(180deg,rgba(15,23,42,0.78),rgba(15,23,42,0.98))] px-2 py-2 sm:px-3 sm:py-3">
+            <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.75rem] border border-slate-700/80 bg-slate-950/70 p-3 shadow-[inset_0_1px_0_rgba(148,163,184,0.08)] sm:p-4">
+              <div className="relative flex h-[clamp(10rem,28vh,15rem)] min-h-0 items-center justify-center overflow-hidden rounded-[1.5rem] border border-emerald-400/10 bg-[radial-gradient(circle_at_bottom,rgba(16,185,129,0.14),transparent_54%),linear-gradient(180deg,rgba(15,23,42,0.78),rgba(15,23,42,0.98))] px-2 py-2 sm:h-[clamp(13rem,30vh,18rem)] sm:px-3 sm:py-3 lg:h-[clamp(22rem,44vh,31rem)]">
                 <p
-                  className="pointer-events-none absolute left-4 top-3 z-10 max-w-[55%] truncate text-sm font-bold text-emerald-200/85"
+                  className="pointer-events-none absolute left-4 top-3 z-10 max-w-[65%] truncate text-xs font-bold text-emerald-200/85 sm:max-w-[55%] sm:text-sm"
                   title={displayPlayerName}
                 >
                   {displayPlayerName}
@@ -2074,24 +2074,24 @@ export default function App() {
           </div>
 
           {/* Right: Math Problem & Input */}
-          <div className="flex-1 min-w-0 flex flex-col gap-3 min-h-0">
-            <div className="flex items-center gap-3 shrink-0">
-              <div className="min-w-0 flex-1 bg-slate-900 px-3 py-2 rounded-2xl border-2 border-slate-700">
-                <div className="flex items-center gap-3">
-                  <p className="min-w-0 max-w-[38%] truncate text-sm font-black text-yellow-400" title={LEVEL_DESCRIPTIONS[level]}>{LEVEL_DESCRIPTIONS[level]}</p>
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
+            <div className="shrink-0 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="min-w-0 flex-1 rounded-2xl border-2 border-slate-700 bg-slate-900 px-3 py-2">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <p className="min-w-0 max-w-full truncate text-xs font-black text-yellow-400 sm:max-w-[38%] sm:text-sm" title={LEVEL_DESCRIPTIONS[level]}>{LEVEL_DESCRIPTIONS[level]}</p>
                   <div className="flex flex-1 gap-1 min-w-0">
                   {[...Array(TOTAL_LEVELS)].map((_, i) => (
                       <div key={i} className={`h-2 flex-1 rounded-full ${i < level ? 'bg-yellow-500' : 'bg-slate-700'}`} />
                   ))}
                   </div>
-                  <span className="shrink-0 text-sm font-bold text-slate-300">{level} / {TOTAL_LEVELS}</span>
+                  <span className="shrink-0 text-xs font-bold text-slate-300 sm:text-sm">{level} / {TOTAL_LEVELS}</span>
                 </div>
               </div>
 
               {!isEstimation && canUseHint && !isHintForced && (
                 <button
                   onClick={toggleHint}
-                  className="shrink-0 inline-flex items-center rounded-2xl border border-blue-400/30 bg-blue-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-blue-500"
+                  className="inline-flex w-full shrink-0 items-center justify-center rounded-2xl border border-blue-400/30 bg-blue-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-blue-500 sm:w-auto"
                 >
                   {showHint ? '힌트 닫기' : '힌트 보기'}
                 </button>
@@ -2100,10 +2100,10 @@ export default function App() {
 
             <div className="flex flex-1 min-h-0 flex-col">
               {isEstimation ? (
-              <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4, ease: "easeOut" }} className="bg-slate-900 border-4 border-yellow-500 rounded-3xl p-8 flex flex-col items-center text-center text-slate-100 shadow-inner flex-1 min-h-0 justify-center">
+              <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4, ease: "easeOut" }} className="flex min-h-0 flex-1 flex-col items-center justify-center rounded-3xl border-4 border-yellow-500 bg-slate-900 p-5 text-center text-slate-100 shadow-inner sm:p-6 lg:p-8">
                 <h2 className="text-4xl font-black text-yellow-400 mb-4">어림잡기 도전! ({timeLeft}초)</h2>
-                <p className="text-6xl font-mono font-bold mb-8">{estimationProblem?.question} = ?</p>
-                <div className="grid grid-cols-3 gap-4 w-full">
+                <p className="mb-6 text-[clamp(2.5rem,12vw,4.5rem)] font-mono font-bold sm:mb-8">{estimationProblem?.question} = ?</p>
+                <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
                   {estimationProblem?.options.map(opt => (
                     <button key={opt} onClick={() => selectEstimationOption(opt)} className="bg-slate-700 hover:bg-slate-600 text-3xl font-bold p-6 rounded-2xl border-2 border-slate-500">{opt}쯤</button>
                   ))}
@@ -2120,7 +2120,7 @@ export default function App() {
                   initial={{ opacity: 0, scale: 0.96 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.25, ease: "easeOut" }}
-                  className="flex flex-1 min-h-0 items-center justify-center rounded-3xl border-4 border-dashed border-sky-300 bg-sky-50 p-8 text-center text-sky-800"
+                  className="flex min-h-0 flex-1 items-center justify-center rounded-3xl border-4 border-dashed border-sky-300 bg-sky-50 p-5 text-center text-sky-800 sm:p-8"
                 >
                   <div className="max-w-2xl">
                     <p className="text-3xl font-black">빈칸에 숫자를 먼저 넣어 주세요.</p>
@@ -2134,21 +2134,21 @@ export default function App() {
                 initial={{ opacity: 0, scale: 0.9, y: 10 }} 
                 animate={{ opacity: 1, scale: 1, y: 0 }} 
                 transition={{ duration: 0.4, ease: "easeOut" }} 
-                className={`bg-white border-8 border-slate-200 rounded-3xl p-8 shadow-inner flex-1 min-h-0 ${
+                className={`flex min-h-0 flex-1 rounded-3xl border-8 border-slate-200 bg-white p-4 shadow-inner sm:p-6 lg:p-8 ${
                   problem.kind !== 'equation'
                     ? 'flex flex-col justify-center overflow-y-auto'
-                    : 'flex flex-col items-center justify-center text-[8rem] leading-none font-black font-mono text-slate-900'
+                    : 'flex flex-col items-center justify-center text-[clamp(3.5rem,18vw,8rem)] leading-none font-black font-mono text-slate-900'
                 }`}
               >
                 {problem.kind === 'story' ? (
-                  <div className="mx-auto flex w-full max-w-[52rem] flex-col gap-6 text-left text-slate-900">
+                  <div className="mx-auto flex w-full max-w-[52rem] flex-col gap-4 text-left text-slate-900 sm:gap-6">
                     {getStoryPromptLines(problem.prompt).map((line, index, lines) => {
                       const isQuestionLine = lines.length === 1 || index === lines.length - 1;
 
                       return (
                         <div
                           key={`${line}-${index}`}
-                          className={`rounded-[2rem] border px-6 py-6 shadow-sm md:px-8 md:py-7 ${
+                          className={`rounded-[2rem] border px-4 py-4 shadow-sm sm:px-6 sm:py-5 md:px-8 md:py-7 ${
                             isQuestionLine
                               ? 'border-amber-200 bg-amber-50/80'
                               : 'border-slate-200 bg-slate-50/85'
@@ -2157,8 +2157,8 @@ export default function App() {
                           <p
                             className={`break-keep tracking-[-0.01em] ${
                               isQuestionLine
-                                ? 'text-[2.1rem] font-black leading-[1.55] text-slate-900 md:text-[2.45rem]'
-                                : 'text-[1.75rem] font-bold leading-[1.72] text-slate-700 md:text-[2rem]'
+                                ? 'text-[1.3rem] font-black leading-[1.55] text-slate-900 sm:text-[1.75rem] md:text-[2.45rem]'
+                                : 'text-[1.1rem] font-bold leading-[1.72] text-slate-700 sm:text-[1.45rem] md:text-[2rem]'
                             }`}
                           >
                             {renderPromptWithHighlight(line, level !== 9)}
@@ -2168,26 +2168,26 @@ export default function App() {
                     })}
                   </div>
                 ) : problem.kind === 'builder' && problem.builder ? (
-                  <div className="flex h-full w-full flex-col gap-4 text-left text-slate-900">
+                  <div className="flex h-full w-full flex-col gap-3 text-left text-slate-900 sm:gap-4">
                     <div>
-                      <h2 className="text-4xl font-black text-slate-900 md:text-[3.5rem]">{problem.builder.title}</h2>
-                      <p className="mt-2 break-keep text-[1.5rem] font-bold leading-[1.4] text-slate-700 md:text-[1.9rem]">
+                      <h2 className="text-2xl font-black text-slate-900 sm:text-3xl md:text-[3.5rem]">{problem.builder.title}</h2>
+                      <p className="mt-2 break-keep text-lg font-bold leading-[1.45] text-slate-700 sm:text-[1.35rem] md:text-[1.9rem]">
                         {problem.builder.instruction}
                       </p>
                     </div>
 
-                    <div className="grid flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
-                      <div className="rounded-[34px] border-4 border-slate-200 bg-slate-50 p-8 md:p-10">
+                    <div className="grid flex-1 gap-4 xl:grid-cols-[minmax(0,1fr)_220px]">
+                      <div className="rounded-[34px] border-4 border-slate-200 bg-slate-50 p-4 sm:p-6 md:p-10">
                         <div className="flex h-full items-center justify-end">
-                          <div className="inline-flex flex-col items-end gap-6">
+                          <div className="inline-flex flex-col items-end gap-4 sm:gap-6">
                             <BuilderNumberRow
                               template={problem.builder.topTemplate}
                               slotsById={builderSlotsById}
                               slotValues={builderSlotValues}
                               onSlotChange={handleBuilderSlotChange}
                             />
-                            <div className="flex items-center justify-end gap-5">
-                              <span className="text-6xl font-black text-slate-500 md:text-7xl">{problem.builder.op}</span>
+                            <div className="flex items-center justify-end gap-3 sm:gap-5">
+                              <span className="text-4xl font-black text-slate-500 sm:text-5xl md:text-7xl">{problem.builder.op}</span>
                               <BuilderNumberRow
                                 template={problem.builder.bottomTemplate}
                                 slotsById={builderSlotsById}
@@ -2205,7 +2205,7 @@ export default function App() {
                           {problem.builder.slots.map((slot) => (
                             <div key={slot.id} className="rounded-2xl border border-sky-200 bg-white px-4 py-4">
                               <div className="text-sm font-black text-slate-500">{slot.label}</div>
-                              <div className="mt-1 text-3xl font-black text-sky-700">{formatDigitChoices(slot.digits)}</div>
+                              <div className="mt-1 text-2xl font-black text-sky-700 sm:text-3xl">{formatDigitChoices(slot.digits)}</div>
                             </div>
                           ))}
                         </div>
@@ -2231,16 +2231,17 @@ export default function App() {
 
             {!isEstimation && (
               <div className="flex flex-col gap-3 shrink-0">
-                <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 items-stretch">
+                <div className="grid grid-cols-1 items-stretch gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
                   <input 
                   type="number" 
+                  inputMode="numeric"
                   value={inputValue} 
                   onChange={e => setInputValue(e.target.value)} 
                   onKeyDown={e => { if (e.key === 'Enter' && !e.ctrlKey && !e.altKey) checkAnswer(); }}
-                  className="min-w-0 text-center text-3xl font-black px-4 py-3 rounded-2xl bg-slate-700 border-4 border-slate-500 outline-none focus:border-emerald-500" 
+                  className="min-w-0 rounded-2xl border-4 border-slate-500 bg-slate-700 px-4 py-3 text-center text-2xl font-black outline-none focus:border-emerald-500 sm:text-3xl" 
                   placeholder={problem.kind === 'builder' ? '답' : '정답 입력'} 
                 />
-                  <button onClick={checkAnswer} className="min-w-[170px] px-6 py-3 bg-emerald-600 text-white font-black text-xl rounded-2xl hover:bg-emerald-500 flex items-center justify-center gap-2 shadow-lg"><Sword size={22} /> 공격!</button>
+                  <button onClick={checkAnswer} className="flex w-full min-w-0 items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-6 py-3 text-lg font-black text-white shadow-lg hover:bg-emerald-500 sm:min-w-[170px] sm:w-auto sm:text-xl"><Sword size={22} /> 공격!</button>
                 </div>
               </div>
             )}
@@ -2252,7 +2253,7 @@ export default function App() {
         <motion.div 
           initial={{ opacity: 0, scale: 0.5 }} 
           animate={{ opacity: 1, scale: 1 }} 
-          className="text-center bg-slate-800 p-16 rounded-3xl shadow-2xl border-4 border-slate-600"
+          className="w-full max-w-2xl rounded-3xl border-4 border-slate-600 bg-slate-800 p-6 text-center shadow-2xl sm:p-10 lg:p-16"
         >
           {gameState === 'win' ? (
             <motion.div 
@@ -2263,7 +2264,7 @@ export default function App() {
               }} 
               transition={{ repeat: Infinity, duration: 2 }}
             >
-              <Star className="w-48 h-48 text-yellow-400 mx-auto mb-8 fill-current" />
+              <Star className="mx-auto mb-6 h-28 w-28 fill-current text-yellow-400 sm:mb-7 sm:h-36 sm:w-36 lg:mb-8 lg:h-48 lg:w-48" />
               <h1 className="text-8xl font-black mb-8 text-yellow-400 drop-shadow-lg">배틀 승리!</h1>
             </motion.div>
           ) : (
@@ -2275,11 +2276,11 @@ export default function App() {
               }} 
               transition={{ repeat: Infinity, duration: 3 }}
             >
-              <Heart className="w-48 h-48 text-slate-500 mx-auto mb-8 fill-current" />
+              <Heart className="mx-auto mb-6 h-28 w-28 fill-current text-slate-500 sm:mb-7 sm:h-36 sm:w-36 lg:mb-8 lg:h-48 lg:w-48" />
               <h1 className="text-8xl font-black mb-8 text-slate-400">배틀 패배...</h1>
             </motion.div>
           )}
-          <button onClick={startGame} className="px-12 py-6 bg-slate-600 text-white font-black text-4xl rounded-full hover:bg-slate-500 transition-all flex items-center gap-4 mx-auto"><RotateCcw size={40} /> 다시하기</button>
+          <button onClick={startGame} className="mx-auto flex w-full items-center justify-center gap-3 rounded-full bg-slate-600 px-8 py-4 text-xl font-black text-white transition-all hover:bg-slate-500 sm:w-auto sm:text-2xl lg:gap-4 lg:px-12 lg:py-6 lg:text-4xl"><RotateCcw size={28} /> 다시하기</button>
         </motion.div>
       )}
     </div>
