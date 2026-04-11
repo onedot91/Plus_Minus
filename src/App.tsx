@@ -2,12 +2,71 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Sword, Heart, Zap, RotateCcw, Play, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { VisualCalculator } from './components/VisualCalculator';
+import playerAttackImage from './assets/player-attack.png';
+import playerDefaultImage from './assets/player-default.png';
+import playerHitImage from './assets/player-hit.png';
+import opponentLevel1AttackImage from './assets/opponent-level1-attack.png';
+import opponentLevel1DefaultImage from './assets/opponent-level1-default.png';
+import opponentLevel1HitImage from './assets/opponent-level1-hit.png';
+import opponentLevel2AttackImage from './assets/opponent-level2-attack.png';
+import opponentLevel2DefaultImage from './assets/opponent-level2-default.png';
+import opponentLevel2HitImage from './assets/opponent-level2-hit.png';
+import opponentLevel3AttackImage from './assets/opponent-level3-attack.png';
+import opponentLevel3DefaultImage from './assets/opponent-level3-default.png';
+import opponentLevel3HitImage from './assets/opponent-level3-hit.png';
+import opponentLevel4AttackImage from './assets/opponent-level4-attack.png';
+import opponentLevel4DefaultImage from './assets/opponent-level4-default.png';
+import opponentLevel4HitImage from './assets/opponent-level4-hit.png';
+import opponentLevel5AttackImage from './assets/opponent-level5-attack.png';
+import opponentLevel5DefaultImage from './assets/opponent-level5-default.png';
+import opponentLevel5HitImage from './assets/opponent-level5-hit.png';
+import opponentLevel6AttackImage from './assets/opponent-level6-attack.png';
+import opponentLevel6DefaultImage from './assets/opponent-level6-default.png';
+import opponentLevel6HitImage from './assets/opponent-level6-hit.png';
+import opponentLevel7AttackImage from './assets/opponent-level7-attack.png';
+import opponentLevel7DefaultImage from './assets/opponent-level7-default.png';
+import opponentLevel7HitImage from './assets/opponent-level7-hit.png';
+import opponentLevel8AttackImage from './assets/opponent-level8-attack.png';
+import opponentLevel8DefaultImage from './assets/opponent-level8-default.png';
+import opponentLevel8HitImage from './assets/opponent-level8-hit.png';
+import opponentLevel9AttackImage from './assets/opponent-level9-attack.png';
+import opponentLevel9DefaultImage from './assets/opponent-level9-default.png';
+import opponentLevel9HitImage from './assets/opponent-level9-hit.png';
 
 type GameState = 'start' | 'playing' | 'win' | 'lose';
 
+type ProblemKind = 'equation' | 'story' | 'builder';
+
+interface BuildSlotConfig {
+  id: string;
+  digits: string[];
+}
+
+interface BuilderProblemData {
+  title: string;
+  instruction: string;
+  helperText: string;
+  badge?: string;
+  op: '+' | '-';
+  topTemplate: string;
+  bottomTemplate: string;
+  slots: BuildSlotConfig[];
+  invalidMessage: string;
+  validate: (left: number, right: number) => boolean;
+}
+
 interface Problem {
   text: string;
+  prompt: string;
   answer: number;
+  kind: ProblemKind;
+  builder?: BuilderProblemData;
+}
+
+interface CharacterSpriteSet {
+  attack: string;
+  default: string;
+  hit: string;
 }
 
 type SoundEffectName =
@@ -142,11 +201,11 @@ const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
     ],
   },
   ui: {
-    output: 0.7,
+    output: 0.52,
     layers: [
-      { kind: 'noise', duration: 0.03, gain: 0.008, attack: 0.001, release: 0.02, filter: { type: 'highpass', frequency: 2400, sweepTo: 6200, q: 0.8 } },
-      { kind: 'oscillator', wave: 'triangle', frequency: 760, glideTo: 980, duration: 0.055, gain: 0.016, attack: 0.001, release: 0.04, filter: { type: 'bandpass', frequency: 1600, sweepTo: 2200, q: 2.2 }, pan: -0.04 },
-      { kind: 'oscillator', wave: 'sine', startAt: 0.01, frequency: 1320, duration: 0.045, gain: 0.01, attack: 0.001, release: 0.035, reverbSend: 0.03, pan: 0.04 },
+      { kind: 'oscillator', wave: 'triangle', frequency: 560, glideTo: 410, duration: 0.045, gain: 0.012, attack: 0.001, release: 0.03, filter: { type: 'lowpass', frequency: 1700, sweepTo: 900, q: 0.8 }, pan: -0.02 },
+      { kind: 'oscillator', wave: 'sine', frequency: 260, glideTo: 185, duration: 0.055, gain: 0.011, attack: 0.001, release: 0.038, filter: { type: 'lowpass', frequency: 820, sweepTo: 480, q: 0.7 } },
+      { kind: 'oscillator', wave: 'square', startAt: 0.002, frequency: 1080, glideTo: 760, duration: 0.018, gain: 0.0035, attack: 0.001, release: 0.012, filter: { type: 'lowpass', frequency: 2000, sweepTo: 1100, q: 0.8 }, pan: 0.02 },
     ],
   },
   lose: {
@@ -391,6 +450,54 @@ function playEffect(engine: AudioEngine, effectName: SoundEffectName) {
 
 const CHARACTER_NAMES = ["몬스터 A", "몬스터 B", "몬스터 C", "몬스터 D", "몬스터 E", "몬스터 F", "몬스터 G"];
 
+const LEVEL_OPPONENT_EMOJIS = ['', '👾', '👹', '👺', '🤖', '👻', '🦖', '🐲', '😈', '👿'];
+const LEVEL_OPPONENT_SPRITES: Partial<Record<number, CharacterSpriteSet>> = {
+  1: {
+    attack: opponentLevel1AttackImage,
+    default: opponentLevel1DefaultImage,
+    hit: opponentLevel1HitImage,
+  },
+  2: {
+    attack: opponentLevel2AttackImage,
+    default: opponentLevel2DefaultImage,
+    hit: opponentLevel2HitImage,
+  },
+  3: {
+    attack: opponentLevel3AttackImage,
+    default: opponentLevel3DefaultImage,
+    hit: opponentLevel3HitImage,
+  },
+  4: {
+    attack: opponentLevel4AttackImage,
+    default: opponentLevel4DefaultImage,
+    hit: opponentLevel4HitImage,
+  },
+  5: {
+    attack: opponentLevel5AttackImage,
+    default: opponentLevel5DefaultImage,
+    hit: opponentLevel5HitImage,
+  },
+  6: {
+    attack: opponentLevel6AttackImage,
+    default: opponentLevel6DefaultImage,
+    hit: opponentLevel6HitImage,
+  },
+  7: {
+    attack: opponentLevel7AttackImage,
+    default: opponentLevel7DefaultImage,
+    hit: opponentLevel7HitImage,
+  },
+  8: {
+    attack: opponentLevel8AttackImage,
+    default: opponentLevel8DefaultImage,
+    hit: opponentLevel8HitImage,
+  },
+  9: {
+    attack: opponentLevel9AttackImage,
+    default: opponentLevel9DefaultImage,
+    hit: opponentLevel9HitImage,
+  },
+};
 const LEVEL_DESCRIPTIONS = [
   "",
   "1단계: 받아올림 없는 덧셈",
@@ -399,8 +506,68 @@ const LEVEL_DESCRIPTIONS = [
   "4단계: 받아내림 1번 뺄셈",
   "5단계: 받아올림 2~3번 덧셈",
   "6단계: 받아내림 2번 뺄셈",
-  "7단계: 덧셈과 뺄셈 종합"
+  "7단계: 덧셈과 뺄셈 종합",
+  "8단계: 텍스트 해석형 문항",
+  "9단계: 텍스트 해석형 문항",
 ];
+
+const TOTAL_LEVELS = LEVEL_DESCRIPTIONS.length - 1;
+const FINAL_BUILDER_HP = 25;
+const ESTIMATION_SAFE_HP = 40;
+const ATTACK_POSE_DURATION_MS = 850;
+const HIT_POSE_DURATION_MS = 700;
+const ATTACK_MOTION_DURATION_S = 0.4;
+const HIT_MOTION_DURATION_S = 0.5;
+const ESTIMATION_TIME_LIMIT_SECONDS = 20;
+const ESTIMATION_ROUNDING_UNIT = 100;
+const ESTIMATION_MIN_ANSWER = 100;
+const ESTIMATION_MAX_ANSWER = 900;
+const ESTIMATION_MAX_RAW_ANSWER = ESTIMATION_MAX_ANSWER + ESTIMATION_ROUNDING_UNIT / 2 - 1;
+
+function getOpponentEmojiForLevel(level: number) {
+  return LEVEL_OPPONENT_EMOJIS[level] ?? LEVEL_OPPONENT_EMOJIS[LEVEL_OPPONENT_EMOJIS.length - 1];
+}
+
+function digitRange(min: number, max: number) {
+  return Array.from({ length: max - min + 1 }, (_, index) => String(min + index));
+}
+
+const ADD_STORY_TEMPLATES = [
+  (a: number, b: number) =>
+    `연지네 집에서 학교까지 가려면 ${a}걸음을, 학교에서 도서관까지 가려면 ${b}걸음을 걸어야 합니다.\n연지가 집에서 학교를 지나 도서관까지 가려면 모두 몇 걸음을 걸어야 하는지 구해 봅시다.`,
+  (a: number, b: number) =>
+    `도서관 책 정리 봉사에 오전에는 ${a}권, 오후에는 ${b}권의 책을 제자리에 꽂았습니다.\n하루 동안 모두 몇 권의 책을 정리했는지 구해 봅시다.`,
+  (a: number, b: number) =>
+    `운동회 응원 점수를 1반은 ${a}점, 2반은 ${b}점 얻었습니다.\n두 반이 얻은 점수는 모두 몇 점인지 구해 봅시다.`,
+  (a: number, b: number) =>
+    `민준이는 아침에 색종이 ${a}장을 접고, 방과 후에 ${b}장을 더 접었습니다.\n민준이가 접은 색종이는 모두 몇 장인지 구해 봅시다.`,
+];
+
+const SUB_STORY_TEMPLATES = [
+  (a: number, b: number) =>
+    `도윤이네 학교 누리집은 오늘 ${a}명이 방문했고, 어제는 ${b}명이 방문했습니다.\n오늘 누리집을 방문한 사람은 어제보다 몇 명 더 많은지 구해 봅시다.`,
+  (a: number, b: number) =>
+    `학급문고에 책이 ${a}권 있었는데, 친구들이 ${b}권을 빌려 갔습니다.\n지금 남아 있는 책은 몇 권인지 구해 봅시다.`,
+  (a: number, b: number) =>
+    `준호는 스티커를 ${a}장 가지고 있었는데, 동생에게 ${b}장을 나누어 주었습니다.\n준호에게 남은 스티커는 몇 장인지 구해 봅시다.`,
+  (a: number, b: number) =>
+    `체육 시간에 준비한 공은 ${a}개였고, 그중 ${b}개를 사용했습니다.\n아직 사용하지 않은 공은 몇 개인지 구해 봅시다.`,
+];
+
+function sample<T>(items: T[]): T {
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+function createEquationProblem(a: number, b: number, op: '+' | '-', answer: number): Problem {
+  const text = `${a} ${op} ${b}`;
+  return { text, prompt: text, answer, kind: 'equation' };
+}
+
+function createStoryProblem(a: number, b: number, op: '+' | '-', answer: number): Problem {
+  const text = `${a} ${op} ${b}`;
+  const prompt = (op === '+' ? sample(ADD_STORY_TEMPLATES) : sample(SUB_STORY_TEMPLATES))(a, b);
+  return { text, prompt, answer, kind: 'story' };
+}
 
 function countCarries(a: number, b: number): number {
   let carries = 0; let carry = 0; let tempA = a; let tempB = b;
@@ -422,20 +589,275 @@ function countBorrows(a: number, b: number): number {
   return borrows;
 }
 
-function generateProblem(level: number): Problem {
-  let a = 0, b = 0, answer = 0, text = '';
+function isFinalBuilderTurn(opponentHP: number) {
+  return opponentHP <= FINAL_BUILDER_HP;
+}
+
+function canOfferEstimation(opponentHP: number) {
+  return opponentHP > ESTIMATION_SAFE_HP;
+}
+
+function createBuilderProblem(level: number): Problem {
+  const baseTitle = '문제 만들기';
+  let builder: BuilderProblemData;
+
+  switch (level) {
+    case 1:
+      builder = {
+        title: baseTitle,
+        instruction: '받아올림 없는 덧셈',
+        helperText: '0~4',
+        op: '+',
+        topTemplate: '24[a]',
+        bottomTemplate: '31[b]',
+        slots: [
+          { id: 'a', digits: digitRange(0, 4) },
+          { id: 'b', digits: digitRange(0, 4) },
+        ],
+        invalidMessage: '받아올림이 생기지 않도록 빈칸의 수를 다시 골라 주세요.',
+        validate: (left, right) => left + right <= 999 && countCarries(left, right) === 0,
+      };
+      break;
+    case 2:
+      builder = {
+        title: baseTitle,
+        instruction: '받아내림 없는 뺄셈',
+        helperText: '5~9 / 0~4',
+        op: '-',
+        topTemplate: '86[a]',
+        bottomTemplate: '41[b]',
+        slots: [
+          { id: 'a', digits: digitRange(5, 9) },
+          { id: 'b', digits: digitRange(0, 4) },
+        ],
+        invalidMessage: '받아내림이 생기지 않도록 제시된 범위 안에서 다시 만들어 주세요.',
+        validate: (left, right) => left > right && countBorrows(left, right) === 0,
+      };
+      break;
+    case 3:
+      builder = {
+        title: baseTitle,
+        instruction: '받아올림 1번 덧셈',
+        helperText: '5~9',
+        op: '+',
+        topTemplate: '24[a]',
+        bottomTemplate: '31[b]',
+        slots: [
+          { id: 'a', digits: digitRange(5, 9) },
+          { id: 'b', digits: digitRange(5, 9) },
+        ],
+        invalidMessage: '받아올림이 꼭 1번만 생기도록 다시 만들어 주세요.',
+        validate: (left, right) => left + right <= 999 && countCarries(left, right) === 1,
+      };
+      break;
+    case 4:
+      builder = {
+        title: baseTitle,
+        instruction: '받아내림 1번 뺄셈',
+        helperText: '0~4 / 5~9',
+        op: '-',
+        topTemplate: '63[a]',
+        bottomTemplate: '41[b]',
+        slots: [
+          { id: 'a', digits: digitRange(0, 4) },
+          { id: 'b', digits: digitRange(5, 9) },
+        ],
+        invalidMessage: '받아내림이 정확히 1번 생기도록 다시 만들어 주세요.',
+        validate: (left, right) => left > right && countBorrows(left, right) === 1,
+      };
+      break;
+    case 5:
+      builder = {
+        title: baseTitle,
+        instruction: '받아올림 2번 이상 덧셈',
+        helperText: '5~9',
+        op: '+',
+        topTemplate: '48[a]',
+        bottomTemplate: '37[b]',
+        slots: [
+          { id: 'a', digits: digitRange(5, 9) },
+          { id: 'b', digits: digitRange(5, 9) },
+        ],
+        invalidMessage: '받아올림이 2번 이상 생기도록 다시 만들어 주세요.',
+        validate: (left, right) => countCarries(left, right) >= 2,
+      };
+      break;
+    case 6:
+      builder = {
+        title: baseTitle,
+        instruction: '받아내림 2번 뺄셈',
+        helperText: '0~7 / 3~9',
+        op: '-',
+        topTemplate: '53[a]',
+        bottomTemplate: '2[b]8',
+        slots: [
+          { id: 'a', digits: digitRange(0, 7) },
+          { id: 'b', digits: digitRange(3, 9) },
+        ],
+        invalidMessage: '받아내림이 2번 생기도록 다시 만들어 주세요.',
+        validate: (left, right) => left > right && countBorrows(left, right) === 2,
+      };
+      break;
+    case 7:
+      builder = sample([
+        {
+          title: baseTitle,
+          instruction: '자유롭게 덧셈 만들기',
+          helperText: '0~9',
+          op: '+',
+          topTemplate: '36[a]',
+          bottomTemplate: '27[b]',
+          slots: [
+            { id: 'a', digits: digitRange(0, 9) },
+            { id: 'b', digits: digitRange(0, 9) },
+          ],
+          invalidMessage: '빈칸을 채워 덧셈 문제를 완성해 주세요.',
+          validate: (left, right) => left + right <= 999,
+        },
+        {
+          title: baseTitle,
+          instruction: '자유롭게 뺄셈 만들기',
+          helperText: '0~9 / 0~7',
+          op: '-',
+          topTemplate: '84[a]',
+          bottomTemplate: '3[b]5',
+          slots: [
+            { id: 'a', digits: digitRange(0, 9) },
+            { id: 'b', digits: digitRange(0, 7) },
+          ],
+          invalidMessage: '뺄셈이 되도록 알맞은 수를 넣어 주세요.',
+          validate: (left, right) => left > right,
+        },
+      ]);
+      break;
+    case 8:
+      builder = {
+        title: '이야기 문제 만들기',
+        instruction: '이야기식 덧셈 만들기',
+        helperText: '0~9',
+        op: '+',
+        topTemplate: '37[a]',
+        bottomTemplate: '24[b]',
+        slots: [
+          { id: 'a', digits: digitRange(0, 9) },
+          { id: 'b', digits: digitRange(0, 9) },
+        ],
+        invalidMessage: '빈칸에 숫자를 넣어 이야기식 문제를 완성해 주세요.',
+        validate: (left, right) => left + right <= 999,
+      };
+      break;
+    case 9:
+    default:
+      builder = {
+        title: '이야기 문제 만들기',
+        instruction: '이야기식 뺄셈 만들기',
+        helperText: '0~9',
+        op: '-',
+        topTemplate: '94[a]',
+        bottomTemplate: '3[b]6',
+        slots: [
+          { id: 'a', digits: digitRange(0, 9) },
+          { id: 'b', digits: digitRange(0, 9) },
+        ],
+        invalidMessage: '뺄셈이 되도록 빈칸의 수를 다시 골라 주세요.',
+        validate: (left, right) => left > right,
+      };
+      break;
+  }
+
+  return {
+    text: '',
+    prompt: builder.title,
+    answer: 0,
+    kind: 'builder',
+    builder,
+  };
+}
+
+function generateRegularProblem(level: number): Problem {
+  let a = 0, b = 0, answer = 0;
+  let op: '+' | '-' = '+';
   let valid = false;
+
+  if (level >= 8) {
+    const isAdd = Math.random() > 0.5;
+
+    while (!valid) {
+      a = Math.floor(Math.random() * 900) + 100;
+      b = Math.floor(Math.random() * 900) + 100;
+
+      if (isAdd) {
+        if (a + b <= 1998) {
+          answer = a + b;
+          op = '+';
+          valid = true;
+        }
+      } else if (a > b) {
+        answer = a - b;
+        op = '-';
+        valid = true;
+      }
+    }
+
+    return createStoryProblem(a, b, op, answer);
+  }
+
   while (!valid) {
     a = Math.floor(Math.random() * 900) + 100; b = Math.floor(Math.random() * 900) + 100;
-    if (level === 1) { if (a + b <= 999 && countCarries(a, b) === 0) { valid = true; answer = a + b; text = `${a} + ${b}`; } }
-    else if (level === 2) { if (a > b && countBorrows(a, b) === 0) { valid = true; answer = a - b; text = `${a} - ${b}`; } }
-    else if (level === 3) { if (a + b <= 999 && countCarries(a, b) === 1) { valid = true; answer = a + b; text = `${a} + ${b}`; } }
-    else if (level === 4) { if (a > b && countBorrows(a, b) === 1) { valid = true; answer = a - b; text = `${a} - ${b}`; } }
-    else if (level === 5) { const carries = countCarries(a, b); if (a + b <= 1998 && (carries === 2 || carries === 3)) { valid = true; answer = a + b; text = `${a} + ${b}`; } }
-    else if (level === 6) { if (a > b && countBorrows(a, b) === 2) { valid = true; answer = a - b; text = `${a} - ${b}`; } }
-    else { const isAdd = Math.random() > 0.5; if (isAdd) { answer = a + b; text = `${a} + ${b}`; valid = true; } else { if (a > b) { answer = a - b; text = `${a} - ${b}`; valid = true; } } }
+    if (level === 1) { if (a + b <= 999 && countCarries(a, b) === 0) { valid = true; answer = a + b; op = '+'; } }
+    else if (level === 2) { if (a > b && countBorrows(a, b) === 0) { valid = true; answer = a - b; op = '-'; } }
+    else if (level === 3) { if (a + b <= 999 && countCarries(a, b) === 1) { valid = true; answer = a + b; op = '+'; } }
+    else if (level === 4) { if (a > b && countBorrows(a, b) === 1) { valid = true; answer = a - b; op = '-'; } }
+    else if (level === 5) { const carries = countCarries(a, b); if (a + b <= 1998 && (carries === 2 || carries === 3)) { valid = true; answer = a + b; op = '+'; } }
+    else if (level === 6) { if (a > b && countBorrows(a, b) === 2) { valid = true; answer = a - b; op = '-'; } }
+    else { const isAdd = Math.random() > 0.5; if (isAdd) { answer = a + b; op = '+'; valid = true; } else { if (a > b) { answer = a - b; op = '-'; valid = true; } } }
   }
-  return { text, answer };
+  return createEquationProblem(a, b, op, answer);
+}
+
+function getProblemForTurn(level: number, opponentHP: number): Problem {
+  return isFinalBuilderTurn(opponentHP) ? createBuilderProblem(level) : generateRegularProblem(level);
+}
+
+function fillBuilderTemplate(template: string, slotValues: Record<string, string>, emptyValue = '') {
+  return template.replace(/\[([a-z]+)\]/g, (_, slotId: string) => slotValues[slotId] ?? emptyValue);
+}
+
+function evaluateBuilderProblem(problem: Problem, slotValues: Record<string, string>) {
+  if (problem.kind !== 'builder' || !problem.builder) {
+    return null;
+  }
+
+  for (const slot of problem.builder.slots) {
+    const value = slotValues[slot.id];
+
+    if (!value) {
+      return { status: 'incomplete' as const, message: '빈칸에 숫자를 먼저 넣어 문제를 완성해 주세요.' };
+    }
+
+    if (!slot.digits.includes(value)) {
+      return { status: 'invalid' as const, message: '제시된 범위 안의 숫자만 넣을 수 있어요.' };
+    }
+  }
+
+  const leftText = fillBuilderTemplate(problem.builder.topTemplate, slotValues);
+  const rightText = fillBuilderTemplate(problem.builder.bottomTemplate, slotValues);
+  const left = Number(leftText);
+  const right = Number(rightText);
+
+  if (!Number.isFinite(left) || !Number.isFinite(right)) {
+    return { status: 'invalid' as const, message: '빈칸의 숫자를 다시 확인해 주세요.' };
+  }
+
+  if (!problem.builder.validate(left, right)) {
+    return { status: 'invalid' as const, message: problem.builder.invalidMessage };
+  }
+
+  return {
+    status: 'ready' as const,
+    text: `${left} ${problem.builder.op} ${right}`,
+    answer: problem.builder.op === '+' ? left + right : left - right,
+  };
 }
 
 function shuffleNumbers(values: number[]) {
@@ -449,29 +871,104 @@ function shuffleNumbers(values: number[]) {
   return next;
 }
 
-function createEstimationChoices(answer: number) {
-  const unit = answer < 100 ? 10 : 100;
-  const roundedAnswer = Math.max(unit, Math.round(answer / unit) * unit);
-  const candidates = new Set<number>([roundedAnswer]);
-  const offsets = [-1, 1, -2, 2, -3, 3];
+function renderPromptWithHighlight(text: string) {
+  return text.split(/(\d+)/).map((part, index) =>
+    /^\d+$/.test(part) ? (
+      <span key={`${part}-${index}`} className="font-black text-sky-600">
+        {part}
+      </span>
+    ) : (
+      <React.Fragment key={`${part}-${index}`}>{part}</React.Fragment>
+    ),
+  );
+}
 
-  for (const offset of offsets) {
-    const candidate = roundedAnswer + unit * offset;
-
-    if (candidate > 0) {
-      candidates.add(candidate);
-    }
-
-    if (candidates.size >= 3) break;
+function formatDigitChoices(digits: string[]) {
+  if (digits.length > 1 && Number(digits[digits.length - 1]) - Number(digits[0]) === digits.length - 1) {
+    return `${digits[0]}~${digits[digits.length - 1]}`;
   }
 
-  while (candidates.size < 3) {
-    candidates.add(roundedAnswer + unit * candidates.size);
+  return digits.join(', ');
+}
+
+function BuilderNumberRow({
+  template,
+  slotsById,
+  slotValues,
+  onSlotChange,
+}: {
+  template: string;
+  slotsById: Record<string, BuildSlotConfig>;
+  slotValues: Record<string, string>;
+  onSlotChange: (slotId: string, nextValue: string) => void;
+}) {
+  const tokens = template.match(/\[[a-z]+\]|./g) ?? [];
+
+  return (
+    <div className="flex flex-wrap items-center justify-end gap-3">
+      {tokens.map((token, index) => {
+        const slotMatch = token.match(/^\[([a-z]+)\]$/);
+
+        if (slotMatch) {
+          const slotId = slotMatch[1];
+          const slot = slotsById[slotId];
+
+          return (
+            <input
+              key={`${slotId}-${index}`}
+              type="text"
+              inputMode="numeric"
+              maxLength={1}
+              value={slotValues[slotId] ?? ''}
+              onChange={(event) => onSlotChange(slotId, event.target.value)}
+              placeholder="?"
+              aria-label={`${slotId} 빈칸`}
+              className="h-20 w-20 rounded-[28px] border-4 border-sky-200 bg-sky-50 text-center text-5xl font-black text-sky-700 outline-none transition focus:border-sky-500 md:h-24 md:w-24 md:text-6xl"
+              title={`${formatDigitChoices(slot.digits)} 중에서 넣기`}
+            />
+          );
+        }
+
+        return (
+          <span
+            key={`${token}-${index}`}
+            className="flex h-20 w-20 items-center justify-center rounded-[28px] border-4 border-slate-200 bg-slate-50 text-5xl font-black text-slate-900 md:h-24 md:w-24 md:text-6xl"
+          >
+            {token}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+function createEstimationChoices(answer: number) {
+  const roundedAnswer = clamp(
+    Math.round(answer / ESTIMATION_ROUNDING_UNIT) * ESTIMATION_ROUNDING_UNIT,
+    ESTIMATION_MIN_ANSWER,
+    ESTIMATION_MAX_ANSWER,
+  );
+  const candidates = new Set<number>([roundedAnswer]);
+
+  for (let step = 1; candidates.size < 3; step += 1) {
+    const lower = roundedAnswer - ESTIMATION_ROUNDING_UNIT * step;
+    if (lower >= ESTIMATION_MIN_ANSWER) {
+      candidates.add(lower);
+    }
+
+    if (candidates.size >= 3) {
+      break;
+    }
+
+    const upper = roundedAnswer + ESTIMATION_ROUNDING_UNIT * step;
+    if (upper <= ESTIMATION_MAX_ANSWER) {
+      candidates.add(upper);
+    }
   }
 
   return {
     answer: roundedAnswer,
-    options: shuffleNumbers([...candidates].slice(0, 3)),
+    options: shuffleNumbers([...candidates]),
   };
 }
 
@@ -479,8 +976,9 @@ export default function App() {
   const audioEngineRef = useRef<AudioEngine | null>(null);
   const [gameState, setGameState] = useState<GameState>('start');
   const [level, setLevel] = useState(1);
-  const [problem, setProblem] = useState<Problem>(generateProblem(1));
+  const [problem, setProblem] = useState<Problem>(() => getProblemForTurn(1, 100));
   const [inputValue, setInputValue] = useState('');
+  const [builderSlotValues, setBuilderSlotValues] = useState<Record<string, string>>({});
   const [playerHP, setPlayerHP] = useState(100);
   const [opponentHP, setOpponentHP] = useState(100);
   const [message, setMessage] = useState('야생의 몬스터가 나타났다!');
@@ -532,16 +1030,49 @@ export default function App() {
   const [isOpponentAttacking, setIsOpponentAttacking] = useState(false);
   const [isOpponentHit, setIsOpponentHit] = useState(false);
   const [isPlayerHit, setIsPlayerHit] = useState(false);
+  const playerCharacterImage = isPlayerHit
+    ? playerHitImage
+    : isAttacking
+      ? playerAttackImage
+      : playerDefaultImage;
+  const opponentSpriteSet = LEVEL_OPPONENT_SPRITES[level];
+  const opponentCharacterImage = opponentSpriteSet
+    ? isOpponentHit
+      ? opponentSpriteSet.hit
+      : isOpponentAttacking
+        ? opponentSpriteSet.attack
+        : opponentSpriteSet.default
+    : null;
 
   const [isEstimation, setIsEstimation] = useState(false);
   const [estimationProblem, setEstimationProblem] = useState<{question: string, options: number[], answer: number} | null>(null);
-  const [timeLeft, setTimeLeft] = useState(10);
+  const [timeLeft, setTimeLeft] = useState(ESTIMATION_TIME_LIMIT_SECONDS);
   const [showHint, setShowHint] = useState(false);
-  const isHintForced = level <= 3;
+  const isHintForced = opponentHP > 50;
+  const builderSlotsById =
+    problem.kind === 'builder' && problem.builder
+      ? Object.fromEntries(problem.builder.slots.map((slot) => [slot.id, slot])) as Record<string, BuildSlotConfig>
+      : {};
+  const builderEvaluation = evaluateBuilderProblem(problem, builderSlotValues);
+  const hintProblemText =
+    problem.kind === 'builder'
+      ? builderEvaluation?.status === 'ready'
+        ? builderEvaluation.text
+        : null
+      : problem.text;
 
   useEffect(() => {
-    if (isHintForced) setShowHint(true);
-  }, [problem, level]);
+    setShowHint(isHintForced);
+  }, [problem, isHintForced]);
+
+  useEffect(() => {
+    if (problem.kind === 'builder' && problem.builder) {
+      setBuilderSlotValues(Object.fromEntries(problem.builder.slots.map((slot) => [slot.id, ''])));
+      return;
+    }
+
+    setBuilderSlotValues({});
+  }, [problem]);
 
   useEffect(() => {
     if (isEstimation && timeLeft > 0) {
@@ -560,29 +1091,69 @@ export default function App() {
     setShowHint(prev => !prev);
   };
 
+  const handleBuilderSlotChange = (slotId: string, nextValue: string) => {
+    if (problem.kind !== 'builder' || !problem.builder) return;
+
+    const slot = problem.builder.slots.find((item) => item.id === slotId);
+    if (!slot) return;
+
+    const sanitized = nextValue.replace(/\D/g, '').slice(-1);
+    if (sanitized && !slot.digits.includes(sanitized)) {
+      return;
+    }
+
+    setBuilderSlotValues((prev) => ({ ...prev, [slotId]: sanitized }));
+  };
+
   const selectEstimationOption = (selected: number) => {
     playSound('ui');
     checkEstimation(selected);
   };
 
+  const queueEstimationChallenge = () => {
+    window.setTimeout(() => {
+      triggerEstimation();
+    }, 700);
+  };
+
+  const scheduleNextLevelTransition = (nextLevel: number, shouldQueueEstimation = false) => {
+    window.setTimeout(() => {
+      setIsOpponentHit(false);
+      setIsOpponentAttacking(false);
+      setLevel(nextLevel);
+      setOpponentHP(100);
+      setProblem(getProblemForTurn(nextLevel, 100));
+      queueSound('levelUp', 180);
+      updateMessage(`다음 몬스터 ${CHARACTER_NAMES[(nextLevel - 1) % CHARACTER_NAMES.length]} 등장!`);
+      if (shouldQueueEstimation) {
+        queueEstimationChallenge();
+      }
+    }, HIT_POSE_DURATION_MS);
+  };
+
   const triggerEstimation = () => {
-    const a = Math.floor(Math.random() * 800) + 100;
-    const b = Math.floor(Math.random() * 800) + 100;
-    const isAdd = Math.random() > 0.5;
+    let a = 0;
+    let b = 0;
+    let isAdd = false;
     
     // 초3 교육과정 준수: 결과가 항상 양수가 되도록 보장
-    let answer: number;
-    let question: string;
-    if (isAdd) {
-      answer = a + b;
-      question = `${a} + ${b}`;
-    } else {
+    let answer = 0;
+    let question = '';
+    do {
+      a = Math.floor(Math.random() * 800) + 100;
+      b = Math.floor(Math.random() * 800) + 100;
+      isAdd = Math.random() > 0.5;
+      if (isAdd) {
+        answer = a + b;
+        question = `${a} + ${b}`;
+      } else {
       // 뺄셈인 경우 큰 수에서 작은 수를 뺌
-      const max = Math.max(a, b);
-      const min = Math.min(a, b);
-      answer = max - min;
-      question = `${max} - ${min}`;
-    }
+        const max = Math.max(a, b);
+        const min = Math.min(a, b);
+        answer = max - min;
+        question = `${max} - ${min}`;
+      }
+    } while (answer < ESTIMATION_MIN_ANSWER || answer > ESTIMATION_MAX_RAW_ANSWER);
     
     const estimationChoices = createEstimationChoices(answer);
     
@@ -593,38 +1164,38 @@ export default function App() {
       answer: estimationChoices.answer,
     });
     setIsEstimation(true);
-    setTimeLeft(10);
+    setTimeLeft(ESTIMATION_TIME_LIMIT_SECONDS);
     updateMessage('갑작스러운 어림잡기 도전!');
   };
 
   const checkEstimation = (selected: number) => {
+    const isCorrectEstimation = selected === estimationProblem?.answer;
     setIsEstimation(false);
-    if (selected === estimationProblem?.answer) {
+    setEstimationProblem(null);
+    if (isCorrectEstimation) {
       playSound('correct');
       setIsAttacking(true);
       setTimeout(() => {
         setIsAttacking(false);
         setIsOpponentHit(true);
         playSound('enemyHit');
-        setTimeout(() => setIsOpponentHit(false), 500);
+        setTimeout(() => setIsOpponentHit(false), HIT_POSE_DURATION_MS);
 
         const newOpponentHP = Math.max(0, opponentHP - 40);
         setOpponentHP(newOpponentHP);
         updateMessage('정확한 어림잡기! 공격 성공!');
 
         if (newOpponentHP === 0) {
-          if (level < 7) {
-            setLevel(l => l + 1);
-            setOpponentHP(100);
-            setProblem(generateProblem(level + 1));
-            queueSound('levelUp', 180);
-            updateMessage(`다음 몬스터 ${CHARACTER_NAMES[level % CHARACTER_NAMES.length]} 등장!`);
+          if (level < TOTAL_LEVELS) {
+            scheduleNextLevelTransition(level + 1);
           } else {
             setGameState('win');
             playSound('win');
           }
+        } else {
+          setProblem(getProblemForTurn(level, newOpponentHP));
         }
-      }, 500);
+      }, ATTACK_POSE_DURATION_MS);
     } else {
       playSound('wrong');
       setIsOpponentAttacking(true);
@@ -632,7 +1203,7 @@ export default function App() {
         setIsOpponentAttacking(false);
         setIsPlayerHit(true);
         playSound('playerHit');
-        setTimeout(() => setIsPlayerHit(false), 500);
+        setTimeout(() => setIsPlayerHit(false), HIT_POSE_DURATION_MS);
 
         const newPlayerHP = Math.max(0, playerHP - 30);
         setPlayerHP(newPlayerHP);
@@ -642,16 +1213,22 @@ export default function App() {
           setGameState('lose');
           playSound('lose');
         }
-      }, 500);
+      }, ATTACK_POSE_DURATION_MS);
     }
   };
 
   const checkAnswer = () => {
-    if (Math.random() < 0.15) { // 15% chance
-      triggerEstimation();
-      return;
+    let isCorrect = parseInt(inputValue, 10) === problem.answer;
+
+    if (problem.kind === 'builder') {
+      if (!builderEvaluation || builderEvaluation.status === 'incomplete' || builderEvaluation.status === 'invalid') {
+        playSound('ui');
+        updateMessage(builderEvaluation?.message ?? '빈칸에 숫자를 먼저 넣어 문제를 완성해 주세요.');
+        return;
+      }
+
+      isCorrect = parseInt(inputValue, 10) === builderEvaluation.answer;
     }
-    const isCorrect = parseInt(inputValue) === problem.answer;
     
     if (isCorrect) {
       playSound('correct');
@@ -660,7 +1237,7 @@ export default function App() {
         setIsAttacking(false);
         setIsOpponentHit(true);
         playSound('enemyHit');
-        setTimeout(() => setIsOpponentHit(false), 500);
+        setTimeout(() => setIsOpponentHit(false), HIT_POSE_DURATION_MS);
         
         const damage = 25; // Fixed damage
         const newOpponentHP = Math.max(0, opponentHP - damage);
@@ -668,20 +1245,19 @@ export default function App() {
         updateMessage('공격 성공! 데미지를 입혔다!');
         
         if (newOpponentHP === 0) {
-          if (level < 7) {
-            setLevel(l => l + 1);
-            setOpponentHP(100);
-            setProblem(generateProblem(level + 1));
-            queueSound('levelUp', 180);
-            updateMessage(`다음 몬스터 ${CHARACTER_NAMES[level % CHARACTER_NAMES.length]} 등장!`);
+          if (level < TOTAL_LEVELS) {
+            scheduleNextLevelTransition(level + 1, canOfferEstimation(100) && Math.random() < 0.15);
           } else {
             setGameState('win');
             playSound('win');
           }
         } else {
-          setProblem(generateProblem(level));
+          setProblem(getProblemForTurn(level, newOpponentHP));
+          if (canOfferEstimation(newOpponentHP) && Math.random() < 0.15) {
+            queueEstimationChallenge();
+          }
         }
-      }, 500);
+      }, ATTACK_POSE_DURATION_MS);
     } else {
       playSound('wrong');
       setIsOpponentAttacking(true);
@@ -689,7 +1265,7 @@ export default function App() {
         setIsOpponentAttacking(false);
         setIsPlayerHit(true);
         playSound('playerHit');
-        setTimeout(() => setIsPlayerHit(false), 500);
+        setTimeout(() => setIsPlayerHit(false), HIT_POSE_DURATION_MS);
         
         const newPlayerHP = Math.max(0, playerHP - 15);
         setPlayerHP(newPlayerHP);
@@ -697,8 +1273,11 @@ export default function App() {
         if (newPlayerHP === 0) {
           setGameState('lose');
           playSound('lose');
+        } else if (canOfferEstimation(opponentHP) && Math.random() < 0.15) {
+          setProblem(getProblemForTurn(level, opponentHP));
+          queueEstimationChallenge();
         }
-      }, 500);
+      }, ATTACK_POSE_DURATION_MS);
     }
     setInputValue('');
   };
@@ -706,10 +1285,15 @@ export default function App() {
   const startGame = () => {
     playSound('start');
     setGameState('playing');
+    setIsAttacking(false);
+    setIsOpponentAttacking(false);
+    setIsOpponentHit(false);
+    setIsPlayerHit(false);
     setLevel(1);
     setPlayerHP(100);
     setOpponentHP(100);
-    setProblem(generateProblem(1));
+    setProblem(getProblemForTurn(1, 100));
+    setInputValue('');
     updateMessage('배틀 시작!');
   };
 
@@ -736,20 +1320,31 @@ export default function App() {
             {gameState === 'playing' ? (
               <motion.div 
                 animate={{ 
-                  x: isOpponentAttacking ? [0, 50, -300, 0] : isOpponentHit ? [0, -30, 30, -30, 0] : 0,
-                  rotate: isOpponentAttacking ? [0, 30, -60, 0] : isOpponentHit ? [0, -45, 45, -45, 0] : 0,
-                  scale: isOpponentAttacking ? [1, 0.7, 2.5, 1] : isOpponentHit ? [1, 1.6, 0.6, 1.3, 1] : 1,
-                  filter: isOpponentAttacking ? 'brightness(1.1) drop-shadow(0 0 5px rgba(239, 68, 68, 0.3))' : isOpponentHit ? 'brightness(10) saturate(10) hue-rotate(180deg) blur(4px) invert(0.5)' : 'brightness(1)'
+                  x: isOpponentAttacking ? [0, 50, -300, 0] : isOpponentHit ? [0, -20, 20, -20, 0] : 0,
+                  rotate: isOpponentAttacking ? [0, 30, -60, 0] : 0,
+                  scale: isOpponentAttacking ? [1, 0.7, 2.5, 1] : isOpponentHit ? [1, 0.9, 1] : 1,
+                  filter: isOpponentAttacking ? 'brightness(1.1) drop-shadow(0 0 5px rgba(239, 68, 68, 0.3))' : isOpponentHit ? 'brightness(2) saturate(2)' : 'brightness(1)'
                 }} 
-                transition={{ duration: isOpponentAttacking ? 0.25 : 0.35, ease: "backOut" }}
-                className="text-[8rem] my-2 relative"
+                transition={{ duration: isOpponentAttacking ? ATTACK_MOTION_DURATION_S : HIT_MOTION_DURATION_S, ease: "backOut" }}
+                className={opponentSpriteSet
+                  ? "relative my-2 flex h-[13rem] w-full items-center justify-center overflow-visible"
+                  : "text-[8rem] my-2 relative"}
               >
-                {level % 2 === 0 ? '👾' : '👹'}
+                {opponentSpriteSet && opponentCharacterImage ? (
+                  <img
+                    src={opponentCharacterImage}
+                    alt={`Level ${level} opponent character`}
+                    className="h-full w-auto object-contain select-none drop-shadow-[0_18px_24px_rgba(15,23,42,0.35)]"
+                    draggable={false}
+                  />
+                ) : (
+                  getOpponentEmojiForLevel(level)
+                )}
                 {isOpponentAttacking && (
                   <motion.div 
                     initial={{ opacity: 0, scale: 0 }}
                     animate={{ opacity: 0.5, scale: 1.2 }}
-                    className="absolute -top-2 -left-2 w-10 h-10 bg-red-300 rounded-full blur-lg"
+                    className="pointer-events-none absolute -top-2 -left-2 w-10 h-10 bg-red-300 rounded-full blur-lg"
                   />
                 )}
               </motion.div>
@@ -780,15 +1375,20 @@ export default function App() {
                 scale: isAttacking ? [1, 0.8, 2, 1] : isPlayerHit ? [1, 0.9, 1] : 1,
                 filter: isAttacking ? 'brightness(5) drop-shadow(0 0 30px rgba(16, 185, 129, 1))' : isPlayerHit ? 'brightness(2) saturate(2)' : 'brightness(1)'
               }} 
-              transition={{ duration: isAttacking ? 0.2 : 0.3, ease: "backOut" }}
-              className="text-[8rem] mt-2 relative"
+              transition={{ duration: isAttacking ? ATTACK_MOTION_DURATION_S : HIT_MOTION_DURATION_S, ease: "backOut" }}
+              className="relative mt-2 flex h-[13rem] w-full items-center justify-center overflow-visible"
             >
-              {'🐹'}
+              <img
+                src={playerCharacterImage}
+                alt="플레이어 캐릭터"
+                className="h-full w-auto object-contain select-none drop-shadow-[0_18px_24px_rgba(15,23,42,0.35)]"
+                draggable={false}
+              />
               {isAttacking && (
                 <motion.div 
                   initial={{ opacity: 0, scale: 0, rotate: 0 }}
                   animate={{ opacity: 1, scale: 2, rotate: 45 }}
-                  className="absolute -top-10 -right-10 w-40 h-10 bg-emerald-400 rounded-full blur-xl"
+                  className="pointer-events-none absolute -top-10 -right-10 h-10 w-40 rounded-full bg-emerald-400 blur-xl"
                 />
               )}
             </motion.div>
@@ -801,19 +1401,31 @@ export default function App() {
 
           {/* Right: Math Problem & Input */}
           <div className="flex-1 min-w-0 flex flex-col gap-3 min-h-0">
-            <div className="bg-slate-900 px-3 py-2 rounded-2xl border-2 border-slate-700 shrink-0">
-              <div className="flex items-center gap-3">
-                <p className="min-w-0 max-w-[38%] truncate text-sm font-black text-yellow-400" title={LEVEL_DESCRIPTIONS[level]}>{LEVEL_DESCRIPTIONS[level]}</p>
-                <div className="flex flex-1 gap-1 min-w-0">
-                {[...Array(10)].map((_, i) => (
-                    <div key={i} className={`h-2 flex-1 rounded-full ${i < level ? 'bg-yellow-500' : 'bg-slate-700'}`} />
-                ))}
+            <div className="flex items-center gap-3 shrink-0">
+              <div className="min-w-0 flex-1 bg-slate-900 px-3 py-2 rounded-2xl border-2 border-slate-700">
+                <div className="flex items-center gap-3">
+                  <p className="min-w-0 max-w-[38%] truncate text-sm font-black text-yellow-400" title={LEVEL_DESCRIPTIONS[level]}>{LEVEL_DESCRIPTIONS[level]}</p>
+                  <div className="flex flex-1 gap-1 min-w-0">
+                  {[...Array(TOTAL_LEVELS)].map((_, i) => (
+                      <div key={i} className={`h-2 flex-1 rounded-full ${i < level ? 'bg-yellow-500' : 'bg-slate-700'}`} />
+                  ))}
+                  </div>
+                  <span className="shrink-0 text-sm font-bold text-slate-300">{level} / {TOTAL_LEVELS}</span>
                 </div>
-                <span className="shrink-0 text-sm font-bold text-slate-300">{level} / 10</span>
               </div>
+
+              {!isEstimation && !isHintForced && (
+                <button
+                  onClick={toggleHint}
+                  className="shrink-0 inline-flex items-center rounded-2xl border border-blue-400/30 bg-blue-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-blue-500"
+                >
+                  {showHint ? '힌트 닫기' : '힌트 보기'}
+                </button>
+              )}
             </div>
 
-            {isEstimation ? (
+            <div className="flex flex-1 min-h-0 flex-col">
+              {isEstimation ? (
               <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4, ease: "easeOut" }} className="bg-slate-900 border-4 border-yellow-500 rounded-3xl p-8 flex flex-col items-center text-center text-slate-100 shadow-inner flex-1 min-h-0 justify-center">
                 <h2 className="text-4xl font-black text-yellow-400 mb-4">어림잡기 도전! ({timeLeft}초)</h2>
                 <p className="text-6xl font-mono font-bold mb-8">{estimationProblem?.question} = ?</p>
@@ -824,25 +1436,110 @@ export default function App() {
                 </div>
               </motion.div>
             ) : showHint ? (
-              <VisualCalculator problemText={problem.text} onControlSound={() => playSound('ui')} />
+              hintProblemText ? (
+                <VisualCalculator problemText={hintProblemText} onControlSound={() => playSound('ui')} />
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.96 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
+                  className="flex flex-1 min-h-0 items-center justify-center rounded-3xl border-4 border-dashed border-sky-300 bg-sky-50 p-8 text-center text-sky-800"
+                >
+                  <div className="max-w-2xl">
+                    <p className="text-3xl font-black">빈칸에 숫자를 먼저 넣어 주세요.</p>
+                    <p className="mt-3 text-lg font-bold leading-8 text-slate-600">문제를 완성하면 단계별 힌트와 블록 계산 화면을 바로 볼 수 있어요.</p>
+                  </div>
+                </motion.div>
+              )
             ) : (
               <motion.div 
-                key={problem.text} 
+                key={`${problem.kind}-${problem.prompt}`} 
                 initial={{ opacity: 0, scale: 0.9, y: 10 }} 
                 animate={{ opacity: 1, scale: 1, y: 0 }} 
                 transition={{ duration: 0.4, ease: "easeOut" }} 
-                className="bg-white border-8 border-slate-200 rounded-3xl p-8 flex flex-col items-center text-[8rem] leading-none font-black font-mono text-slate-900 shadow-inner flex-1 min-h-0 justify-center"
+                className={`bg-white border-8 border-slate-200 rounded-3xl p-8 shadow-inner flex-1 min-h-0 ${
+                  problem.kind !== 'equation'
+                    ? 'flex flex-col justify-center overflow-y-auto'
+                    : 'flex flex-col items-center justify-center text-[8rem] leading-none font-black font-mono text-slate-900'
+                }`}
               >
-                <div className="flex flex-col items-end">
-                  <span>{problem.text.split(' ')[0]}</span>
-                  <div className="flex items-center gap-4">
-                    <span>{problem.text.split(' ')[1]}</span>
-                    <span>{problem.text.split(' ')[2]}</span>
+                {problem.kind === 'story' ? (
+                  <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 text-left text-slate-900">
+                    <div className="inline-flex w-fit items-center rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-sm font-black tracking-[0.18em] text-sky-700">
+                      이야기 문제
+                    </div>
+                    {problem.prompt.split('\n').map((line, index, lines) => (
+                      <p
+                        key={`${line}-${index}`}
+                        className={`break-keep leading-[1.8] ${
+                          index === lines.length - 1
+                            ? 'text-[2rem] font-black text-slate-900 md:text-[2.25rem]'
+                            : 'text-[1.85rem] font-bold text-slate-700 md:text-[2.1rem]'
+                        }`}
+                      >
+                        {renderPromptWithHighlight(line)}
+                      </p>
+                    ))}
                   </div>
-                </div>
-                <div className="w-full h-4 bg-slate-900 my-6 rounded-full"></div>
+                ) : problem.kind === 'builder' && problem.builder ? (
+                  <div className="flex h-full w-full flex-col gap-4 text-left text-slate-900">
+                    <div>
+                      <h2 className="text-4xl font-black text-slate-900 md:text-[3.5rem]">{problem.builder.title}</h2>
+                      <p className="mt-2 break-keep text-[1.5rem] font-bold leading-[1.4] text-slate-700 md:text-[1.9rem]">
+                        {problem.builder.instruction}
+                      </p>
+                    </div>
+
+                    <div className="grid flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
+                      <div className="rounded-[34px] border-4 border-slate-200 bg-slate-50 p-8 md:p-10">
+                        <div className="flex h-full flex-col justify-center gap-6">
+                          <BuilderNumberRow
+                            template={problem.builder.topTemplate}
+                            slotsById={builderSlotsById}
+                            slotValues={builderSlotValues}
+                            onSlotChange={handleBuilderSlotChange}
+                          />
+                          <div className="flex items-center justify-end gap-5">
+                            <span className="text-6xl font-black text-slate-500 md:text-7xl">{problem.builder.op}</span>
+                            <BuilderNumberRow
+                              template={problem.builder.bottomTemplate}
+                              slotsById={builderSlotsById}
+                              slotValues={builderSlotValues}
+                              onSlotChange={handleBuilderSlotChange}
+                            />
+                          </div>
+                        </div>
+                        <div className="mt-8 h-2 rounded-full bg-slate-900" />
+                      </div>
+
+                      <div className="rounded-[30px] border border-sky-200 bg-sky-50 p-4 md:p-5">
+                        <div className="flex flex-col gap-3">
+                          {problem.builder.slots.map((slot, index) => (
+                            <div key={slot.id} className="rounded-2xl border border-sky-200 bg-white px-4 py-4">
+                              <div className="text-sm font-black text-slate-500">빈칸 {index + 1}</div>
+                              <div className="mt-1 text-3xl font-black text-sky-700">{formatDigitChoices(slot.digits)}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex flex-col items-end">
+                      <span>{problem.text.split(' ')[0]}</span>
+                      <div className="flex items-center gap-4">
+                        <span>{problem.text.split(' ')[1]}</span>
+                        <span>{problem.text.split(' ')[2]}</span>
+                      </div>
+                    </div>
+                    <div className="w-full h-4 bg-slate-900 my-6 rounded-full"></div>
+                  </>
+                )}
               </motion.div>
             )}
+            </div>
 
             {!isEstimation && (
               <div className="flex flex-col gap-3 shrink-0">
@@ -853,15 +1550,10 @@ export default function App() {
                   onChange={e => setInputValue(e.target.value)} 
                   onKeyDown={e => { if (e.key === 'Enter') checkAnswer(); }}
                   className="min-w-0 text-center text-3xl font-black px-4 py-3 rounded-2xl bg-slate-700 border-4 border-slate-500 outline-none focus:border-emerald-500" 
-                  placeholder="정답 입력" 
+                  placeholder={problem.kind === 'builder' ? '답' : '정답 입력'} 
                 />
                   <button onClick={checkAnswer} className="min-w-[170px] px-6 py-3 bg-emerald-600 text-white font-black text-xl rounded-2xl hover:bg-emerald-500 flex items-center justify-center gap-2 shadow-lg"><Sword size={22} /> 공격!</button>
                 </div>
-                {!isHintForced && (
-                  <button onClick={toggleHint} className="w-full py-2 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-500 text-sm">
-                    {showHint ? '힌트 닫기' : '힌트 보기'}
-                  </button>
-                )}
               </div>
             )}
           </div>
