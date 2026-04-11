@@ -438,6 +438,43 @@ function generateProblem(level: number): Problem {
   return { text, answer };
 }
 
+function shuffleNumbers(values: number[]) {
+  const next = [...values];
+
+  for (let index = next.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [next[index], next[swapIndex]] = [next[swapIndex], next[index]];
+  }
+
+  return next;
+}
+
+function createEstimationChoices(answer: number) {
+  const unit = answer < 100 ? 10 : 100;
+  const roundedAnswer = Math.max(unit, Math.round(answer / unit) * unit);
+  const candidates = new Set<number>([roundedAnswer]);
+  const offsets = [-1, 1, -2, 2, -3, 3];
+
+  for (const offset of offsets) {
+    const candidate = roundedAnswer + unit * offset;
+
+    if (candidate > 0) {
+      candidates.add(candidate);
+    }
+
+    if (candidates.size >= 3) break;
+  }
+
+  while (candidates.size < 3) {
+    candidates.add(roundedAnswer + unit * candidates.size);
+  }
+
+  return {
+    answer: roundedAnswer,
+    options: shuffleNumbers([...candidates].slice(0, 3)),
+  };
+}
+
 export default function App() {
   const audioEngineRef = useRef<AudioEngine | null>(null);
   const [gameState, setGameState] = useState<GameState>('start');
@@ -547,12 +584,14 @@ export default function App() {
       question = `${max} - ${min}`;
     }
     
-    const roundedAnswer = Math.round(answer / 100) * 100;
-    // 옵션도 양수만 포함하도록 필터링
-    const options = [roundedAnswer - 100, roundedAnswer, roundedAnswer + 100].filter(o => o > 0).sort(() => Math.random() - 0.5);
+    const estimationChoices = createEstimationChoices(answer);
     
     playSound('alert');
-    setEstimationProblem({ question, options, answer: roundedAnswer });
+    setEstimationProblem({
+      question,
+      options: estimationChoices.options,
+      answer: estimationChoices.answer,
+    });
     setIsEstimation(true);
     setTimeLeft(10);
     updateMessage('갑작스러운 어림잡기 도전!');
