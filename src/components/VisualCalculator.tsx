@@ -710,6 +710,32 @@ function genSub(n1: number, n2: number) {
   });
 
   if (state.o1 < state.o2) {
+    if (state.t1 === 0) {
+      state.h1 -= 1;
+      state.borrowH = 1;
+      state.borrowHPos = 'h';
+      state.crossH = true;
+
+      pushStep(steps, state, {
+        title: '백의 자리 1개를 먼저 가져올 준비를 합니다.',
+        detail: '십의 자리가 0이라서 바로 일의 자리로 갈 수 없어, 백 1개를 십의 자리로 보냅니다.',
+        focus: 'h',
+        phase: 'borrow-source',
+      });
+
+      state.borrowHPos = 't';
+      state.t1 += 10;
+
+      pushStep(steps, state, {
+        title: '가져온 백 1개를 십 10개로 풉니다.',
+        detail: `이제 십의 자리에 ${state.t1}개의 십 모형이 생겼습니다.`,
+        focus: 't',
+        phase: 'borrow-target',
+      });
+
+      state.borrowH = 0;
+    }
+
     state.t1 -= 1;
     state.borrowT = 1;
     state.borrowTPos = 't';
