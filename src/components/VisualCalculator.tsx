@@ -2786,15 +2786,23 @@ export const VisualCalculator: React.FC<VisualCalculatorProps> = ({
 
   useEffect(() => () => clearAutoCompleteTimer(), []);
 
-  const step = steps[stepIdx];
-  const previousStep = stepIdx > 0 ? steps[stepIdx - 1] : undefined;
+  const currentStepIdx = steps.length > 0 ? Math.min(stepIdx, steps.length - 1) : 0;
+  const step = steps[currentStepIdx];
+  const previousStep = currentStepIdx > 0 ? steps[currentStepIdx - 1] : undefined;
+
+  if (!step) {
+    return null;
+  }
+
   const transfer = getSimpleTransferVisual(step, op);
   const showThousandsSection = op === '+' && step.thousands > 0;
-  const isPenultimateStep = stepIdx === steps.length - 2;
-  const finalStep = isPenultimateStep ? steps[stepIdx + 1] : undefined;
+  const isPenultimateStep = currentStepIdx === steps.length - 2;
+  const finalStep = isPenultimateStep ? steps[currentStepIdx + 1] : undefined;
 
   const moveStep = (nextIndex: number, source: StepNavigationSource) => {
     clearAutoCompleteTimer();
+    if (steps.length === 0) return;
+
     const safeIndex = Math.min(Math.max(nextIndex, 0), steps.length - 1);
     const nextStep = steps[safeIndex];
     lastMoveSourceRef.current = source;
@@ -2807,11 +2815,11 @@ export const VisualCalculator: React.FC<VisualCalculatorProps> = ({
     if (lastMoveSourceRef.current !== 'forward') return;
 
     autoCompleteTimerRef.current = window.setTimeout(() => {
-      moveStep(stepIdx + 1, 'auto');
+      moveStep(currentStepIdx + 1, 'auto');
     }, AUTO_COMPLETE_CHAIN_DELAY_MS);
 
     return () => clearAutoCompleteTimer();
-  }, [finalStep?.phase, isPenultimateStep, stepIdx, steps, onControlSound]);
+  }, [currentStepIdx, finalStep?.phase, isPenultimateStep, steps, onControlSound]);
 
   return (
     <motion.div
@@ -2822,7 +2830,7 @@ export const VisualCalculator: React.FC<VisualCalculatorProps> = ({
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <AnimatePresence mode="wait">
             <motion.p
-              key={`${stepIdx}-${step.title}`}
+              key={`${currentStepIdx}-${step.title}`}
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
@@ -2836,8 +2844,8 @@ export const VisualCalculator: React.FC<VisualCalculatorProps> = ({
           <div className="flex items-center gap-1.5 self-end sm:self-auto">
             <button
               type="button"
-              onClick={() => moveStep(stepIdx - 1, 'backward')}
-              disabled={stepIdx === 0}
+              onClick={() => moveStep(currentStepIdx - 1, 'backward')}
+              disabled={currentStepIdx === 0}
               aria-label="이전 단계"
               className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-slate-800 text-white transition hover:bg-slate-700 disabled:opacity-45"
             >
@@ -2845,8 +2853,8 @@ export const VisualCalculator: React.FC<VisualCalculatorProps> = ({
             </button>
             <button
               type="button"
-              onClick={() => moveStep(stepIdx + 1, 'forward')}
-              disabled={stepIdx === steps.length - 1}
+              onClick={() => moveStep(currentStepIdx + 1, 'forward')}
+              disabled={currentStepIdx === steps.length - 1}
               aria-label="다음 단계"
               className="flex h-9 w-9 items-center justify-center rounded-xl border border-blue-400/20 bg-blue-600 text-white transition hover:bg-blue-500 disabled:opacity-45"
             >
@@ -2886,7 +2894,7 @@ export const VisualCalculator: React.FC<VisualCalculatorProps> = ({
           <div className="relative min-h-0 flex-1">
             <SimpleTransferOverlay
               transfer={transfer}
-              stepIdx={stepIdx}
+              stepIdx={currentStepIdx}
               showThousandsSection={showThousandsSection}
             />
 
@@ -2899,7 +2907,7 @@ export const VisualCalculator: React.FC<VisualCalculatorProps> = ({
                     step={step}
                     op={op}
                     steps={steps}
-                    stepIdx={stepIdx}
+                    stepIdx={currentStepIdx}
                     pools={placePools[place]}
                     transferRole={
                       transfer ? (transfer.source === place ? 'source' : transfer.target === place ? 'target' : null) : null
