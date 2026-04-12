@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef, useEffectEvent } from 'react';
-import { Sword, Heart, Zap, RotateCcw, Play, Star } from 'lucide-react';
+import { Sword, Heart, RotateCcw, Play, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { VisualCalculator, type VisualControlSound } from './components/VisualCalculator';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import startHeroImage from './assets/start-hero-bear.jpeg';
 import playerAttackImage from './assets/player-attack.png';
 import playerDefaultImage from './assets/player-default.png';
 import playerHitImage from './assets/player-hit.png';
@@ -1985,11 +1986,44 @@ export default function App() {
   return (
     <div className="flex min-h-[100svh] flex-col items-center justify-start overflow-x-hidden overflow-y-auto bg-slate-950 p-3 font-sans text-white sm:p-4 lg:justify-center">
       {gameState === 'start' && (
-        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="relative w-full max-w-2xl rounded-3xl border-4 border-slate-600 bg-slate-800 px-5 py-8 text-center shadow-2xl sm:px-8 sm:py-10 lg:px-12 lg:py-12">
-          <Zap className="mx-auto mb-5 h-20 w-20 animate-pulse text-yellow-400 sm:mb-6 sm:h-24 sm:w-24" />
-          <h1 className="text-5xl font-black mb-6">덧셈과 뺄셈 배틀</h1>
-          <p className="text-xl text-slate-300 mb-10">문제를 풀어 상대를 쓰러뜨리세요!</p>
-          <button onClick={openNamePrompt} className="px-10 py-5 bg-yellow-500 text-slate-900 font-black text-3xl rounded-full hover:bg-yellow-400 transition-all flex items-center gap-4 mx-auto"><Play /> 배틀 시작!</button>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.97, y: 16 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.28, ease: 'easeOut' }}
+          className="relative w-full max-w-5xl overflow-hidden rounded-[2rem] border-4 border-emerald-200/20 bg-[linear-gradient(180deg,rgba(15,23,42,0.98),rgba(30,41,59,0.96))] shadow-[0_30px_80px_rgba(15,23,42,0.48)]"
+        >
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(251,191,36,0.18),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(45,212,191,0.18),transparent_28%)]" />
+
+          <div className="relative flex flex-col gap-5 p-3 sm:gap-6 sm:p-5 lg:p-6">
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.06, duration: 0.28, ease: 'easeOut' }}
+              className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-white/92 p-2 shadow-[0_22px_60px_rgba(15,23,42,0.34)]"
+            >
+              <img
+                src={startHeroImage}
+                alt="곰 마법사와 숲속 친구들이 등장하는 더하기와 빼기 대결 일러스트"
+                className="w-full rounded-[1.6rem] object-cover"
+                draggable={false}
+              />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.12, duration: 0.28, ease: 'easeOut' }}
+              className="flex flex-col items-center px-2 pb-2 pt-1 text-center"
+            >
+              <button
+                onClick={openNamePrompt}
+                className="flex w-full items-center justify-center gap-3 rounded-full bg-yellow-400 px-8 py-4 text-xl font-black text-slate-950 transition hover:scale-[1.01] hover:bg-yellow-300 sm:w-auto sm:min-w-[17rem] sm:px-10 sm:py-5 sm:text-2xl"
+              >
+                <Play className="h-6 w-6" />
+                배틀 시작!
+              </button>
+            </motion.div>
+          </div>
 
           <AnimatePresence>
             {isNamePromptOpen && (
@@ -1997,7 +2031,7 @@ export default function App() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 z-20 flex items-center justify-center rounded-3xl bg-slate-950/75 p-4 backdrop-blur-sm sm:p-6"
+                className="absolute inset-0 z-20 flex items-center justify-center bg-slate-950/76 p-4 backdrop-blur-sm sm:p-6"
               >
                 <motion.form
                   initial={{ opacity: 0, scale: 0.94, y: 12 }}
@@ -2008,32 +2042,38 @@ export default function App() {
                     event.preventDefault();
                     confirmPlayerNameAndStart();
                   }}
-                  className="w-full max-w-md rounded-[2rem] border border-emerald-300/20 bg-slate-900 p-5 text-left shadow-[0_24px_80px_rgba(15,23,42,0.45)] sm:p-7"
+                  className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-emerald-300/20 bg-[linear-gradient(180deg,rgba(15,23,42,0.98),rgba(15,23,42,0.94))] p-5 text-left shadow-[0_24px_80px_rgba(15,23,42,0.45)] sm:p-7"
                 >
-                  <h2 className="text-3xl font-black text-white">이름 입력</h2>
-                  <input
-                    autoFocus
-                    type="text"
-                    value={pendingPlayerName}
-                    onChange={(event) => setPendingPlayerName(event.target.value.slice(0, 10))}
-                    placeholder="이름"
-                    className="mt-4 w-full rounded-2xl border-2 border-slate-600 bg-slate-950 px-4 py-3 text-xl font-black text-white outline-none transition focus:border-emerald-400 sm:mt-5 sm:px-5 sm:py-4 sm:text-2xl"
-                  />
-                  <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
-                    <button
-                      type="button"
-                      onClick={closeNamePrompt}
-                      className="w-full rounded-2xl border border-slate-600 px-5 py-3 text-base font-black text-slate-200 transition hover:bg-slate-800 sm:w-auto"
-                    >
-                      취소
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={!pendingPlayerName.trim()}
-                      className="w-full rounded-2xl bg-emerald-500 px-6 py-3 text-base font-black text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400 sm:w-auto"
-                    >
-                      시작
-                    </button>
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(52,211,153,0.18),transparent_40%),radial-gradient(circle_at_bottom_right,rgba(251,191,36,0.18),transparent_28%)]" />
+
+                  <div className="relative">
+                    <h2 className="text-3xl font-black text-white">이름 입력</h2>
+                    <p className="mt-2 text-sm font-semibold text-slate-300">최대 10글자</p>
+
+                    <input
+                      autoFocus
+                      type="text"
+                      value={pendingPlayerName}
+                      onChange={(event) => setPendingPlayerName(event.target.value.slice(0, 10))}
+                      placeholder="이름"
+                      className="mt-4 w-full rounded-2xl border-2 border-slate-600 bg-slate-950 px-4 py-3 text-xl font-black text-white outline-none transition focus:border-emerald-400 sm:mt-5 sm:px-5 sm:py-4 sm:text-2xl"
+                    />
+                    <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+                      <button
+                        type="button"
+                        onClick={closeNamePrompt}
+                        className="w-full rounded-2xl border border-slate-600 px-5 py-3 text-base font-black text-slate-200 transition hover:bg-slate-800 sm:w-auto"
+                      >
+                        취소
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={!pendingPlayerName.trim()}
+                        className="w-full rounded-2xl bg-emerald-500 px-6 py-3 text-base font-black text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400 sm:w-auto"
+                      >
+                        시작
+                      </button>
+                    </div>
                   </div>
                 </motion.form>
               </motion.div>
