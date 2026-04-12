@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useEffectEvent } from 'react';
 import { Sword, Heart, Zap, RotateCcw, Play, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { VisualCalculator, type VisualControlSound } from './components/VisualCalculator';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import playerAttackImage from './assets/player-attack.png';
 import playerDefaultImage from './assets/player-default.png';
 import playerHitImage from './assets/player-hit.png';
@@ -1339,6 +1340,18 @@ function BuilderNumberRow({
           const slotId = slotMatch[1];
           const slot = slotsById[slotId];
 
+          if (!slot) {
+            return (
+              <span
+                key={`${slotId}-${index}`}
+                className="flex h-14 w-14 items-center justify-center rounded-[22px] border-4 border-rose-200 bg-rose-50 text-3xl font-black text-rose-500 sm:h-20 sm:w-20 sm:rounded-[28px] sm:text-5xl md:h-24 md:w-24 md:text-6xl"
+                title="잘못된 빈칸 설정"
+              >
+                ?
+              </span>
+            );
+          }
+
           return (
             <input
               key={`${slotId}-${index}`}
@@ -2111,10 +2124,43 @@ export default function App() {
               </motion.div>
             ) : canUseHint && showHint ? (
               hintProblemText ? (
-                <VisualCalculator
-                  problemText={hintProblemText}
-                  onControlSound={playVisualControlSound}
-                />
+                <ErrorBoundary
+                  resetKey={hintProblemText}
+                  fallbackRender={({ resetError }) => (
+                    <div className="flex min-h-0 flex-1 items-center justify-center rounded-3xl border-4 border-amber-300 bg-amber-50 p-5 text-center text-slate-900 sm:p-8">
+                      <div className="max-w-2xl">
+                        <p className="text-3xl font-black text-amber-700">힌트를 표시하는 중 문제가 생겼어요</p>
+                        <p className="mt-3 text-lg font-bold leading-8 text-slate-600">
+                          현재 문제는 계속 풀 수 있습니다. 다시 시도하거나 힌트를 닫고 진행해 주세요.
+                        </p>
+                        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+                          <button
+                            type="button"
+                            onClick={resetError}
+                            className="rounded-full bg-amber-500 px-6 py-3 text-base font-black text-slate-950 transition hover:bg-amber-400"
+                          >
+                            힌트 다시 시도
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowHint(false);
+                              resetError();
+                            }}
+                            className="rounded-full border border-slate-300 px-6 py-3 text-base font-black text-slate-700 transition hover:bg-white"
+                          >
+                            문제만 계속하기
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                >
+                  <VisualCalculator
+                    problemText={hintProblemText}
+                    onControlSound={playVisualControlSound}
+                  />
+                </ErrorBoundary>
               ) : (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.96 }}
