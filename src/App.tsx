@@ -801,7 +801,7 @@ function countBorrows(a: number, b: number): number {
 }
 
 function isFinalBuilderTurn(level: number, opponentHP: number) {
-  return level <= 7 && opponentHP <= FINAL_BUILDER_HP;
+  return level <= 6 && opponentHP <= FINAL_BUILDER_HP;
 }
 
 function canOfferEstimation(opponentHP: number) {
@@ -1615,6 +1615,7 @@ export default function App() {
   const [showHint, setShowHint] = useState(false);
   const canUseHint = level <= 7;
   const isHintForced = canUseHint && opponentHP > 50;
+  const shouldRenderHorizontalEquation = level === 7 && !isHintForced && problem.kind === 'equation';
   const builderSlotsById =
     problem.kind === 'builder' && problem.builder
       ? Object.fromEntries(problem.builder.slots.map((slot) => [slot.id, slot])) as Record<string, BuildSlotConfig>
@@ -2284,7 +2285,9 @@ export default function App() {
                 className={`flex min-h-0 flex-1 rounded-3xl border-8 border-slate-200 bg-white p-4 shadow-inner sm:p-6 lg:p-8 ${
                   problem.kind !== 'equation'
                     ? 'flex flex-col justify-center overflow-y-auto'
-                    : 'flex flex-col items-center justify-center text-[clamp(3.5rem,18vw,8rem)] leading-none font-black font-mono text-slate-900'
+                    : shouldRenderHorizontalEquation
+                      ? 'flex items-center justify-center overflow-y-auto text-center text-[clamp(3.6rem,12vw,6.8rem)] leading-tight font-black font-mono text-slate-900'
+                      : 'flex flex-col items-center justify-center text-[clamp(3.5rem,18vw,8rem)] leading-none font-black font-mono text-slate-900'
                 }`}
               >
                 {problem.kind === 'story' ? (
@@ -2359,6 +2362,10 @@ export default function App() {
                       </div>
                     </div>
 
+                  </div>
+                ) : shouldRenderHorizontalEquation ? (
+                  <div className="flex w-full items-center justify-center text-center">
+                    <span>{problem.text}</span>
                   </div>
                 ) : (
                   <>
