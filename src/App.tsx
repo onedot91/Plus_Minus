@@ -649,6 +649,9 @@ const TOTAL_LEVELS = LEVEL_DESCRIPTIONS.length - 1;
 const DEFAULT_PLAYER_NAME = '나';
 const FINAL_BUILDER_HP = 25;
 const ESTIMATION_SAFE_HP = 40;
+const MAX_ZERO_TENS_BORROW_COACHMARKS = 3;
+const ZERO_TENS_BORROW_COACHMARK_TITLE = '생각해보기';
+const ZERO_TENS_BORROW_COACHMARK_TEXT = '십의 자리가 0인 수에서 일의 자리로 어떻게 받아내림을 할까요?';
 const ATTACK_POSE_DURATION_MS = 850;
 const HIT_POSE_DURATION_MS = 700;
 const ATTACK_MOTION_DURATION_S = 0.4;
@@ -1190,7 +1193,20 @@ function createBuilderProblem(level: number): Problem {
   };
 }
 
-function generateRegularProblem(level: number): Problem {
+interface RegularProblemOptions {
+  requireZeroTensBorrow?: boolean;
+}
+
+function isZeroTensBorrowCase(minuend: number, subtrahend: number) {
+  const tensDigit = Math.floor((minuend % 100) / 10);
+  const onesDigit = minuend % 10;
+  const subtrahendOnesDigit = subtrahend % 10;
+
+  return tensDigit === 0 && onesDigit < subtrahendOnesDigit;
+}
+
+function generateRegularProblem(level: number, options: RegularProblemOptions = {}): Problem {
+  const { requireZeroTensBorrow = false } = options;
   let a = 0, b = 0, answer = 0;
   let op: '+' | '-' = '+';
   let valid = false;
@@ -1225,8 +1241,22 @@ function generateRegularProblem(level: number): Problem {
     else if (level === 3) { if (a + b <= 999 && countCarries(a, b) === 1) { valid = true; answer = a + b; op = '+'; } }
     else if (level === 4) { if (a > b && countBorrows(a, b) === 1) { valid = true; answer = a - b; op = '-'; } }
     else if (level === 5) { const carries = countCarries(a, b); if (a + b <= 1998 && (carries === 2 || carries === 3)) { valid = true; answer = a + b; op = '+'; } }
-    else if (level === 6) { if (a > b && countBorrows(a, b) === 2) { valid = true; answer = a - b; op = '-'; } }
-    else { const isAdd = Math.random() > 0.5; if (isAdd) { answer = a + b; op = '+'; valid = true; } else { if (a > b) { answer = a - b; op = '-'; valid = true; } } }
+    else if (level === 6) {
+      if (
+        a > b &&
+        countBorrows(a, b) === 2 &&
+        (!requireZeroTensBorrow || isZeroTensBorrowCase(a, b))
+      ) {
+        valid = true; answer = a - b; op = '-';
+      }
+    }
+    else {
+      const isAdd = requireZeroTensBorrow ? false : Math.random() > 0.5;
+      if (isAdd) { answer = a + b; op = '+'; valid = true; }
+      else if (a > b && (!requireZeroTensBorrow || isZeroTensBorrowCase(a, b))) {
+        answer = a - b; op = '-'; valid = true;
+      }
+    }
   }
   return createEquationProblem(a, b, op, answer);
 }
@@ -1237,6 +1267,30 @@ function getProblemForTurn(level: number, opponentHP: number): Problem {
 
 function fillBuilderTemplate(template: string, slotValues: Record<string, string>, emptyValue = '') {
   return template.replace(/\[([a-z]+)\]/g, (_, slotId: string) => slotValues[slotId] ?? emptyValue);
+}
+
+function parseProblemExpression(text: string) {
+  const match = text.match(/(\d+)\s*([+-])\s*(\d+)/);
+
+  if (!match) {
+    return null;
+  }
+
+  return {
+    left: Number(match[1]),
+    op: match[2] as '+' | '-',
+    right: Number(match[3]),
+  };
+}
+
+function isZeroTensBorrowProblem(problem: Problem) {
+  const expression = parseProblemExpression(problem.text);
+
+  if (!expression || expression.op !== '-') {
+    return false;
+  }
+
+  return isZeroTensBorrowCase(expression.left, expression.right);
 }
 
 function evaluateBuilderProblem(problem: Problem, slotValues: Record<string, string>) {
@@ -1415,6 +1469,7 @@ export default function App() {
   const audioEngineRef = useRef<AudioEngine | null>(null);
   const lowHealthPulsePlayedRef = useRef(false);
   const countdownDangerPlayedRef = useRef(false);
+  const zeroTensBorrowCoachmarkLevelsRef = useRef(new Set<number>());
   const isDeveloperShortcutEnabled = import.meta.env.DEV;
   const [gameState, setGameState] = useState<GameState>('start');
   const [playerName, setPlayerName] = useState(DEFAULT_PLAYER_NAME);
@@ -1428,6 +1483,7 @@ export default function App() {
   const [opponentHP, setOpponentHP] = useState(100);
   const [message, setMessage] = useState(() => getOpponentEntranceMessage(1));
   const [showMsg, setShowMsg] = useState(true);
+  const [problemCoachmark, setProblemCoachmark] = useState<string | null>(null);
 
   const updateMessage = (msg: string) => {
     setMessage(msg);
@@ -1480,6 +1536,34 @@ export default function App() {
 
   const queueSound = (effectName: SoundEffectName, delayMs: number, options: SoundPlaybackOptions = {}) => {
     window.setTimeout(() => playSound(effectName, options), delayMs);
+  };
+
+  const setProblemWithCoachmark = (nextProblem: Problem, nextLevel: number) => {
+    const shouldForceZeroTensBorrowProblem =
+      zeroTensBorrowCoachmarkLevelsRef.current.size < MAX_ZERO_TENS_BORROW_COACHMARKS &&
+      !zeroTensBorrowCoachmarkLevelsRef.current.has(nextLevel) &&
+      nextProblem.kind !== 'builder' &&
+      (nextLevel === 6 || nextLevel === 7);
+
+    const resolvedProblem =
+      shouldForceZeroTensBorrowProblem && !isZeroTensBorrowProblem(nextProblem)
+        ? generateRegularProblem(nextLevel, { requireZeroTensBorrow: true })
+        : nextProblem;
+
+    setProblem(resolvedProblem);
+
+    const shouldShowZeroTensBorrowCoachmark =
+      isZeroTensBorrowProblem(resolvedProblem) &&
+      zeroTensBorrowCoachmarkLevelsRef.current.size < MAX_ZERO_TENS_BORROW_COACHMARKS &&
+      !zeroTensBorrowCoachmarkLevelsRef.current.has(nextLevel);
+
+    if (shouldShowZeroTensBorrowCoachmark) {
+      zeroTensBorrowCoachmarkLevelsRef.current.add(nextLevel);
+      setProblemCoachmark(ZERO_TENS_BORROW_COACHMARK_TEXT);
+      return;
+    }
+
+    setProblemCoachmark(null);
   };
 
   const playVisualControlSound = (sound: VisualControlSound) => {
@@ -1631,7 +1715,7 @@ export default function App() {
       setIsOpponentAttacking(false);
       setLevel(nextLevel);
       setOpponentHP(100);
-      setProblem(getProblemForTurn(nextLevel, 100));
+      setProblemWithCoachmark(getProblemForTurn(nextLevel, 100), nextLevel);
       queueSound('levelUp', 180, {
         gainMultiplier: 1 + nextLevel * 0.025,
         detune: Math.min(nextLevel * 10, 90),
@@ -1711,7 +1795,7 @@ export default function App() {
             playSound('win', { gainMultiplier: 1.08, detune: 20 });
           }
         } else {
-          setProblem(getProblemForTurn(level, newOpponentHP));
+          setProblemWithCoachmark(getProblemForTurn(level, newOpponentHP), level);
         }
       }, ATTACK_POSE_DURATION_MS);
     } else {
@@ -1776,7 +1860,7 @@ export default function App() {
             playSound('win', { gainMultiplier: 1.08, detune: 18 });
           }
         } else {
-          setProblem(getProblemForTurn(level, newOpponentHP));
+          setProblemWithCoachmark(getProblemForTurn(level, newOpponentHP), level);
           if (canOfferEstimation(newOpponentHP) && Math.random() < 0.15) {
             queueEstimationChallenge();
           }
@@ -1873,7 +1957,8 @@ export default function App() {
     setLevel(1);
     setPlayerHP(100);
     setOpponentHP(100);
-    setProblem(getProblemForTurn(1, 100));
+    zeroTensBorrowCoachmarkLevelsRef.current.clear();
+    setProblemWithCoachmark(getProblemForTurn(1, 100), 1);
     setInputValue('');
     updateMessage(getOpponentEntranceMessage(1));
   };
@@ -2110,6 +2195,22 @@ export default function App() {
                 </button>
               )}
             </div>
+
+            {!isEstimation && problemCoachmark && (
+              <div className="rounded-[28px] border border-sky-200 bg-sky-50 px-4 py-3 shadow-sm sm:px-5 sm:py-4">
+                <div className="flex items-start gap-3 sm:gap-4">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-pink-400 text-2xl font-black text-white sm:h-11 sm:w-11">
+                    !
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-2xl font-black text-pink-400 sm:text-[1.9rem]">{ZERO_TENS_BORROW_COACHMARK_TITLE}</p>
+                    <p className="mt-1 break-keep text-lg font-bold leading-8 text-slate-700 sm:text-[1.45rem]">
+                      {problemCoachmark}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="flex flex-1 min-h-0 flex-col">
               {isEstimation ? (
