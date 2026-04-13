@@ -703,9 +703,9 @@ const BATTLE_DIFFICULTY_CONFIG: Record<BattleDifficulty, BattleDifficultyConfig>
   easy: {
     label: '쉬움',
     regularAttackDamage: 30,
-    regularHitDamage: 12,
+    regularHitDamage: 10,
     estimationAttackDamage: 48,
-    estimationHitDamage: 24,
+    estimationHitDamage: 25,
   },
   normal: {
     label: '보통',
@@ -717,9 +717,9 @@ const BATTLE_DIFFICULTY_CONFIG: Record<BattleDifficulty, BattleDifficultyConfig>
   hard: {
     label: '어려움',
     regularAttackDamage: 20,
-    regularHitDamage: 18,
+    regularHitDamage: 20,
     estimationAttackDamage: 32,
-    estimationHitDamage: 36,
+    estimationHitDamage: 35,
   },
 };
 const FINAL_BUILDER_HP = 25;
@@ -1712,6 +1712,8 @@ export default function App() {
     : null;
   const currentOpponentName = getOpponentNameForLevel(level);
   const displayPlayerName = playerName.trim() || DEFAULT_PLAYER_NAME;
+  const trimmedPendingPlayerName = pendingPlayerName.trim();
+  const hasPendingPlayerName = trimmedPendingPlayerName.length > 0;
   const maxHealth = 100;
   const battleDifficultyConfig = BATTLE_DIFFICULTY_CONFIG[battleDifficulty];
   const regularAttackDamage = battleDifficultyConfig.regularAttackDamage;
@@ -2068,7 +2070,7 @@ export default function App() {
 
   const startGame = () => {
     warmAudio();
-    playSound('start', { gainMultiplier: 0.92, detune: 12 });
+    playSound('start', { gainMultiplier: 0.8, detune: 12 });
     setGameState('playing');
     setIsAttacking(false);
     setIsOpponentAttacking(false);
@@ -2102,10 +2104,9 @@ export default function App() {
   };
 
   const confirmPlayerNameAndStart = () => {
-    const trimmedName = pendingPlayerName.trim();
-    if (!trimmedName) return;
+    if (!trimmedPendingPlayerName) return;
 
-    setPlayerName(trimmedName);
+    setPlayerName(trimmedPendingPlayerName);
     setIsNamePromptOpen(false);
     startGame();
   };
@@ -2190,48 +2191,73 @@ export default function App() {
                       placeholder="이름"
                       className="mt-4 w-full rounded-2xl border-2 border-slate-600 bg-slate-950 px-4 py-3 text-xl font-black text-white outline-none transition focus:border-emerald-400 sm:mt-5 sm:px-5 sm:py-4 sm:text-2xl"
                     />
-                    <div className="mt-5 rounded-[1.6rem] border border-emerald-300/20 bg-slate-950/70 p-4">
-                      <div>
-                        <p className="text-sm font-black tracking-[0.18em] text-emerald-300">난이도</p>
-                      </div>
-                      <div className="mt-3 grid grid-cols-3 gap-2">
-                        {BATTLE_DIFFICULTY_ORDER.map((difficultyOption) => {
-                          const difficultyOptionConfig = BATTLE_DIFFICULTY_CONFIG[difficultyOption];
-                          const isSelectedDifficulty = battleDifficulty === difficultyOption;
+                    <AnimatePresence initial={false}>
+                      {hasPendingPlayerName && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0, y: 12 }}
+                          animate={{ opacity: 1, height: 'auto', y: 0 }}
+                          exit={{ opacity: 0, height: 0, y: -8 }}
+                          transition={{ duration: 0.2, ease: 'easeOut' }}
+                          className="overflow-hidden"
+                        >
+                          <div className="mt-5 rounded-[1.6rem] border border-emerald-300/20 bg-slate-950/70 p-4">
+                            <div>
+                              <p className="text-sm font-black tracking-[0.18em] text-emerald-300">난이도</p>
+                            </div>
+                            <div className="mt-3 grid grid-cols-3 gap-2">
+                              {BATTLE_DIFFICULTY_ORDER.map((difficultyOption) => {
+                                const difficultyOptionConfig = BATTLE_DIFFICULTY_CONFIG[difficultyOption];
+                                const isSelectedDifficulty = battleDifficulty === difficultyOption;
 
-                          return (
-                            <button
-                              key={difficultyOption}
-                              type="button"
-                              onClick={() => changeBattleDifficulty(difficultyOption)}
-                              className={`rounded-2xl border px-3 py-3 text-sm font-black transition ${
-                                isSelectedDifficulty
-                                  ? 'border-emerald-300 bg-emerald-400 text-slate-950 shadow-[0_10px_24px_rgba(52,211,153,0.25)]'
-                                  : 'border-slate-600 bg-slate-900 text-slate-200 hover:border-emerald-300/50 hover:bg-slate-800'
-                              }`}
-                            >
-                              {difficultyOptionConfig.label}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                    <div className="mt-5 flex flex-col-reverse gap-3 sm:grid sm:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+                                return (
+                                  <button
+                                    key={difficultyOption}
+                                    type="button"
+                                    onClick={() => changeBattleDifficulty(difficultyOption)}
+                                    className={`rounded-2xl border px-3 py-3 text-sm font-black transition ${
+                                      isSelectedDifficulty
+                                        ? 'border-emerald-300 bg-emerald-400 text-slate-950 shadow-[0_10px_24px_rgba(52,211,153,0.25)]'
+                                        : 'border-slate-600 bg-slate-900 text-slate-200 hover:border-emerald-300/50 hover:bg-slate-800'
+                                    }`}
+                                  >
+                                    {difficultyOptionConfig.label}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                    <div className={`mt-5 flex flex-col-reverse gap-3 ${
+                      hasPendingPlayerName
+                        ? 'sm:grid sm:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]'
+                        : 'sm:flex sm:justify-end'
+                    }`}>
                       <button
                         type="button"
                         onClick={closeNamePrompt}
-                        className="w-full rounded-2xl border border-slate-600 px-5 py-3 text-base font-black text-slate-200 transition hover:bg-slate-800 sm:w-full"
+                        className={`w-full rounded-2xl border border-slate-600 px-5 py-3 text-base font-black text-slate-200 transition hover:bg-slate-800 ${
+                          hasPendingPlayerName ? 'sm:w-full' : 'sm:w-auto sm:min-w-[9rem]'
+                        }`}
                       >
                         취소
                       </button>
-                      <button
-                        type="submit"
-                        onPointerDown={warmAudio}
-                        disabled={!pendingPlayerName.trim()}
-                        className="w-full rounded-2xl bg-emerald-500 px-6 py-3 text-base font-black text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400 sm:w-full"
-                      >
-                        시작
-                      </button>
+                      <AnimatePresence initial={false}>
+                        {hasPendingPlayerName && (
+                          <motion.button
+                            initial={{ opacity: 0, x: 18, scale: 0.98 }}
+                            animate={{ opacity: 1, x: 0, scale: 1 }}
+                            exit={{ opacity: 0, x: 18, scale: 0.98 }}
+                            transition={{ duration: 0.18, ease: 'easeOut' }}
+                            type="submit"
+                            onPointerDown={warmAudio}
+                            className="w-full rounded-2xl bg-emerald-500 px-6 py-3 text-base font-black text-slate-950 transition hover:bg-emerald-400 sm:w-full"
+                          >
+                            시작
+                          </motion.button>
+                        )}
+                      </AnimatePresence>
                     </div>
                   </div>
                 </motion.form>
