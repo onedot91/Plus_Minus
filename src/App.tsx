@@ -1,9 +1,18 @@
 import React, { useState, useEffect, useRef, useEffectEvent } from 'react';
-import { Sword, Heart, RotateCcw, Play, Star } from 'lucide-react';
+import { Sword, Heart, RotateCcw, Play, Sparkles, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { VisualCalculator, type VisualControlSound } from './components/VisualCalculator';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import startHeroImage from './assets/start-hero-bear.jpeg';
+import stage1DefeatSceneImage from './assets/stage1-defeat-scene-cutout.png';
+import stage2DefeatSceneImage from './assets/stage2-defeat-scene.jpeg';
+import stage3DefeatSceneImage from './assets/stage3-defeat-scene-cutout.png';
+import stage4DefeatSceneImage from './assets/stage4-defeat-scene-cutout.png';
+import stage5DefeatSceneImage from './assets/stage5-defeat-scene-cutout.png';
+import stage6DefeatSceneImage from './assets/stage6-defeat-scene-cutout.png';
+import stage7DefeatSceneImage from './assets/stage7-defeat-scene-cutout.png';
+import stage8DefeatSceneImage from './assets/stage8-defeat-scene-cutout.png';
+import stage9DefeatSceneImage from './assets/stage9-defeat-scene-cutout.png';
 import playerAttackImage from './assets/player-attack.png';
 import playerDefaultImage from './assets/player-default.png';
 import playerHitImage from './assets/player-hit.png';
@@ -36,6 +45,8 @@ import opponentLevel9DefaultImage from './assets/opponent-level9-default.png';
 import opponentLevel9HitImage from './assets/opponent-level9-hit.png';
 
 type GameState = 'start' | 'playing' | 'win' | 'lose';
+
+type BattleDifficulty = 'easy' | 'normal' | 'hard';
 
 type ProblemKind = 'equation' | 'story' | 'builder';
 
@@ -70,6 +81,14 @@ interface CharacterSpriteSet {
   attack: string;
   default: string;
   hit: string;
+}
+
+interface BattleDifficultyConfig {
+  label: string;
+  regularAttackDamage: number;
+  regularHitDamage: number;
+  estimationAttackDamage: number;
+  estimationHitDamage: number;
 }
 
 type StoryTemplate = (a: number, b: number) => string;
@@ -305,16 +324,21 @@ const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
     ],
   },
   win: {
-    output: 0.9,
+    output: 0.96,
     layers: [
-      { kind: 'noise', duration: 0.28, gain: 0.009, attack: 0.002, release: 0.18, filter: { type: 'highpass', frequency: 3200, sweepTo: 8800, q: 0.8 }, reverbSend: 0.15 },
-      { kind: 'oscillator', wave: 'triangle', frequency: 523.25, duration: 0.12, gain: 0.026, attack: 0.003, release: 0.08, delaySend: 0.04, reverbSend: 0.1, pan: -0.18 },
-      { kind: 'oscillator', wave: 'sine', frequency: 1046.5, duration: 0.09, gain: 0.01, attack: 0.002, release: 0.06, reverbSend: 0.12, pan: -0.08 },
-      { kind: 'oscillator', wave: 'triangle', startAt: 0.11, frequency: 659.25, duration: 0.12, gain: 0.028, attack: 0.003, release: 0.08, delaySend: 0.04, reverbSend: 0.11, pan: 0.08 },
-      { kind: 'oscillator', wave: 'sine', startAt: 0.11, frequency: 1318.5, duration: 0.09, gain: 0.011, attack: 0.002, release: 0.06, reverbSend: 0.12, pan: 0.18 },
-      { kind: 'oscillator', wave: 'triangle', startAt: 0.22, frequency: 783.99, duration: 0.15, gain: 0.03, attack: 0.003, release: 0.1, delaySend: 0.05, reverbSend: 0.12, pan: -0.04 },
-      { kind: 'oscillator', wave: 'triangle', startAt: 0.34, frequency: 1046.5, duration: 0.22, gain: 0.034, attack: 0.004, release: 0.14, delaySend: 0.06, reverbSend: 0.15, pan: 0.02 },
-      { kind: 'oscillator', wave: 'sine', startAt: 0.34, frequency: 1567.98, duration: 0.16, gain: 0.012, attack: 0.002, release: 0.1, reverbSend: 0.18 },
+      { kind: 'noise', duration: 0.42, gain: 0.01, attack: 0.002, release: 0.28, filter: { type: 'highpass', frequency: 3600, sweepTo: 9800, q: 0.8 }, reverbSend: 0.18, delaySend: 0.04 },
+      { kind: 'oscillator', wave: 'sine', frequency: 261.63, glideTo: 392, duration: 0.24, gain: 0.014, attack: 0.003, release: 0.16, filter: { type: 'lowpass', frequency: 760, sweepTo: 320, q: 0.8 }, reverbSend: 0.08, pan: -0.08 },
+      { kind: 'oscillator', wave: 'sawtooth', frequency: 392, glideTo: 523.25, duration: 0.18, gain: 0.012, attack: 0.003, release: 0.12, filter: { type: 'lowpass', frequency: 2200, sweepTo: 1600, q: 0.85 }, reverbSend: 0.08, delaySend: 0.04, pan: -0.18 },
+      { kind: 'oscillator', wave: 'triangle', frequency: 523.25, duration: 0.16, gain: 0.028, attack: 0.0025, release: 0.11, delaySend: 0.05, reverbSend: 0.12, pan: -0.1 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.012, frequency: 1046.5, duration: 0.12, gain: 0.012, attack: 0.002, release: 0.08, reverbSend: 0.14, pan: 0.06 },
+      { kind: 'oscillator', wave: 'sawtooth', startAt: 0.14, frequency: 659.25, glideTo: 783.99, duration: 0.18, gain: 0.013, attack: 0.0025, release: 0.12, filter: { type: 'lowpass', frequency: 2400, sweepTo: 1750, q: 0.9 }, delaySend: 0.05, reverbSend: 0.12, pan: 0.16 },
+      { kind: 'oscillator', wave: 'triangle', startAt: 0.14, frequency: 783.99, duration: 0.18, gain: 0.03, attack: 0.003, release: 0.12, delaySend: 0.05, reverbSend: 0.13, pan: 0.02 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.16, frequency: 1567.98, duration: 0.12, gain: 0.011, attack: 0.002, release: 0.08, reverbSend: 0.16, pan: 0.18 },
+      { kind: 'oscillator', wave: 'triangle', startAt: 0.3, frequency: 783.99, glideTo: 1046.5, duration: 0.22, gain: 0.032, attack: 0.003, release: 0.14, delaySend: 0.06, reverbSend: 0.14, pan: -0.04 },
+      { kind: 'oscillator', wave: 'sawtooth', startAt: 0.3, frequency: 1046.5, glideTo: 1318.5, duration: 0.24, gain: 0.013, attack: 0.002, release: 0.16, filter: { type: 'lowpass', frequency: 2600, sweepTo: 1900, q: 0.85 }, reverbSend: 0.12, pan: 0.12 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.33, frequency: 2093, duration: 0.16, gain: 0.009, attack: 0.0015, release: 0.1, delaySend: 0.03, reverbSend: 0.18, pan: 0.2 },
+      { kind: 'oscillator', wave: 'triangle', startAt: 0.52, frequency: 1318.5, glideTo: 1567.98, duration: 0.22, gain: 0.024, attack: 0.0025, release: 0.14, delaySend: 0.07, reverbSend: 0.16, pan: 0.05 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.56, frequency: 2637.02, duration: 0.18, gain: 0.007, attack: 0.001, release: 0.12, reverbSend: 0.2, pan: 0.22 },
     ],
   },
 };
@@ -647,7 +671,57 @@ const LEVEL_DESCRIPTIONS = [
 ];
 
 const TOTAL_LEVELS = LEVEL_DESCRIPTIONS.length - 1;
+const DEFEAT_SCENE_IMAGES: Partial<Record<number, string>> = {
+  1: stage1DefeatSceneImage,
+  2: stage2DefeatSceneImage,
+  3: stage3DefeatSceneImage,
+  4: stage4DefeatSceneImage,
+  5: stage5DefeatSceneImage,
+  6: stage6DefeatSceneImage,
+  7: stage7DefeatSceneImage,
+  8: stage8DefeatSceneImage,
+  9: stage9DefeatSceneImage,
+};
+const RECORD_BOARD_URL = 'https://padlet.com/hyong4115_/3-3-77v0oraqzx1gqvn2';
+const VICTORY_CONFETTI = [
+  { left: '6%', top: '12%', className: 'h-3 w-14 rounded-full bg-yellow-300/90', duration: 3.6, delay: 0.15, drift: 10 },
+  { left: '17%', top: '27%', className: 'h-4 w-4 rounded-full bg-amber-100/95', duration: 4.1, delay: 0.75, drift: -8 },
+  { left: '84%', top: '14%', className: 'h-3 w-12 rounded-full bg-rose-300/80', duration: 3.9, delay: 0.4, drift: -12 },
+  { left: '92%', top: '28%', className: 'h-4 w-4 rotate-45 rounded-sm bg-cyan-300/80', duration: 4.4, delay: 0.95, drift: 8 },
+  { left: '11%', top: '61%', className: 'h-3 w-10 rotate-12 rounded-full bg-emerald-300/80', duration: 4.2, delay: 1.1, drift: 6 },
+  { left: '88%', top: '59%', className: 'h-3 w-9 -rotate-12 rounded-full bg-fuchsia-300/75', duration: 3.8, delay: 0.55, drift: -6 },
+] as const;
+const VICTORY_SPARKLES = [
+  { left: '15%', top: '10%', size: 28, delay: 0.2, duration: 2.8, className: 'text-yellow-100/90' },
+  { left: '81%', top: '8%', size: 26, delay: 0.85, duration: 2.6, className: 'text-amber-200/80' },
+  { left: '10%', top: '44%', size: 24, delay: 0.55, duration: 2.9, className: 'text-rose-200/75' },
+  { left: '86%', top: '42%', size: 30, delay: 1.1, duration: 3.1, className: 'text-cyan-200/75' },
+] as const;
 const DEFAULT_PLAYER_NAME = '나';
+const BATTLE_DIFFICULTY_ORDER: BattleDifficulty[] = ['easy', 'normal', 'hard'];
+const BATTLE_DIFFICULTY_CONFIG: Record<BattleDifficulty, BattleDifficultyConfig> = {
+  easy: {
+    label: '쉬움',
+    regularAttackDamage: 30,
+    regularHitDamage: 12,
+    estimationAttackDamage: 48,
+    estimationHitDamage: 24,
+  },
+  normal: {
+    label: '보통',
+    regularAttackDamage: 25,
+    regularHitDamage: 15,
+    estimationAttackDamage: 40,
+    estimationHitDamage: 30,
+  },
+  hard: {
+    label: '어려움',
+    regularAttackDamage: 20,
+    regularHitDamage: 18,
+    estimationAttackDamage: 32,
+    estimationHitDamage: 36,
+  },
+};
 const FINAL_BUILDER_HP = 25;
 const ESTIMATION_SAFE_HP = 40;
 const MAX_ZERO_TENS_BORROW_COACHMARKS = 3;
@@ -1485,6 +1559,7 @@ export default function App() {
   const [message, setMessage] = useState(() => getOpponentEntranceMessage(1));
   const [showMsg, setShowMsg] = useState(true);
   const [problemCoachmark, setProblemCoachmark] = useState<string | null>(null);
+  const [battleDifficulty, setBattleDifficulty] = useState<BattleDifficulty>('normal');
 
   const updateMessage = (msg: string) => {
     setMessage(msg);
@@ -1508,11 +1583,18 @@ export default function App() {
     }
   }, [level, message]);
 
-  useEffect(() => () => {
-    closeAudioEngine(audioEngineRef.current);
+  useEffect(() => {
+    if (!audioEngineRef.current) {
+      audioEngineRef.current = createAudioEngine();
+    }
+
+    return () => {
+      closeAudioEngine(audioEngineRef.current);
+      audioEngineRef.current = null;
+    };
   }, []);
 
-  const playSound = (effectName: SoundEffectName, options: SoundPlaybackOptions = {}) => {
+  const ensureAudioEngine = () => {
     if (
       !audioEngineRef.current ||
       audioEngineRef.current.context.state === 'closed' ||
@@ -1522,7 +1604,20 @@ export default function App() {
       audioEngineRef.current = createAudioEngine();
     }
 
-    const engine = audioEngineRef.current;
+    return audioEngineRef.current;
+  };
+
+  const warmAudio = () => {
+    const engine = ensureAudioEngine();
+    if (!engine || engine.context.state !== 'suspended') {
+      return;
+    }
+
+    void engine.context.resume().catch(() => undefined);
+  };
+
+  const playSound = (effectName: SoundEffectName, options: SoundPlaybackOptions = {}) => {
+    const engine = ensureAudioEngine();
     if (!engine) return;
 
     const startPlayback = () => playEffect(engine, effectName, options);
@@ -1537,6 +1632,15 @@ export default function App() {
 
   const queueSound = (effectName: SoundEffectName, delayMs: number, options: SoundPlaybackOptions = {}) => {
     window.setTimeout(() => playSound(effectName, options), delayMs);
+  };
+
+  const triggerBattleVictory = (detune: number) => {
+    setGameState('win');
+    playSound('win', { gainMultiplier: 1.14, detune });
+    queueSound('levelUp', 240, {
+      gainMultiplier: 0.78,
+      detune: detune + 42,
+    });
   };
 
   const setProblemWithCoachmark = (nextProblem: Problem, nextLevel: number) => {
@@ -1609,6 +1713,11 @@ export default function App() {
   const currentOpponentName = getOpponentNameForLevel(level);
   const displayPlayerName = playerName.trim() || DEFAULT_PLAYER_NAME;
   const maxHealth = 100;
+  const battleDifficultyConfig = BATTLE_DIFFICULTY_CONFIG[battleDifficulty];
+  const regularAttackDamage = battleDifficultyConfig.regularAttackDamage;
+  const regularHitDamage = battleDifficultyConfig.regularHitDamage;
+  const estimationAttackDamage = battleDifficultyConfig.estimationAttackDamage;
+  const estimationHitDamage = battleDifficultyConfig.estimationHitDamage;
 
   const [isEstimation, setIsEstimation] = useState(false);
   const [estimationProblem, setEstimationProblem] = useState<{question: string, options: number[], answer: number} | null>(null);
@@ -1617,6 +1726,12 @@ export default function App() {
   const canUseHint = level <= 7;
   const isHintForced = canUseHint && opponentHP > 50;
   const shouldRenderHorizontalEquation = level === 7 && !isHintForced && problem.kind === 'equation';
+  const isResultScreen = gameState === 'win' || gameState === 'lose';
+  const isWinResult = gameState === 'win';
+  const defeatSceneImage = gameState === 'lose' ? DEFEAT_SCENE_IMAGES[level] ?? null : null;
+  const currentLevelDescription = LEVEL_DESCRIPTIONS[level] ?? `${level}단계`;
+  const finalRecordLabel = gameState === 'win' ? `${level}단계 클리어` : `${level}단계 도달`;
+  const finalRecordTopic = currentLevelDescription.replace(/^\d+단계:\s*/, '');
   const builderSlotsById =
     problem.kind === 'builder' && problem.builder
       ? Object.fromEntries(problem.builder.slots.map((slot) => [slot.id, slot])) as Record<string, BuildSlotConfig>
@@ -1683,6 +1798,11 @@ export default function App() {
   const toggleHint = () => {
     playSound('ui');
     setShowHint(prev => !prev);
+  };
+
+  const changeBattleDifficulty = (nextDifficulty: BattleDifficulty) => {
+    playSound('ui');
+    setBattleDifficulty(nextDifficulty);
   };
 
   const handleBuilderSlotChange = (slotId: string, nextValue: string) => {
@@ -1785,7 +1905,7 @@ export default function App() {
         });
         setTimeout(() => setIsOpponentHit(false), HIT_POSE_DURATION_MS);
 
-        const newOpponentHP = Math.max(0, opponentHP - 40);
+        const newOpponentHP = Math.max(0, opponentHP - estimationAttackDamage);
         setOpponentHP(newOpponentHP);
         updateMessage('정확한 어림잡기! 공격 성공!');
 
@@ -1793,8 +1913,7 @@ export default function App() {
           if (level < TOTAL_LEVELS) {
             scheduleNextLevelTransition(level + 1);
           } else {
-            setGameState('win');
-            playSound('win', { gainMultiplier: 1.08, detune: 20 });
+            triggerBattleVictory(20);
           }
         } else {
           setProblemWithCoachmark(getProblemForTurn(level, newOpponentHP), level);
@@ -1802,7 +1921,7 @@ export default function App() {
       }, ATTACK_POSE_DURATION_MS);
     } else {
       playSound('wrong', {
-        gainMultiplier: previewRemainingHP(playerHP, 30) <= 30 ? 1.08 : 1,
+        gainMultiplier: previewRemainingHP(playerHP, estimationHitDamage) <= 30 ? 1.08 : 1,
         detune: -30,
       });
       setIsOpponentAttacking(true);
@@ -1810,13 +1929,13 @@ export default function App() {
         setIsOpponentAttacking(false);
         setIsPlayerHit(true);
         playSound('playerHit', {
-          gainMultiplier: previewRemainingHP(playerHP, 30) <= 30 ? 1.12 : 1.04,
+          gainMultiplier: previewRemainingHP(playerHP, estimationHitDamage) <= 30 ? 1.12 : 1.04,
           detune: -Math.min(level * 10, 70),
           noisePlaybackRateMultiplier: 0.98,
         });
         setTimeout(() => setIsPlayerHit(false), HIT_POSE_DURATION_MS);
 
-        const newPlayerHP = Math.max(0, playerHP - 30);
+        const newPlayerHP = Math.max(0, playerHP - estimationHitDamage);
         setPlayerHP(newPlayerHP);
         updateMessage('어림잡기 실패! 반격당했다!');
 
@@ -1849,8 +1968,7 @@ export default function App() {
         });
         setTimeout(() => setIsOpponentHit(false), HIT_POSE_DURATION_MS);
         
-        const damage = 25; // Fixed damage
-        const newOpponentHP = Math.max(0, opponentHP - damage);
+        const newOpponentHP = Math.max(0, opponentHP - regularAttackDamage);
         setOpponentHP(newOpponentHP);
         updateMessage('공격 성공! 데미지를 입혔다!');
         
@@ -1858,8 +1976,7 @@ export default function App() {
           if (level < TOTAL_LEVELS) {
             scheduleNextLevelTransition(level + 1, canOfferEstimation(100) && Math.random() < 0.15);
           } else {
-            setGameState('win');
-            playSound('win', { gainMultiplier: 1.08, detune: 18 });
+            triggerBattleVictory(18);
           }
         } else {
           setProblemWithCoachmark(getProblemForTurn(level, newOpponentHP), level);
@@ -1870,7 +1987,7 @@ export default function App() {
       }, ATTACK_POSE_DURATION_MS);
     } else {
       playSound('wrong', {
-        gainMultiplier: previewRemainingHP(playerHP, 15) <= 30 ? 1.06 : 1,
+        gainMultiplier: previewRemainingHP(playerHP, regularHitDamage) <= 30 ? 1.06 : 1,
         detune: -24,
       });
       setIsOpponentAttacking(true);
@@ -1878,13 +1995,13 @@ export default function App() {
         setIsOpponentAttacking(false);
         setIsPlayerHit(true);
         playSound('playerHit', {
-          gainMultiplier: previewRemainingHP(playerHP, 15) <= 30 ? 1.1 : 1.03,
+          gainMultiplier: previewRemainingHP(playerHP, regularHitDamage) <= 30 ? 1.1 : 1.03,
           detune: -Math.min(level * 10, 70),
           noisePlaybackRateMultiplier: 0.98,
         });
         setTimeout(() => setIsPlayerHit(false), HIT_POSE_DURATION_MS);
         
-        const newPlayerHP = Math.max(0, playerHP - 15);
+        const newPlayerHP = Math.max(0, playerHP - regularHitDamage);
         setPlayerHP(newPlayerHP);
         updateMessage('앗! 공격이 빗나갔다! 상대의 반격!');
         if (newPlayerHP === 0) {
@@ -1950,7 +2067,8 @@ export default function App() {
   }, [isDeveloperShortcutEnabled]);
 
   const startGame = () => {
-    playSound('start', { gainMultiplier: 1.04, detune: 12 });
+    warmAudio();
+    playSound('start', { gainMultiplier: 0.92, detune: 12 });
     setGameState('playing');
     setIsAttacking(false);
     setIsOpponentAttacking(false);
@@ -1965,7 +2083,16 @@ export default function App() {
     updateMessage(getOpponentEntranceMessage(1));
   };
 
+  const returnToStartScreen = () => {
+    warmAudio();
+    playSound('ui');
+    setGameState('start');
+    setIsNamePromptOpen(false);
+    setBattleDifficulty('normal');
+  };
+
   const openNamePrompt = () => {
+    warmAudio();
     setPendingPlayerName(playerName === DEFAULT_PLAYER_NAME ? '' : playerName);
     setIsNamePromptOpen(true);
   };
@@ -1984,7 +2111,11 @@ export default function App() {
   };
 
   return (
-    <div className="flex min-h-[100svh] flex-col items-center justify-start overflow-x-hidden overflow-y-auto bg-slate-950 p-3 font-sans text-white sm:p-4 lg:justify-center">
+    <div className={`flex min-h-[100svh] flex-col items-center overflow-x-hidden bg-slate-950 font-sans text-white ${
+      isResultScreen
+        ? 'justify-center overflow-y-hidden p-2 sm:p-3'
+        : 'justify-start overflow-y-auto p-3 sm:p-4 lg:justify-center'
+    }`}>
       {gameState === 'start' && (
         <motion.div
           initial={{ opacity: 0, scale: 0.97, y: 16 }}
@@ -2016,6 +2147,7 @@ export default function App() {
               className="flex flex-col items-center px-2 pb-2 pt-1 text-center"
             >
               <button
+                onPointerDown={warmAudio}
                 onClick={openNamePrompt}
                 className="flex w-full items-center justify-center gap-3 rounded-full bg-yellow-400 px-8 py-4 text-xl font-black text-slate-950 transition hover:scale-[1.01] hover:bg-yellow-300 sm:w-auto sm:min-w-[17rem] sm:px-10 sm:py-5 sm:text-2xl"
               >
@@ -2058,18 +2190,45 @@ export default function App() {
                       placeholder="이름"
                       className="mt-4 w-full rounded-2xl border-2 border-slate-600 bg-slate-950 px-4 py-3 text-xl font-black text-white outline-none transition focus:border-emerald-400 sm:mt-5 sm:px-5 sm:py-4 sm:text-2xl"
                     />
-                    <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+                    <div className="mt-5 rounded-[1.6rem] border border-emerald-300/20 bg-slate-950/70 p-4">
+                      <div>
+                        <p className="text-sm font-black tracking-[0.18em] text-emerald-300">난이도</p>
+                      </div>
+                      <div className="mt-3 grid grid-cols-3 gap-2">
+                        {BATTLE_DIFFICULTY_ORDER.map((difficultyOption) => {
+                          const difficultyOptionConfig = BATTLE_DIFFICULTY_CONFIG[difficultyOption];
+                          const isSelectedDifficulty = battleDifficulty === difficultyOption;
+
+                          return (
+                            <button
+                              key={difficultyOption}
+                              type="button"
+                              onClick={() => changeBattleDifficulty(difficultyOption)}
+                              className={`rounded-2xl border px-3 py-3 text-sm font-black transition ${
+                                isSelectedDifficulty
+                                  ? 'border-emerald-300 bg-emerald-400 text-slate-950 shadow-[0_10px_24px_rgba(52,211,153,0.25)]'
+                                  : 'border-slate-600 bg-slate-900 text-slate-200 hover:border-emerald-300/50 hover:bg-slate-800'
+                              }`}
+                            >
+                              {difficultyOptionConfig.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div className="mt-5 flex flex-col-reverse gap-3 sm:grid sm:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
                       <button
                         type="button"
                         onClick={closeNamePrompt}
-                        className="w-full rounded-2xl border border-slate-600 px-5 py-3 text-base font-black text-slate-200 transition hover:bg-slate-800 sm:w-auto"
+                        className="w-full rounded-2xl border border-slate-600 px-5 py-3 text-base font-black text-slate-200 transition hover:bg-slate-800 sm:w-full"
                       >
                         취소
                       </button>
                       <button
                         type="submit"
+                        onPointerDown={warmAudio}
                         disabled={!pendingPlayerName.trim()}
-                        className="w-full rounded-2xl bg-emerald-500 px-6 py-3 text-base font-black text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400 sm:w-auto"
+                        className="w-full rounded-2xl bg-emerald-500 px-6 py-3 text-base font-black text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400 sm:w-full"
                       >
                         시작
                       </button>
@@ -2214,10 +2373,10 @@ export default function App() {
 
           {/* Right: Math Problem & Input */}
           <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
-            <div className="shrink-0 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="shrink-0 flex flex-col gap-3">
               <div className="min-w-0 flex-1 rounded-2xl border-2 border-slate-700 bg-slate-900 px-3 py-2">
                 <div className="flex items-center gap-2 sm:gap-3">
-                  <p className="min-w-0 max-w-full truncate text-xs font-black text-yellow-400 sm:max-w-[38%] sm:text-sm" title={LEVEL_DESCRIPTIONS[level]}>{LEVEL_DESCRIPTIONS[level]}</p>
+                  <p className="min-w-0 max-w-full truncate text-xs font-black text-yellow-400 sm:max-w-[38%] sm:text-sm" title={currentLevelDescription}>{currentLevelDescription}</p>
                   <div className="flex flex-1 gap-1 min-w-0">
                   {[...Array(TOTAL_LEVELS)].map((_, i) => (
                       <div key={i} className={`h-2 flex-1 rounded-full ${i < level ? 'bg-yellow-500' : 'bg-slate-700'}`} />
@@ -2225,9 +2384,10 @@ export default function App() {
                   </div>
                   <span className="shrink-0 text-xs font-bold text-slate-300 sm:text-sm">{level} / {TOTAL_LEVELS}</span>
                 </div>
-              </div>
+              </div>{/*
 
-              {!isEstimation && canUseHint && !isHintForced && (
+                  <p className="text-xs font-black tracking-[0.18em] text-emerald-300">난이도</p>
+              */}{!isEstimation && canUseHint && !isHintForced && (
                 <button
                   onClick={toggleHint}
                   className="inline-flex w-full shrink-0 items-center justify-center rounded-2xl border border-blue-400/30 bg-blue-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-blue-500 sm:w-auto"
@@ -2443,24 +2603,112 @@ export default function App() {
         </div>
       )}
 
-      {(gameState === 'win' || gameState === 'lose') && (
+      {isResultScreen && (
         <motion.div 
           initial={{ opacity: 0, scale: 0.5 }} 
           animate={{ opacity: 1, scale: 1 }} 
-          className="w-full max-w-2xl rounded-3xl border-4 border-slate-600 bg-slate-800 p-6 text-center shadow-2xl sm:p-10 lg:p-16"
+          className={`relative flex w-full max-w-xl max-h-[calc(100svh-1rem)] flex-col justify-center overflow-hidden rounded-[2.5rem] border-4 p-4 text-center shadow-2xl sm:max-w-2xl sm:p-6 lg:p-8 ${
+            isWinResult
+              ? 'border-yellow-200/35 bg-[radial-gradient(circle_at_top,rgba(250,204,21,0.18),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(34,211,238,0.08),transparent_30%),linear-gradient(180deg,rgba(49,46,129,0.92),rgba(30,41,59,0.98))] shadow-[0_40px_120px_rgba(245,158,11,0.3)]'
+              : 'border-slate-600 bg-slate-800'
+          }`}
         >
+          {isWinResult && (
+            <>
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.16),transparent_24%),radial-gradient(circle_at_50%_32%,rgba(250,204,21,0.22),transparent_28%)]" />
+              <motion.div
+                className="pointer-events-none absolute left-1/2 top-8 h-72 w-72 -translate-x-1/2 rounded-full bg-[conic-gradient(from_0deg,rgba(250,204,21,0),rgba(253,224,71,0.55),rgba(250,204,21,0),rgba(244,114,182,0.35),rgba(250,204,21,0))] blur-[2px]"
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 16, ease: 'linear' }}
+              />
+              <motion.div
+                className="pointer-events-none absolute left-1/2 top-10 h-64 w-64 -translate-x-1/2 rounded-full border border-yellow-100/30"
+                animate={{ scale: [1, 1.08, 1], opacity: [0.5, 0.9, 0.5] }}
+                transition={{ repeat: Infinity, duration: 3.6, ease: 'easeInOut' }}
+              />
+              {VICTORY_CONFETTI.map((item) => (
+                <motion.div
+                  key={`${item.left}-${item.top}`}
+                  className={`pointer-events-none absolute ${item.className}`}
+                  style={{ left: item.left, top: item.top }}
+                  animate={{
+                    y: [0, -10, 0, 8, 0],
+                    x: [0, item.drift, 0],
+                    rotate: [0, 14, -10, 0],
+                    opacity: [0.45, 1, 0.8, 1, 0.45],
+                  }}
+                  transition={{ repeat: Infinity, duration: item.duration, delay: item.delay, ease: 'easeInOut' }}
+                />
+              ))}
+              {VICTORY_SPARKLES.map((item) => (
+                <motion.div
+                  key={`${item.left}-${item.top}-sparkle`}
+                  className={`pointer-events-none absolute ${item.className}`}
+                  style={{ left: item.left, top: item.top }}
+                  animate={{ scale: [0.7, 1.18, 0.7], opacity: [0.2, 1, 0.2], rotate: [0, 16, -16, 0] }}
+                  transition={{ repeat: Infinity, duration: item.duration, delay: item.delay, ease: 'easeInOut' }}
+                >
+                  <Sparkles size={item.size} />
+                </motion.div>
+              ))}
+            </>
+          )}
+
           {gameState === 'win' ? (
-            <motion.div 
-              animate={{ 
-                rotate: [0, -10, 10, -10, 0], 
-                scale: [1, 1.3, 1],
-                filter: ['hue-rotate(0deg)', 'hue-rotate(360deg)']
-              }} 
-              transition={{ repeat: Infinity, duration: 2 }}
-            >
-              <Star className="mx-auto mb-6 h-28 w-28 fill-current text-yellow-400 sm:mb-7 sm:h-36 sm:w-36 lg:mb-8 lg:h-48 lg:w-48" />
-              <h1 className="text-8xl font-black mb-8 text-yellow-400 drop-shadow-lg">배틀 승리!</h1>
-            </motion.div>
+            <div className="relative mb-4 sm:mb-5">
+              <div className="relative mx-auto mb-6 flex h-40 w-40 items-center justify-center sm:h-48 sm:w-48 lg:mb-8 lg:h-56 lg:w-56">
+                <motion.div
+                  className="absolute inset-0 rounded-full bg-yellow-300/25 blur-3xl"
+                  animate={{ scale: [1, 1.18, 1], opacity: [0.55, 0.95, 0.55] }}
+                  transition={{ repeat: Infinity, duration: 2.8, ease: 'easeInOut' }}
+                />
+                <motion.div
+                  className="absolute inset-5 rounded-full border border-yellow-100/40 bg-white/10 backdrop-blur-sm"
+                  animate={{ rotate: 360 }}
+                  transition={{ repeat: Infinity, duration: 18, ease: 'linear' }}
+                />
+                <motion.div
+                  animate={{ rotate: [0, -10, 12, -8, 0], scale: [1, 1.12, 1] }}
+                  transition={{ repeat: Infinity, duration: 3.2, ease: 'easeInOut' }}
+                >
+                  <Star className="h-28 w-28 fill-current text-yellow-300 drop-shadow-[0_0_35px_rgba(253,224,71,0.75)] sm:h-36 sm:w-36 lg:h-44 lg:w-44" />
+                </motion.div>
+              </div>
+              <motion.p
+                className="mb-2 text-sm font-black tracking-[0.55em] text-yellow-100/80 sm:text-base"
+                animate={{ letterSpacing: ['0.45em', '0.6em', '0.45em'], opacity: [0.75, 1, 0.75] }}
+                transition={{ repeat: Infinity, duration: 2.6, ease: 'easeInOut' }}
+              >
+                CHAMPION
+              </motion.p>
+              <motion.h1
+                className="text-[clamp(4.2rem,15vw,7.2rem)] font-black leading-none tracking-[-0.08em] text-transparent bg-[linear-gradient(180deg,#fef9c3_0%,#facc15_36%,#fb7185_100%)] bg-clip-text"
+                style={{ textShadow: '0 18px 40px rgba(251,191,36,0.22)' }}
+                animate={{ scale: [1, 1.04, 1], y: [0, -4, 0] }}
+                transition={{ repeat: Infinity, duration: 2.7, ease: 'easeInOut' }}
+              >
+                배틀 승리!
+              </motion.h1>
+            </div>
+          ) : defeatSceneImage ? (
+            <div className="relative mb-4 sm:mb-5">
+              <motion.div
+                className="mx-auto w-full max-w-[20rem] overflow-hidden rounded-[1.75rem] border border-slate-500/80 bg-slate-900/80 p-2 shadow-[0_22px_60px_rgba(15,23,42,0.4)] sm:max-w-[22rem]"
+                animate={{ y: [0, -6, 0], scale: [1, 1.02, 1] }}
+                transition={{ repeat: Infinity, duration: 3.4, ease: 'easeInOut' }}
+              >
+                <img
+                  src={defeatSceneImage}
+                  alt="1단계 패배 장면"
+                  className="mx-auto aspect-square max-h-[34svh] w-full rounded-[1.35rem] object-contain sm:max-h-[38svh]"
+                  draggable={false}
+                />
+              </motion.div>
+              {/*
+              <h1 className="text-5xl font-black text-slate-300 sm:text-6xl lg:text-7xl">?꾩쟾 醫낅즺</h1>
+            </div>
+              */}
+            </div>
           ) : (
             <motion.div 
               animate={{ 
@@ -2471,10 +2719,38 @@ export default function App() {
               transition={{ repeat: Infinity, duration: 3 }}
             >
               <Heart className="mx-auto mb-6 h-28 w-28 fill-current text-slate-500 sm:mb-7 sm:h-36 sm:w-36 lg:mb-8 lg:h-48 lg:w-48" />
-              <h1 className="text-8xl font-black mb-8 text-slate-400">배틀 패배...</h1>
+              <h1 className="mb-8 text-6xl font-black text-slate-300 sm:text-7xl lg:text-8xl">도전 종료</h1>
             </motion.div>
           )}
-          <button onClick={startGame} className="mx-auto flex w-full items-center justify-center gap-3 rounded-full bg-slate-600 px-8 py-4 text-xl font-black text-white transition-all hover:bg-slate-500 sm:w-auto sm:text-2xl lg:gap-4 lg:px-12 lg:py-6 lg:text-4xl"><RotateCcw size={28} /> 다시하기</button>
+          <div className={`mb-4 rounded-[1.75rem] px-4 py-4 shadow-inner sm:px-6 sm:py-5 ${
+            isWinResult
+              ? 'border border-yellow-100/25 bg-[linear-gradient(180deg,rgba(15,23,42,0.54),rgba(30,41,59,0.74))] shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_0_45px_rgba(250,204,21,0.1)]'
+              : 'border border-slate-500/70 bg-slate-900/80'
+          }`}>
+            <p className={`text-3xl font-black sm:text-4xl ${isWinResult ? 'text-yellow-50' : 'text-white'}`}>{finalRecordLabel}</p>
+            <p className={`mt-2 break-keep text-sm font-bold leading-6 sm:text-lg ${isWinResult ? 'text-yellow-100/80' : 'text-slate-300'}`}>
+              {finalRecordTopic}
+            </p>
+          </div>
+          <div className="mx-auto flex w-full flex-col gap-2 sm:w-auto sm:min-w-[18rem]">
+            <a
+              href={RECORD_BOARD_URL}
+              target="_blank"
+              rel="noreferrer"
+              className={`flex w-full items-center justify-center rounded-full px-6 py-3 text-lg font-black transition-all sm:text-xl lg:px-10 lg:py-4 ${
+                isWinResult
+                  ? 'bg-[linear-gradient(90deg,#facc15_0%,#34d399_100%)] text-slate-950 shadow-[0_18px_40px_rgba(250,204,21,0.28)] hover:scale-[1.01] hover:brightness-105'
+                  : 'bg-emerald-500 text-slate-950 hover:bg-emerald-400'
+              }`}
+            >
+              Padlet에 기록 남기기
+            </a>
+            <button onPointerDown={warmAudio} onClick={returnToStartScreen} className={`flex w-full items-center justify-center gap-3 rounded-full px-6 py-3 text-lg font-black text-white transition-all sm:text-xl lg:gap-4 lg:px-10 lg:py-4 lg:text-2xl ${
+              isWinResult
+                ? 'border border-white/15 bg-white/14 backdrop-blur-sm hover:bg-white/20'
+                : 'bg-slate-600 hover:bg-slate-500'
+            }`}><RotateCcw size={28} /> 다시하기</button>
+          </div>
         </motion.div>
       )}
     </div>
