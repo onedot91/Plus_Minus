@@ -15,7 +15,7 @@ import stage4BaekgeurigoaDefeatSceneImage from './assets/stage4-baekgeurigoa-def
 import stage5DefeatSceneImage from './assets/stage5-defeat-scene-cutout.png';
 import stage5JurdiDefeatSceneImage from './assets/stage5-jurdi-defeat-scene-cutout.png';
 import stage6DefeatSceneImage from './assets/stage6-defeat-scene-cutout.png';
-import stage6AnheunhanDefeatSceneImage from './assets/stage6-anheunhan-defeat-scene-cutout.png';
+import stage6AnheunhanDefeatSceneImage from './assets/stage6-anheunhan-defeat-scene.jpeg';
 import stage7DefeatSceneImage from './assets/stage7-defeat-scene-cutout.png';
 import stage7ArnyaDefeatSceneImage from './assets/stage7-arnya-defeat-scene-cutout.png';
 import stage8DefeatSceneImage from './assets/stage8-defeat-scene-cutout.png';
@@ -130,6 +130,8 @@ interface SpecialOpponentConfig {
   name: string;
   spriteSet: CharacterSpriteSet;
   defeatSceneImage: string;
+  spriteClassName?: string;
+  defeatSceneClassName?: string;
 }
 
 interface SpecialOpponentSelections {
@@ -807,6 +809,7 @@ const LEVEL6_OPPONENT_VARIANTS: Record<Level6OpponentId, SpecialOpponentConfig> 
       hit: opponentLevel6AnheunhanHitImage,
     },
     defeatSceneImage: stage6AnheunhanDefeatSceneImage,
+    defeatSceneClassName: 'scale-[0.94]',
   },
 };
 const LEVEL7_OPPONENT_VARIANTS: Record<Level7OpponentId, SpecialOpponentConfig> = {
@@ -1711,6 +1714,11 @@ function randomIntInRange(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function isEstimationBoundaryValue(value: number) {
+  const lastTwoDigits = Math.abs(value) % ESTIMATION_ROUNDING_UNIT;
+  return lastTwoDigits >= ESTIMATION_BOUNDARY_RANGE_MIN && lastTwoDigits <= ESTIMATION_BOUNDARY_RANGE_MAX;
+}
+
 function renderPromptWithHighlight(text: string, shouldHighlight = true) {
   if (!shouldHighlight) {
     return text;
@@ -1841,8 +1849,7 @@ function createEstimationOperand(anchor: number) {
   const candidates: number[] = [];
 
   for (let value = minValue; value <= maxValue; value += 1) {
-    const lastTwoDigits = value % ESTIMATION_ROUNDING_UNIT;
-    if (lastTwoDigits >= ESTIMATION_BOUNDARY_RANGE_MIN && lastTwoDigits <= ESTIMATION_BOUNDARY_RANGE_MAX) {
+    if (isEstimationBoundaryValue(value)) {
       continue;
     }
 
@@ -1884,6 +1891,7 @@ function createEstimationProblem(): EstimationProblem {
         estimatedAnswer < ESTIMATION_MIN_ANSWER
         || estimatedAnswer > ESTIMATION_MAX_ANSWER
         || exactAnswer > ESTIMATION_MAX_RAW_ANSWER
+        || isEstimationBoundaryValue(exactAnswer)
         || roundToNearestUnit(exactAnswer, ESTIMATION_ROUNDING_UNIT) !== estimatedAnswer
       ) {
         continue;
@@ -1909,6 +1917,7 @@ function createEstimationProblem(): EstimationProblem {
       || estimatedAnswer > ESTIMATION_MAX_ANSWER
       || exactAnswer < ESTIMATION_MIN_ANSWER
       || exactAnswer > ESTIMATION_MAX_RAW_ANSWER
+      || isEstimationBoundaryValue(exactAnswer)
       || roundToNearestUnit(exactAnswer, ESTIMATION_ROUNDING_UNIT) !== estimatedAnswer
     ) {
       continue;
@@ -2084,6 +2093,13 @@ export default function App() {
 
   const [startTime, setStartTime] = useState(Date.now());
   const [isCritical, setIsCritical] = useState(false);
+  const [isShortViewport, setIsShortViewport] = useState(() => {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+
+    return window.innerWidth >= 1024 && window.innerHeight <= 820;
+  });
 
   const [isAttacking, setIsAttacking] = useState(false);
   const [isOpponentAttacking, setIsOpponentAttacking] = useState(false);
@@ -2102,7 +2118,10 @@ export default function App() {
         ? opponentSpriteSet.attack
         : opponentSpriteSet.default
     : null;
+  const currentSpecialOpponent = getSpecialOpponentConfig(level, specialOpponentSelections);
   const currentOpponentName = getOpponentNameForLevel(level, specialOpponentSelections);
+  const opponentImageClassName = currentSpecialOpponent?.spriteClassName ?? '';
+  const defeatSceneImageClassName = currentSpecialOpponent?.defeatSceneClassName ?? '';
   const displayPlayerName = playerName.trim() || DEFAULT_PLAYER_NAME;
   const trimmedPendingPlayerName = pendingPlayerName.trim();
   const hasPendingPlayerName = trimmedPendingPlayerName.length > 0;
@@ -2144,10 +2163,37 @@ export default function App() {
     problem.kind === 'builder'
       ? hasValidAnswerInput && builderEvaluation?.status === 'ready'
       : hasValidAnswerInput;
+  const battleShellResponsiveClass = isShortViewport
+    ? 'lg:h-[calc(100svh-1rem)] lg:gap-3 lg:p-4'
+    : 'lg:h-[90vh] lg:gap-4 lg:p-6';
+  const battleSidebarResponsiveClass = isShortViewport
+    ? 'lg:w-[28%] lg:p-3'
+    : 'lg:w-[29%] lg:p-4';
+  const battleSectionResponsiveClass = isShortViewport ? 'p-3 sm:p-3' : 'p-3 sm:p-4';
+  const battleStageResponsiveClass = isShortViewport
+    ? 'lg:h-[clamp(14rem,29vh,18rem)]'
+    : 'lg:h-[clamp(22rem,44vh,31rem)]';
 
   useEffect(() => {
     setShowHint(isHintForced);
   }, [problem, isHintForced]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const syncViewportDensity = () => {
+      setIsShortViewport(window.innerWidth >= 1024 && window.innerHeight <= 820);
+    };
+
+    syncViewportDensity();
+    window.addEventListener('resize', syncViewportDensity);
+
+    return () => {
+      window.removeEventListener('resize', syncViewportDensity);
+    };
+  }, []);
 
   useEffect(() => {
     if (problem.kind === 'builder' && problem.builder) {
@@ -2649,10 +2695,10 @@ export default function App() {
       )}
 
       {gameState === 'playing' && (
-        <div className="flex w-full max-w-7xl min-h-0 flex-col gap-3 overflow-visible rounded-3xl border-4 border-slate-700 bg-slate-800 p-3 shadow-2xl sm:p-4 lg:h-[90vh] lg:flex-row lg:gap-4 lg:overflow-hidden lg:p-6">
+        <div className={`flex w-full max-w-7xl min-h-0 flex-col gap-3 overflow-visible rounded-3xl border-4 border-slate-700 bg-slate-800 p-3 shadow-2xl sm:p-4 lg:flex-row lg:overflow-hidden ${battleShellResponsiveClass}`}>
           {/* Left: Character Visuals & Messages */}
-          <div className="relative flex w-full min-h-0 flex-col gap-3 overflow-visible rounded-2xl border-2 border-slate-600 bg-slate-900 p-3 lg:w-[29%] lg:overflow-hidden lg:p-4">
-            <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.75rem] border border-slate-700/80 bg-slate-950/70 p-3 shadow-[inset_0_1px_0_rgba(148,163,184,0.08)] sm:p-4">
+          <div className={`relative flex w-full min-h-0 flex-col gap-3 overflow-visible rounded-2xl border-2 border-slate-600 bg-slate-900 p-3 lg:overflow-hidden ${battleSidebarResponsiveClass}`}>
+            <section className={`flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.75rem] border border-slate-700/80 bg-slate-950/70 shadow-[inset_0_1px_0_rgba(148,163,184,0.08)] ${battleSectionResponsiveClass}`}>
               <div className="flex items-center justify-between gap-3 text-sm">
                 <div className="inline-flex items-center gap-2 font-semibold text-slate-300">
                   <Heart className="h-4 w-4 text-red-400" />
@@ -2669,7 +2715,7 @@ export default function App() {
                 />
               </div>
 
-              <div className="relative mt-3 flex h-[clamp(10rem,28vh,15rem)] min-h-0 items-center justify-center overflow-hidden rounded-[1.5rem] border border-red-400/10 bg-[radial-gradient(circle_at_top,rgba(248,113,113,0.14),transparent_52%),linear-gradient(180deg,rgba(15,23,42,0.98),rgba(15,23,42,0.78))] px-2 py-2 sm:h-[clamp(13rem,30vh,18rem)] sm:px-3 sm:py-3 lg:h-[clamp(22rem,44vh,31rem)]">
+              <div className={`relative mt-3 flex h-[clamp(10rem,28vh,15rem)] min-h-0 items-center justify-center overflow-hidden rounded-[1.5rem] border border-red-400/10 bg-[radial-gradient(circle_at_top,rgba(248,113,113,0.14),transparent_52%),linear-gradient(180deg,rgba(15,23,42,0.98),rgba(15,23,42,0.78))] px-2 py-2 sm:h-[clamp(13rem,30vh,18rem)] sm:px-3 sm:py-3 ${battleStageResponsiveClass}`}>
                 <p className="pointer-events-none absolute left-4 top-3 z-10 text-sm font-bold text-red-200/85">
                   {currentOpponentName}
                 </p>
@@ -2687,7 +2733,7 @@ export default function App() {
                     <img
                       src={opponentCharacterImage}
                       alt={`${currentOpponentName} 캐릭터`}
-                      className="h-full max-h-full w-auto max-w-full translate-y-2 object-contain select-none drop-shadow-[0_18px_24px_rgba(15,23,42,0.35)]"
+                      className={`h-full max-h-full w-auto max-w-full translate-y-2 object-contain select-none drop-shadow-[0_18px_24px_rgba(15,23,42,0.35)] ${opponentImageClassName}`}
                       draggable={false}
                     />
                   ) : (
@@ -2726,8 +2772,8 @@ export default function App() {
               </div>
             </div>
 
-            <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.75rem] border border-slate-700/80 bg-slate-950/70 p-3 shadow-[inset_0_1px_0_rgba(148,163,184,0.08)] sm:p-4">
-              <div className="relative flex h-[clamp(10rem,28vh,15rem)] min-h-0 items-center justify-center overflow-hidden rounded-[1.5rem] border border-emerald-400/10 bg-[radial-gradient(circle_at_bottom,rgba(16,185,129,0.14),transparent_54%),linear-gradient(180deg,rgba(15,23,42,0.78),rgba(15,23,42,0.98))] px-2 py-2 sm:h-[clamp(13rem,30vh,18rem)] sm:px-3 sm:py-3 lg:h-[clamp(22rem,44vh,31rem)]">
+            <section className={`flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.75rem] border border-slate-700/80 bg-slate-950/70 shadow-[inset_0_1px_0_rgba(148,163,184,0.08)] ${battleSectionResponsiveClass}`}>
+              <div className={`relative flex h-[clamp(10rem,28vh,15rem)] min-h-0 items-center justify-center overflow-hidden rounded-[1.5rem] border border-emerald-400/10 bg-[radial-gradient(circle_at_bottom,rgba(16,185,129,0.14),transparent_54%),linear-gradient(180deg,rgba(15,23,42,0.78),rgba(15,23,42,0.98))] px-2 py-2 sm:h-[clamp(13rem,30vh,18rem)] sm:px-3 sm:py-3 ${battleStageResponsiveClass}`}>
                 <p
                   className="pointer-events-none absolute left-4 top-3 z-10 max-w-[65%] truncate text-xs font-bold text-emerald-200/85 sm:max-w-[55%] sm:text-sm"
                   title={displayPlayerName}
@@ -2869,6 +2915,7 @@ export default function App() {
                   <VisualCalculator
                     problemText={hintProblemText}
                     onControlSound={playVisualControlSound}
+                    condensed={isShortViewport}
                   />
                 </ErrorBoundary>
               ) : (
@@ -3031,7 +3078,7 @@ export default function App() {
         <motion.div 
           initial={{ opacity: 0, scale: 0.5 }} 
           animate={{ opacity: 1, scale: 1 }} 
-          className={`relative flex w-full max-w-xl max-h-[calc(100svh-1rem)] flex-col justify-center overflow-hidden rounded-[2.5rem] border-4 p-4 text-center shadow-2xl sm:max-w-2xl sm:p-6 lg:p-8 ${
+          className={`relative flex w-full max-w-xl max-h-[calc(100svh-1rem)] flex-col justify-center ${isShortViewport ? 'overflow-x-hidden overflow-y-auto' : 'overflow-hidden'} rounded-[2.5rem] border-4 p-4 text-center shadow-2xl sm:max-w-2xl sm:p-6 lg:p-8 ${
             isWinResult
               ? 'border-yellow-200/35 bg-[radial-gradient(circle_at_top,rgba(250,204,21,0.18),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(34,211,238,0.08),transparent_30%),linear-gradient(180deg,rgba(49,46,129,0.92),rgba(30,41,59,0.98))] shadow-[0_40px_120px_rgba(245,158,11,0.3)]'
               : 'border-slate-600 bg-slate-800'
@@ -3124,7 +3171,7 @@ export default function App() {
                 <img
                   src={defeatSceneImage}
                   alt="1단계 패배 장면"
-                  className="mx-auto aspect-square max-h-[34svh] w-full rounded-[1.35rem] object-contain sm:max-h-[38svh]"
+                  className={`mx-auto aspect-square max-h-[34svh] w-full rounded-[1.35rem] object-contain sm:max-h-[38svh] ${defeatSceneImageClassName}`}
                   draggable={false}
                 />
               </motion.div>

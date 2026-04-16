@@ -54,6 +54,7 @@ interface VisualStep {
 interface VisualCalculatorProps {
   problemText: string;
   onControlSound?: (sound: VisualControlSound) => void;
+  condensed?: boolean;
 }
 
 interface ActionCardData {
@@ -289,11 +290,16 @@ const THOUSAND_CUBE_COLORS: Record<
 };
 
 const SIMPLE_CARD_MIN_HEIGHT_CLASS = 'min-h-[200px] sm:min-h-[220px] md:min-h-[280px]';
+const DENSE_SIMPLE_CARD_MIN_HEIGHT_CLASS = 'min-h-[170px] sm:min-h-[188px] md:min-h-[228px]';
 const SIMPLE_CARD_HEADER_CLASS = 'flex min-h-[24px] items-center justify-between gap-2 md:min-h-[28px]';
 const SIMPLE_CARD_BODY_CLASS =
   'grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_minmax(76px,0.7fr)] gap-2';
 const SIMPLE_OPERAND_ROWS_CLASS =
   'grid h-full min-h-0 grid-rows-[minmax(0,1fr)_1px_minmax(0,1fr)] gap-2';
+
+function getSimpleCardMinHeightClass(compactLayout: boolean) {
+  return compactLayout ? DENSE_SIMPLE_CARD_MIN_HEIGHT_CLASS : SIMPLE_CARD_MIN_HEIGHT_CLASS;
+}
 
 function clampCount(value: number) {
   return Math.max(0, value);
@@ -2357,6 +2363,7 @@ function SimpleThousandsCard({
           ? '올림'
         : '결과'
       : null;
+  const cardMinHeightClass = getSimpleCardMinHeightClass(compactLayout);
   const resultItems = Array.from({ length: resultCount }, (_, index) => ({
     id: `thousands-result-${index}`,
     tone: 'result' as BlockTone,
@@ -2373,7 +2380,7 @@ function SimpleThousandsCard({
         duration: transferRole ? 0.6 : 0.24,
         ease: [0.22, 1, 0.36, 1],
       }}
-      className={`flex min-w-0 flex-col ${compactLayout ? 'gap-1.5 rounded-[20px] p-2 md:p-2.5' : 'gap-2 rounded-[22px] p-2.5 md:p-3'} transition-all ${SIMPLE_CARD_MIN_HEIGHT_CLASS} ${
+      className={`flex min-w-0 flex-col ${compactLayout ? 'gap-1.5 rounded-[20px] p-2 md:p-2.5' : 'gap-2 rounded-[22px] p-2.5 md:p-3'} transition-all ${cardMinHeightClass} ${
         meta.cardBase
       } ${isActive ? meta.cardActive : ''} ${transferShadowClass} ${
         dimmed ? 'opacity-55 saturate-[0.85]' : resultCount === 0 ? 'opacity-70 saturate-[0.82]' : 'opacity-100'
@@ -2583,10 +2590,11 @@ function SimpleFormulaPanel({
   const operatorClass = compactLayout
     ? 'text-[1.35rem] font-black leading-none text-yellow-400 sm:text-[1.75rem] md:text-[2.3rem]'
     : 'text-[1.5rem] font-black leading-none text-yellow-400 sm:text-[1.95rem] md:text-[2.55rem]';
+  const cardMinHeightClass = getSimpleCardMinHeightClass(compactLayout);
 
   return (
     <div
-      className={`flex shrink-0 flex-col rounded-[22px] border border-white/10 bg-slate-800/72 p-2.5 ${panelWidthClass} ${SIMPLE_CARD_MIN_HEIGHT_CLASS} md:p-3`}
+      className={`flex shrink-0 flex-col rounded-[22px] border border-white/10 bg-slate-800/72 p-2.5 ${panelWidthClass} ${cardMinHeightClass} md:p-3`}
     >
       <div aria-hidden="true" className={`${SIMPLE_CARD_HEADER_CLASS} opacity-0`}>
         <div className="text-center text-xs font-black md:text-sm">백</div>
@@ -2672,6 +2680,7 @@ function SimplePlaceCard({
           ? 'shadow-[0_0_32px_rgba(52,211,153,0.16)]'
           : 'shadow-[0_0_32px_rgba(251,191,36,0.16)]'
         : '';
+  const cardMinHeightClass = getSimpleCardMinHeightClass(compactLayout);
 
   return (
     <motion.section
@@ -2688,7 +2697,7 @@ function SimplePlaceCard({
         duration: transferRole ? 0.6 : 0.24,
         ease: [0.22, 1, 0.36, 1],
       }}
-      className={`flex min-w-0 flex-col ${compactLayout ? 'gap-1.5 rounded-[20px] p-2 md:p-2.5' : 'gap-2 rounded-[22px] p-2.5 md:p-3'} transition-all ${SIMPLE_CARD_MIN_HEIGHT_CLASS} ${
+      className={`flex min-w-0 flex-col ${compactLayout ? 'gap-1.5 rounded-[20px] p-2 md:p-2.5' : 'gap-2 rounded-[22px] p-2.5 md:p-3'} transition-all ${cardMinHeightClass} ${
         meta.cardBase
       } ${isFocused ? meta.cardActive : ''} ${transferShadowClass} ${
         dimmed ? 'opacity-55 saturate-[0.85]' : 'opacity-100'
@@ -2753,6 +2762,7 @@ function SimplePlaceCard({
 export const VisualCalculator: React.FC<VisualCalculatorProps> = ({
   problemText,
   onControlSound,
+  condensed = false,
 }) => {
   const { n1, op, n2 } = useMemo(() => parseProblem(problemText), [problemText]);
   const steps = useMemo(
@@ -2822,6 +2832,7 @@ export const VisualCalculator: React.FC<VisualCalculatorProps> = ({
 
   const transfer = getSimpleTransferVisual(step, op);
   const showThousandsSection = op === '+' && step.thousands > 0;
+  const desktopCompactLayout = showThousandsSection || condensed;
   const isPenultimateStep = currentStepIdx === steps.length - 2;
   const finalStep = isPenultimateStep ? steps[currentStepIdx + 1] : undefined;
 
@@ -2850,7 +2861,9 @@ export const VisualCalculator: React.FC<VisualCalculatorProps> = ({
   return (
     <motion.div
       layout
-      className="flex h-full min-h-0 flex-col gap-3 rounded-[28px] border-4 border-slate-700 bg-[linear-gradient(180deg,rgba(15,23,42,0.96),rgba(2,6,23,0.98))] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]"
+      className={`flex h-full min-h-0 flex-col rounded-[28px] border-4 border-slate-700 bg-[linear-gradient(180deg,rgba(15,23,42,0.96),rgba(2,6,23,0.98))] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${
+        condensed ? 'gap-2.5 p-2.5' : 'gap-3 p-3'
+      }`}
     >
       <div className="rounded-[22px] border border-white/10 bg-slate-900/78 px-3 py-2.5">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
@@ -2914,8 +2927,8 @@ export const VisualCalculator: React.FC<VisualCalculatorProps> = ({
           </div>
         </div>
 
-        <div className="hidden min-h-0 flex-1 gap-3 xl:flex">
-          <SimpleFormulaPanel n1={n1} n2={n2} op={op} compactLayout={showThousandsSection} />
+        <div className={`hidden min-h-0 flex-1 xl:flex ${condensed ? 'gap-2' : 'gap-3'}`}>
+          <SimpleFormulaPanel n1={n1} n2={n2} op={op} compactLayout={desktopCompactLayout} />
 
           <div className="relative min-h-0 flex-1">
             <SimpleTransferOverlay
@@ -2925,7 +2938,7 @@ export const VisualCalculator: React.FC<VisualCalculatorProps> = ({
             />
 
             <div className={`grid min-h-0 h-full ${showThousandsSection ? 'grid-cols-4 gap-2 md:gap-2.5' : 'grid-cols-3 gap-2.5 md:gap-3'}`}>
-              {showThousandsSection ? <SimpleThousandsCard step={step} compactLayout /> : null}
+              {showThousandsSection ? <SimpleThousandsCard step={step} compactLayout={desktopCompactLayout} /> : null}
               {PLACE_ORDER.map((place) => (
                 <React.Fragment key={place}>
                   <SimplePlaceCard
@@ -2939,7 +2952,7 @@ export const VisualCalculator: React.FC<VisualCalculatorProps> = ({
                       transfer ? (transfer.source === place ? 'source' : transfer.target === place ? 'target' : null) : null
                     }
                     transferMode={transfer?.mode ?? null}
-                    compactLayout={showThousandsSection}
+                    compactLayout={desktopCompactLayout}
                   />
                 </React.Fragment>
               ))}
