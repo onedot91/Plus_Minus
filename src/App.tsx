@@ -5,38 +5,62 @@ import { VisualCalculator, type VisualControlSound } from './components/VisualCa
 import { ErrorBoundary } from './components/ErrorBoundary';
 import startHeroImage from './assets/start-hero-bear.jpeg';
 import stage1DefeatSceneImage from './assets/stage1-defeat-scene-cutout.png';
+import stage1ChurusigiDefeatSceneImage from './assets/stage1-churusigi-defeat-scene.jpeg';
 import stage2DefeatSceneImage from './assets/stage2-defeat-scene.jpeg';
+import stage2JjangpalDefeatSceneImage from './assets/stage2-jjangpal-defeat-scene.jpeg';
 import stage3DefeatSceneImage from './assets/stage3-defeat-scene-cutout.png';
+import stage3GamjaanigumaDefeatSceneImage from './assets/stage3-gamjaaniguma-defeat-scene-cutout.png';
 import stage4DefeatSceneImage from './assets/stage4-defeat-scene-cutout.png';
+import stage4BaekgeurigoaDefeatSceneImage from './assets/stage4-baekgeurigoa-defeat-scene-cutout.png';
 import stage5DefeatSceneImage from './assets/stage5-defeat-scene-cutout.png';
 import stage6DefeatSceneImage from './assets/stage6-defeat-scene-cutout.png';
+import stage6AnheunhanDefeatSceneImage from './assets/stage6-anheunhan-defeat-scene-cutout.png';
 import stage7DefeatSceneImage from './assets/stage7-defeat-scene-cutout.png';
+import stage7ArnyaDefeatSceneImage from './assets/stage7-arnya-defeat-scene-cutout.png';
 import stage8DefeatSceneImage from './assets/stage8-defeat-scene-cutout.png';
 import stage9DefeatSceneImage from './assets/stage9-defeat-scene-cutout.png';
 import playerAttackImage from './assets/player-attack.png';
 import playerDefaultImage from './assets/player-default.png';
 import playerHitImage from './assets/player-hit.png';
 import opponentLevel1AttackImage from './assets/opponent-level1-attack.png';
+import opponentLevel1ChurusigiAttackImage from './assets/opponent-level1-churusigi-attack-cutout.png';
 import opponentLevel1DefaultImage from './assets/opponent-level1-default.png';
+import opponentLevel1ChurusigiDefaultImage from './assets/opponent-level1-churusigi-default-cutout.png';
 import opponentLevel1HitImage from './assets/opponent-level1-hit.png';
+import opponentLevel1ChurusigiHitImage from './assets/opponent-level1-churusigi-hit-cutout.png';
 import opponentLevel2AttackImage from './assets/opponent-level2-attack.png';
+import opponentLevel2JjangpalAttackImage from './assets/opponent-level2-jjangpal-attack-cutout.png';
 import opponentLevel2DefaultImage from './assets/opponent-level2-default.png';
+import opponentLevel2JjangpalDefaultImage from './assets/opponent-level2-jjangpal-default-cutout.png';
 import opponentLevel2HitImage from './assets/opponent-level2-hit.png';
+import opponentLevel2JjangpalHitImage from './assets/opponent-level2-jjangpal-hit-cutout.png';
 import opponentLevel3AttackImage from './assets/opponent-level3-attack.png';
+import opponentLevel3GamjaanigumaAttackImage from './assets/opponent-level3-gamjaaniguma-attack-cutout.png';
 import opponentLevel3DefaultImage from './assets/opponent-level3-default.png';
+import opponentLevel3GamjaanigumaDefaultImage from './assets/opponent-level3-gamjaaniguma-default-cutout.png';
 import opponentLevel3HitImage from './assets/opponent-level3-hit.png';
+import opponentLevel3GamjaanigumaHitImage from './assets/opponent-level3-gamjaaniguma-hit-cutout.png';
 import opponentLevel4AttackImage from './assets/opponent-level4-attack.png';
+import opponentLevel4BaekgeurigoaAttackImage from './assets/opponent-level4-baekgeurigoa-attack-cutout.png';
 import opponentLevel4DefaultImage from './assets/opponent-level4-default.png';
+import opponentLevel4BaekgeurigoaDefaultImage from './assets/opponent-level4-baekgeurigoa-default-cutout.png';
 import opponentLevel4HitImage from './assets/opponent-level4-hit.png';
+import opponentLevel4BaekgeurigoaHitImage from './assets/opponent-level4-baekgeurigoa-hit-cutout.png';
 import opponentLevel5AttackImage from './assets/opponent-level5-attack.png';
 import opponentLevel5DefaultImage from './assets/opponent-level5-default.png';
 import opponentLevel5HitImage from './assets/opponent-level5-hit.png';
 import opponentLevel6AttackImage from './assets/opponent-level6-attack.png';
+import opponentLevel6AnheunhanAttackImage from './assets/opponent-level6-anheunhan-attack-cutout.png';
 import opponentLevel6DefaultImage from './assets/opponent-level6-default.png';
+import opponentLevel6AnheunhanDefaultImage from './assets/opponent-level6-anheunhan-default-cutout.png';
 import opponentLevel6HitImage from './assets/opponent-level6-hit.png';
+import opponentLevel6AnheunhanHitImage from './assets/opponent-level6-anheunhan-hit-cutout.png';
 import opponentLevel7AttackImage from './assets/opponent-level7-attack.png';
+import opponentLevel7ArnyaAttackImage from './assets/opponent-level7-arnya-attack-cutout.png';
 import opponentLevel7DefaultImage from './assets/opponent-level7-default.png';
+import opponentLevel7ArnyaDefaultImage from './assets/opponent-level7-arnya-default-cutout.png';
 import opponentLevel7HitImage from './assets/opponent-level7-hit.png';
+import opponentLevel7ArnyaHitImage from './assets/opponent-level7-arnya-hit-cutout.png';
 import opponentLevel8AttackImage from './assets/opponent-level8-attack.png';
 import opponentLevel8DefaultImage from './assets/opponent-level8-default.png';
 import opponentLevel8HitImage from './assets/opponent-level8-hit.png';
@@ -77,10 +101,39 @@ interface Problem {
   builder?: BuilderProblemData;
 }
 
+interface EstimationProblem {
+  prompt: string;
+  question: string;
+  options: number[];
+  answer: number;
+}
+
 interface CharacterSpriteSet {
   attack: string;
   default: string;
   hit: string;
+}
+
+type Level1OpponentId = 'jeongichu' | 'churusigi';
+type Level2OpponentId = 'noneunpenggwin' | 'jjangpal';
+type Level3OpponentId = 'romiromi' | 'gamjaaniguma';
+type Level4OpponentId = 'koronan' | 'baekgeurigoa';
+type Level6OpponentId = 'syuppeolboi' | 'anheunhannammae';
+type Level7OpponentId = 'anijeuko' | 'arnya';
+
+interface SpecialOpponentConfig {
+  name: string;
+  spriteSet: CharacterSpriteSet;
+  defeatSceneImage: string;
+}
+
+interface SpecialOpponentSelections {
+  level1: Level1OpponentId;
+  level2: Level2OpponentId;
+  level3: Level3OpponentId;
+  level4: Level4OpponentId;
+  level6: Level6OpponentId;
+  level7: Level7OpponentId;
 }
 
 interface BattleDifficultyConfig {
@@ -347,6 +400,10 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
+function roundToNearestUnit(value: number, unit: number) {
+  return Math.round(value / unit) * unit;
+}
+
 function previewRemainingHP(currentHP: number, damage: number) {
   return Math.max(0, currentHP - damage);
 }
@@ -610,6 +667,140 @@ const LEVEL_OPPONENT_NAMES = [
 ];
 
 const LEVEL_OPPONENT_EMOJIS = ['', '👾', '👹', '👺', '🤖', '👻', '🦖', '🐲', '😈', '👿'];
+const DEFAULT_LEVEL1_OPPONENT_ID: Level1OpponentId = 'jeongichu';
+const DEFAULT_LEVEL2_OPPONENT_ID: Level2OpponentId = 'noneunpenggwin';
+const DEFAULT_LEVEL3_OPPONENT_ID: Level3OpponentId = 'romiromi';
+const DEFAULT_LEVEL4_OPPONENT_ID: Level4OpponentId = 'koronan';
+const DEFAULT_LEVEL6_OPPONENT_ID: Level6OpponentId = 'syuppeolboi';
+const DEFAULT_LEVEL7_OPPONENT_ID: Level7OpponentId = 'anijeuko';
+const DEFAULT_SPECIAL_OPPONENT_SELECTIONS: SpecialOpponentSelections = {
+  level1: DEFAULT_LEVEL1_OPPONENT_ID,
+  level2: DEFAULT_LEVEL2_OPPONENT_ID,
+  level3: DEFAULT_LEVEL3_OPPONENT_ID,
+  level4: DEFAULT_LEVEL4_OPPONENT_ID,
+  level6: DEFAULT_LEVEL6_OPPONENT_ID,
+  level7: DEFAULT_LEVEL7_OPPONENT_ID,
+};
+const LEVEL1_OPPONENT_VARIANTS: Record<Level1OpponentId, SpecialOpponentConfig> = {
+  jeongichu: {
+    name: '전기츄',
+    spriteSet: {
+      attack: opponentLevel1AttackImage,
+      default: opponentLevel1DefaultImage,
+      hit: opponentLevel1HitImage,
+    },
+    defeatSceneImage: stage1DefeatSceneImage,
+  },
+  churusigi: {
+    name: '츄르식이',
+    spriteSet: {
+      attack: opponentLevel1ChurusigiAttackImage,
+      default: opponentLevel1ChurusigiDefaultImage,
+      hit: opponentLevel1ChurusigiHitImage,
+    },
+    defeatSceneImage: stage1ChurusigiDefeatSceneImage,
+  },
+};
+const LEVEL2_OPPONENT_VARIANTS: Record<Level2OpponentId, SpecialOpponentConfig> = {
+  noneunpenggwin: {
+    name: '노는펭귄',
+    spriteSet: {
+      attack: opponentLevel2AttackImage,
+      default: opponentLevel2DefaultImage,
+      hit: opponentLevel2HitImage,
+    },
+    defeatSceneImage: stage2DefeatSceneImage,
+  },
+  jjangpal: {
+    name: '짱팔',
+    spriteSet: {
+      attack: opponentLevel2JjangpalAttackImage,
+      default: opponentLevel2JjangpalDefaultImage,
+      hit: opponentLevel2JjangpalHitImage,
+    },
+    defeatSceneImage: stage2JjangpalDefeatSceneImage,
+  },
+};
+const LEVEL3_OPPONENT_VARIANTS: Record<Level3OpponentId, SpecialOpponentConfig> = {
+  romiromi: {
+    name: '로미로미',
+    spriteSet: {
+      attack: opponentLevel3AttackImage,
+      default: opponentLevel3DefaultImage,
+      hit: opponentLevel3HitImage,
+    },
+    defeatSceneImage: stage3DefeatSceneImage,
+  },
+  gamjaaniguma: {
+    name: '감자아니구마',
+    spriteSet: {
+      attack: opponentLevel3GamjaanigumaAttackImage,
+      default: opponentLevel3GamjaanigumaDefaultImage,
+      hit: opponentLevel3GamjaanigumaHitImage,
+    },
+    defeatSceneImage: stage3GamjaanigumaDefeatSceneImage,
+  },
+};
+const LEVEL4_OPPONENT_VARIANTS: Record<Level4OpponentId, SpecialOpponentConfig> = {
+  koronan: {
+    name: '코로난',
+    spriteSet: {
+      attack: opponentLevel4AttackImage,
+      default: opponentLevel4DefaultImage,
+      hit: opponentLevel4HitImage,
+    },
+    defeatSceneImage: stage4DefeatSceneImage,
+  },
+  baekgeurigoa: {
+    name: '백 그리고 아',
+    spriteSet: {
+      attack: opponentLevel4BaekgeurigoaAttackImage,
+      default: opponentLevel4BaekgeurigoaDefaultImage,
+      hit: opponentLevel4BaekgeurigoaHitImage,
+    },
+    defeatSceneImage: stage4BaekgeurigoaDefeatSceneImage,
+  },
+};
+const LEVEL6_OPPONENT_VARIANTS: Record<Level6OpponentId, SpecialOpponentConfig> = {
+  syuppeolboi: {
+    name: '슈뻘보이',
+    spriteSet: {
+      attack: opponentLevel6AttackImage,
+      default: opponentLevel6DefaultImage,
+      hit: opponentLevel6HitImage,
+    },
+    defeatSceneImage: stage6DefeatSceneImage,
+  },
+  anheunhannammae: {
+    name: '안흔한남매',
+    spriteSet: {
+      attack: opponentLevel6AnheunhanAttackImage,
+      default: opponentLevel6AnheunhanDefaultImage,
+      hit: opponentLevel6AnheunhanHitImage,
+    },
+    defeatSceneImage: stage6AnheunhanDefeatSceneImage,
+  },
+};
+const LEVEL7_OPPONENT_VARIANTS: Record<Level7OpponentId, SpecialOpponentConfig> = {
+  anijeuko: {
+    name: '아니즈코',
+    spriteSet: {
+      attack: opponentLevel7AttackImage,
+      default: opponentLevel7DefaultImage,
+      hit: opponentLevel7HitImage,
+    },
+    defeatSceneImage: stage7DefeatSceneImage,
+  },
+  arnya: {
+    name: '아르냐',
+    spriteSet: {
+      attack: opponentLevel7ArnyaAttackImage,
+      default: opponentLevel7ArnyaDefaultImage,
+      hit: opponentLevel7ArnyaHitImage,
+    },
+    defeatSceneImage: stage7ArnyaDefeatSceneImage,
+  },
+};
 const LEVEL_OPPONENT_SPRITES: Partial<Record<number, CharacterSpriteSet>> = {
   1: {
     attack: opponentLevel1AttackImage,
@@ -736,17 +927,82 @@ const ESTIMATION_ROUNDING_UNIT = 100;
 const ESTIMATION_MIN_ANSWER = 100;
 const ESTIMATION_MAX_ANSWER = 900;
 const ESTIMATION_MAX_RAW_ANSWER = ESTIMATION_MAX_ANSWER + ESTIMATION_ROUNDING_UNIT / 2 - 1;
+const ESTIMATION_PROMPT = '각 수를 백의 자리까지 반올림해서 계산해 보세요.';
+const ESTIMATION_OPERAND_OFFSET_LIMIT = 20;
+const ESTIMATION_MAX_GENERATION_ATTEMPTS = 300;
+
+function pickSpecialOpponentSelections(): SpecialOpponentSelections {
+  return {
+    level1: Math.random() < 0.5 ? DEFAULT_LEVEL1_OPPONENT_ID : 'churusigi',
+    level2: Math.random() < 0.5 ? DEFAULT_LEVEL2_OPPONENT_ID : 'jjangpal',
+    level3: Math.random() < 0.5 ? DEFAULT_LEVEL3_OPPONENT_ID : 'gamjaaniguma',
+    level4: Math.random() < 0.5 ? DEFAULT_LEVEL4_OPPONENT_ID : 'baekgeurigoa',
+    level6: Math.random() < 0.5 ? DEFAULT_LEVEL6_OPPONENT_ID : 'anheunhannammae',
+    level7: Math.random() < 0.5 ? DEFAULT_LEVEL7_OPPONENT_ID : 'arnya',
+  };
+}
+
+function getSpecialOpponentConfig(level: number, selections: SpecialOpponentSelections) {
+  if (level === 1) {
+    return LEVEL1_OPPONENT_VARIANTS[selections.level1] ?? LEVEL1_OPPONENT_VARIANTS[DEFAULT_LEVEL1_OPPONENT_ID];
+  }
+
+  if (level === 2) {
+    return LEVEL2_OPPONENT_VARIANTS[selections.level2] ?? LEVEL2_OPPONENT_VARIANTS[DEFAULT_LEVEL2_OPPONENT_ID];
+  }
+
+  if (level === 3) {
+    return LEVEL3_OPPONENT_VARIANTS[selections.level3] ?? LEVEL3_OPPONENT_VARIANTS[DEFAULT_LEVEL3_OPPONENT_ID];
+  }
+
+  if (level === 4) {
+    return LEVEL4_OPPONENT_VARIANTS[selections.level4] ?? LEVEL4_OPPONENT_VARIANTS[DEFAULT_LEVEL4_OPPONENT_ID];
+  }
+
+  if (level === 6) {
+    return LEVEL6_OPPONENT_VARIANTS[selections.level6] ?? LEVEL6_OPPONENT_VARIANTS[DEFAULT_LEVEL6_OPPONENT_ID];
+  }
+
+  if (level === 7) {
+    return LEVEL7_OPPONENT_VARIANTS[selections.level7] ?? LEVEL7_OPPONENT_VARIANTS[DEFAULT_LEVEL7_OPPONENT_ID];
+  }
+
+  return null;
+}
 
 function getOpponentEmojiForLevel(level: number) {
   return LEVEL_OPPONENT_EMOJIS[level] ?? LEVEL_OPPONENT_EMOJIS[LEVEL_OPPONENT_EMOJIS.length - 1];
 }
 
-function getOpponentNameForLevel(level: number) {
+function getOpponentNameForLevel(level: number, selections: SpecialOpponentSelections = DEFAULT_SPECIAL_OPPONENT_SELECTIONS) {
+  const specialOpponent = getSpecialOpponentConfig(level, selections);
+  if (specialOpponent) {
+    return specialOpponent.name;
+  }
+
   return LEVEL_OPPONENT_NAMES[level] ?? LEVEL_OPPONENT_NAMES[LEVEL_OPPONENT_NAMES.length - 1];
 }
 
-function getOpponentEntranceMessage(level: number) {
-  return `상대 ${getOpponentNameForLevel(level)} 등장!`;
+function getOpponentSpriteSetForLevel(level: number, selections: SpecialOpponentSelections = DEFAULT_SPECIAL_OPPONENT_SELECTIONS) {
+  const specialOpponent = getSpecialOpponentConfig(level, selections);
+  if (specialOpponent) {
+    return specialOpponent.spriteSet;
+  }
+
+  return LEVEL_OPPONENT_SPRITES[level];
+}
+
+function getDefeatSceneImageForLevel(level: number, selections: SpecialOpponentSelections = DEFAULT_SPECIAL_OPPONENT_SELECTIONS) {
+  const specialOpponent = getSpecialOpponentConfig(level, selections);
+  if (specialOpponent) {
+    return specialOpponent.defeatSceneImage;
+  }
+
+  return DEFEAT_SCENE_IMAGES[level] ?? null;
+}
+
+function getOpponentEntranceMessage(level: number, selections: SpecialOpponentSelections = DEFAULT_SPECIAL_OPPONENT_SELECTIONS) {
+  return `상대 ${getOpponentNameForLevel(level, selections)} 등장!`;
 }
 
 function digitRange(min: number, max: number) {
@@ -1416,6 +1672,10 @@ function shuffleNumbers(values: number[]) {
   return next;
 }
 
+function randomIntInRange(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 function renderPromptWithHighlight(text: string, shouldHighlight = true) {
   if (!shouldHighlight) {
     return text;
@@ -1512,7 +1772,7 @@ function BuilderNumberRow({
 
 function createEstimationChoices(answer: number) {
   const roundedAnswer = clamp(
-    Math.round(answer / ESTIMATION_ROUNDING_UNIT) * ESTIMATION_ROUNDING_UNIT,
+    roundToNearestUnit(answer, ESTIMATION_ROUNDING_UNIT),
     ESTIMATION_MIN_ANSWER,
     ESTIMATION_MAX_ANSWER,
   );
@@ -1540,6 +1800,79 @@ function createEstimationChoices(answer: number) {
   };
 }
 
+function createEstimationOperand(anchor: number) {
+  const minOffset = Math.max(-ESTIMATION_OPERAND_OFFSET_LIMIT, ESTIMATION_MIN_ANSWER - anchor);
+  const maxOffset = Math.min(ESTIMATION_OPERAND_OFFSET_LIMIT, 999 - anchor);
+  return anchor + randomIntInRange(minOffset, maxOffset);
+}
+
+function createEstimationProblem(): EstimationProblem {
+  const anchors = Array.from(
+    { length: (ESTIMATION_MAX_ANSWER - ESTIMATION_MIN_ANSWER) / ESTIMATION_ROUNDING_UNIT + 1 },
+    (_, index) => ESTIMATION_MIN_ANSWER + index * ESTIMATION_ROUNDING_UNIT,
+  );
+
+  for (let attempt = 0; attempt < ESTIMATION_MAX_GENERATION_ATTEMPTS; attempt += 1) {
+    const leftAnchor = anchors[randomIntInRange(0, anchors.length - 1)];
+    const rightAnchor = anchors[randomIntInRange(0, anchors.length - 1)];
+    const left = createEstimationOperand(leftAnchor);
+    const right = createEstimationOperand(rightAnchor);
+    const isAddition = Math.random() > 0.5;
+
+    if (isAddition) {
+      const exactAnswer = left + right;
+      const estimatedAnswer = leftAnchor + rightAnchor;
+      if (
+        estimatedAnswer < ESTIMATION_MIN_ANSWER
+        || estimatedAnswer > ESTIMATION_MAX_ANSWER
+        || exactAnswer > ESTIMATION_MAX_RAW_ANSWER
+        || roundToNearestUnit(exactAnswer, ESTIMATION_ROUNDING_UNIT) !== estimatedAnswer
+      ) {
+        continue;
+      }
+
+      const choices = createEstimationChoices(exactAnswer);
+      return {
+        prompt: ESTIMATION_PROMPT,
+        question: `${left} + ${right}`,
+        options: choices.options,
+        answer: choices.answer,
+      };
+    }
+
+    const largerAnchor = Math.max(leftAnchor, rightAnchor);
+    const smallerAnchor = Math.min(leftAnchor, rightAnchor);
+    const leftValue = largerAnchor === leftAnchor ? left : right;
+    const rightValue = largerAnchor === leftAnchor ? right : left;
+    const exactAnswer = leftValue - rightValue;
+    const estimatedAnswer = largerAnchor - smallerAnchor;
+    if (
+      estimatedAnswer < ESTIMATION_MIN_ANSWER
+      || estimatedAnswer > ESTIMATION_MAX_ANSWER
+      || exactAnswer < ESTIMATION_MIN_ANSWER
+      || exactAnswer > ESTIMATION_MAX_RAW_ANSWER
+      || roundToNearestUnit(exactAnswer, ESTIMATION_ROUNDING_UNIT) !== estimatedAnswer
+    ) {
+      continue;
+    }
+
+    const choices = createEstimationChoices(exactAnswer);
+    return {
+      prompt: ESTIMATION_PROMPT,
+      question: `${leftValue} - ${rightValue}`,
+      options: choices.options,
+      answer: choices.answer,
+    };
+  }
+
+  return {
+    prompt: ESTIMATION_PROMPT,
+    question: '320 + 180',
+    options: shuffleNumbers([400, 500, 600]),
+    answer: 500,
+  };
+}
+
 export default function App() {
   const audioEngineRef = useRef<AudioEngine | null>(null);
   const lowHealthPulsePlayedRef = useRef(false);
@@ -1550,13 +1883,14 @@ export default function App() {
   const [playerName, setPlayerName] = useState(DEFAULT_PLAYER_NAME);
   const [pendingPlayerName, setPendingPlayerName] = useState('');
   const [isNamePromptOpen, setIsNamePromptOpen] = useState(false);
+  const [specialOpponentSelections, setSpecialOpponentSelections] = useState<SpecialOpponentSelections>(DEFAULT_SPECIAL_OPPONENT_SELECTIONS);
   const [level, setLevel] = useState(1);
   const [problem, setProblem] = useState<Problem>(() => getProblemForTurn(1, 100));
   const [inputValue, setInputValue] = useState('');
   const [builderSlotValues, setBuilderSlotValues] = useState<Record<string, string>>({});
   const [playerHP, setPlayerHP] = useState(100);
   const [opponentHP, setOpponentHP] = useState(100);
-  const [message, setMessage] = useState(() => getOpponentEntranceMessage(1));
+  const [message, setMessage] = useState(() => getOpponentEntranceMessage(1, DEFAULT_SPECIAL_OPPONENT_SELECTIONS));
   const [showMsg, setShowMsg] = useState(true);
   const [problemCoachmark, setProblemCoachmark] = useState<string | null>(null);
   const [battleDifficulty, setBattleDifficulty] = useState<BattleDifficulty>('normal');
@@ -1577,11 +1911,11 @@ export default function App() {
       return;
     }
 
-    const nextEntranceMessage = getOpponentEntranceMessage(level);
+    const nextEntranceMessage = getOpponentEntranceMessage(level, specialOpponentSelections);
     if (message !== nextEntranceMessage) {
       setMessage(nextEntranceMessage);
     }
-  }, [level, message]);
+  }, [level, message, specialOpponentSelections]);
 
   useEffect(() => {
     if (!audioEngineRef.current) {
@@ -1702,7 +2036,7 @@ export default function App() {
     : isAttacking
       ? playerAttackImage
       : playerDefaultImage;
-  const opponentSpriteSet = LEVEL_OPPONENT_SPRITES[level];
+  const opponentSpriteSet = getOpponentSpriteSetForLevel(level, specialOpponentSelections);
   const opponentCharacterImage = opponentSpriteSet
     ? isOpponentHit
       ? opponentSpriteSet.hit
@@ -1710,7 +2044,7 @@ export default function App() {
         ? opponentSpriteSet.attack
         : opponentSpriteSet.default
     : null;
-  const currentOpponentName = getOpponentNameForLevel(level);
+  const currentOpponentName = getOpponentNameForLevel(level, specialOpponentSelections);
   const displayPlayerName = playerName.trim() || DEFAULT_PLAYER_NAME;
   const trimmedPendingPlayerName = pendingPlayerName.trim();
   const hasPendingPlayerName = trimmedPendingPlayerName.length > 0;
@@ -1722,7 +2056,7 @@ export default function App() {
   const estimationHitDamage = battleDifficultyConfig.estimationHitDamage;
 
   const [isEstimation, setIsEstimation] = useState(false);
-  const [estimationProblem, setEstimationProblem] = useState<{question: string, options: number[], answer: number} | null>(null);
+  const [estimationProblem, setEstimationProblem] = useState<EstimationProblem | null>(null);
   const [timeLeft, setTimeLeft] = useState(ESTIMATION_TIME_LIMIT_SECONDS);
   const [showHint, setShowHint] = useState(false);
   const canUseHint = level <= 7;
@@ -1730,7 +2064,7 @@ export default function App() {
   const shouldRenderHorizontalEquation = level === 7 && !isHintForced && problem.kind === 'equation';
   const isResultScreen = gameState === 'win' || gameState === 'lose';
   const isWinResult = gameState === 'win';
-  const defeatSceneImage = gameState === 'lose' ? DEFEAT_SCENE_IMAGES[level] ?? null : null;
+  const defeatSceneImage = gameState === 'lose' ? getDefeatSceneImageForLevel(level, specialOpponentSelections) : null;
   const currentLevelDescription = LEVEL_DESCRIPTIONS[level] ?? `${level}단계`;
   const finalRecordLabel = gameState === 'win' ? `${level}단계 클리어` : `${level}단계 도달`;
   const finalRecordTopic = currentLevelDescription.replace(/^\d+단계:\s*/, '');
@@ -1844,7 +2178,7 @@ export default function App() {
         gainMultiplier: 1 + nextLevel * 0.025,
         detune: Math.min(nextLevel * 10, 90),
       });
-      updateMessage(getOpponentEntranceMessage(nextLevel));
+      updateMessage(getOpponentEntranceMessage(nextLevel, specialOpponentSelections));
       if (shouldQueueEstimation) {
         queueEstimationChallenge();
       }
@@ -1852,37 +2186,10 @@ export default function App() {
   };
 
   const triggerEstimation = () => {
-    let a = 0;
-    let b = 0;
-    let isAdd = false;
-    
-    // 초3 교육과정 준수: 결과가 항상 양수가 되도록 보장
-    let answer = 0;
-    let question = '';
-    do {
-      a = Math.floor(Math.random() * 800) + 100;
-      b = Math.floor(Math.random() * 800) + 100;
-      isAdd = Math.random() > 0.5;
-      if (isAdd) {
-        answer = a + b;
-        question = `${a} + ${b}`;
-      } else {
-      // 뺄셈인 경우 큰 수에서 작은 수를 뺌
-        const max = Math.max(a, b);
-        const min = Math.min(a, b);
-        answer = max - min;
-        question = `${max} - ${min}`;
-      }
-    } while (answer < ESTIMATION_MIN_ANSWER || answer > ESTIMATION_MAX_RAW_ANSWER);
-    
-    const estimationChoices = createEstimationChoices(answer);
-    
+    const nextEstimationProblem = createEstimationProblem();
+
     playSound('alert', { gainMultiplier: 1.08, detune: 25 });
-    setEstimationProblem({
-      question,
-      options: estimationChoices.options,
-      answer: estimationChoices.answer,
-    });
+    setEstimationProblem(nextEstimationProblem);
     setIsEstimation(true);
     setTimeLeft(ESTIMATION_TIME_LIMIT_SECONDS);
     updateMessage('갑작스러운 어림잡기 도전!');
@@ -2069,6 +2376,8 @@ export default function App() {
   }, [isDeveloperShortcutEnabled]);
 
   const startGame = () => {
+    const nextSpecialOpponentSelections = pickSpecialOpponentSelections();
+
     warmAudio();
     playSound('start', { gainMultiplier: 0.8, detune: 12 });
     setGameState('playing');
@@ -2076,13 +2385,14 @@ export default function App() {
     setIsOpponentAttacking(false);
     setIsOpponentHit(false);
     setIsPlayerHit(false);
+    setSpecialOpponentSelections(nextSpecialOpponentSelections);
     setLevel(1);
     setPlayerHP(100);
     setOpponentHP(100);
     zeroTensBorrowCoachmarkLevelsRef.current.clear();
     setProblemWithCoachmark(getProblemForTurn(1, 100), 1);
     setInputValue('');
-    updateMessage(getOpponentEntranceMessage(1));
+    updateMessage(getOpponentEntranceMessage(1, nextSpecialOpponentSelections));
   };
 
   const returnToStartScreen = () => {
@@ -2443,10 +2753,11 @@ export default function App() {
               {isEstimation ? (
               <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4, ease: "easeOut" }} className="flex min-h-0 flex-1 flex-col items-center justify-center rounded-3xl border-4 border-yellow-500 bg-slate-900 p-5 text-center text-slate-100 shadow-inner sm:p-6 lg:p-8">
                 <h2 className="text-4xl font-black text-yellow-400 mb-4">어림잡기 도전! ({timeLeft}초)</h2>
+                <p className="mb-3 text-base font-bold text-amber-100 sm:text-lg">{estimationProblem?.prompt}</p>
                 <p className="mb-6 text-[clamp(2.5rem,12vw,4.5rem)] font-mono font-bold sm:mb-8">{estimationProblem?.question} = ?</p>
                 <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
                   {estimationProblem?.options.map(opt => (
-                    <button key={opt} onClick={() => selectEstimationOption(opt)} className="bg-slate-700 hover:bg-slate-600 text-3xl font-bold p-6 rounded-2xl border-2 border-slate-500">{opt}쯤</button>
+                    <button key={opt} onClick={() => selectEstimationOption(opt)} className="bg-slate-700 hover:bg-slate-600 text-3xl font-bold p-6 rounded-2xl border-2 border-slate-500">약 {opt}</button>
                   ))}
                 </div>
               </motion.div>
