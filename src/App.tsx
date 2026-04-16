@@ -13,6 +13,7 @@ import stage3GamjaanigumaDefeatSceneImage from './assets/stage3-gamjaaniguma-def
 import stage4DefeatSceneImage from './assets/stage4-defeat-scene-cutout.png';
 import stage4BaekgeurigoaDefeatSceneImage from './assets/stage4-baekgeurigoa-defeat-scene-cutout.png';
 import stage5DefeatSceneImage from './assets/stage5-defeat-scene-cutout.png';
+import stage5JurdiDefeatSceneImage from './assets/stage5-jurdi-defeat-scene-cutout.png';
 import stage6DefeatSceneImage from './assets/stage6-defeat-scene-cutout.png';
 import stage6AnheunhanDefeatSceneImage from './assets/stage6-anheunhan-defeat-scene-cutout.png';
 import stage7DefeatSceneImage from './assets/stage7-defeat-scene-cutout.png';
@@ -47,8 +48,11 @@ import opponentLevel4BaekgeurigoaDefaultImage from './assets/opponent-level4-bae
 import opponentLevel4HitImage from './assets/opponent-level4-hit.png';
 import opponentLevel4BaekgeurigoaHitImage from './assets/opponent-level4-baekgeurigoa-hit-cutout.png';
 import opponentLevel5AttackImage from './assets/opponent-level5-attack.png';
+import opponentLevel5JurdiAttackImage from './assets/opponent-level5-jurdi-attack-cutout.png';
 import opponentLevel5DefaultImage from './assets/opponent-level5-default.png';
+import opponentLevel5JurdiDefaultImage from './assets/opponent-level5-jurdi-default-cutout.png';
 import opponentLevel5HitImage from './assets/opponent-level5-hit.png';
+import opponentLevel5JurdiHitImage from './assets/opponent-level5-jurdi-hit-cutout.png';
 import opponentLevel6AttackImage from './assets/opponent-level6-attack.png';
 import opponentLevel6AnheunhanAttackImage from './assets/opponent-level6-anheunhan-attack-cutout.png';
 import opponentLevel6DefaultImage from './assets/opponent-level6-default.png';
@@ -118,6 +122,7 @@ type Level1OpponentId = 'jeongichu' | 'churusigi';
 type Level2OpponentId = 'noneunpenggwin' | 'jjangpal';
 type Level3OpponentId = 'romiromi' | 'gamjaaniguma';
 type Level4OpponentId = 'koronan' | 'baekgeurigoa';
+type Level5OpponentId = 'niiik' | 'jurdi';
 type Level6OpponentId = 'syuppeolboi' | 'anheunhannammae';
 type Level7OpponentId = 'anijeuko' | 'arnya';
 
@@ -132,6 +137,7 @@ interface SpecialOpponentSelections {
   level2: Level2OpponentId;
   level3: Level3OpponentId;
   level4: Level4OpponentId;
+  level5: Level5OpponentId;
   level6: Level6OpponentId;
   level7: Level7OpponentId;
 }
@@ -671,6 +677,7 @@ const DEFAULT_LEVEL1_OPPONENT_ID: Level1OpponentId = 'jeongichu';
 const DEFAULT_LEVEL2_OPPONENT_ID: Level2OpponentId = 'noneunpenggwin';
 const DEFAULT_LEVEL3_OPPONENT_ID: Level3OpponentId = 'romiromi';
 const DEFAULT_LEVEL4_OPPONENT_ID: Level4OpponentId = 'koronan';
+const DEFAULT_LEVEL5_OPPONENT_ID: Level5OpponentId = 'niiik';
 const DEFAULT_LEVEL6_OPPONENT_ID: Level6OpponentId = 'syuppeolboi';
 const DEFAULT_LEVEL7_OPPONENT_ID: Level7OpponentId = 'anijeuko';
 const DEFAULT_SPECIAL_OPPONENT_SELECTIONS: SpecialOpponentSelections = {
@@ -678,6 +685,7 @@ const DEFAULT_SPECIAL_OPPONENT_SELECTIONS: SpecialOpponentSelections = {
   level2: DEFAULT_LEVEL2_OPPONENT_ID,
   level3: DEFAULT_LEVEL3_OPPONENT_ID,
   level4: DEFAULT_LEVEL4_OPPONENT_ID,
+  level5: DEFAULT_LEVEL5_OPPONENT_ID,
   level6: DEFAULT_LEVEL6_OPPONENT_ID,
   level7: DEFAULT_LEVEL7_OPPONENT_ID,
 };
@@ -759,6 +767,26 @@ const LEVEL4_OPPONENT_VARIANTS: Record<Level4OpponentId, SpecialOpponentConfig> 
       hit: opponentLevel4BaekgeurigoaHitImage,
     },
     defeatSceneImage: stage4BaekgeurigoaDefeatSceneImage,
+  },
+};
+const LEVEL5_OPPONENT_VARIANTS: Record<Level5OpponentId, SpecialOpponentConfig> = {
+  niiik: {
+    name: '니이익',
+    spriteSet: {
+      attack: opponentLevel5AttackImage,
+      default: opponentLevel5DefaultImage,
+      hit: opponentLevel5HitImage,
+    },
+    defeatSceneImage: stage5DefeatSceneImage,
+  },
+  jurdi: {
+    name: '주르디',
+    spriteSet: {
+      attack: opponentLevel5JurdiAttackImage,
+      default: opponentLevel5JurdiDefaultImage,
+      hit: opponentLevel5JurdiHitImage,
+    },
+    defeatSceneImage: stage5JurdiDefeatSceneImage,
   },
 };
 const LEVEL6_OPPONENT_VARIANTS: Record<Level6OpponentId, SpecialOpponentConfig> = {
@@ -928,7 +956,9 @@ const ESTIMATION_MIN_ANSWER = 100;
 const ESTIMATION_MAX_ANSWER = 900;
 const ESTIMATION_MAX_RAW_ANSWER = ESTIMATION_MAX_ANSWER + ESTIMATION_ROUNDING_UNIT / 2 - 1;
 const ESTIMATION_PROMPT = '각 수를 백의 자리까지 반올림해서 계산해 보세요.';
-const ESTIMATION_OPERAND_OFFSET_LIMIT = 20;
+const ESTIMATION_BOUNDARY_RANGE_MIN = 40;
+const ESTIMATION_BOUNDARY_RANGE_MAX = 60;
+const ESTIMATION_MIN_DISTANCE_FROM_ANCHOR = 15;
 const ESTIMATION_MAX_GENERATION_ATTEMPTS = 300;
 
 function pickSpecialOpponentSelections(): SpecialOpponentSelections {
@@ -937,6 +967,7 @@ function pickSpecialOpponentSelections(): SpecialOpponentSelections {
     level2: Math.random() < 0.5 ? DEFAULT_LEVEL2_OPPONENT_ID : 'jjangpal',
     level3: Math.random() < 0.5 ? DEFAULT_LEVEL3_OPPONENT_ID : 'gamjaaniguma',
     level4: Math.random() < 0.5 ? DEFAULT_LEVEL4_OPPONENT_ID : 'baekgeurigoa',
+    level5: Math.random() < 0.5 ? DEFAULT_LEVEL5_OPPONENT_ID : 'jurdi',
     level6: Math.random() < 0.5 ? DEFAULT_LEVEL6_OPPONENT_ID : 'anheunhannammae',
     level7: Math.random() < 0.5 ? DEFAULT_LEVEL7_OPPONENT_ID : 'arnya',
   };
@@ -957,6 +988,10 @@ function getSpecialOpponentConfig(level: number, selections: SpecialOpponentSele
 
   if (level === 4) {
     return LEVEL4_OPPONENT_VARIANTS[selections.level4] ?? LEVEL4_OPPONENT_VARIANTS[DEFAULT_LEVEL4_OPPONENT_ID];
+  }
+
+  if (level === 5) {
+    return LEVEL5_OPPONENT_VARIANTS[selections.level5] ?? LEVEL5_OPPONENT_VARIANTS[DEFAULT_LEVEL5_OPPONENT_ID];
   }
 
   if (level === 6) {
@@ -1633,7 +1668,7 @@ function evaluateBuilderProblem(problem: Problem, slotValues: Record<string, str
     const value = slotValues[slot.id];
 
     if (!value) {
-      return { status: 'incomplete' as const, message: '빈칸에 숫자를 먼저 넣어 문제를 완성해 주세요.' };
+      return { status: 'incomplete' as const, message: '빈칸에 숫자를 넣어주세요.' };
     }
 
     if (!slot.digits.includes(value)) {
@@ -1801,9 +1836,32 @@ function createEstimationChoices(answer: number) {
 }
 
 function createEstimationOperand(anchor: number) {
-  const minOffset = Math.max(-ESTIMATION_OPERAND_OFFSET_LIMIT, ESTIMATION_MIN_ANSWER - anchor);
-  const maxOffset = Math.min(ESTIMATION_OPERAND_OFFSET_LIMIT, 999 - anchor);
-  return anchor + randomIntInRange(minOffset, maxOffset);
+  const minValue = Math.max(ESTIMATION_MIN_ANSWER, anchor - ESTIMATION_ROUNDING_UNIT / 2 + 1);
+  const maxValue = Math.min(999, anchor + ESTIMATION_ROUNDING_UNIT / 2 - 1);
+  const candidates: number[] = [];
+
+  for (let value = minValue; value <= maxValue; value += 1) {
+    const lastTwoDigits = value % ESTIMATION_ROUNDING_UNIT;
+    if (lastTwoDigits >= ESTIMATION_BOUNDARY_RANGE_MIN && lastTwoDigits <= ESTIMATION_BOUNDARY_RANGE_MAX) {
+      continue;
+    }
+
+    if (Math.abs(value - anchor) < ESTIMATION_MIN_DISTANCE_FROM_ANCHOR) {
+      continue;
+    }
+
+    if (roundToNearestUnit(value, ESTIMATION_ROUNDING_UNIT) !== anchor) {
+      continue;
+    }
+
+    candidates.push(value);
+  }
+
+  if (candidates.length === 0) {
+    return anchor;
+  }
+
+  return candidates[randomIntInRange(0, candidates.length - 1)];
 }
 
 function createEstimationProblem(): EstimationProblem {
@@ -2079,6 +2137,13 @@ export default function App() {
         ? builderEvaluation.text
         : null
       : problem.text;
+  const normalizedInputValue = inputValue.trim();
+  const parsedInputAnswer = Number.parseInt(normalizedInputValue, 10);
+  const hasValidAnswerInput = normalizedInputValue.length > 0 && !Number.isNaN(parsedInputAnswer);
+  const canAttemptAttack =
+    problem.kind === 'builder'
+      ? hasValidAnswerInput && builderEvaluation?.status === 'ready'
+      : hasValidAnswerInput;
 
   useEffect(() => {
     setShowHint(isHintForced);
@@ -2323,16 +2388,22 @@ export default function App() {
   };
 
   const checkAnswer = () => {
-    let isCorrect = parseInt(inputValue, 10) === problem.answer;
+    if (!hasValidAnswerInput) {
+      playSound('ui');
+      updateMessage('정답을 입력해야 공격할 수 있어!');
+      return;
+    }
+
+    let isCorrect = parsedInputAnswer === problem.answer;
 
     if (problem.kind === 'builder') {
       if (!builderEvaluation || builderEvaluation.status === 'incomplete' || builderEvaluation.status === 'invalid') {
         playSound('ui');
-        updateMessage(builderEvaluation?.message ?? '빈칸에 숫자를 먼저 넣어 문제를 완성해 주세요.');
+        updateMessage(builderEvaluation?.message ?? '빈칸에 숫자를 넣어주세요.');
         return;
       }
 
-      isCorrect = parseInt(inputValue, 10) === builderEvaluation.answer;
+      isCorrect = parsedInputAnswer === builderEvaluation.answer;
     }
 
     playSound('submit', {
@@ -2928,11 +2999,27 @@ export default function App() {
                   inputMode="numeric"
                   value={inputValue} 
                   onChange={e => setInputValue(e.target.value)} 
-                  onKeyDown={e => { if (e.key === 'Enter' && !e.ctrlKey && !e.altKey) checkAnswer(); }}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && !e.ctrlKey && !e.altKey) {
+                      e.preventDefault();
+                      checkAnswer();
+                    }
+                  }}
                   className="min-w-0 rounded-2xl border-4 border-slate-500 bg-slate-700 px-4 py-3 text-center text-2xl font-black outline-none focus:border-emerald-500 sm:text-3xl" 
                   placeholder={problem.kind === 'builder' ? '답' : '정답 입력'} 
                 />
-                  <button onClick={checkAnswer} className="flex w-full min-w-0 items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-6 py-3 text-lg font-black text-white shadow-lg hover:bg-emerald-500 sm:min-w-[170px] sm:w-auto sm:text-xl"><Sword size={22} /> 공격!</button>
+                  <button
+                    type="button"
+                    disabled={!canAttemptAttack}
+                    onClick={checkAnswer}
+                    className={`flex w-full min-w-0 items-center justify-center gap-2 rounded-2xl px-6 py-3 text-lg font-black text-white shadow-lg sm:min-w-[170px] sm:w-auto sm:text-xl ${
+                      canAttemptAttack
+                        ? 'bg-emerald-600 hover:bg-emerald-500'
+                        : 'cursor-not-allowed bg-slate-500 opacity-60'
+                    }`}
+                  >
+                    <Sword size={22} /> 공격!
+                  </button>
                 </div>
               </div>
             )}
