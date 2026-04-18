@@ -71,6 +71,38 @@ import opponentLevel8HitImage from './assets/opponent-level8-hit.png';
 import opponentLevel9AttackImage from './assets/opponent-level9-attack.png';
 import opponentLevel9DefaultImage from './assets/opponent-level9-default.png';
 import opponentLevel9HitImage from './assets/opponent-level9-hit.png';
+import unit3Level1YorsiAttackImage from './assets/unit3-level1-yorsi-attack.png';
+import unit3Level1YorsiDefaultImage from './assets/unit3-level1-yorsi-default.png';
+import unit3Level1YorsiDefeatSceneImage from './assets/unit3-level1-yorsi-defeat-scene.png';
+import unit3Level1YorsiHitImage from './assets/unit3-level1-yorsi-hit.png';
+import unit3Level2JjeojjeomiAttackImage from './assets/unit3-level2-jjeojjeomi-attack.png';
+import unit3Level2JjeojjeomiDefaultImage from './assets/unit3-level2-jjeojjeomi-default.png';
+import unit3Level2JjeojjeomiDefeatSceneImage from './assets/unit3-level2-jjeojjeomi-defeat-scene.png';
+import unit3Level2JjeojjeomiHitImage from './assets/unit3-level2-jjeojjeomi-hit.png';
+import unit3Level3BbangAttackImage from './assets/unit3-level3-bbang-attack.png';
+import unit3Level3BbangDefaultImage from './assets/unit3-level3-bbang-default.png';
+import unit3Level3BbangDefeatSceneImage from './assets/unit3-level3-bbang-defeat-scene.png';
+import unit3Level3BbangHitImage from './assets/unit3-level3-bbang-hit.png';
+import unit3Level4HeartpingAttackImage from './assets/unit3-level4-heartping-attack.png';
+import unit3Level4HeartpingDefaultImage from './assets/unit3-level4-heartping-default.png';
+import unit3Level4HeartpingDefeatSceneImage from './assets/unit3-level4-heartping-defeat-scene.png';
+import unit3Level4HeartpingHitImage from './assets/unit3-level4-heartping-hit.png';
+import unit3Level5TraleroAttackImage from './assets/unit3-level5-tralero-attack.png';
+import unit3Level5TraleroDefaultImage from './assets/unit3-level5-tralero-default.png';
+import unit3Level5TraleroDefeatSceneImage from './assets/unit3-level5-tralero-defeat-scene.png';
+import unit3Level5TraleroHitImage from './assets/unit3-level5-tralero-hit.png';
+import unit3Level6DeongdeongiDetectiveAttackImage from './assets/unit3-level6-deongdeongi-detective-attack.png';
+import unit3Level6DeongdeongiDetectiveDefaultImage from './assets/unit3-level6-deongdeongi-detective-default.png';
+import unit3Level6DeongdeongiDetectiveDefeatSceneImage from './assets/unit3-level6-deongdeongi-detective-defeat-scene.png';
+import unit3Level6DeongdeongiDetectiveHitImage from './assets/unit3-level6-deongdeongi-detective-hit.png';
+import unit3Level7MochiengelAttackImage from './assets/unit3-level7-mochiengel-attack.png';
+import unit3Level7MochiengelDefaultImage from './assets/unit3-level7-mochiengel-default.png';
+import unit3Level7MochiengelDefeatSceneImage from './assets/unit3-level7-mochiengel-defeat-scene.png';
+import unit3Level7MochiengelHitImage from './assets/unit3-level7-mochiengel-hit.png';
+import unit3Level8LabulabuAttackImage from './assets/unit3-level8-labulabu-attack.png';
+import unit3Level8LabulabuDefaultImage from './assets/unit3-level8-labulabu-default.png';
+import unit3Level8LabulabuDefeatSceneImage from './assets/unit3-level8-labulabu-defeat-scene.png';
+import unit3Level8LabulabuHitImage from './assets/unit3-level8-labulabu-hit.png';
 
 type GameState = 'start' | 'unitSelect' | 'playing' | 'win' | 'lose';
 
@@ -107,6 +139,7 @@ interface Problem {
   answer: number;
   kind: ProblemKind;
   answerUnit?: string;
+  requiresUnitSelection?: boolean;
   builder?: BuilderProblemData;
   measurement?: MeasurementProblemData;
   distanceMap?: DistanceMapProblemData;
@@ -995,6 +1028,80 @@ const LEVEL7_OPPONENT_VARIANTS: Record<Level7OpponentId, SpecialOpponentConfig> 
     defeatSceneImage: stage7ArnyaDefeatSceneImage,
   },
 };
+const UNIT3_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
+  1: {
+    name: '요르시',
+    spriteSet: {
+      attack: unit3Level1YorsiAttackImage,
+      default: unit3Level1YorsiDefaultImage,
+      hit: unit3Level1YorsiHitImage,
+    },
+    defeatSceneImage: unit3Level1YorsiDefeatSceneImage,
+  },
+  2: {
+    name: '쩌쩌미',
+    spriteSet: {
+      attack: unit3Level2JjeojjeomiAttackImage,
+      default: unit3Level2JjeojjeomiDefaultImage,
+      hit: unit3Level2JjeojjeomiHitImage,
+    },
+    defeatSceneImage: unit3Level2JjeojjeomiDefeatSceneImage,
+  },
+  3: {
+    name: '빵',
+    spriteSet: {
+      attack: unit3Level3BbangAttackImage,
+      default: unit3Level3BbangDefaultImage,
+      hit: unit3Level3BbangHitImage,
+    },
+    defeatSceneImage: unit3Level3BbangDefeatSceneImage,
+  },
+  4: {
+    name: '하트핑',
+    spriteSet: {
+      attack: unit3Level4HeartpingAttackImage,
+      default: unit3Level4HeartpingDefaultImage,
+      hit: unit3Level4HeartpingHitImage,
+    },
+    defeatSceneImage: unit3Level4HeartpingDefeatSceneImage,
+  },
+  5: {
+    name: '트라레로',
+    spriteSet: {
+      attack: unit3Level5TraleroAttackImage,
+      default: unit3Level5TraleroDefaultImage,
+      hit: unit3Level5TraleroHitImage,
+    },
+    defeatSceneImage: unit3Level5TraleroDefeatSceneImage,
+  },
+  6: {
+    name: '덩덩이 탐정',
+    spriteSet: {
+      attack: unit3Level6DeongdeongiDetectiveAttackImage,
+      default: unit3Level6DeongdeongiDetectiveDefaultImage,
+      hit: unit3Level6DeongdeongiDetectiveHitImage,
+    },
+    defeatSceneImage: unit3Level6DeongdeongiDetectiveDefeatSceneImage,
+  },
+  7: {
+    name: '모찌엔젤',
+    spriteSet: {
+      attack: unit3Level7MochiengelAttackImage,
+      default: unit3Level7MochiengelDefaultImage,
+      hit: unit3Level7MochiengelHitImage,
+    },
+    defeatSceneImage: unit3Level7MochiengelDefeatSceneImage,
+  },
+  8: {
+    name: '라부라부',
+    spriteSet: {
+      attack: unit3Level8LabulabuAttackImage,
+      default: unit3Level8LabulabuDefaultImage,
+      hit: unit3Level8LabulabuHitImage,
+    },
+    defeatSceneImage: unit3Level8LabulabuDefeatSceneImage,
+  },
+};
 const LEVEL_OPPONENT_SPRITES: Partial<Record<number, CharacterSpriteSet>> = {
   1: {
     attack: opponentLevel1AttackImage,
@@ -1236,39 +1343,67 @@ function getSpecialOpponentConfig(level: number, selections: SpecialOpponentSele
   return null;
 }
 
+function getConfiguredOpponentForUnit(
+  unitId: LearningUnitId,
+  level: number,
+  selections: SpecialOpponentSelections,
+) {
+  if (unitId === 'unit3') {
+    return UNIT3_LEVEL_OPPONENTS[level] ?? null;
+  }
+
+  return getSpecialOpponentConfig(level, selections);
+}
+
 function getOpponentEmojiForLevel(level: number) {
   return LEVEL_OPPONENT_EMOJIS[level] ?? LEVEL_OPPONENT_EMOJIS[LEVEL_OPPONENT_EMOJIS.length - 1];
 }
 
-function getOpponentNameForLevel(level: number, selections: SpecialOpponentSelections = DEFAULT_SPECIAL_OPPONENT_SELECTIONS) {
-  const specialOpponent = getSpecialOpponentConfig(level, selections);
-  if (specialOpponent) {
-    return specialOpponent.name;
+function getOpponentNameForLevel(
+  unitId: LearningUnitId,
+  level: number,
+  selections: SpecialOpponentSelections = DEFAULT_SPECIAL_OPPONENT_SELECTIONS,
+) {
+  const configuredOpponent = getConfiguredOpponentForUnit(unitId, level, selections);
+  if (configuredOpponent) {
+    return configuredOpponent.name;
   }
 
   return LEVEL_OPPONENT_NAMES[level] ?? LEVEL_OPPONENT_NAMES[LEVEL_OPPONENT_NAMES.length - 1];
 }
 
-function getOpponentSpriteSetForLevel(level: number, selections: SpecialOpponentSelections = DEFAULT_SPECIAL_OPPONENT_SELECTIONS) {
-  const specialOpponent = getSpecialOpponentConfig(level, selections);
-  if (specialOpponent) {
-    return specialOpponent.spriteSet;
+function getOpponentSpriteSetForLevel(
+  unitId: LearningUnitId,
+  level: number,
+  selections: SpecialOpponentSelections = DEFAULT_SPECIAL_OPPONENT_SELECTIONS,
+) {
+  const configuredOpponent = getConfiguredOpponentForUnit(unitId, level, selections);
+  if (configuredOpponent) {
+    return configuredOpponent.spriteSet;
   }
 
   return LEVEL_OPPONENT_SPRITES[level] ?? LEVEL_OPPONENT_SPRITES[9];
 }
 
-function getDefeatSceneImageForLevel(level: number, selections: SpecialOpponentSelections = DEFAULT_SPECIAL_OPPONENT_SELECTIONS) {
-  const specialOpponent = getSpecialOpponentConfig(level, selections);
-  if (specialOpponent) {
-    return specialOpponent.defeatSceneImage;
+function getDefeatSceneImageForLevel(
+  unitId: LearningUnitId,
+  level: number,
+  selections: SpecialOpponentSelections = DEFAULT_SPECIAL_OPPONENT_SELECTIONS,
+) {
+  const configuredOpponent = getConfiguredOpponentForUnit(unitId, level, selections);
+  if (configuredOpponent) {
+    return configuredOpponent.defeatSceneImage;
   }
 
   return DEFEAT_SCENE_IMAGES[level] ?? DEFEAT_SCENE_IMAGES[9] ?? null;
 }
 
-function getOpponentEntranceMessage(level: number, selections: SpecialOpponentSelections = DEFAULT_SPECIAL_OPPONENT_SELECTIONS) {
-  return `상대 ${getOpponentNameForLevel(level, selections)} 등장!`;
+function getOpponentEntranceMessage(
+  unitId: LearningUnitId,
+  level: number,
+  selections: SpecialOpponentSelections = DEFAULT_SPECIAL_OPPONENT_SELECTIONS,
+) {
+  return `상대 ${getOpponentNameForLevel(unitId, level, selections)} 등장!`;
 }
 
 function digitRange(min: number, max: number) {
@@ -1652,6 +1787,7 @@ function createDistanceWorksheetProblem(distanceWorksheet: DistanceWorksheetProb
     prompt: `${distanceWorksheet.instruction}\n${distanceWorksheet.prompt.prefix}□${distanceWorksheet.prompt.suffix}`,
     answer: 0,
     answerUnit: distanceWorksheet.prompt.answerUnit,
+    requiresUnitSelection: Boolean(distanceWorksheet.prompt.answerUnit),
     kind: 'distanceWorksheet',
     distanceWorksheet,
   };
@@ -2403,7 +2539,10 @@ const UNIT3_PROBLEM_FACTORIES: Record<number, Array<() => Problem>> = {
       return createPromptProblem(`${centimeters}cm ${millimeters}mm는 몇 mm인가요?`, toMillimeters(centimeters, millimeters), 'mm');
     },
     () => {
-      const totalMillimeters = randomInt(12, 89);
+      let totalMillimeters = randomInt(12, 89);
+      while (totalMillimeters % 10 === 0) {
+        totalMillimeters = randomInt(12, 89);
+      }
       return createPromptProblem(
         `${totalMillimeters}mm는 ${Math.floor(totalMillimeters / 10)}cm □mm입니다.\n□에 들어갈 수는?`,
         totalMillimeters % 10,
@@ -2411,13 +2550,16 @@ const UNIT3_PROBLEM_FACTORIES: Record<number, Array<() => Problem>> = {
     },
     () => {
       const centimeters = randomInt(2, 8);
-      return createPromptProblem(`${toMillimeters(centimeters)}mm는 □cm입니다.\n□에 들어갈 수는?`, centimeters, 'cm');
+      return createPromptProblem(`${toMillimeters(centimeters)}mm는 □cm입니다.\n□에 들어갈 수는?`, centimeters);
     },
     () => {
-      const totalMillimeters = randomInt(21, 87);
+      let totalMillimeters = randomInt(21, 87);
+      while (totalMillimeters % 10 === 0) {
+        totalMillimeters = randomInt(21, 87);
+      }
       const centimeters = Math.floor(totalMillimeters / 10);
       const millimeters = totalMillimeters % 10;
-      return createPromptProblem(`${totalMillimeters}mm는 □cm ${millimeters}mm입니다.\n□에 들어갈 수는?`, centimeters, 'cm');
+      return createPromptProblem(`${totalMillimeters}mm는 □cm ${millimeters}mm입니다.\n□에 들어갈 수는?`, centimeters);
     },
     () => {
       const centimeters = randomInt(2, 8);
@@ -3515,6 +3657,31 @@ function getStoryPromptLines(prompt: string) {
     .split('\n')
     .map((line) => line.trim())
     .filter(Boolean);
+}
+
+function splitStoryPromptSections(prompt: string) {
+  const lines = getStoryPromptLines(prompt);
+  const optionStartIndex = lines.findIndex((line) => /^\d+\)/.test(line));
+
+  if (optionStartIndex === -1) {
+    return {
+      introLines: lines,
+      optionLines: [] as string[],
+    };
+  }
+
+  const optionLines = lines.slice(optionStartIndex);
+  if (!optionLines.every((line) => /^\d+\)/.test(line))) {
+    return {
+      introLines: lines,
+      optionLines: [] as string[],
+    };
+  }
+
+  return {
+    introLines: lines.slice(0, optionStartIndex),
+    optionLines,
+  };
 }
 
 function formatDigitChoices(digits: string[]) {
@@ -4910,10 +5077,10 @@ function DistanceWorksheetProblemCard({
         </svg>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-5">
+      <div className="min-h-0 flex-1 overflow-hidden px-4 py-4 sm:px-6 sm:py-5">
         <div className="flex items-start gap-3">
           <span className="mt-[0.55rem] h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-500" aria-hidden="true" />
-          <p className="min-w-0 break-keep text-[1.08rem] font-black leading-[1.9] text-slate-900 sm:text-[1.35rem]">
+          <p className="min-w-0 break-keep text-[1rem] font-black leading-[1.75] text-slate-900 sm:text-[1.2rem]">
             <span>{distanceWorksheet.prompt.prefix}</span>
             <span className={`mx-2 inline-flex h-11 rounded-2xl border-2 border-slate-300 bg-white align-middle shadow-sm ${
               distanceWorksheet.prompt.kind === 'number' ? 'w-20 sm:w-24' : 'w-28 sm:w-36'
@@ -5669,11 +5836,12 @@ export default function App() {
   const [builderSlotValues, setBuilderSlotValues] = useState<Record<string, string>>({});
   const [playerHP, setPlayerHP] = useState(100);
   const [opponentHP, setOpponentHP] = useState(100);
-  const [message, setMessage] = useState(() => getOpponentEntranceMessage(1, DEFAULT_SPECIAL_OPPONENT_SELECTIONS));
+  const [message, setMessage] = useState(() => getOpponentEntranceMessage(DEFAULT_LEARNING_UNIT_ID, 1, DEFAULT_SPECIAL_OPPONENT_SELECTIONS));
   const [showMsg, setShowMsg] = useState(true);
   const [problemCoachmark, setProblemCoachmark] = useState<string | null>(null);
   const [battleDifficulty, setBattleDifficulty] = useState<BattleDifficulty>('normal');
   const [selectedLearningUnitId, setSelectedLearningUnitId] = useState<LearningUnitId | null>(null);
+  const activeLearningUnitId = selectedLearningUnitId ?? DEFAULT_LEARNING_UNIT_ID;
   const [isEstimation, setIsEstimation] = useState(false);
   const [estimationProblem, setEstimationProblem] = useState<EstimationProblem | null>(null);
   const [isUnitSelectionChallenge, setIsUnitSelectionChallenge] = useState(false);
@@ -5697,11 +5865,11 @@ export default function App() {
       return;
     }
 
-    const nextEntranceMessage = getOpponentEntranceMessage(level, specialOpponentSelections);
+    const nextEntranceMessage = getOpponentEntranceMessage(activeLearningUnitId, level, specialOpponentSelections);
     if (message !== nextEntranceMessage) {
       setMessage(nextEntranceMessage);
     }
-  }, [level, message, specialOpponentSelections]);
+  }, [activeLearningUnitId, level, message, specialOpponentSelections]);
 
   useEffect(() => {
     if (!audioEngineRef.current) {
@@ -5902,7 +6070,7 @@ export default function App() {
     : isAttacking
       ? playerAttackImage
       : playerDefaultImage;
-  const opponentSpriteSet = getOpponentSpriteSetForLevel(level, specialOpponentSelections);
+  const opponentSpriteSet = getOpponentSpriteSetForLevel(activeLearningUnitId, level, specialOpponentSelections);
   const opponentCharacterImage = opponentSpriteSet
     ? isOpponentHit
       ? opponentSpriteSet.hit
@@ -5910,14 +6078,13 @@ export default function App() {
         ? opponentSpriteSet.attack
         : opponentSpriteSet.default
     : null;
-  const currentSpecialOpponent = getSpecialOpponentConfig(level, specialOpponentSelections);
-  const currentOpponentName = getOpponentNameForLevel(level, specialOpponentSelections);
+  const currentSpecialOpponent = getConfiguredOpponentForUnit(activeLearningUnitId, level, specialOpponentSelections);
+  const currentOpponentName = getOpponentNameForLevel(activeLearningUnitId, level, specialOpponentSelections);
   const opponentImageClassName = currentSpecialOpponent?.spriteClassName ?? '';
   const defeatSceneImageClassName = currentSpecialOpponent?.defeatSceneClassName ?? '';
   const displayPlayerName = playerName.trim() || DEFAULT_PLAYER_NAME;
   const trimmedPendingPlayerName = pendingPlayerName.trim();
   const hasPendingPlayerName = trimmedPendingPlayerName.length > 0;
-  const activeLearningUnitId = selectedLearningUnitId ?? DEFAULT_LEARNING_UNIT_ID;
   const selectedLearningUnit = selectedLearningUnitId
     ? LEARNING_UNITS.find((unit) => unit.id === selectedLearningUnitId) ?? null
     : null;
@@ -5937,7 +6104,7 @@ export default function App() {
   const shouldRenderHorizontalEquation = activeLearningUnitId === 'unit2' && level === 7 && !isHintForced && problem.kind === 'equation';
   const isResultScreen = gameState === 'win' || gameState === 'lose';
   const isWinResult = gameState === 'win';
-  const defeatSceneImage = gameState === 'lose' ? getDefeatSceneImageForLevel(level, specialOpponentSelections) : null;
+  const defeatSceneImage = gameState === 'lose' ? getDefeatSceneImageForLevel(activeLearningUnitId, level, specialOpponentSelections) : null;
   const currentLevelDescription = levelDescriptions[level] ?? `${level}단계`;
   const finalRecordLabel = gameState === 'win' ? `${level}단계 클리어` : `${level}단계 도달`;
   const finalRecordTopic = currentLevelDescription.replace(/^\d+단계:\s*/, '');
@@ -6047,9 +6214,10 @@ export default function App() {
   const normalizedDistanceWorksheetInput = currentDistanceWorksheetPrompt
     ? normalizeDistanceWorksheetAnswer(normalizedInputValue, currentDistanceWorksheetPrompt.kind)
     : '';
-  const requiredAnswerUnit = problem.kind === 'builder' ? null : problem.answerUnit ?? null;
-  const answerUnitOptions = requiredAnswerUnit ? getAnswerUnitOptions(requiredAnswerUnit) : [];
-  const hasValidUnitInput = requiredAnswerUnit ? normalizedUnitInputValue.length > 0 : true;
+  const selectedAnswerUnit = problem.kind === 'builder' ? null : problem.answerUnit ?? null;
+  const requiresUnitSelection = problem.kind !== 'builder' && problem.requiresUnitSelection === true && selectedAnswerUnit !== null;
+  const answerUnitOptions = requiresUnitSelection && selectedAnswerUnit ? getAnswerUnitOptions(selectedAnswerUnit) : [];
+  const hasValidUnitInput = requiresUnitSelection ? normalizedUnitInputValue.length > 0 : true;
   const hasValidAnswerInput = normalizedInputValue.length > 0 && !Number.isNaN(parsedInputAnswer) && hasValidUnitInput;
   const hasValidDistanceWorksheetInput =
     currentDistanceWorksheetPrompt !== null &&
@@ -6062,16 +6230,24 @@ export default function App() {
       : problem.kind === 'builder'
       ? hasValidAnswerInput && builderEvaluation?.status === 'ready'
       : hasValidAnswerInput;
-  const battleShellResponsiveClass = isShortViewport
-    ? 'lg:h-[calc(100svh-1rem)] lg:gap-3 lg:p-4'
-    : 'lg:h-[90vh] lg:gap-4 lg:p-6';
-  const battleSidebarResponsiveClass = isShortViewport
-    ? 'lg:w-[28%] lg:p-3'
-    : 'lg:w-[29%] lg:p-4';
-  const battleSectionResponsiveClass = isShortViewport ? 'p-3 sm:p-3' : 'p-3 sm:p-4';
-  const battleStageResponsiveClass = isShortViewport
-    ? 'lg:h-[clamp(14rem,29vh,18rem)]'
-    : 'lg:h-[clamp(22rem,44vh,31rem)]';
+  const storyPromptSections = problem.kind === 'story' ? splitStoryPromptSections(problem.prompt) : null;
+  const hasNumberedStoryOptions = Boolean(storyPromptSections && storyPromptSections.optionLines.length >= 2);
+  const isCompactBattleViewport =
+    isShortViewport || (activeLearningUnitId === 'unit3' && level >= 8) || hasNumberedStoryOptions;
+  const battleShellWidthClass = isCompactBattleViewport ? 'max-w-7xl' : 'max-w-[78rem]';
+  const battleShellResponsiveClass = isCompactBattleViewport
+    ? 'lg:h-[48rem] lg:max-h-[calc(100svh-3rem)] lg:gap-2 lg:p-3'
+    : 'lg:h-[47.5rem] lg:max-h-[calc(100svh-2.5rem)] lg:gap-4 lg:p-6';
+  const battleSidebarResponsiveClass = isCompactBattleViewport
+    ? 'lg:w-[27%] lg:p-2.5'
+    : 'lg:w-[29.5%] lg:p-4';
+  const battleSectionResponsiveClass = isCompactBattleViewport ? 'p-2.5 sm:p-3' : 'p-3 sm:p-4';
+  const battleStageResponsiveClass = isCompactBattleViewport
+    ? 'lg:h-[clamp(11rem,23vh,15rem)]'
+    : 'lg:h-[clamp(17rem,31vh,21.5rem)]';
+  const battleRightPanelResponsiveClass = isCompactBattleViewport ? 'gap-2' : 'gap-3';
+  const battleTopGroupResponsiveClass = isCompactBattleViewport ? 'gap-2' : 'gap-3';
+  const battleInputResponsiveClass = isCompactBattleViewport ? 'gap-2' : 'gap-3';
 
   useEffect(() => {
     setShowHint(isHintForced);
@@ -6212,7 +6388,7 @@ export default function App() {
         gainMultiplier: 1 + nextLevel * 0.025,
         detune: Math.min(nextLevel * 10, 90),
       });
-      updateMessage(getOpponentEntranceMessage(nextLevel, specialOpponentSelections));
+      updateMessage(getOpponentEntranceMessage(activeLearningUnitId, nextLevel, specialOpponentSelections));
       if (shouldQueueEstimation) {
         queueEstimationChallenge();
       }
@@ -6465,7 +6641,7 @@ export default function App() {
     if (problem.kind === 'distanceWorksheet' && problem.distanceWorksheet) {
       if (!hasValidDistanceWorksheetInput) {
         playSound('ui');
-        updateMessage(requiredAnswerUnit ? '숫자를 쓰고 단위 버튼도 골라야 공격할 수 있어!' : '정답을 입력해야 공격할 수 있어!');
+        updateMessage(requiresUnitSelection ? '숫자를 쓰고 단위 버튼도 골라야 공격할 수 있어!' : '정답을 입력해야 공격할 수 있어!');
         return;
       }
 
@@ -6473,8 +6649,8 @@ export default function App() {
         normalizeDistanceWorksheetAnswer(normalizedInputValue, problem.distanceWorksheet.prompt.kind)
         === normalizeDistanceWorksheetAnswer(problem.distanceWorksheet.prompt.answer, problem.distanceWorksheet.prompt.kind);
 
-      if (requiredAnswerUnit) {
-        isCorrect = isCorrect && normalizedUnitInputValue === normalizeAnswerUnit(requiredAnswerUnit);
+      if (requiresUnitSelection && selectedAnswerUnit) {
+        isCorrect = isCorrect && normalizedUnitInputValue === normalizeAnswerUnit(selectedAnswerUnit);
       }
 
       playSound('submit', {
@@ -6487,7 +6663,7 @@ export default function App() {
 
     if (!hasValidAnswerInput) {
       playSound('ui');
-      updateMessage(requiredAnswerUnit ? '숫자를 쓰고 단위 버튼도 골라야 공격할 수 있어!' : '정답을 입력해야 공격할 수 있어!');
+      updateMessage(requiresUnitSelection ? '숫자를 쓰고 단위 버튼도 골라야 공격할 수 있어!' : '정답을 입력해야 공격할 수 있어!');
       return;
     }
 
@@ -6503,8 +6679,8 @@ export default function App() {
       isCorrect = parsedInputAnswer === builderEvaluation.answer;
     }
 
-    if (requiredAnswerUnit) {
-      isCorrect = isCorrect && normalizedUnitInputValue === normalizeAnswerUnit(requiredAnswerUnit);
+    if (requiresUnitSelection && selectedAnswerUnit) {
+      isCorrect = isCorrect && normalizedUnitInputValue === normalizeAnswerUnit(selectedAnswerUnit);
     }
 
     playSound('submit', {
@@ -6540,10 +6716,10 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!requiredAnswerUnit) {
+    if (!requiresUnitSelection) {
       setIsUnitMenuOpen(false);
     }
-  }, [requiredAnswerUnit]);
+  }, [requiresUnitSelection]);
 
   useEffect(() => {
     if (!isDeveloperShortcutEnabled) {
@@ -6615,7 +6791,7 @@ export default function App() {
     setInputValue('');
     setUnitInputValue('');
     setIsUnitMenuOpen(false);
-    updateMessage(getOpponentEntranceMessage(1, nextSpecialOpponentSelections));
+    updateMessage(getOpponentEntranceMessage(activeLearningUnitId, 1, nextSpecialOpponentSelections));
   };
 
   const returnToStartScreen = () => {
@@ -6683,7 +6859,7 @@ export default function App() {
     <div className={`flex min-h-[100svh] flex-col items-center overflow-x-hidden bg-slate-950 font-sans text-white ${
       isResultScreen
         ? 'justify-center overflow-y-hidden p-2 sm:p-3'
-        : 'justify-start overflow-y-auto p-3 sm:p-4 lg:justify-center'
+        : 'justify-start overflow-y-auto p-3 sm:p-4 lg:justify-center lg:p-6'
     }`}>
       {gameState === 'start' && (
         <motion.div
@@ -6924,7 +7100,7 @@ export default function App() {
       )}
 
       {gameState === 'playing' && (
-        <div className={`flex w-full max-w-7xl min-h-0 flex-col gap-3 overflow-visible rounded-3xl border-4 border-slate-700 bg-slate-800 p-3 shadow-2xl sm:p-4 lg:flex-row lg:overflow-hidden ${battleShellResponsiveClass}`}>
+        <div className={`flex w-full min-h-0 flex-col gap-3 overflow-visible rounded-3xl border-4 border-slate-700 bg-slate-800 p-3 shadow-2xl sm:p-4 lg:flex-row lg:overflow-hidden ${battleShellWidthClass} ${battleShellResponsiveClass}`}>
           {/* Left: Character Visuals & Messages */}
           <div className={`relative flex w-full min-h-0 flex-col gap-3 overflow-visible rounded-2xl border-2 border-slate-600 bg-slate-900 p-3 lg:overflow-hidden ${battleSidebarResponsiveClass}`}>
             <section className={`flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.75rem] border border-slate-700/80 bg-slate-950/70 shadow-[inset_0_1px_0_rgba(148,163,184,0.08)] ${battleSectionResponsiveClass}`}>
@@ -7054,8 +7230,8 @@ export default function App() {
           </div>
 
           {/* Right: Math Problem & Input */}
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
-            <div className="shrink-0 flex flex-col gap-3">
+          <div className={`flex min-h-0 min-w-0 flex-1 flex-col ${battleRightPanelResponsiveClass}`}>
+            <div className={`shrink-0 flex flex-col ${battleTopGroupResponsiveClass}`}>
               <div className="min-w-0 flex-1 rounded-2xl border-2 border-slate-700 bg-slate-900 px-3 py-2">
                 <div className="flex items-center gap-2 sm:gap-3">
                   <p className="min-w-0 max-w-full truncate text-xs font-black text-yellow-400 sm:max-w-[38%] sm:text-sm" title={currentLevelDescription}>{currentLevelDescription}</p>
@@ -7189,7 +7365,7 @@ export default function App() {
                   <VisualCalculator
                     problemText={hintProblemText}
                     onControlSound={playVisualControlSound}
-                    condensed={isShortViewport}
+                    condensed={isCompactBattleViewport}
                   />
                 </ErrorBoundary>
               ) : (
@@ -7214,8 +7390,10 @@ export default function App() {
                 className={`flex min-h-0 flex-1 rounded-3xl border-8 border-slate-200 bg-white shadow-inner ${
                   problem.kind === 'distanceMap' || problem.kind === 'distanceWorksheet'
                     ? 'flex flex-col overflow-hidden p-2 sm:p-3 lg:p-3'
+                    : hasNumberedStoryOptions
+                      ? 'flex flex-col overflow-hidden p-3 sm:p-4 lg:p-5'
                     : problem.kind !== 'equation'
-                      ? 'flex flex-col justify-center overflow-y-auto p-4 sm:p-6 lg:p-8'
+                      ? `flex flex-col justify-center ${isCompactBattleViewport ? 'overflow-hidden p-3 sm:p-4 lg:p-5' : 'overflow-y-auto p-4 sm:p-6 lg:p-8'}`
                     : shouldRenderHorizontalEquation
                       ? 'items-center justify-center overflow-y-auto p-4 text-center text-[clamp(3.6rem,12vw,6.8rem)] leading-tight font-black font-mono text-slate-900 sm:p-6 lg:p-8'
                       : 'flex flex-col items-center justify-center p-4 text-[clamp(3.5rem,18vw,8rem)] leading-none font-black font-mono text-slate-900 sm:p-6 lg:p-8'
@@ -7235,32 +7413,106 @@ export default function App() {
                 ) : problem.kind === 'measurement' && problem.measurement ? (
                   <MeasurementProblemCard measurement={problem.measurement} />
                 ) : problem.kind === 'story' ? (
-                  <div className="mx-auto flex w-full max-w-[52rem] flex-col gap-4 text-left text-slate-900 sm:gap-6">
-                    {getStoryPromptLines(problem.prompt).map((line, index, lines) => {
-                      const isQuestionLine = lines.length === 1 || index === lines.length - 1;
+                  hasNumberedStoryOptions && storyPromptSections ? (
+                    <div className={`mx-auto flex h-full w-full max-w-[54rem] flex-col text-left text-slate-900 ${isCompactBattleViewport ? 'gap-3' : 'gap-4 sm:gap-5'}`}>
+                      <div className={`flex shrink-0 flex-col ${isCompactBattleViewport ? 'gap-3' : 'gap-4 sm:gap-5'}`}>
+                        {storyPromptSections.introLines.map((line, index) => {
+                          const isQuestionLine = index === storyPromptSections.introLines.length - 1;
 
-                      return (
-                        <div
-                          key={`${line}-${index}`}
-                          className={`rounded-[2rem] border px-4 py-4 shadow-sm sm:px-6 sm:py-5 md:px-8 md:py-7 ${
-                            isQuestionLine
-                              ? 'border-amber-200 bg-amber-50/80'
-                              : 'border-slate-200 bg-slate-50/85'
-                          }`}
-                        >
-                          <p
-                            className={`break-keep tracking-[-0.01em] ${
-                              isQuestionLine
-                                ? 'text-[1.3rem] font-black leading-[1.55] text-slate-900 sm:text-[1.75rem] md:text-[2.45rem]'
-                                : 'text-[1.1rem] font-bold leading-[1.72] text-slate-700 sm:text-[1.45rem] md:text-[2rem]'
+                          return (
+                            <div
+                              key={`${line}-${index}`}
+                              className={`rounded-[1.75rem] border shadow-sm ${
+                                isCompactBattleViewport
+                                  ? 'px-4 py-3 sm:px-5 sm:py-4'
+                                  : 'px-5 py-4 sm:px-6 sm:py-5'
+                              } ${
+                                isQuestionLine
+                                  ? 'border-amber-200 bg-amber-50/85'
+                                  : 'border-slate-200 bg-slate-50/85'
+                              }`}
+                            >
+                              <p
+                                className={`break-keep tracking-[-0.01em] ${
+                                  isQuestionLine
+                                    ? isCompactBattleViewport
+                                      ? 'text-[1.2rem] font-black leading-[1.45] text-slate-900 sm:text-[1.55rem] lg:text-[1.9rem]'
+                                      : 'text-[1.35rem] font-black leading-[1.52] text-slate-900 sm:text-[1.75rem] lg:text-[2.2rem]'
+                                    : isCompactBattleViewport
+                                      ? 'text-[1rem] font-bold leading-[1.62] text-slate-700 sm:text-[1.2rem] lg:text-[1.45rem]'
+                                      : 'text-[1.1rem] font-bold leading-[1.72] text-slate-700 sm:text-[1.35rem] lg:text-[1.75rem]'
+                                }`}
+                              >
+                                {renderPromptWithHighlight(line, level !== 9)}
+                              </p>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div
+                        className={`grid min-h-0 flex-1 ${isCompactBattleViewport ? 'gap-3' : 'gap-4'}`}
+                        style={{ gridTemplateRows: `repeat(${storyPromptSections.optionLines.length}, minmax(0, 1fr))` }}
+                      >
+                        {storyPromptSections.optionLines.map((line, index) => (
+                          <div
+                            key={`${line}-${index}`}
+                            className={`flex min-h-0 items-center rounded-[1.75rem] border border-slate-200 bg-slate-50/90 shadow-sm ${
+                              isCompactBattleViewport
+                                ? 'px-4 py-3 sm:px-5'
+                                : 'px-5 py-4 sm:px-6'
                             }`}
                           >
-                            {renderPromptWithHighlight(line, level !== 9)}
-                          </p>
-                        </div>
-                      );
-                    })}
-                  </div>
+                            <p
+                              className={`break-keep tracking-[-0.01em] text-slate-900 ${
+                                isCompactBattleViewport
+                                  ? 'text-[1.2rem] font-black leading-[1.42] sm:text-[1.5rem] lg:text-[1.85rem]'
+                                  : 'text-[1.35rem] font-black leading-[1.48] sm:text-[1.7rem] lg:text-[2.15rem]'
+                              }`}
+                            >
+                              {renderPromptWithHighlight(line, level !== 9)}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className={`mx-auto flex w-full max-w-[52rem] flex-col text-left text-slate-900 ${
+                      isCompactBattleViewport ? 'gap-3' : 'gap-4 sm:gap-6'
+                    }`}>
+                      {getStoryPromptLines(problem.prompt).map((line, index, lines) => {
+                        const isQuestionLine = lines.length === 1 || index === lines.length - 1;
+
+                        return (
+                          <div
+                            key={`${line}-${index}`}
+                            className={`rounded-[2rem] border shadow-sm ${
+                              isCompactBattleViewport
+                                ? 'px-4 py-3 sm:px-5 sm:py-4'
+                                : 'px-4 py-4 sm:px-6 sm:py-5 md:px-8 md:py-7'
+                            } ${
+                              isQuestionLine
+                                ? 'border-amber-200 bg-amber-50/80'
+                                : 'border-slate-200 bg-slate-50/85'
+                            }`}
+                          >
+                            <p
+                              className={`break-keep tracking-[-0.01em] ${
+                                isQuestionLine
+                                  ? isCompactBattleViewport
+                                    ? 'text-[1.2rem] font-black leading-[1.45] text-slate-900 sm:text-[1.5rem] lg:text-[1.9rem]'
+                                    : 'text-[1.3rem] font-black leading-[1.55] text-slate-900 sm:text-[1.75rem] md:text-[2.45rem]'
+                                  : isCompactBattleViewport
+                                    ? 'text-[1rem] font-bold leading-[1.58] text-slate-700 sm:text-[1.15rem] lg:text-[1.45rem]'
+                                    : 'text-[1.1rem] font-bold leading-[1.72] text-slate-700 sm:text-[1.45rem] md:text-[2rem]'
+                              }`}
+                            >
+                              {renderPromptWithHighlight(line, level !== 9)}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )
                 ) : problem.kind === 'builder' && problem.builder ? (
                   <div className="flex h-full w-full flex-col gap-3 text-left text-slate-900 sm:gap-4">
                     <div>
@@ -7328,9 +7580,11 @@ export default function App() {
             </div>
 
             {!isSpecialChallengeActive && (
-              <div className="flex flex-col gap-3 shrink-0">
-                <div className="grid grid-cols-[minmax(0,1fr)_auto] items-stretch gap-3">
-                  <div className="flex min-w-0 items-center gap-3 rounded-2xl border-4 border-slate-500 bg-slate-700 px-4 py-2 focus-within:border-emerald-500">
+              <div className={`shrink-0 flex flex-col ${battleInputResponsiveClass}`}>
+                <div className={`grid grid-cols-[minmax(0,1fr)_auto] items-stretch ${battleInputResponsiveClass}`}>
+                  <div className={`flex min-w-0 items-center rounded-2xl border-4 border-slate-500 bg-slate-700 px-4 focus-within:border-emerald-500 ${
+                    isCompactBattleViewport ? 'gap-2 py-1.5' : 'gap-3 py-2'
+                  }`}>
                     <input
                       type={usesTextAnswerInput ? 'text' : 'number'}
                       inputMode={usesTextAnswerInput ? 'text' : 'numeric'}
@@ -7342,7 +7596,9 @@ export default function App() {
                           checkAnswer();
                         }
                       }}
-                      className="min-w-0 flex-1 bg-transparent py-2 text-center text-2xl font-black text-slate-100 outline-none placeholder:text-slate-400 sm:text-3xl"
+                      className={`min-w-0 flex-1 bg-transparent text-center font-black text-slate-100 outline-none placeholder:text-slate-400 ${
+                        isCompactBattleViewport ? 'py-1.5 text-xl sm:text-2xl' : 'py-2 text-2xl sm:text-3xl'
+                      }`}
                       placeholder={
                         problem.kind === 'builder'
                           ? '답'
@@ -7350,12 +7606,12 @@ export default function App() {
                             ? usesTextAnswerInput
                               ? '장소 이름 입력'
                               : '숫자 입력'
-                            : requiredAnswerUnit
+                            : requiresUnitSelection
                               ? '숫자 입력'
                               : '정답 입력'
                       }
                     />
-                    {requiredAnswerUnit && (
+                    {requiresUnitSelection && (
                       <div ref={unitMenuRef} className="relative shrink-0 pl-1">
                         <button
                           type="button"
