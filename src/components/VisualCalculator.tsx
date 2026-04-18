@@ -95,7 +95,26 @@ interface SimpleTransferVisual {
   note: string;
 }
 
-const AUTO_COMPLETE_CHAIN_DELAY_MS = 560;
+const AUTO_COMPLETE_CHAIN_DELAY_MS = 980;
+const NEXT_BUTTON_COOLDOWN_MS = 1200;
+const STEP_TRANSITION_EASE = [0.18, 0.9, 0.24, 1] as const;
+const BLOCK_LAYOUT_SPRING = { type: 'spring', stiffness: 180, damping: 26, mass: 0.85 } as const;
+const CARD_LAYOUT_SPRING = { type: 'spring', stiffness: 180, damping: 26, mass: 0.9 } as const;
+const STEP_ADVANCE_LOCK_MS: Record<StepPhase, number> = {
+  intro: 760,
+  group: 820,
+  'regroup-source': 1100,
+  'regroup-target': 1140,
+  'borrow-source': 1060,
+  'borrow-target': 1100,
+  remove: 860,
+  'place-complete': 920,
+  complete: 900,
+};
+
+function getStepAdvanceLockMs(step: VisualStep, source: StepNavigationSource) {
+  return Math.max(STEP_ADVANCE_LOCK_MS[step.phase], source === 'forward' ? NEXT_BUTTON_COOLDOWN_MS : 0);
+}
 
 const PLACE_ORDER: PlaceKey[] = ['h', 't', 'o'];
 
@@ -943,9 +962,9 @@ function BlockSet({
             }}
             exit={{ opacity: 0, y: isRemove ? -16 : -6, scale: isRemove ? 0.84 : 0.94 }}
             transition={{
-              layout: { type: 'spring', stiffness: 240, damping: 24, mass: 0.7 },
-              duration: isAccent || isResultPulse ? 0.56 : 0.28,
-              ease: [0.22, 1, 0.36, 1],
+              layout: BLOCK_LAYOUT_SPRING,
+              duration: isAccent || isResultPulse ? 0.74 : 0.4,
+              ease: STEP_TRANSITION_EASE,
             }}
             className={`relative flex items-center justify-center overflow-visible ${
               compact ? meta.compactBlockShape : meta.blockShape
@@ -1017,7 +1036,7 @@ function ActionPreview({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.18 }}
+      transition={{ duration: 0.26, ease: STEP_TRANSITION_EASE }}
       className={`rounded-2xl border p-3 ${ACTION_TONE[action.tone]}`}
     >
       <div className="flex items-start justify-between gap-3">
@@ -2136,7 +2155,7 @@ function TransferMorphVisual({
         top: isTargetPhase ? '25%' : '25%',
         scale: isTargetPhase ? 1.03 : 0.98,
       }}
-      transition={{ duration: 0.86, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 1.12, ease: STEP_TRANSITION_EASE }}
       className="absolute -translate-x-1/2 -translate-y-1/2"
     >
       <div className="relative h-28 w-36">
@@ -2146,7 +2165,7 @@ function TransferMorphVisual({
             opacity: isTargetPhase ? 0.34 : 0.2,
             scale: isTargetPhase ? 1.16 : 0.94,
           }}
-          transition={{ duration: 0.68, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.88, ease: STEP_TRANSITION_EASE }}
           className={`absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full blur-2xl ${glowClass}`}
         />
 
@@ -2162,9 +2181,9 @@ function TransferMorphVisual({
               rotate: isTargetPhase && transfer.mode === 'borrow' ? -18 : 0,
             }}
             transition={{
-              duration: 0.82,
-              delay: Math.min(index, 4) * 0.018,
-              ease: [0.22, 1, 0.36, 1],
+              duration: 1.04,
+              delay: Math.min(index, 4) * 0.026,
+              ease: STEP_TRANSITION_EASE,
             }}
             className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center"
           >
@@ -2194,9 +2213,9 @@ function TransferMorphVisual({
               rotate: isTargetPhase ? 0 : 12,
             }}
             transition={{
-              duration: 0.88,
-              delay: isTargetPhase ? 0.08 + Math.min(index, 4) * 0.018 : 0,
-              ease: [0.22, 1, 0.36, 1],
+              duration: 1.08,
+              delay: isTargetPhase ? 0.12 + Math.min(index, 4) * 0.026 : 0,
+              ease: STEP_TRANSITION_EASE,
             }}
             className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center"
           >
@@ -2259,13 +2278,13 @@ function SimpleTransferOverlay({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.22 }}
+        transition={{ duration: 0.32, ease: STEP_TRANSITION_EASE }}
         className="pointer-events-none absolute inset-0 z-20"
       >
         <motion.div
           initial={false}
           animate={{ opacity: 1, scaleX: 1 }}
-          transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.58, ease: STEP_TRANSITION_EASE }}
           className={`absolute h-[2px] origin-center rounded-full ${railClass}`}
           style={{ top: '26%', left: `${lineLeft}%`, width: `${lineWidth}%` }}
         />
@@ -2274,7 +2293,7 @@ function SimpleTransferOverlay({
           <motion.div
             key={`${transfer.key}-marker-${index}`}
             animate={{ scale: [0.92, 1.45, 0.92], opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 1.1, repeat: Infinity, delay: index * 0.12, ease: 'easeInOut' }}
+            transition={{ duration: 1.4, repeat: Infinity, delay: index * 0.16, ease: 'easeInOut' }}
             className={`absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border ${markerClass}`}
             style={{ top: '26%', left: `${left}%` }}
           />
@@ -2286,7 +2305,7 @@ function SimpleTransferOverlay({
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.42, ease: STEP_TRANSITION_EASE }}
             className={`absolute min-w-[148px] -translate-x-1/2 rounded-full border px-3 py-1 text-center text-[11px] font-black backdrop-blur-sm ${noteClass}`}
             style={{ top: '13%', left: `${middleLeft}%` }}
           >
@@ -2320,7 +2339,7 @@ function CompactTransferBanner({
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -4 }}
-      transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.3, ease: STEP_TRANSITION_EASE }}
       className={`rounded-[22px] border px-4 py-3 shadow-inner ${containerClass}`}
     >
       <div className="flex flex-wrap items-center gap-2">
@@ -2376,9 +2395,9 @@ function SimpleThousandsCard({
         transferRole === 'target' ? { y: [0, -2, 0], scale: [1, 1.015, 1] } : { y: 0, scale: 1 }
       }
       transition={{
-        layout: { type: 'spring', stiffness: 240, damping: 24 },
-        duration: transferRole ? 0.6 : 0.24,
-        ease: [0.22, 1, 0.36, 1],
+        layout: CARD_LAYOUT_SPRING,
+        duration: transferRole ? 0.82 : 0.36,
+        ease: STEP_TRANSITION_EASE,
       }}
       className={`flex min-w-0 flex-col ${compactLayout ? 'gap-1.5 rounded-[20px] p-2 md:p-2.5' : 'gap-2 rounded-[22px] p-2.5 md:p-3'} transition-all ${cardMinHeightClass} ${
         meta.cardBase
@@ -2693,9 +2712,9 @@ function SimplePlaceCard({
             : { y: 0, scale: 1 }
       }
       transition={{
-        layout: { type: 'spring', stiffness: 240, damping: 24 },
-        duration: transferRole ? 0.6 : 0.24,
-        ease: [0.22, 1, 0.36, 1],
+        layout: CARD_LAYOUT_SPRING,
+        duration: transferRole ? 0.82 : 0.36,
+        ease: STEP_TRANSITION_EASE,
       }}
       className={`flex min-w-0 flex-col ${compactLayout ? 'gap-1.5 rounded-[20px] p-2 md:p-2.5' : 'gap-2 rounded-[22px] p-2.5 md:p-3'} transition-all ${cardMinHeightClass} ${
         meta.cardBase
@@ -2805,7 +2824,10 @@ export const VisualCalculator: React.FC<VisualCalculatorProps> = ({
   );
   const [stepIdx, setStepIdx] = useState(0);
   const autoCompleteTimerRef = useRef<number | null>(null);
+  const nextUnlockTimerRef = useRef<number | null>(null);
+  const nextLockUntilRef = useRef(0);
   const lastMoveSourceRef = useRef<StepNavigationSource>('reset');
+  const [isNextLocked, setIsNextLocked] = useState(steps.length > 1);
 
   const clearAutoCompleteTimer = () => {
     if (autoCompleteTimerRef.current !== null) {
@@ -2814,13 +2836,57 @@ export const VisualCalculator: React.FC<VisualCalculatorProps> = ({
     }
   };
 
+  const clearNextUnlockTimer = () => {
+    if (nextUnlockTimerRef.current !== null) {
+      window.clearTimeout(nextUnlockTimerRef.current);
+      nextUnlockTimerRef.current = null;
+    }
+
+    nextLockUntilRef.current = 0;
+  };
+
+  const scheduleNextUnlock = (
+    nextStep: VisualStep,
+    nextIndex: number,
+    source: StepNavigationSource,
+  ) => {
+    clearNextUnlockTimer();
+
+    if (steps.length <= 1 || nextIndex >= steps.length - 1) {
+      setIsNextLocked(false);
+      return;
+    }
+
+    const lockMs = getStepAdvanceLockMs(nextStep, source);
+    nextLockUntilRef.current = Date.now() + lockMs;
+    setIsNextLocked(true);
+    nextUnlockTimerRef.current = window.setTimeout(() => {
+      nextUnlockTimerRef.current = null;
+      nextLockUntilRef.current = 0;
+      setIsNextLocked(false);
+    }, lockMs);
+  };
+
   useEffect(() => {
     clearAutoCompleteTimer();
+    clearNextUnlockTimer();
     lastMoveSourceRef.current = 'reset';
     setStepIdx(0);
-  }, [problemText]);
+    if (!steps[0]) {
+      setIsNextLocked(false);
+      return;
+    }
 
-  useEffect(() => () => clearAutoCompleteTimer(), []);
+    scheduleNextUnlock(steps[0], 0, 'reset');
+  }, [problemText, steps]);
+
+  useEffect(
+    () => () => {
+      clearAutoCompleteTimer();
+      clearNextUnlockTimer();
+    },
+    [],
+  );
 
   const currentStepIdx = steps.length > 0 ? Math.min(stepIdx, steps.length - 1) : 0;
   const step = steps[currentStepIdx];
@@ -2835,13 +2901,17 @@ export const VisualCalculator: React.FC<VisualCalculatorProps> = ({
   const desktopCompactLayout = showThousandsSection || condensed;
   const isPenultimateStep = currentStepIdx === steps.length - 2;
   const finalStep = isPenultimateStep ? steps[currentStepIdx + 1] : undefined;
+  const nextButtonDisabled = currentStepIdx === steps.length - 1 || isNextLocked;
 
   const moveStep = (nextIndex: number, source: StepNavigationSource) => {
     clearAutoCompleteTimer();
     if (steps.length === 0) return;
+    if (source === 'forward' && Date.now() < nextLockUntilRef.current) return;
 
     const safeIndex = Math.min(Math.max(nextIndex, 0), steps.length - 1);
+    if (safeIndex === currentStepIdx) return;
     const nextStep = steps[safeIndex];
+    scheduleNextUnlock(nextStep, safeIndex, source);
     lastMoveSourceRef.current = source;
     setStepIdx(safeIndex);
     onControlSound?.(getControlSoundForStep(nextStep.phase));
@@ -2873,7 +2943,7 @@ export const VisualCalculator: React.FC<VisualCalculatorProps> = ({
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.14 }}
+              transition={{ duration: 0.22, ease: STEP_TRANSITION_EASE }}
               className="min-w-0 text-sm font-black leading-5 text-yellow-300 sm:truncate sm:text-base sm:leading-normal"
             >
               {getSimpleStepMessage(step, op, previousStep)}
@@ -2893,7 +2963,7 @@ export const VisualCalculator: React.FC<VisualCalculatorProps> = ({
             <button
               type="button"
               onClick={() => moveStep(currentStepIdx + 1, 'forward')}
-              disabled={currentStepIdx === steps.length - 1}
+               disabled={nextButtonDisabled}
               aria-label="다음 단계"
               className="flex h-9 w-9 items-center justify-center rounded-xl border border-blue-400/20 bg-blue-600 text-white transition hover:bg-blue-500 disabled:opacity-45"
             >
