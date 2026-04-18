@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef, useEffectEvent } from 'react';
-import { Sword, Heart, RotateCcw, Play, Sparkles, Star } from 'lucide-react';
+import { Sword, Heart, RotateCcw, Play, Sparkles, Star, ChevronDown, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { VisualCalculator, type VisualControlSound } from './components/VisualCalculator';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import startHeroImage from './assets/start-hero-bear.jpeg';
+import startHeroImage from './assets/Intro2.jpeg';
 import stage1DefeatSceneImage from './assets/stage1-defeat-scene-cutout.png';
 import stage1ChurusigiDefeatSceneImage from './assets/stage1-churusigi-defeat-scene.jpeg';
 import stage2DefeatSceneImage from './assets/stage2-defeat-scene.jpeg';
@@ -72,11 +72,15 @@ import opponentLevel9AttackImage from './assets/opponent-level9-attack.png';
 import opponentLevel9DefaultImage from './assets/opponent-level9-default.png';
 import opponentLevel9HitImage from './assets/opponent-level9-hit.png';
 
-type GameState = 'start' | 'playing' | 'win' | 'lose';
+type GameState = 'start' | 'unitSelect' | 'playing' | 'win' | 'lose';
 
 type BattleDifficulty = 'easy' | 'normal' | 'hard';
 
-type ProblemKind = 'equation' | 'story' | 'builder';
+type LearningUnitId = 'unit2' | 'unit3';
+
+type ProblemKind = 'equation' | 'story' | 'builder' | 'measurement' | 'distanceMap';
+type MeasurementObjectKind = 'seed' | 'rice' | 'eraser' | 'leaf' | 'paperStrip' | 'stick' | 'pencil' | 'chocolate';
+type DistanceEstimationStrategy = 'compare' | 'chunk' | 'unitize';
 
 interface BuildSlotConfig {
   id: string;
@@ -102,7 +106,10 @@ interface Problem {
   prompt: string;
   answer: number;
   kind: ProblemKind;
+  answerUnit?: string;
   builder?: BuilderProblemData;
+  measurement?: MeasurementProblemData;
+  distanceMap?: DistanceMapProblemData;
 }
 
 interface EstimationProblem {
@@ -110,6 +117,92 @@ interface EstimationProblem {
   question: string;
   options: number[];
   answer: number;
+}
+
+interface UnitSelectionChallenge {
+  badge: string;
+  prompt: string;
+  options: string[];
+  answer: string;
+}
+
+interface DeveloperProblemSnapshot {
+  level: number;
+  opponentHP: number;
+  problem: Problem;
+  problemCoachmark: string | null;
+}
+
+interface MeasurementProblemData {
+  title: string;
+  question: string;
+  objectKind: MeasurementObjectKind;
+  objectLabel: string;
+  startMm: number;
+  lengthMm: number;
+  rulerCm: number;
+}
+
+interface DistanceMapPoint {
+  x: number;
+  y: number;
+}
+
+interface DistanceMapLandmarkData {
+  id: string;
+  label: string;
+  x: number;
+  y: number;
+  accent: string;
+  kind: 'home' | 'reference' | 'place';
+}
+
+interface DistanceEstimationBaseData {
+  title: string;
+  question: string;
+  referenceMeters: number;
+  targetLabel: string;
+  targetMeters: number;
+  strategy: DistanceEstimationStrategy;
+  landmarks: DistanceMapLandmarkData[];
+}
+
+interface DistanceCompareProblemData extends DistanceEstimationBaseData {
+  strategy: 'compare';
+  referenceRoute: DistanceMapPoint[];
+  targetRoute: DistanceMapPoint[];
+  compareSlotCount: number;
+}
+
+interface DistanceChunkSegmentData {
+  id: string;
+  color: string;
+  points: DistanceMapPoint[];
+  units: number;
+}
+
+interface DistanceChunkProblemData extends DistanceEstimationBaseData {
+  strategy: 'chunk';
+  targetRoute: DistanceMapPoint[];
+  segments: DistanceChunkSegmentData[];
+}
+
+interface DistanceUnitizeProblemData extends DistanceEstimationBaseData {
+  strategy: 'unitize';
+  referenceRoute: DistanceMapPoint[];
+  targetRoute: DistanceMapPoint[];
+}
+
+type DistanceMapProblemData =
+  | DistanceCompareProblemData
+  | DistanceChunkProblemData
+  | DistanceUnitizeProblemData;
+
+interface DistanceMapTokenData {
+  id: number;
+  slotIndex: number | null;
+  x: number;
+  y: number;
 }
 
 interface CharacterSpriteSet {
@@ -152,11 +245,27 @@ interface BattleDifficultyConfig {
   estimationHitDamage: number;
 }
 
+interface LearningUnitConfig {
+  id: LearningUnitId;
+  chapterLabel: string;
+  title: string;
+  summary: string;
+  description: string;
+  isAvailable: boolean;
+}
+
 type StoryTemplate = (a: number, b: number) => string;
 
 interface StoryTemplatePool {
   '+': StoryTemplate[];
   '-': StoryTemplate[];
+}
+
+interface GeneratedStoryProblem {
+  a: number;
+  b: number;
+  op: '+' | '-';
+  answer: number;
 }
 
 type SoundEffectName =
@@ -672,9 +781,13 @@ const LEVEL_OPPONENT_NAMES = [
   '아니즈코',
   '발오공',
   '홍홍자',
+  '시계수호자',
+  '단위박사',
+  '길시대왕',
 ];
 
-const LEVEL_OPPONENT_EMOJIS = ['', '👾', '👹', '👺', '🤖', '👻', '🦖', '🐲', '😈', '👿'];
+const LEVEL_OPPONENT_EMOJIS = ['', '👾', '👹', '👺', '🤖', '👻', '🦖', '🐲', '😈', '👿', '⌛', '📏', '👑'];
+const DEFAULT_LEARNING_UNIT_ID: LearningUnitId = 'unit2';
 const DEFAULT_LEVEL1_OPPONENT_ID: Level1OpponentId = 'jeongichu';
 const DEFAULT_LEVEL2_OPPONENT_ID: Level2OpponentId = 'noneunpenggwin';
 const DEFAULT_LEVEL3_OPPONENT_ID: Level3OpponentId = 'romiromi';
@@ -879,20 +992,65 @@ const LEVEL_OPPONENT_SPRITES: Partial<Record<number, CharacterSpriteSet>> = {
     hit: opponentLevel9HitImage,
   },
 };
-const LEVEL_DESCRIPTIONS = [
-  "",
-  "1단계: 받아올림 없는 덧셈",
-  "2단계: 받아내림 없는 뺄셈",
-  "3단계: 받아올림 1번 덧셈",
-  "4단계: 받아내림 1번 뺄셈",
-  "5단계: 받아올림 2~3번 덧셈",
-  "6단계: 받아내림 2번 뺄셈",
-  "7단계: 덧셈과 뺄셈 종합",
-  "8단계: 해석형 문항",
-  "9단계: 해석형 문항",
-];
+const UNIT_LEVEL_DESCRIPTIONS: Record<LearningUnitId, string[]> = {
+  unit2: [
+    '',
+    '1단계: 받아올림 없는 덧셈',
+    '2단계: 받아내림 없는 뺄셈',
+    '3단계: 받아올림 1번 덧셈',
+    '4단계: 받아내림 1번 뺄셈',
+    '5단계: 받아올림 2~3번 덧셈',
+    '6단계: 받아내림 2번 뺄셈',
+    '7단계: 덧셈과 뺄셈 종합',
+    '8단계: 해석형 문항',
+    '9단계: 해석형 문항',
+  ],
+  unit3: [
+    '',
+    '1단계: 1mm가 왜 필요할까',
+    '2단계: 1cm와 1mm의 관계',
+    '3단계: 길이 재기',
+    '4단계: 약으로 나타내기와 비교',
+    '5단계: 1km가 왜 필요할까',
+    '6단계: 1km와 1m의 관계',
+    '7단계: 거리 어림',
+    '8단계: 시각과 시간 구별',
+    '9단계: 1초와 1분의 관계',
+    '10단계: 초 단위까지 시각 읽기',
+    '11단계: 시간의 덧셈',
+    '12단계: 시간의 뺄셈과 종합',
+  ],
+};
 
-const TOTAL_LEVELS = LEVEL_DESCRIPTIONS.length - 1;
+function getLevelDescriptionsForUnit(unitId: LearningUnitId) {
+  return UNIT_LEVEL_DESCRIPTIONS[unitId];
+}
+
+function getTotalLevelsForUnit(unitId: LearningUnitId) {
+  return getLevelDescriptionsForUnit(unitId).length - 1;
+}
+
+function getDeveloperLevelFromShortcut(event: KeyboardEvent) {
+  if (!event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) {
+    return null;
+  }
+
+  if (event.code.startsWith('Digit')) {
+    const digit = Number(event.code.slice(5));
+    return digit === 0 ? 10 : digit;
+  }
+
+  if (event.code === 'Minus') {
+    return 11;
+  }
+
+  if (event.code === 'Equal') {
+    return 12;
+  }
+
+  return null;
+}
+
 const DEFEAT_SCENE_IMAGES: Partial<Record<number, string>> = {
   1: stage1DefeatSceneImage,
   2: stage2DefeatSceneImage,
@@ -944,8 +1102,28 @@ const BATTLE_DIFFICULTY_CONFIG: Record<BattleDifficulty, BattleDifficultyConfig>
     estimationHitDamage: 35,
   },
 };
+const LEARNING_UNITS: LearningUnitConfig[] = [
+  {
+    id: 'unit2',
+    chapterLabel: '2단원',
+    title: '덧셈과 뺄셈',
+    summary: '기존 내용',
+    description: '현재 바로 플레이할 수 있는 단원입니다.',
+    isAvailable: true,
+  },
+  {
+    id: 'unit3',
+    chapterLabel: '3단원',
+    title: '길이와 시간',
+    summary: '단위, 측정, 시각과 시간',
+    description: '길이와 시간을 읽고, 재고, 어림하고, 계산하는 단원입니다.',
+    isAvailable: true,
+  },
+];
 const FINAL_BUILDER_HP = 25;
 const ESTIMATION_SAFE_HP = 40;
+const UNIT_SELECTION_TIME_LIMIT_SECONDS = 15;
+const UNIT_SELECTION_CHALLENGE_LEVELS = new Set<number>([2, 4, 7, 9, 11, 12]);
 const MAX_ZERO_TENS_BORROW_COACHMARKS = 3;
 const ZERO_TENS_BORROW_COACHMARK_TITLE = '생각해보기';
 const ZERO_TENS_BORROW_COACHMARK_TEXT = '십의 자리가 0인 수에서 일의 자리로 어떻게 받아내림을 할까요?';
@@ -1027,7 +1205,7 @@ function getOpponentSpriteSetForLevel(level: number, selections: SpecialOpponent
     return specialOpponent.spriteSet;
   }
 
-  return LEVEL_OPPONENT_SPRITES[level];
+  return LEVEL_OPPONENT_SPRITES[level] ?? LEVEL_OPPONENT_SPRITES[9];
 }
 
 function getDefeatSceneImageForLevel(level: number, selections: SpecialOpponentSelections = DEFAULT_SPECIAL_OPPONENT_SELECTIONS) {
@@ -1036,7 +1214,7 @@ function getDefeatSceneImageForLevel(level: number, selections: SpecialOpponentS
     return specialOpponent.defeatSceneImage;
   }
 
-  return DEFEAT_SCENE_IMAGES[level] ?? null;
+  return DEFEAT_SCENE_IMAGES[level] ?? DEFEAT_SCENE_IMAGES[9] ?? null;
 }
 
 function getOpponentEntranceMessage(level: number, selections: SpecialOpponentSelections = DEFAULT_SPECIAL_OPPONENT_SELECTIONS) {
@@ -1074,6 +1252,14 @@ const STORY_TEMPLATE_POOLS: Record<number, StoryTemplatePool> = {
         `급식실 우유 상자를 오전에 ${a}개 정리하고, 점심시간 뒤에 ${b}개를 더 정리했습니다.\n정리한 우유 상자는 모두 몇 개인지 구해 봅시다.`,
       (a, b) =>
         `과학실 관찰 기록지를 월요일에 ${a}장, 화요일에 ${b}장 모았습니다.\n이틀 동안 모은 기록지는 모두 몇 장인지 구해 봅시다.`,
+      (a, b) =>
+        `학교 복도 분리수거함에 오전에는 플라스틱 병 ${a}개, 오후에는 ${b}개를 넣었습니다.\n하루 동안 모두 몇 개를 모았는지 구해 봅시다.`,
+      (a, b) =>
+        `독서 달력에 소희는 지난주에 ${a}쪽, 이번 주에 ${b}쪽을 읽었습니다.\n지금까지 읽은 쪽수는 모두 몇 쪽인지 구해 봅시다.`,
+      (a, b) =>
+        `체험학습 준비로 3학년은 이름표 ${a}장, 4학년은 ${b}장을 만들었습니다.\n만든 이름표는 모두 몇 장인지 구해 봅시다.`,
+      (a, b) =>
+        `학교 앞 나눔 바구니에 아침에는 귤 ${a}개, 점심 뒤에는 ${b}개를 더 담았습니다.\n바구니에 들어 있는 귤은 모두 몇 개인지 구해 봅시다.`,
     ],
     '-': [
       (a, b) =>
@@ -1092,6 +1278,14 @@ const STORY_TEMPLATE_POOLS: Record<number, StoryTemplatePool> = {
         `학교 화단에 심은 꽃모종이 ${a}개였는데, 운동장 쪽 화단으로 ${b}개를 옮겼습니다.\n처음 화단에 남은 꽃모종은 몇 개인지 구해 봅시다.`,
       (a, b) =>
         `급식 도우미 배지가 ${a}개 있었는데, 오늘 ${b}개를 사용했습니다.\n보관함에 남은 배지는 몇 개인지 구해 봅시다.`,
+      (a, b) =>
+        `현장체험학습 명찰을 ${a}개 준비했는데, 출발 전에 ${b}개를 나누어 주었습니다.\n남은 명찰은 몇 개인지 구해 봅시다.`,
+      (a, b) =>
+        `교실 게시판에 압정을 ${a}개 두었는데, 오늘 ${b}개를 사용했습니다.\n상자에 남아 있는 압정은 몇 개인지 구해 봅시다.`,
+      (a, b) =>
+        `급식실에서 종이컵 ${a}개를 꺼냈는데, 그중 ${b}개를 먼저 사용했습니다.\n아직 남은 종이컵은 몇 개인지 구해 봅시다.`,
+      (a, b) =>
+        `민지는 퍼즐 조각 ${a}개를 맞췄다가 그중 ${b}개를 다시 빼 보았습니다.\n지금 맞춰 놓은 조각은 몇 개인지 구해 봅시다.`,
     ],
   },
   9: {
@@ -1112,6 +1306,14 @@ const STORY_TEMPLATE_POOLS: Record<number, StoryTemplatePool> = {
         `환경 동아리에서 페트병 뚜껑을 지난주에 ${a}개, 이번 주에 ${b}개 더 모았습니다. 모은 양을 벽보에 적기 전에 전체 수를 확인하려고 합니다.\n지금까지 모두 몇 개를 모았는지 구해 봅시다.`,
       (a, b) =>
         `교실 뒤 게시판에 작품 사진을 첫째 줄에 ${a}장, 둘째 줄에 ${b}장 붙였습니다. 게시판에 전시된 사진 수를 안내문에 적으려고 합니다.\n게시판에 붙인 사진은 모두 몇 장인지 구해 봅시다.`,
+      (a, b) =>
+        `학교 안전 캠페인 설문에 어제는 ${a}명, 오늘은 ${b}명이 참여했습니다. 학생회에서 이틀 동안 모인 응답 수를 정리하려고 합니다.\n모인 응답은 모두 몇 개인지 구해 봅시다.`,
+      (a, b) =>
+        `도서관 대출 기록을 보니 오전에는 책 ${a}권, 오후에는 ${b}권이 대출되었습니다. 사서 선생님이 하루 대출 수를 확인하려고 합니다.\n하루 동안 대출된 책은 모두 몇 권인지 구해 봅시다.`,
+      (a, b) =>
+        `교내 스포츠데이에서 5학년은 ${a}점, 6학년은 ${b}점을 얻었습니다. 진행팀이 전체 점수를 합쳐 발표하려고 합니다.\n두 학년이 얻은 점수는 모두 몇 점인지 구해 봅시다.`,
+      (a, b) =>
+        `환경 보호 벽보에 손도장을 첫째 시간에 ${a}개, 둘째 시간에 ${b}개 찍었습니다. 벽보에 찍힌 손도장의 수를 세어 보려고 합니다.\n손도장은 모두 몇 개인지 구해 봅시다.`,
     ],
     '-': [
       (a, b) =>
@@ -1130,12 +1332,204 @@ const STORY_TEMPLATE_POOLS: Record<number, StoryTemplatePool> = {
         `학급 회의 자료를 ${a}부 인쇄했는데, 발표 모둠에 ${b}부를 나누어 주었습니다. 교실 책상 위에 남아 있는 자료 수를 알아보려 합니다.\n책상 위에 남은 자료는 몇 부인지 구해 봅시다.`,
       (a, b) =>
         `우산 꽂이에 우산이 ${a}개 있었는데, 비가 그친 뒤 ${b}개가 먼저 가져가졌습니다. 우산 꽂이에 아직 남은 우산 수를 확인하려고 합니다.\n남아 있는 우산은 몇 개인지 구해 봅시다.`,
+      (a, b) =>
+        `자원봉사 팔찌를 ${a}개 준비했는데, 행사 시작 전에 ${b}개를 나누어 주었습니다. 진행팀이 남은 수량을 확인하려고 합니다.\n남은 팔찌는 몇 개인지 구해 봅시다.`,
+      (a, b) =>
+        `코딩 교실 태블릿이 ${a}대 있었는데, 그중 ${b}대를 먼저 배부했습니다. 아직 보관함에 있는 태블릿은 몇 대인지 구해 봅시다.`,
+      (a, b) =>
+        `운동장 응원 깃발을 ${a}개 세워 두었는데, 비가 와서 ${b}개를 먼저 정리했습니다. 아직 남아 있는 깃발은 몇 개인지 구해 봅시다.`,
+      (a, b) =>
+        `학교 사진전 인화 사진이 ${a}장 있었는데, 전시 준비로 ${b}장을 먼저 게시판에 붙였습니다. 아직 상자에 남은 사진은 몇 장인지 구해 봅시다.`,
     ],
   },
 };
 
 function sample<T>(items: T[]): T {
   return items[Math.floor(Math.random() * items.length)];
+}
+
+function randomInt(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+interface MeasurementFactoryConfig {
+  title: string;
+  question: string;
+  objectKind: MeasurementObjectKind;
+  objectLabel: string;
+  minLengthMm: number;
+  maxLengthMm: number;
+  shiftedStartMinMm: number;
+  shiftedStartMaxMm: number;
+}
+
+function shuffleValues<T>(values: T[]) {
+  const next = [...values];
+
+  for (let index = next.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [next[index], next[swapIndex]] = [next[swapIndex], next[index]];
+  }
+
+  return next;
+}
+
+function createMeasurementFactoryPair(config: MeasurementFactoryConfig): Array<() => Problem> {
+  return [
+    () => {
+      const lengthMm = randomInt(config.minLengthMm, config.maxLengthMm);
+      return createMeasurementProblem({
+        title: config.title,
+        question: config.question,
+        objectKind: config.objectKind,
+        objectLabel: config.objectLabel,
+        startMm: 0,
+        lengthMm,
+      });
+    },
+    () => {
+      const lengthMm = randomInt(config.minLengthMm, config.maxLengthMm);
+      return createMeasurementProblem({
+        title: config.title,
+        question: config.question,
+        objectKind: config.objectKind,
+        objectLabel: config.objectLabel,
+        startMm: randomInt(config.shiftedStartMinMm, config.shiftedStartMaxMm),
+        lengthMm,
+      });
+    },
+  ];
+}
+
+function toMillimeters(centimeters: number, millimeters = 0) {
+  return centimeters * 10 + millimeters;
+}
+
+function formatLengthAsMixedUnits(totalMillimeters: number) {
+  const centimeters = Math.floor(totalMillimeters / 10);
+  const millimeters = totalMillimeters % 10;
+
+  if (centimeters === 0) {
+    return `${totalMillimeters}mm`;
+  }
+
+  if (millimeters === 0) {
+    return `${centimeters}cm`;
+  }
+
+  return `${centimeters}cm ${millimeters}mm`;
+}
+
+function formatLengthValue(totalMillimeters: number) {
+  if (totalMillimeters < 10) {
+    return `${totalMillimeters}mm`;
+  }
+
+  if (Math.random() < 0.4) {
+    return `${totalMillimeters}mm`;
+  }
+
+  return formatLengthAsMixedUnits(totalMillimeters);
+}
+
+function toMeters(kilometers: number, meters = 0) {
+  return kilometers * 1000 + meters;
+}
+
+function formatDistanceAsMixedUnits(totalMeters: number) {
+  const kilometers = Math.floor(totalMeters / 1000);
+  const meters = totalMeters % 1000;
+
+  if (kilometers === 0) {
+    return `${totalMeters}m`;
+  }
+
+  if (meters === 0) {
+    return `${kilometers}km`;
+  }
+
+  return `${kilometers}km ${meters}m`;
+}
+
+function formatDistanceValue(totalMeters: number) {
+  if (totalMeters < 1000) {
+    return `${totalMeters}m`;
+  }
+
+  if (Math.random() < 0.35) {
+    return `${totalMeters}m`;
+  }
+
+  return formatDistanceAsMixedUnits(totalMeters);
+}
+
+function getDistinctRandomNumbers(count: number, min: number, max: number) {
+  const values = new Set<number>();
+
+  while (values.size < count) {
+    values.add(randomInt(min, max));
+  }
+
+  return [...values];
+}
+
+function buildNumberedOptionsPrompt(question: string, options: string[]) {
+  return `${question}\n${options.map((option, index) => `${index + 1}) ${option}`).join('\n')}`;
+}
+
+function formatClockTime(hours: number, minutes: number, seconds?: number) {
+  if (seconds === undefined) {
+    return `${hours}시 ${minutes}분`;
+  }
+
+  return `${hours}시 ${minutes}분 ${seconds}초`;
+}
+
+function formatDuration(hours: number, minutes: number, seconds = 0) {
+  const parts: string[] = [];
+
+  if (hours > 0) {
+    parts.push(`${hours}시간`);
+  }
+
+  if (minutes > 0) {
+    parts.push(`${minutes}분`);
+  }
+
+  if (seconds > 0 || parts.length === 0) {
+    parts.push(`${seconds}초`);
+  }
+
+  return parts.join(' ');
+}
+
+function splitClockSeconds(totalSeconds: number) {
+  return {
+    hours: Math.floor(totalSeconds / 3600),
+    minutes: Math.floor((totalSeconds % 3600) / 60),
+    seconds: totalSeconds % 60,
+  };
+}
+
+function createClockReadingChoiceProblem(): Problem {
+  const hour = randomInt(1, 11);
+  const nextHour = hour + 1;
+  const minuteMark = randomInt(0, 11);
+  const secondMark = randomInt(0, 11);
+  const minute = minuteMark * 5;
+  const second = secondMark * 5;
+  const correct = formatClockTime(hour, minute, second);
+  const wrongHour = formatClockTime(nextHour, minute, second);
+  const wrongMinuteSecond = formatClockTime(hour, second, minute === second ? (second + 5) % 60 : minute);
+  const options = shuffleValues([correct, wrongHour, wrongMinuteSecond]);
+
+  return createPromptProblem(
+    buildNumberedOptionsPrompt(
+      `시침은 ${hour}과 ${nextHour} 사이, 분침은 ${minuteMark === 0 ? 12 : minuteMark}, 초침은 ${secondMark === 0 ? 12 : secondMark}를 가리킵니다.\n알맞은 시각은 몇 번인가요?`,
+      options,
+    ),
+    options.indexOf(correct) + 1,
+  );
 }
 
 function createEquationProblem(a: number, b: number, op: '+' | '-', answer: number): Problem {
@@ -1147,6 +1541,1033 @@ function createStoryProblem(level: number, a: number, b: number, op: '+' | '-', 
   const text = `${a} ${op} ${b}`;
   const prompt = sample(STORY_TEMPLATE_POOLS[level]?.[op] ?? STORY_TEMPLATE_POOLS[9][op])(a, b);
   return { text, prompt, answer, kind: 'story' };
+}
+
+function createPromptProblem(prompt: string, answer: number, answerUnit?: string): Problem {
+  return {
+    text: '',
+    prompt,
+    answer,
+    kind: 'story',
+    answerUnit,
+  };
+}
+
+function createMeasurementProblem({
+  title,
+  question,
+  objectKind,
+  objectLabel,
+  startMm,
+  lengthMm,
+}: {
+  title: string;
+  question: string;
+  objectKind: MeasurementObjectKind;
+  objectLabel: string;
+  startMm: number;
+  lengthMm: number;
+}): Problem {
+  return {
+    text: '',
+    prompt: question,
+    answer: lengthMm,
+    kind: 'measurement',
+    answerUnit: 'mm',
+    measurement: {
+      title,
+      question,
+      objectKind,
+      objectLabel,
+      startMm,
+      lengthMm,
+      rulerCm: Math.max(5, Math.ceil((startMm + lengthMm + 8) / 10)),
+    },
+  };
+}
+
+function createDistanceMapProblem(distanceMap: DistanceMapProblemData): Problem {
+  return {
+    text: '',
+    prompt: distanceMap.question,
+    answer: distanceMap.targetMeters,
+    kind: 'distanceMap',
+    answerUnit: 'm',
+    distanceMap,
+  };
+}
+
+function normalizeAnswerUnit(unit: string) {
+  return unit.trim().replace(/\s+/g, '').toLowerCase();
+}
+
+function getAnswerUnitOptions(expectedUnit: string) {
+  const normalizedUnit = normalizeAnswerUnit(expectedUnit);
+
+  if (['mm', 'cm', 'm', 'km'].includes(normalizedUnit)) {
+    return ['mm', 'cm', 'm', 'km'];
+  }
+
+  if (['초', '분', '시간'].includes(expectedUnit.trim())) {
+    return ['초', '분', '시간'];
+  }
+
+  return [expectedUnit];
+}
+
+const UNIT_SELECTION_CHALLENGE_POOLS: Partial<Record<number, UnitSelectionChallenge[]>> = {
+  2: [
+    {
+      badge: '길이 단위 선택',
+      prompt: '가위의 긴 쪽 길이는 약 15 □입니다.',
+      options: ['mm', 'cm', 'km'],
+      answer: 'cm',
+    },
+    {
+      badge: '길이 단위 선택',
+      prompt: '지우개 한 개의 길이는 약 45 □입니다.',
+      options: ['mm', 'm', 'km'],
+      answer: 'mm',
+    },
+    {
+      badge: '길이 단위 선택',
+      prompt: '책 한 권의 두께는 약 12 □입니다.',
+      options: ['mm', 'm', 'km'],
+      answer: 'mm',
+    },
+    {
+      badge: '길이 단위 선택',
+      prompt: '색연필 한 자루의 길이는 약 18 □입니다.',
+      options: ['mm', 'cm', 'km'],
+      answer: 'cm',
+    },
+    {
+      badge: '길이 단위 선택',
+      prompt: '단추 한 개의 두께는 약 3 □입니다.',
+      options: ['mm', 'cm', 'm'],
+      answer: 'mm',
+    },
+    {
+      badge: '길이 단위 선택',
+      prompt: '공책의 가로 길이는 약 21 □입니다.',
+      options: ['mm', 'cm', 'km'],
+      answer: 'cm',
+    },
+    {
+      badge: '길이 단위 선택',
+      prompt: '손톱의 두께는 약 1 □입니다.',
+      options: ['mm', 'cm', 'm'],
+      answer: 'mm',
+    },
+    {
+      badge: '길이 단위 선택',
+      prompt: '빨대의 길이는 약 20 □입니다.',
+      options: ['mm', 'cm', 'km'],
+      answer: 'cm',
+    },
+  ],
+  4: [
+    {
+      badge: '길이 판단하기',
+      prompt: '단위를 잘못 사용한 문장은 어느 것일까요?',
+      options: [
+        '필통의 길이는 약 20cm입니다.',
+        '버스의 길이는 약 10m입니다.',
+        '학교 복도의 길이는 약 70km입니다.',
+      ],
+      answer: '학교 복도의 길이는 약 70km입니다.',
+    },
+    {
+      badge: '길이 판단하기',
+      prompt: '알맞지 않은 문장을 골라 보세요.',
+      options: [
+        '수학책의 두께는 약 9mm입니다.',
+        '엄지손톱의 너비는 약 2km입니다.',
+        '교실 문의 높이는 약 2m입니다.',
+      ],
+      answer: '엄지손톱의 너비는 약 2km입니다.',
+    },
+    {
+      badge: '길이 판단하기',
+      prompt: '단위를 바르게 쓴 문장은 어느 것일까요?',
+      options: [
+        '나무젓가락 한 개의 길이는 약 20km입니다.',
+        '도로의 길이는 약 3mm입니다.',
+        '연필 한 자루의 길이는 약 18cm입니다.',
+      ],
+      answer: '연필 한 자루의 길이는 약 18cm입니다.',
+    },
+    {
+      badge: '길이 판단하기',
+      prompt: '단위를 바르게 쓴 문장은 어느 것일까요?',
+      options: [
+        '고속도로의 길이는 약 7cm입니다.',
+        '책상 높이는 약 70cm입니다.',
+        '연필심의 굵기는 약 2m입니다.',
+      ],
+      answer: '책상 높이는 약 70cm입니다.',
+    },
+    {
+      badge: '길이 판단하기',
+      prompt: '알맞지 않은 문장을 골라 보세요.',
+      options: [
+        '교실 칠판의 가로 길이는 약 3m입니다.',
+        '운동화 끈의 길이는 약 1m입니다.',
+        '개미의 길이는 약 8km입니다.',
+      ],
+      answer: '개미의 길이는 약 8km입니다.',
+    },
+    {
+      badge: '길이 판단하기',
+      prompt: '단위를 바르게 쓴 문장은 어느 것일까요?',
+      options: [
+        '복사 종이 한 장의 두께는 약 1m입니다.',
+        '손가락 한 마디의 길이는 약 4cm입니다.',
+        '학교 운동장의 둘레는 약 400mm입니다.',
+      ],
+      answer: '손가락 한 마디의 길이는 약 4cm입니다.',
+    },
+  ],
+  7: [
+    {
+      badge: '거리 단위 선택',
+      prompt: '집에서 학교까지의 거리를 알맞게 나타낸 것은 어느 것일까요?',
+      options: ['1mm 200cm', '1km 200m', '1m 200mm'],
+      answer: '1km 200m',
+    },
+    {
+      badge: '거리 단위 선택',
+      prompt: '서울에서 여수까지의 거리는 약 328 □입니다.',
+      options: ['mm', 'm', 'km'],
+      answer: 'km',
+    },
+    {
+      badge: '거리 단위 선택',
+      prompt: '학교에서 가까운 편의점까지의 거리는 약 400 □입니다.',
+      options: ['mm', 'm', 'km'],
+      answer: 'm',
+    },
+    {
+      badge: '거리 단위 선택',
+      prompt: '부산에서 대구까지의 거리는 약 90 □입니다.',
+      options: ['cm', 'm', 'km'],
+      answer: 'km',
+    },
+    {
+      badge: '거리 단위 선택',
+      prompt: '학교 현관에서 교실까지의 거리는 약 80 □입니다.',
+      options: ['mm', 'm', 'km'],
+      answer: 'm',
+    },
+    {
+      badge: '거리 단위 선택',
+      prompt: '놀이터까지의 거리를 알맞게 나타낸 것은 어느 것일까요?',
+      options: ['850m', '850km', '850mm'],
+      answer: '850m',
+    },
+    {
+      badge: '거리 단위 선택',
+      prompt: '집에서 할머니 댁까지 차로 가는 거리를 알맞게 나타낸 것은 어느 것일까요?',
+      options: ['2km 300m', '2m 300mm', '2mm 300cm'],
+      answer: '2km 300m',
+    },
+  ],
+  9: [
+    {
+      badge: '시간 단위 선택',
+      prompt: '박수 한 번 치는 데 걸리는 시간은 약 1 □입니다.',
+      options: ['초', '분', '시간'],
+      answer: '초',
+    },
+    {
+      badge: '시간 단위 선택',
+      prompt: '양치하는 데 걸리는 시간은 약 3 □입니다.',
+      options: ['초', '분', '시간'],
+      answer: '분',
+    },
+    {
+      badge: '시간 단위 선택',
+      prompt: '잠자는 시간은 보통 8 □입니다.',
+      options: ['초', '분', '시간'],
+      answer: '시간',
+    },
+    {
+      badge: '시간 단위 선택',
+      prompt: '100m를 달리는 데 걸리는 시간은 약 20 □입니다.',
+      options: ['초', '분', '시간'],
+      answer: '초',
+    },
+    {
+      badge: '시간 단위 선택',
+      prompt: '점심을 먹는 데 걸리는 시간은 약 30 □입니다.',
+      options: ['초', '분', '시간'],
+      answer: '분',
+    },
+    {
+      badge: '시간 단위 선택',
+      prompt: '하루 동안 학교에 머무는 시간은 약 6 □입니다.',
+      options: ['초', '분', '시간'],
+      answer: '시간',
+    },
+    {
+      badge: '시간 단위 선택',
+      prompt: '눈을 한 번 깜빡이는 데 걸리는 시간은 약 1 □입니다.',
+      options: ['초', '분', '시간'],
+      answer: '초',
+    },
+  ],
+  11: [
+    {
+      badge: '시간 판단하기',
+      prompt: '단위를 잘못 사용한 문장은 어느 것일까요?',
+      options: [
+        '손을 한 번 드는 데 1초쯤 걸립니다.',
+        '수업 한 시간은 약 40분입니다.',
+        '박수 한 번 치는 데 1분이 걸렸습니다.',
+      ],
+      answer: '박수 한 번 치는 데 1분이 걸렸습니다.',
+    },
+    {
+      badge: '시간 판단하기',
+      prompt: '알맞지 않은 문장을 골라 보세요.',
+      options: [
+        '눈을 한 번 깜빡이는 데 걸리는 시간은 약 1초입니다.',
+        '영화 한 편을 보는 데 걸리는 시간은 약 2시간입니다.',
+        '줄넘기 50개를 하는 데 2시간이 걸립니다.',
+      ],
+      answer: '줄넘기 50개를 하는 데 2시간이 걸립니다.',
+    },
+    {
+      badge: '시간 판단하기',
+      prompt: '알맞은 문장을 골라 보세요.',
+      options: [
+        '낮잠을 1초 잤습니다.',
+        '동화책 한 쪽을 읽는 데 30초쯤 걸립니다.',
+        '급식 먹는 데 20시간이 걸립니다.',
+      ],
+      answer: '동화책 한 쪽을 읽는 데 30초쯤 걸립니다.',
+    },
+    {
+      badge: '시간 판단하기',
+      prompt: '단위를 바르게 쓴 문장은 어느 것일까요?',
+      options: [
+        '엘리베이터 문이 닫히는 데 10시간이 걸립니다.',
+        '교실을 청소하는 데 15분쯤 걸립니다.',
+        '지우개를 한 번 집는 데 3분이 걸립니다.',
+      ],
+      answer: '교실을 청소하는 데 15분쯤 걸립니다.',
+    },
+    {
+      badge: '시간 판단하기',
+      prompt: '알맞지 않은 문장을 골라 보세요.',
+      options: [
+        '손뼉을 세 번 치는 데 5초쯤 걸립니다.',
+        '운동장을 한 바퀴 걷는 데 10분쯤 걸립니다.',
+        '하품 한 번 하는 데 1시간이 걸립니다.',
+      ],
+      answer: '하품 한 번 하는 데 1시간이 걸립니다.',
+    },
+    {
+      badge: '시간 판단하기',
+      prompt: '알맞은 문장을 골라 보세요.',
+      options: [
+        '샤워를 하는 데 15초쯤 걸립니다.',
+        '학급 회의를 하는 데 20분쯤 걸립니다.',
+        '버스를 기다리는 데 3시간쯤 걸립니다.',
+      ],
+      answer: '학급 회의를 하는 데 20분쯤 걸립니다.',
+    },
+  ],
+  12: [
+    {
+      badge: '시간 단위 선택',
+      prompt: '멀리 있는 놀이공원까지 차를 타고 가는 시간은 약 1 □ 30 □입니다.',
+      options: ['시간, 분', '분, 초', '초, 시간'],
+      answer: '시간, 분',
+    },
+    {
+      badge: '시간 단위 선택',
+      prompt: '어제 본 만화영화는 90 □ 동안 했어요.',
+      options: ['초', '분', '시간'],
+      answer: '분',
+    },
+    {
+      badge: '시간 단위 선택',
+      prompt: '점심시간은 보통 50 □입니다.',
+      options: ['초', '분', '시간'],
+      answer: '분',
+    },
+    {
+      badge: '시간 단위 선택',
+      prompt: '줄넘기 100개를 하는 데 걸리는 시간은 약 1 □ 20 □입니다.',
+      options: ['시간, 분', '분, 초', '초, 시간'],
+      answer: '분, 초',
+    },
+    {
+      badge: '시간 단위 선택',
+      prompt: '친척 집까지 버스를 타고 가는 시간은 약 2 □ 10 □입니다.',
+      options: ['시간, 분', '분, 초', '초, 시간'],
+      answer: '시간, 분',
+    },
+    {
+      badge: '시간 단위 선택',
+      prompt: '학교 조회 시간은 보통 15 □입니다.',
+      options: ['초', '분', '시간'],
+      answer: '분',
+    },
+    {
+      badge: '시간 단위 선택',
+      prompt: '애니메이션 한 편은 보통 30 □ 동안 합니다.',
+      options: ['초', '분', '시간'],
+      answer: '분',
+    },
+  ],
+};
+
+const SMALL_MEASUREMENT_FACTORY_CONFIGS: MeasurementFactoryConfig[] = [
+  {
+    title: '그림을 보고 작은 눈금을 세어 보세요.',
+    question: '씨앗의 길이는 몇 mm인가요?',
+    objectKind: 'seed',
+    objectLabel: '씨앗',
+    minLengthMm: 4,
+    maxLengthMm: 9,
+    shiftedStartMinMm: 1,
+    shiftedStartMaxMm: 4,
+  },
+  {
+    title: '그림을 보고 작은 눈금을 세어 보세요.',
+    question: '쌀알의 길이는 몇 mm인가요?',
+    objectKind: 'rice',
+    objectLabel: '쌀알',
+    minLengthMm: 5,
+    maxLengthMm: 9,
+    shiftedStartMinMm: 2,
+    shiftedStartMaxMm: 5,
+  },
+  {
+    title: '그림을 보고 작은 눈금을 세어 보세요.',
+    question: '종이띠의 길이는 몇 mm인가요?',
+    objectKind: 'paperStrip',
+    objectLabel: '종이띠',
+    minLengthMm: 6,
+    maxLengthMm: 9,
+    shiftedStartMinMm: 1,
+    shiftedStartMaxMm: 3,
+  },
+  {
+    title: '그림을 보고 작은 눈금을 세어 보세요.',
+    question: '초콜릿 조각의 길이는 몇 mm인가요?',
+    objectKind: 'chocolate',
+    objectLabel: '초콜릿 조각',
+    minLengthMm: 7,
+    maxLengthMm: 10,
+    shiftedStartMinMm: 1,
+    shiftedStartMaxMm: 3,
+  },
+];
+
+const LARGE_MEASUREMENT_FACTORY_CONFIGS: MeasurementFactoryConfig[] = [
+  {
+    title: '그림을 보고 길이를 재어 보세요.',
+    question: '지우개의 길이는 몇 mm인가요?',
+    objectKind: 'eraser',
+    objectLabel: '지우개',
+    minLengthMm: 32,
+    maxLengthMm: 46,
+    shiftedStartMinMm: 1,
+    shiftedStartMaxMm: 4,
+  },
+  {
+    title: '그림을 보고 길이를 재어 보세요.',
+    question: '나뭇잎의 길이는 몇 mm인가요?',
+    objectKind: 'leaf',
+    objectLabel: '나뭇잎',
+    minLengthMm: 35,
+    maxLengthMm: 48,
+    shiftedStartMinMm: 1,
+    shiftedStartMaxMm: 6,
+  },
+  {
+    title: '그림을 보고 길이를 재어 보세요.',
+    question: '연필의 길이는 몇 mm인가요?',
+    objectKind: 'pencil',
+    objectLabel: '연필',
+    minLengthMm: 44,
+    maxLengthMm: 58,
+    shiftedStartMinMm: 1,
+    shiftedStartMaxMm: 5,
+  },
+  {
+    title: '그림을 보고 길이를 재어 보세요.',
+    question: '막대의 길이는 몇 mm인가요?',
+    objectKind: 'stick',
+    objectLabel: '막대',
+    minLengthMm: 50,
+    maxLengthMm: 67,
+    shiftedStartMinMm: 1,
+    shiftedStartMaxMm: 5,
+  },
+  {
+    title: '그림을 보고 길이를 재어 보세요.',
+    question: '종이띠의 길이는 몇 mm인가요?',
+    objectKind: 'paperStrip',
+    objectLabel: '종이띠',
+    minLengthMm: 38,
+    maxLengthMm: 52,
+    shiftedStartMinMm: 1,
+    shiftedStartMaxMm: 4,
+  },
+  {
+    title: '그림을 보고 길이를 재어 보세요.',
+    question: '초콜릿 조각의 길이는 몇 mm인가요?',
+    objectKind: 'chocolate',
+    objectLabel: '초콜릿 조각',
+    minLengthMm: 40,
+    maxLengthMm: 54,
+    shiftedStartMinMm: 1,
+    shiftedStartMaxMm: 4,
+  },
+];
+
+const DISTANCE_MAP_REFERENCE_METERS = 500;
+const DISTANCE_MAP_HOME_POINT: DistanceMapPoint = { x: 296, y: 84 };
+const DISTANCE_MAP_BUS_STOP_POINT: DistanceMapPoint = { x: 430, y: 126 };
+const DISTANCE_MAP_LIBRARY_POINT: DistanceMapPoint = { x: 176, y: 154 };
+const DISTANCE_MAP_POLICE_POINT: DistanceMapPoint = { x: 150, y: 320 };
+const DISTANCE_MAP_STADIUM_POINT: DistanceMapPoint = { x: 360, y: 340 };
+const DISTANCE_MAP_SCIENCE_POINT: DistanceMapPoint = { x: 530, y: 268 };
+const DISTANCE_MAP_PARK_POINT: DistanceMapPoint = { x: 532, y: 112 };
+
+const DISTANCE_MAP_LANDMARKS: DistanceMapLandmarkData[] = [
+  { id: 'home', label: '집', x: DISTANCE_MAP_HOME_POINT.x, y: DISTANCE_MAP_HOME_POINT.y, accent: '#f59e0b', kind: 'home' },
+  { id: 'bus-stop', label: '버스정류장', x: DISTANCE_MAP_BUS_STOP_POINT.x, y: DISTANCE_MAP_BUS_STOP_POINT.y, accent: '#38bdf8', kind: 'reference' },
+  { id: 'library', label: '도서관', x: DISTANCE_MAP_LIBRARY_POINT.x, y: DISTANCE_MAP_LIBRARY_POINT.y, accent: '#34d399', kind: 'place' },
+  { id: 'police', label: '경찰서', x: DISTANCE_MAP_POLICE_POINT.x, y: DISTANCE_MAP_POLICE_POINT.y, accent: '#fb923c', kind: 'place' },
+  { id: 'stadium', label: '축구장', x: DISTANCE_MAP_STADIUM_POINT.x, y: DISTANCE_MAP_STADIUM_POINT.y, accent: '#8b5cf6', kind: 'place' },
+  { id: 'science', label: '과학관', x: DISTANCE_MAP_SCIENCE_POINT.x, y: DISTANCE_MAP_SCIENCE_POINT.y, accent: '#ec4899', kind: 'place' },
+  { id: 'park', label: '공원', x: DISTANCE_MAP_PARK_POINT.x, y: DISTANCE_MAP_PARK_POINT.y, accent: '#22c55e', kind: 'place' },
+];
+
+const DISTANCE_MAP_REFERENCE_ROUTE: DistanceMapPoint[] = [
+  DISTANCE_MAP_HOME_POINT,
+  { x: 356, y: 104 },
+  DISTANCE_MAP_BUS_STOP_POINT,
+];
+
+interface DistanceCompareScenarioConfig {
+  strategy: 'compare';
+  targetLabel: string;
+  targetMeters: number;
+  targetRoute: DistanceMapPoint[];
+}
+
+interface DistanceChunkScenarioConfig {
+  strategy: 'chunk';
+  targetLabel: string;
+  targetMeters: number;
+  segments: DistanceChunkSegmentData[];
+}
+
+interface DistanceUnitizeScenarioConfig {
+  strategy: 'unitize';
+  targetLabel: string;
+  targetMeters: number;
+  targetRoute: DistanceMapPoint[];
+}
+
+type DistanceScenarioConfig =
+  | DistanceCompareScenarioConfig
+  | DistanceChunkScenarioConfig
+  | DistanceUnitizeScenarioConfig;
+
+function joinDistanceSegments(segments: DistanceChunkSegmentData[]) {
+  return segments.reduce<DistanceMapPoint[]>((acc, segment, index) => {
+    if (index === 0) {
+      return [...segment.points];
+    }
+
+    return [...acc, ...segment.points.slice(1)];
+  }, []);
+}
+
+function createDistanceMapScenario(config: DistanceScenarioConfig): Problem {
+  const base = {
+    title: '거리 어림',
+    question:
+      config.strategy === 'compare'
+        ? '몇 개쯤?'
+        : config.strategy === 'chunk'
+          ? '나눠서 몇 m?'
+          : '몇 번?',
+    referenceMeters: DISTANCE_MAP_REFERENCE_METERS,
+    targetLabel: config.targetLabel,
+    targetMeters: config.targetMeters,
+    strategy: config.strategy,
+    landmarks: DISTANCE_MAP_LANDMARKS,
+  } as const;
+
+  if (config.strategy === 'compare') {
+    return createDistanceMapProblem({
+      ...base,
+      strategy: 'compare',
+      referenceRoute: DISTANCE_MAP_REFERENCE_ROUTE,
+      targetRoute: config.targetRoute,
+      compareSlotCount: Math.min(5, Math.max(3, Math.round(config.targetMeters / DISTANCE_MAP_REFERENCE_METERS) + 1)),
+    });
+  }
+
+  if (config.strategy === 'chunk') {
+    return createDistanceMapProblem({
+      ...base,
+      strategy: 'chunk',
+      targetRoute: joinDistanceSegments(config.segments),
+      segments: config.segments,
+    });
+  }
+
+  return createDistanceMapProblem({
+    ...base,
+    strategy: 'unitize',
+    referenceRoute: DISTANCE_MAP_REFERENCE_ROUTE,
+    targetRoute: config.targetRoute,
+  });
+}
+
+const DISTANCE_COMPARE_SCENARIOS: DistanceCompareScenarioConfig[] = [
+  {
+    strategy: 'compare',
+    targetLabel: '도서관',
+    targetMeters: 1000,
+    targetRoute: [
+      DISTANCE_MAP_HOME_POINT,
+      { x: 240, y: 116 },
+      DISTANCE_MAP_LIBRARY_POINT,
+    ],
+  },
+  {
+    strategy: 'compare',
+    targetLabel: '공원',
+    targetMeters: 1000,
+    targetRoute: [
+      DISTANCE_MAP_HOME_POINT,
+      { x: 362, y: 96 },
+      { x: 446, y: 102 },
+      DISTANCE_MAP_PARK_POINT,
+    ],
+  },
+];
+
+const DISTANCE_CHUNK_SCENARIOS: DistanceChunkScenarioConfig[] = [
+  {
+    strategy: 'chunk',
+    targetLabel: '경찰서',
+    targetMeters: 1500,
+    segments: [
+      { id: 'police-1', color: '#fb923c', points: [DISTANCE_MAP_HOME_POINT, { x: 276, y: 150 }], units: 1 },
+      { id: 'police-2', color: '#f59e0b', points: [{ x: 276, y: 150 }, { x: 218, y: 242 }], units: 1 },
+      { id: 'police-3', color: '#facc15', points: [{ x: 218, y: 242 }, DISTANCE_MAP_POLICE_POINT], units: 1 },
+    ],
+  },
+  {
+    strategy: 'chunk',
+    targetLabel: '과학관',
+    targetMeters: 2000,
+    segments: [
+      { id: 'science-1', color: '#38bdf8', points: [DISTANCE_MAP_HOME_POINT, { x: 360, y: 110 }, { x: 442, y: 152 }], units: 2 },
+      { id: 'science-2', color: '#818cf8', points: [{ x: 442, y: 152 }, { x: 500, y: 208 }], units: 1 },
+      { id: 'science-3', color: '#f472b6', points: [{ x: 500, y: 208 }, { x: 528, y: 238 }, DISTANCE_MAP_SCIENCE_POINT], units: 1 },
+    ],
+  },
+];
+
+const DISTANCE_UNITIZE_SCENARIOS: DistanceUnitizeScenarioConfig[] = [
+  {
+    strategy: 'unitize',
+    targetLabel: '축구장',
+    targetMeters: 2000,
+    targetRoute: [
+      DISTANCE_MAP_HOME_POINT,
+      { x: 346, y: 140 },
+      { x: 392, y: 222 },
+      { x: 366, y: 292 },
+      DISTANCE_MAP_STADIUM_POINT,
+    ],
+  },
+  {
+    strategy: 'unitize',
+    targetLabel: '과학관',
+    targetMeters: 2500,
+    targetRoute: [
+      DISTANCE_MAP_HOME_POINT,
+      { x: 360, y: 110 },
+      { x: 442, y: 152 },
+      { x: 500, y: 208 },
+      { x: 528, y: 238 },
+      DISTANCE_MAP_SCIENCE_POINT,
+    ],
+  },
+];
+
+const DISTANCE_STAGE7_SCENARIOS: DistanceScenarioConfig[] = [
+  ...DISTANCE_COMPARE_SCENARIOS,
+  ...DISTANCE_CHUNK_SCENARIOS,
+  ...DISTANCE_UNITIZE_SCENARIOS,
+];
+
+const UNIT3_PROBLEM_FACTORIES: Record<number, Array<() => Problem>> = {
+  1: SMALL_MEASUREMENT_FACTORY_CONFIGS.flatMap((config) => createMeasurementFactoryPair(config)),
+  2: [
+    () => createPromptProblem('1cm는 몇 mm인가요?', 10, 'mm'),
+    () => {
+      const centimeters = randomInt(2, 9);
+      return createPromptProblem(`${centimeters}cm는 몇 mm인가요?`, toMillimeters(centimeters), 'mm');
+    },
+    () => {
+      const centimeters = randomInt(2, 7);
+      const millimeters = randomInt(1, 9);
+      return createPromptProblem(`${centimeters}cm ${millimeters}mm는 몇 mm인가요?`, toMillimeters(centimeters, millimeters), 'mm');
+    },
+    () => {
+      const totalMillimeters = randomInt(12, 89);
+      return createPromptProblem(
+        `${totalMillimeters}mm는 ${Math.floor(totalMillimeters / 10)}cm □mm입니다.\n□에 들어갈 수는?`,
+        totalMillimeters % 10,
+      );
+    },
+    () => {
+      const centimeters = randomInt(2, 8);
+      return createPromptProblem(`${toMillimeters(centimeters)}mm는 □cm입니다.\n□에 들어갈 수는?`, centimeters, 'cm');
+    },
+    () => {
+      const totalMillimeters = randomInt(21, 87);
+      const centimeters = Math.floor(totalMillimeters / 10);
+      const millimeters = totalMillimeters % 10;
+      return createPromptProblem(`${totalMillimeters}mm는 □cm ${millimeters}mm입니다.\n□에 들어갈 수는?`, centimeters, 'cm');
+    },
+    () => {
+      const centimeters = randomInt(2, 8);
+      const isCorrect = Math.random() < 0.5;
+      const shownMillimeters = isCorrect ? toMillimeters(centimeters) : toMillimeters(centimeters) + sample([1, 2, 3, 4]);
+      return createPromptProblem(
+        `${centimeters}cm는 ${shownMillimeters}mm와 같습니다.\n맞으면 1, 틀리면 2를 쓰세요.`,
+        isCorrect ? 1 : 2,
+      );
+    },
+  ],
+  3: LARGE_MEASUREMENT_FACTORY_CONFIGS.flatMap((config) => createMeasurementFactoryPair(config)),
+  4: [
+    () => {
+      const [a, b, c] = getDistinctRandomNumbers(3, 118, 149);
+      return createPromptProblem(
+        `연필은 ${formatLengthValue(a)}, 가위는 ${formatLengthValue(b)}, 사인펜은 ${formatLengthValue(c)}입니다.\n가장 긴 것의 길이는 몇 mm인가요?`,
+        Math.max(a, b, c),
+        'mm',
+      );
+    },
+    () => {
+      const [a, b, c] = getDistinctRandomNumbers(3, 36, 98);
+      return createPromptProblem(
+        `지우개는 ${formatLengthValue(a)}, 리본은 ${formatLengthValue(b)}, 색연필은 ${formatLengthValue(c)}입니다.\n가장 짧은 것의 길이는 몇 mm인가요?`,
+        Math.min(a, b, c),
+        'mm',
+      );
+    },
+    () => {
+      const first = randomInt(45, 88);
+      const second = randomInt(first + 5, first + 32);
+      return createPromptProblem(
+        `막대는 ${formatLengthValue(second)}, 지우개는 ${formatLengthValue(first)}입니다.\n막대가 지우개보다 몇 mm 더 긴가요?`,
+        second - first,
+        'mm',
+      );
+    },
+    () => {
+      const totalMillimeters = randomInt(48, 156);
+      const isCorrect = Math.random() < 0.5;
+      const shownMillimeters = isCorrect ? totalMillimeters : totalMillimeters + sample([-3, -2, -1, 1, 2, 3]);
+      return createPromptProblem(
+        `${formatLengthAsMixedUnits(totalMillimeters)}는 ${shownMillimeters}mm와 같습니다.\n맞으면 1, 틀리면 2를 쓰세요.`,
+        isCorrect ? 1 : 2,
+      );
+    },
+    () => {
+      const lengths = getDistinctRandomNumbers(3, 55, 142);
+      const options = [
+        `색연필 ${formatLengthValue(lengths[0])}`,
+        `가위 ${formatLengthValue(lengths[1])}`,
+        `자 ${formatLengthValue(lengths[2])}`,
+      ];
+      return createPromptProblem(
+        buildNumberedOptionsPrompt('가장 긴 것을 고르면 몇 번일까요?', options),
+        lengths.indexOf(Math.max(...lengths)) + 1,
+      );
+    },
+  ],
+  5: [
+    () => createPromptProblem('1km는 몇 m인가요?', 1000, 'm'),
+    () => createPromptProblem('1000m는 몇 km인가요?', 1, 'km'),
+    () => {
+      const kilometers = randomInt(2, 9);
+      return createPromptProblem(`학교에서 공원까지 ${kilometers}km입니다.\n모두 몇 m인가요?`, kilometers * 1000, 'm');
+    },
+    () => {
+      const kilometers = randomInt(2, 8);
+      return createPromptProblem(`${toMeters(kilometers)}m는 몇 km인가요?`, kilometers, 'km');
+    },
+    () => {
+      const kilometers = randomInt(2, 8);
+      const isCorrect = Math.random() < 0.5;
+      const shownMeters = isCorrect ? toMeters(kilometers) : toMeters(kilometers) + sample([100, 200, 300, 400]);
+      return createPromptProblem(
+        `${kilometers}km는 ${shownMeters}m와 같습니다.\n맞으면 1, 틀리면 2를 쓰세요.`,
+        isCorrect ? 1 : 2,
+      );
+    },
+  ],
+  6: [
+    () => {
+      const kilometers = randomInt(2, 9);
+      return createPromptProblem(`${kilometers}km는 몇 m인가요?`, kilometers * 1000, 'm');
+    },
+    () => {
+      const kilometers = randomInt(1, 8);
+      const meters = randomInt(20, 980);
+      return createPromptProblem(`${kilometers}km ${meters}m는 몇 m인가요?`, kilometers * 1000 + meters, 'm');
+    },
+    () => {
+      const kilometers = randomInt(2, 8);
+      const meters = randomInt(10, 980);
+      return createPromptProblem(`${kilometers * 1000 + meters}m는 ${kilometers}km □m입니다.\n□에 들어갈 수는?`, meters);
+    },
+    () => {
+      const first = toMeters(randomInt(1, 3), randomInt(120, 880));
+      const second = toMeters(randomInt(1, 3), randomInt(120, 880));
+      if (first === second) {
+        return createPromptProblem(
+          `등산로는 ${formatDistanceValue(first)}, 산책로는 ${formatDistanceValue(second + 100)}입니다.\n더 긴 거리는 몇 m인가요?`,
+          second + 100,
+          'm',
+        );
+      }
+
+      return createPromptProblem(
+        `등산로는 ${formatDistanceValue(first)}, 산책로는 ${formatDistanceValue(second)}입니다.\n더 긴 거리는 몇 m인가요?`,
+        Math.max(first, second),
+        'm',
+      );
+    },
+    () => {
+      const totalMeters = toMeters(randomInt(2, 6), randomInt(50, 980));
+      const isCorrect = Math.random() < 0.5;
+      const shownMeters = isCorrect ? totalMeters : totalMeters + sample([-200, -100, 100, 200]);
+      return createPromptProblem(
+        `${formatDistanceAsMixedUnits(totalMeters)}는 ${shownMeters}m와 같습니다.\n맞으면 1, 틀리면 2를 쓰세요.`,
+        isCorrect ? 1 : 2,
+      );
+    },
+  ],
+  7: [
+    ...DISTANCE_STAGE7_SCENARIOS.map((scenario) => () => createDistanceMapScenario(scenario)),
+  ],
+  8: [
+    () => createPromptProblem(
+      '다음 중 시간을 나타내는 것은 몇 번인가요?\n1) 오전 9시 15분 20초\n2) 3분 25초\n3) 오후 1시 5분 10초',
+      2,
+    ),
+    () => createPromptProblem(
+      '다음 중 시각을 나타내는 것은 몇 번인가요?\n1) 45초\n2) 2시간 10분\n3) 오전 7시 30분 5초',
+      3,
+    ),
+    () => createPromptProblem(
+      '다음 중 얼마나 걸렸는지를 나타내는 것은 몇 번인가요?\n1) 오후 4시 12분 30초\n2) 12분 8초\n3) 오전 10시',
+      2,
+    ),
+    () => createPromptProblem(
+      '다음 중 시각을 나타내는 것은 몇 번인가요?\n1) 1시간 15분\n2) 오후 6시 40분\n3) 25초',
+      2,
+    ),
+    () => createPromptProblem(
+      '다음 중 시간을 나타내는 것은 몇 번인가요?\n1) 오전 8시 20분\n2) 45분 10초\n3) 오후 3시 5분',
+      2,
+    ),
+    () => createPromptProblem(
+      '다음 중 어떤 때를 나타내는 것은 몇 번인가요?\n1) 2시간 5분\n2) 50초\n3) 오전 7시 50분',
+      3,
+    ),
+    () => createPromptProblem(
+      '다음 중 얼마나 걸렸는지를 나타내는 것은 몇 번인가요?\n1) 오후 2시 30분\n2) 1시간 8분\n3) 오전 11시 15분',
+      2,
+    ),
+  ],
+  9: [
+    () => createPromptProblem('1분은 몇 초인가요?', 60, '초'),
+    () => createPromptProblem('85초는 1분 □초입니다.\n□에 들어갈 수는?', 25),
+    () => createPromptProblem('2분 35초는 몇 초인가요?', 155, '초'),
+    () => createPromptProblem('180초는 몇 분인가요?', 3, '분'),
+    () => {
+      const minutes = randomInt(2, 5);
+      return createPromptProblem(`${minutes}분은 몇 초인가요?`, minutes * 60, '초');
+    },
+    () => {
+      const minutes = randomInt(2, 4);
+      const seconds = randomInt(5, 55);
+      return createPromptProblem(`${minutes}분 ${seconds}초는 몇 초인가요?`, minutes * 60 + seconds, '초');
+    },
+    () => {
+      const minutes = randomInt(2, 5);
+      const seconds = randomInt(10, 55);
+      return createPromptProblem(`${minutes * 60 + seconds}초는 ${minutes}분 □초입니다.\n□에 들어갈 수는?`, seconds);
+    },
+    () => {
+      const minutes = randomInt(3, 6);
+      return createPromptProblem(`${minutes * 60}초는 몇 분인가요?`, minutes, '분');
+    },
+  ],
+  10: [createClockReadingChoiceProblem],
+  11: [
+    () => {
+      const firstMinutes = randomInt(1, 6);
+      const firstSeconds = randomInt(15, 55);
+      const secondMinutes = randomInt(1, 5);
+      const secondSeconds = randomInt(10, 55);
+      const totalSeconds = firstMinutes * 60 + firstSeconds + secondMinutes * 60 + secondSeconds;
+      return createPromptProblem(
+        `${firstMinutes}분 ${firstSeconds}초 + ${secondMinutes}분 ${secondSeconds}초 = ${Math.floor(totalSeconds / 60)}분 □초입니다.\n□에 들어갈 수는?`,
+        totalSeconds % 60,
+      );
+    },
+    () => {
+      const minutes = randomInt(3, 8);
+      const seconds = randomInt(35, 55);
+      const addSeconds = randomInt(10, 30);
+      const totalSeconds = minutes * 60 + seconds + addSeconds;
+      return createPromptProblem(
+        `${minutes}분 ${seconds}초에 ${addSeconds}초를 더하면 ${Math.floor(totalSeconds / 60)}분 □초입니다.\n□에 들어갈 수는?`,
+        totalSeconds % 60,
+      );
+    },
+    () => {
+      const startHour = randomInt(1, 10);
+      const startMinute = randomInt(35, 55);
+      const addMinutes = randomInt(10, 35);
+      const result = splitClockSeconds(startHour * 3600 + startMinute * 60 + addMinutes * 60);
+      return createPromptProblem(
+        `${startHour}시 ${startMinute}분에 영화가 시작합니다.\n${addMinutes}분 뒤는 ${result.hours}시 □분입니다.\n□에 들어갈 수는?`,
+        result.minutes,
+      );
+    },
+    () => {
+      while (true) {
+        const startHour = randomInt(1, 10);
+        const startMinute = randomInt(8, 45);
+        const startSecond = randomInt(10, 45);
+        const addHours = randomInt(0, 1);
+        const addMinutes = randomInt(12, 34);
+        const addSeconds = randomInt(12, 45);
+        const result = splitClockSeconds(
+          startHour * 3600 + startMinute * 60 + startSecond + addHours * 3600 + addMinutes * 60 + addSeconds,
+        );
+
+        if (result.hours <= 12) {
+          return createPromptProblem(
+            `${formatClockTime(startHour, startMinute, startSecond)}에 ${formatDuration(addHours, addMinutes, addSeconds)}을 더하면 ${result.hours}시 ${result.minutes}분 □초입니다.\n□에 들어갈 수는?`,
+            result.seconds,
+          );
+        }
+      }
+    },
+  ],
+  12: [
+    () => {
+      const secondMinutes = randomInt(2, 4);
+      const secondSeconds = randomInt(15, 45);
+      const firstMinutes = randomInt(secondMinutes + 2, secondMinutes + 5);
+      const firstSeconds = randomInt(10, 55);
+      const difference = firstMinutes * 60 + firstSeconds - (secondMinutes * 60 + secondSeconds);
+      return createPromptProblem(
+        `${firstMinutes}분 ${firstSeconds}초 - ${secondMinutes}분 ${secondSeconds}초 = ${Math.floor(difference / 60)}분 □초입니다.\n□에 들어갈 수는?`,
+        difference % 60,
+      );
+    },
+    () => {
+      while (true) {
+        const endHour = randomInt(2, 12);
+        const endMinute = randomInt(8, 58);
+        const endSecond = randomInt(10, 55);
+        const subtractMinutes = randomInt(1, 18);
+        const subtractSeconds = randomInt(10, 45);
+        const result = splitClockSeconds(endHour * 3600 + endMinute * 60 + endSecond - (subtractMinutes * 60 + subtractSeconds));
+
+        if (result.hours >= 1) {
+          return createPromptProblem(
+            `${formatClockTime(endHour, endMinute, endSecond)}에서 ${formatDuration(0, subtractMinutes, subtractSeconds)} 전은 ${result.hours}시 ${result.minutes}분 □초입니다.\n□에 들어갈 수는?`,
+            result.seconds,
+          );
+        }
+      }
+    },
+    () => {
+      while (true) {
+        const startHour = randomInt(1, 10);
+        const startMinute = randomInt(5, 45);
+        const startSecond = randomInt(10, 50);
+        const durationHours = randomInt(0, 1);
+        const durationMinutes = randomInt(20, 48);
+        const durationSeconds = randomInt(10, 45);
+        const arrival = splitClockSeconds(
+          startHour * 3600 + startMinute * 60 + startSecond + durationHours * 3600 + durationMinutes * 60 + durationSeconds,
+        );
+
+        if (arrival.hours <= 12) {
+          return createPromptProblem(
+            `${formatDuration(durationHours, durationMinutes, durationSeconds)} 동안 산책하고 ${formatClockTime(arrival.hours, arrival.minutes, arrival.seconds)}에 집에 도착했습니다.\n산책을 시작한 시각은 ${startHour}시 □분 ${startSecond}초입니다.\n□에 들어갈 수는?`,
+            startMinute,
+          );
+        }
+      }
+    },
+    () => {
+      while (true) {
+        const hour = randomInt(2, 11);
+        const minute = randomInt(10, 55);
+        const second = randomInt(10, 55);
+        const subtractMinutes = randomInt(1, 15);
+        const subtractSeconds = randomInt(5, 40);
+        const result = splitClockSeconds(hour * 3600 + minute * 60 + second - (subtractMinutes * 60 + subtractSeconds));
+
+        if (result.hours >= 1) {
+          const isCorrect = Math.random() < 0.5;
+          const wrongSeconds = result.seconds >= 57 ? result.seconds - 2 : result.seconds + 2;
+          return createPromptProblem(
+            `${formatClockTime(hour, minute, second)}에서 ${subtractMinutes}분 ${subtractSeconds}초를 빼면 ${result.hours}시 ${result.minutes}분 ${isCorrect ? result.seconds : wrongSeconds}초입니다.\n맞으면 1, 틀리면 2를 쓰세요.`,
+            isCorrect ? 1 : 2,
+          );
+        }
+      }
+    },
+  ],
+};
+
+function createUnitSelectionChallenge(level: number): UnitSelectionChallenge {
+  const pool = UNIT_SELECTION_CHALLENGE_POOLS[level] ?? UNIT_SELECTION_CHALLENGE_POOLS[12] ?? [];
+  return sample(pool);
+}
+
+function generateUnit3Problem(level: number, opponentHP: number): Problem {
+  const factories = UNIT3_PROBLEM_FACTORIES[level] ?? UNIT3_PROBLEM_FACTORIES[12];
+
+  if ((level === 1 || level === 3) && opponentHP >= 50) {
+    const zeroStartFactories = factories.filter((_, index) => index % 2 === 0);
+    return sample(zeroStartFactories)();
+  }
+
+  if (level === 1 || level === 3) {
+    const shiftedStartFactories = factories.filter((_, index) => index % 2 === 1);
+    return sample(shiftedStartFactories)();
+  }
+
+  return sample(factories)();
 }
 
 function countCarries(a: number, b: number): number {
@@ -1169,12 +2590,116 @@ function countBorrows(a: number, b: number): number {
   return borrows;
 }
 
+function generateStorySeed({
+  op,
+  aRange,
+  bRange,
+  validate = () => true,
+}: {
+  op: '+' | '-';
+  aRange: [number, number];
+  bRange: [number, number];
+  validate?: (a: number, b: number, answer: number) => boolean;
+}): GeneratedStoryProblem {
+  for (let attempt = 0; attempt < 400; attempt++) {
+    const a = randomInt(aRange[0], aRange[1]);
+    const b = randomInt(bRange[0], bRange[1]);
+
+    if (op === '-' && a <= b) {
+      continue;
+    }
+
+    const answer = op === '+' ? a + b : a - b;
+
+    if (validate(a, b, answer)) {
+      return { a, b, op, answer };
+    }
+  }
+
+  if (op === '+') {
+    return { a: 428, b: 163, op, answer: 591 };
+  }
+
+  return { a: 864, b: 278, op, answer: 586 };
+}
+
+const STORY_NUMBER_GENERATORS: Record<number, Array<() => GeneratedStoryProblem>> = {
+  8: [
+    () =>
+      generateStorySeed({
+        op: '+',
+        aRange: [100, 699],
+        bRange: [100, 399],
+        validate: (a, b, answer) => answer <= 999 && countCarries(a, b) === 0,
+      }),
+    () =>
+      generateStorySeed({
+        op: '+',
+        aRange: [140, 799],
+        bRange: [100, 499],
+        validate: (a, b, answer) => answer <= 999 && countCarries(a, b) === 1,
+      }),
+    () =>
+      generateStorySeed({
+        op: '-',
+        aRange: [300, 999],
+        bRange: [100, 499],
+        validate: (a, b, answer) => answer >= 100 && countBorrows(a, b) === 0,
+      }),
+    () =>
+      generateStorySeed({
+        op: '-',
+        aRange: [300, 999],
+        bRange: [100, 699],
+        validate: (a, b, answer) => answer >= 100 && countBorrows(a, b) === 1,
+      }),
+  ],
+  9: [
+    () =>
+      generateStorySeed({
+        op: '+',
+        aRange: [200, 999],
+        bRange: [200, 999],
+        validate: (a, b, answer) => {
+          const carries = countCarries(a, b);
+          return answer <= 1998 && (carries === 2 || carries === 3);
+        },
+      }),
+    () =>
+      generateStorySeed({
+        op: '+',
+        aRange: [350, 999],
+        bRange: [250, 999],
+        validate: (a, b, answer) => answer >= 1000 && answer <= 1998 && countCarries(a, b) >= 1,
+      }),
+    () =>
+      generateStorySeed({
+        op: '-',
+        aRange: [400, 999],
+        bRange: [100, 899],
+        validate: (a, b, answer) => answer >= 100 && countBorrows(a, b) === 2,
+      }),
+    () =>
+      generateStorySeed({
+        op: '-',
+        aRange: [400, 999],
+        bRange: [100, 899],
+        validate: (a, b, answer) => answer >= 50 && isZeroTensBorrowCase(a, b),
+      }),
+  ],
+};
+
+function generateStoryProblemNumbers(level: number): GeneratedStoryProblem {
+  const generators = STORY_NUMBER_GENERATORS[level] ?? STORY_NUMBER_GENERATORS[9];
+  return sample(generators)();
+}
+
 function isFinalBuilderTurn(level: number, opponentHP: number) {
   return level <= 6 && opponentHP <= FINAL_BUILDER_HP;
 }
 
-function canOfferEstimation(opponentHP: number) {
-  return opponentHP > ESTIMATION_SAFE_HP;
+function canOfferEstimation(unitId: LearningUnitId, opponentHP: number) {
+  return unitId === 'unit2' && opponentHP > ESTIMATION_SAFE_HP;
 }
 
 function createBuilderProblem(level: number): Problem {
@@ -1519,37 +3044,125 @@ function createBuilderProblem(level: number): Problem {
       ]);
       break;
     case 8:
-      builder = {
-        title: '해석형 문항 만들기',
-        instruction: '해석형 덧셈 만들기',
-        helperText: '0~9',
-        op: '+',
-        topTemplate: '37[a]',
-        bottomTemplate: '24[b]',
-        slots: [
-          createBuilderSlot('a', '윗수의 일의 자리', 0, 9),
-          createBuilderSlot('b', '아랫수의 일의 자리', 0, 9),
-        ],
-        invalidMessage: '빈칸에 숫자를 넣어 해석형 문항을 완성해 주세요.',
-        validate: (left, right) => left + right <= 999,
-      };
+      builder = sample([
+        {
+          title: '해석형 문항 만들기',
+          instruction: '해석형 덧셈 만들기',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '+',
+          topTemplate: '37[a]',
+          bottomTemplate: '24[b]',
+          slots: [
+            createBuilderSlot('a', '윗수의 일의 자리', 0, 9),
+            createBuilderSlot('b', '아랫수의 일의 자리', 0, 9),
+          ],
+          invalidMessage: '빈칸에 숫자를 넣어 해석형 문항을 완성해 주세요.',
+          validate: (left, right) => left + right <= 999,
+        },
+        {
+          title: '해석형 문항 만들기',
+          instruction: '해석형 덧셈 만들기',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '+',
+          topTemplate: '4[a]6',
+          bottomTemplate: '25[b]',
+          slots: [
+            createBuilderSlot('a', '윗수의 십의 자리', 0, 9),
+            createBuilderSlot('b', '아랫수의 일의 자리', 0, 9),
+          ],
+          invalidMessage: '빈칸에 숫자를 넣어 해석형 문항을 완성해 주세요.',
+          validate: (left, right) => left + right <= 999,
+        },
+        {
+          title: '해석형 문항 만들기',
+          instruction: '해석형 덧셈 만들기',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '+',
+          topTemplate: '[a]58',
+          bottomTemplate: '24[b]',
+          slots: [
+            createBuilderSlot('a', '윗수의 백의 자리', 1, 6),
+            createBuilderSlot('b', '아랫수의 일의 자리', 0, 9),
+          ],
+          invalidMessage: '빈칸에 숫자를 넣어 해석형 문항을 완성해 주세요.',
+          validate: (left, right) => left + right <= 999,
+        },
+        {
+          title: '해석형 문항 만들기',
+          instruction: '해석형 덧셈 만들기',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '+',
+          topTemplate: '5[a]0',
+          bottomTemplate: '3[b]7',
+          slots: [
+            createBuilderSlot('a', '윗수의 십의 자리', 0, 5),
+            createBuilderSlot('b', '아랫수의 십의 자리', 0, 4),
+          ],
+          invalidMessage: '빈칸에 숫자를 넣어 해석형 문항을 완성해 주세요.',
+          validate: (left, right) => left + right <= 999,
+        },
+      ]);
       break;
     case 9:
     default:
-      builder = {
-        title: '해석형 문항 만들기',
-        instruction: '해석형 뺄셈 만들기',
-        helperText: '0~9',
-        op: '-',
-        topTemplate: '94[a]',
-        bottomTemplate: '3[b]6',
-        slots: [
-          createBuilderSlot('a', '윗수의 일의 자리', 0, 9),
-          createBuilderSlot('b', '아랫수의 십의 자리', 0, 9),
-        ],
-        invalidMessage: '뺄셈이 되도록 빈칸의 수를 다시 골라 주세요.',
-        validate: (left, right) => left > right,
-      };
+      builder = sample([
+        {
+          title: '해석형 문항 만들기',
+          instruction: '해석형 뺄셈 만들기',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '-',
+          topTemplate: '94[a]',
+          bottomTemplate: '3[b]6',
+          slots: [
+            createBuilderSlot('a', '윗수의 일의 자리', 0, 9),
+            createBuilderSlot('b', '아랫수의 십의 자리', 0, 9),
+          ],
+          invalidMessage: '뺄셈이 되도록 빈칸의 수를 다시 골라 주세요.',
+          validate: (left, right) => left > right,
+        },
+        {
+          title: '해석형 문항 만들기',
+          instruction: '해석형 뺄셈 만들기',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '-',
+          topTemplate: '7[a]5',
+          bottomTemplate: '[b]38',
+          slots: [
+            createBuilderSlot('a', '윗수의 십의 자리', 0, 9),
+            createBuilderSlot('b', '아랫수의 백의 자리', 1, 6),
+          ],
+          invalidMessage: '뺄셈이 되도록 빈칸의 수를 다시 골라 주세요.',
+          validate: (left, right) => left > right,
+        },
+        {
+          title: '해석형 문항 만들기',
+          instruction: '해석형 뺄셈 만들기',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '-',
+          topTemplate: '[a]60',
+          bottomTemplate: '2[b]4',
+          slots: [
+            createBuilderSlot('a', '윗수의 백의 자리', 4, 9),
+            createBuilderSlot('b', '아랫수의 십의 자리', 0, 9),
+          ],
+          invalidMessage: '뺄셈이 되도록 빈칸의 수를 다시 골라 주세요.',
+          validate: (left, right) => left > right,
+        },
+        {
+          title: '해석형 문항 만들기',
+          instruction: '해석형 뺄셈 만들기',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '-',
+          topTemplate: '93[a]',
+          bottomTemplate: '4[b]2',
+          slots: [
+            createBuilderSlot('a', '윗수의 일의 자리', 0, 9),
+            createBuilderSlot('b', '아랫수의 십의 자리', 0, 8),
+          ],
+          invalidMessage: '뺄셈이 되도록 빈칸의 수를 다시 골라 주세요.',
+          validate: (left, right) => left > right,
+        },
+      ]);
       break;
   }
 
@@ -1581,26 +3194,8 @@ function generateRegularProblem(level: number, options: RegularProblemOptions = 
   let valid = false;
 
   if (level >= 8) {
-    const isAdd = Math.random() > 0.5;
-
-    while (!valid) {
-      a = Math.floor(Math.random() * 900) + 100;
-      b = Math.floor(Math.random() * 900) + 100;
-
-      if (isAdd) {
-        if (a + b <= 1998) {
-          answer = a + b;
-          op = '+';
-          valid = true;
-        }
-      } else if (a > b) {
-        answer = a - b;
-        op = '-';
-        valid = true;
-      }
-    }
-
-    return createStoryProblem(level, a, b, op, answer);
+    const storyProblem = generateStoryProblemNumbers(level);
+    return createStoryProblem(level, storyProblem.a, storyProblem.b, storyProblem.op, storyProblem.answer);
   }
 
   while (!valid) {
@@ -1630,7 +3225,11 @@ function generateRegularProblem(level: number, options: RegularProblemOptions = 
   return createEquationProblem(a, b, op, answer);
 }
 
-function getProblemForTurn(level: number, opponentHP: number): Problem {
+function getProblemForTurn(unitId: LearningUnitId, level: number, opponentHP: number): Problem {
+  if (unitId === 'unit3') {
+    return generateUnit3Problem(level, opponentHP);
+  }
+
   return isFinalBuilderTurn(level, opponentHP) ? createBuilderProblem(level) : generateRegularProblem(level);
 }
 
@@ -1813,6 +3412,1457 @@ function BuilderNumberRow({
   );
 }
 
+function MeasurementObjectIllustration({
+  kind,
+  x,
+  y,
+  width,
+}: {
+  kind: MeasurementObjectKind;
+  label: string;
+  x: number;
+  y: number;
+  width: number;
+}) {
+  const left = x;
+  const right = x + width;
+
+  if (kind === 'seed') {
+    const centerY = y + 16;
+    const d = [
+      `M ${left} ${centerY}`,
+      `C ${x + width * 0.16} ${y + 4}, ${x + width * 0.42} ${y + 2}, ${right} ${centerY}`,
+      `C ${x + width * 0.42} ${y + 30}, ${x + width * 0.16} ${y + 28}, ${left} ${centerY}`,
+      'Z',
+    ].join(' ');
+
+    return (
+      <g>
+        <ellipse cx={x + width / 2} cy={y + 36} rx={Math.max(10, width * 0.26)} ry={3.4} fill="#d7dde5" opacity="0.18" />
+        <path d={d} fill="#8f4a25" stroke="#6e3417" strokeWidth="2.4" vectorEffect="non-scaling-stroke" />
+        <path
+          d={`M ${x + width * 0.22} ${y + 10} C ${x + width * 0.34} ${y + 6}, ${x + width * 0.5} ${y + 6}, ${x + width * 0.68} ${y + 12}`}
+          fill="none"
+          stroke="#c78861"
+          strokeWidth="1.7"
+          strokeLinecap="round"
+          opacity="0.75"
+          vectorEffect="non-scaling-stroke"
+        />
+      </g>
+    );
+  }
+
+  if (kind === 'rice') {
+    const centerY = y + 18;
+    const d = [
+      `M ${left} ${centerY}`,
+      `C ${x + width * 0.14} ${y + 5}, ${x + width * 0.38} ${y + 3}, ${right} ${centerY}`,
+      `C ${x + width * 0.38} ${y + 31}, ${x + width * 0.14} ${y + 29}, ${left} ${centerY}`,
+      'Z',
+    ].join(' ');
+
+    return (
+      <g>
+        <ellipse cx={x + width / 2} cy={y + 38} rx={Math.max(9, width * 0.2)} ry={3} fill="#d7dde5" opacity="0.16" />
+        <path d={d} fill="#fff8ec" stroke="#d7c7a9" strokeWidth="2.2" vectorEffect="non-scaling-stroke" />
+        <path
+          d={`M ${x + width * 0.18} ${y + 15} C ${x + width * 0.34} ${y + 11}, ${x + width * 0.54} ${y + 11}, ${x + width * 0.74} ${y + 17}`}
+          fill="none"
+          stroke="#ffffff"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          opacity="0.92"
+          vectorEffect="non-scaling-stroke"
+        />
+      </g>
+    );
+  }
+
+  if (kind === 'chocolate') {
+    const top = y + 12;
+    const height = 24;
+    const segmentCount = Math.max(2, Math.min(4, Math.floor(width / 22)));
+
+    return (
+      <g>
+        <ellipse cx={x + width / 2} cy={y + 41} rx={Math.max(10, width * 0.24)} ry={3.1} fill="#d7dde5" opacity="0.16" />
+        <rect x={x} y={top} width={width} height={height} rx="4" fill="#8d4f2e" stroke="#67351a" strokeWidth="2.3" vectorEffect="non-scaling-stroke" />
+        <path d={`M ${x + 4} ${top + 4} H ${x + width - 4}`} stroke="#b87752" strokeWidth="1.5" opacity="0.8" vectorEffect="non-scaling-stroke" />
+        {Array.from({ length: segmentCount - 1 }, (_, index) => {
+          const segmentX = x + ((index + 1) * width) / segmentCount;
+
+          return (
+            <line
+              key={`chocolate-segment-${index}`}
+              x1={segmentX}
+              y1={top + 2}
+              x2={segmentX}
+              y2={top + height - 2}
+              stroke="#6c391d"
+              strokeWidth="1.7"
+              opacity="0.9"
+              vectorEffect="non-scaling-stroke"
+            />
+          );
+        })}
+      </g>
+    );
+  }
+
+  if (kind === 'eraser') {
+    return (
+      <g>
+        <ellipse cx={x + width / 2} cy={y + 54} rx={width * 0.3} ry={3.6} fill="#d7dde5" opacity="0.18" />
+        <rect
+          x={x}
+          y={y + 16}
+          width={width}
+          height="30"
+          rx="6"
+          fill="#83c85d"
+          stroke="#5d9b3e"
+          strokeWidth="2.4"
+          vectorEffect="non-scaling-stroke"
+        />
+        <path
+          d={`M ${x + 5} ${y + 21} H ${x + width - 5}`}
+          stroke="#c8eca7"
+          strokeWidth="1.7"
+          opacity="0.75"
+          vectorEffect="non-scaling-stroke"
+        />
+        <rect
+          x={x + width * 0.28}
+          y={y + 13}
+          width={width * 0.44}
+          height="36"
+          rx="4"
+          fill="#f5efdf"
+          stroke="#cbbb90"
+          strokeWidth="2"
+          vectorEffect="non-scaling-stroke"
+        />
+        <path
+          d={`M ${x + width * 0.33} ${y + 17} V ${y + 45}`}
+          stroke="#d7c79e"
+          strokeWidth="1.2"
+          vectorEffect="non-scaling-stroke"
+        />
+        <path
+          d={`M ${x + width * 0.67} ${y + 17} V ${y + 45}`}
+          stroke="#d7c79e"
+          strokeWidth="1.2"
+          vectorEffect="non-scaling-stroke"
+        />
+        <rect
+          x={x + width * 0.38}
+          y={y + 20}
+          width={width * 0.24}
+          height="18"
+          rx="4"
+          fill="#98cf6d"
+          stroke="#6aa548"
+          strokeWidth="1.4"
+          vectorEffect="non-scaling-stroke"
+        />
+        <text
+          x={x + width / 2}
+          y={y + 34}
+          textAnchor="middle"
+          fontSize={Math.min(14, Math.max(9, width * 0.055))}
+          fontWeight="800"
+          fill="#5a7c3d"
+        >
+          지우개
+        </text>
+      </g>
+    );
+  }
+
+  if (kind === 'leaf') {
+    const centerY = y + 25;
+    const d = [
+      `M ${left} ${centerY}`,
+      `C ${x + width * 0.18} ${y + 4}, ${x + width * 0.42} ${y + 4}, ${x + width * 0.6} ${centerY - 3}`,
+      `C ${x + width * 0.75} ${y + 6}, ${x + width * 0.88} ${y + 11}, ${right} ${centerY}`,
+      `C ${x + width * 0.88} ${y + 39}, ${x + width * 0.75} ${y + 44}, ${x + width * 0.6} ${centerY + 3}`,
+      `C ${x + width * 0.42} ${y + 46}, ${x + width * 0.18} ${y + 46}, ${left} ${centerY}`,
+      'Z',
+    ].join(' ');
+
+    return (
+      <g>
+        <ellipse cx={x + width / 2} cy={y + 54} rx={width * 0.28} ry={3.4} fill="#d7dde5" opacity="0.18" />
+        <path d={d} fill="#9ad16a" stroke="#5d9938" strokeWidth="2.7" vectorEffect="non-scaling-stroke" />
+        <path d={`M ${left + 4} ${centerY} C ${x + width * 0.34} ${centerY - 3}, ${x + width * 0.64} ${centerY - 2}, ${right - 6} ${centerY}`} fill="none" stroke="#6aa547" strokeWidth="2.1" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+        <path d={`M ${x + width * 0.3} ${centerY - 1} C ${x + width * 0.26} ${centerY - 7}, ${x + width * 0.22} ${centerY - 11}, ${x + width * 0.17} ${centerY - 14}`} fill="none" stroke="#84bb58" strokeWidth="1.4" strokeLinecap="round" opacity="0.9" vectorEffect="non-scaling-stroke" />
+        <path d={`M ${x + width * 0.55} ${centerY + 1} C ${x + width * 0.58} ${centerY + 7}, ${x + width * 0.64} ${centerY + 12}, ${x + width * 0.71} ${centerY + 14}`} fill="none" stroke="#84bb58" strokeWidth="1.4" strokeLinecap="round" opacity="0.9" vectorEffect="non-scaling-stroke" />
+        <path d={`M ${x + width * 0.58} ${centerY - 1} C ${x + width * 0.63} ${centerY - 8}, ${x + width * 0.7} ${centerY - 12}, ${x + width * 0.76} ${centerY - 15}`} fill="none" stroke="#84bb58" strokeWidth="1.4" strokeLinecap="round" opacity="0.9" vectorEffect="non-scaling-stroke" />
+      </g>
+    );
+  }
+
+  if (kind === 'paperStrip') {
+    const top = y + 11;
+    const bottom = y + 33;
+    const foldWidth = Math.min(12, width * 0.2);
+    const d = [
+      `M ${left} ${top}`,
+      `H ${right - foldWidth}`,
+      `L ${right} ${y + 22}`,
+      `L ${right - foldWidth} ${bottom}`,
+      `L ${left} ${bottom}`,
+      'Z',
+    ].join(' ');
+
+    return (
+      <g>
+        <ellipse cx={x + width / 2} cy={y + 41} rx={width * 0.3} ry={3.1} fill="#d7dde5" opacity="0.16" />
+        <path d={d} fill="#ff93b8" stroke="#d95784" strokeWidth="2.3" vectorEffect="non-scaling-stroke" />
+        <path d={`M ${left + 3} ${y + 16} H ${right - foldWidth - 3}`} stroke="#ffd0e0" strokeWidth="1.8" opacity="0.95" vectorEffect="non-scaling-stroke" />
+        <path d={`M ${right - foldWidth} ${top} L ${right - foldWidth} ${bottom}`} stroke="#e96e98" strokeWidth="1.4" opacity="0.75" vectorEffect="non-scaling-stroke" />
+        <path d={`M ${right - foldWidth} ${top} L ${right} ${y + 22} L ${right - foldWidth} ${bottom}`} fill="#ff74a4" opacity="0.82" />
+      </g>
+    );
+  }
+
+  if (kind === 'pencil') {
+    const top = y + 14;
+    const bottom = y + 34;
+    const eraserWidth = Math.max(11, width * 0.14);
+    const ferruleWidth = Math.max(7, width * 0.08);
+    const tipWidth = Math.max(14, width * 0.14);
+    const woodStart = right - tipWidth;
+    const leadStart = right - Math.max(6, tipWidth * 0.3);
+    const bodyWidth = width - eraserWidth - ferruleWidth - tipWidth;
+
+    return (
+      <g>
+        <ellipse cx={x + width / 2} cy={y + 41} rx={width * 0.28} ry={3.1} fill="#d7dde5" opacity="0.16" />
+        <rect x={x} y={top} width={eraserWidth} height={bottom - top} rx="3" fill="#ee8ea5" stroke="#c96279" strokeWidth="1.9" vectorEffect="non-scaling-stroke" />
+        <rect x={x + eraserWidth} y={top} width={ferruleWidth} height={bottom - top} fill="#d7dce4" stroke="#9da7b4" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+        <path d={`M ${x + eraserWidth + ferruleWidth * 0.5} ${top + 1} V ${bottom - 1}`} stroke="#aeb6c1" strokeWidth="0.9" vectorEffect="non-scaling-stroke" />
+        <rect
+          x={x + eraserWidth + ferruleWidth}
+          y={top}
+          width={bodyWidth}
+          height={bottom - top}
+          fill="#f2c347"
+          stroke="#c79227"
+          strokeWidth="1.9"
+          vectorEffect="non-scaling-stroke"
+        />
+        <path
+          d={`M ${x + eraserWidth + ferruleWidth + 4} ${top + 4} H ${woodStart - 5}`}
+          stroke="#ffe291"
+          strokeWidth="1.3"
+          opacity="0.85"
+          vectorEffect="non-scaling-stroke"
+        />
+        <path
+          d={`M ${woodStart} ${top} L ${leadStart} ${y + 24} L ${woodStart} ${bottom} Z`}
+          fill="#ead0a8"
+          stroke="#b98949"
+          strokeWidth="1.7"
+          vectorEffect="non-scaling-stroke"
+        />
+        <path
+          d={`M ${leadStart} ${y + 24} L ${right} ${y + 24}`}
+          stroke="#45484e"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          vectorEffect="non-scaling-stroke"
+        />
+      </g>
+    );
+  }
+
+  if (kind === 'stick') {
+    return (
+      <g>
+        <ellipse cx={x + width / 2} cy={y + 42} rx={width * 0.26} ry={3.1} fill="#d7dde5" opacity="0.16" />
+        <rect x={x} y={y + 11} width={width} height="18" rx="5" fill="#d9a067" stroke="#a86c38" strokeWidth="2.4" vectorEffect="non-scaling-stroke" />
+        <path d={`M ${x + 4} ${y + 14} H ${x + width - 4}`} stroke="#efc08b" strokeWidth="1.7" opacity="0.7" vectorEffect="non-scaling-stroke" />
+        {Array.from({ length: Math.max(3, Math.floor(width / 56)) }, (_, index) => {
+          const lineX = x + 16 + index * ((width - 32) / Math.max(1, Math.max(3, Math.floor(width / 56)) - 1));
+          return (
+            <line
+              key={`stick-line-${index}`}
+              x1={lineX}
+              y1={y + 13}
+              x2={lineX}
+              y2={y + 27}
+              stroke="#bc804d"
+              strokeWidth="1.5"
+              opacity="0.72"
+              vectorEffect="non-scaling-stroke"
+            />
+          );
+        })}
+      </g>
+    );
+  }
+
+  return (
+    <g>
+      <ellipse cx={x + width / 2} cy={y + 40} rx={Math.max(10, width * 0.25)} ry={3} fill="#d7dde5" opacity="0.16" />
+      <rect x={x} y={y + 12} width={width} height="22" rx="4" fill="#cfd9e6" stroke="#7b8ba0" strokeWidth="2" vectorEffect="non-scaling-stroke" />
+    </g>
+  );
+}
+
+function MeasurementProblemCard({ measurement }: { measurement: MeasurementProblemData }) {
+  const millimeterWidth = 14.5;
+  const leftPadding = 86;
+  const rightPadding = 58;
+  const rulerWidth = measurement.rulerCm * 10 * millimeterWidth;
+  const svgWidth = leftPadding + rulerWidth + rightPadding;
+  const svgHeight = 288;
+  const rulerX = leftPadding;
+  const rulerY = 166;
+  const rulerHeight = 82;
+  const startX = rulerX + measurement.startMm * millimeterWidth;
+  const endX = startX + measurement.lengthMm * millimeterWidth;
+  const objectY = 56;
+  const gradientIdSuffix = `${measurement.objectKind}-${measurement.startMm}-${measurement.lengthMm}`;
+  const rulerFillId = `measurement-ruler-fill-${gradientIdSuffix}`;
+  const rulerHighlightId = `measurement-ruler-highlight-${gradientIdSuffix}`;
+  const rulerClipId = `measurement-ruler-clip-${gradientIdSuffix}`;
+  const rulerPath = [
+    `M ${rulerX + 12} ${rulerY}`,
+    `H ${rulerX + rulerWidth - 12}`,
+    `Q ${rulerX + rulerWidth} ${rulerY} ${rulerX + rulerWidth} ${rulerY + 12}`,
+    `V ${rulerY + rulerHeight - 10}`,
+    `Q ${rulerX + rulerWidth} ${rulerY + rulerHeight} ${rulerX + rulerWidth - 12} ${rulerY + rulerHeight}`,
+    `H ${rulerX + 12}`,
+    `Q ${rulerX} ${rulerY + rulerHeight} ${rulerX} ${rulerY + rulerHeight - 10}`,
+    `V ${rulerY + 12}`,
+    `Q ${rulerX} ${rulerY} ${rulerX + 12} ${rulerY}`,
+    'Z',
+  ].join(' ');
+
+  return (
+    <div className="mx-auto flex w-full max-w-[56rem] flex-col gap-4 text-left text-slate-900 sm:gap-5">
+      <div className="rounded-[2rem] border border-slate-200 bg-slate-50/85 px-4 py-4 shadow-sm sm:px-6 sm:py-5 md:px-8 md:py-7">
+        <p className="text-[1.1rem] font-black leading-[1.5] text-slate-900 sm:text-[1.4rem] md:text-[1.85rem]">
+          {measurement.title}
+        </p>
+
+        <div className="mt-4 overflow-hidden rounded-[1.75rem] border border-sky-200 bg-white p-3 shadow-[inset_0_2px_14px_rgba(148,163,184,0.12)] sm:p-4">
+          <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} className="block w-full" role="img" aria-label={`${measurement.objectLabel}와 자가 함께 있는 길이 재기 그림`}>
+            <defs>
+              <linearGradient id={rulerFillId} x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#e4f5ff" />
+                <stop offset="56%" stopColor="#d4ebfb" />
+                <stop offset="100%" stopColor="#c5e1f4" />
+              </linearGradient>
+              <linearGradient id={rulerHighlightId} x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#ffffff" stopOpacity="0.92" />
+                <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+              </linearGradient>
+              <clipPath id={rulerClipId}>
+                <path d={rulerPath} />
+              </clipPath>
+            </defs>
+            <rect x={rulerX - 30} y="26" width={rulerWidth + 60} height="96" rx="22" fill="#fbfdff" stroke="#e3f0f8" strokeWidth="1.6" />
+            <line
+              x1={startX}
+              y1="36"
+              x2={startX}
+              y2={rulerY - 12}
+              stroke="#ff63b3"
+              strokeWidth="3.4"
+              strokeDasharray="8 7"
+              strokeLinecap="round"
+              vectorEffect="non-scaling-stroke"
+            />
+            <line
+              x1={endX}
+              y1="36"
+              x2={endX}
+              y2={rulerY - 12}
+              stroke="#ff63b3"
+              strokeWidth="3.4"
+              strokeDasharray="8 7"
+              strokeLinecap="round"
+              vectorEffect="non-scaling-stroke"
+            />
+
+            <MeasurementObjectIllustration
+              kind={measurement.objectKind}
+              label={measurement.objectLabel}
+              x={startX}
+              y={objectY}
+              width={measurement.lengthMm * millimeterWidth}
+            />
+
+            <path d={rulerPath} fill={`url(#${rulerFillId})`} stroke="#6f96b3" strokeWidth="4.2" vectorEffect="non-scaling-stroke" />
+            <g clipPath={`url(#${rulerClipId})`} opacity="0.52">
+              {Array.from({ length: measurement.rulerCm }, (_, centimeter) => (
+                <rect
+                  key={`ruler-band-${centimeter}`}
+                  x={rulerX + centimeter * 10 * millimeterWidth}
+                  y={rulerY + 2}
+                  width={10 * millimeterWidth}
+                  height={rulerHeight - 8}
+                  fill={centimeter % 2 === 0 ? '#d9eefc' : '#cde5f6'}
+                />
+              ))}
+            </g>
+            <path
+              d={`M ${rulerX + 8} ${rulerY + 9} H ${rulerX + rulerWidth - 8}`}
+              stroke={`url(#${rulerHighlightId})`}
+              strokeWidth="5"
+              opacity="0.95"
+              vectorEffect="non-scaling-stroke"
+            />
+            <path
+              d={`M ${rulerX + 10} ${rulerY + rulerHeight - 21} H ${rulerX + rulerWidth - 10}`}
+              stroke="#aac7dc"
+              strokeWidth="2.4"
+              opacity="0.85"
+              vectorEffect="non-scaling-stroke"
+            />
+
+            {Array.from({ length: measurement.rulerCm * 10 + 1 }, (_, tickIndex) => {
+              const tickX = rulerX + tickIndex * millimeterWidth;
+              const isCentimeter = tickIndex % 10 === 0;
+              const isHalfCentimeter = tickIndex % 5 === 0;
+              const tickHeight = isCentimeter ? 40 : isHalfCentimeter ? 28 : 16;
+
+              return (
+                <line
+                  key={`tick-${tickIndex}`}
+                  x1={tickX}
+                  y1={rulerY + 6}
+                  x2={tickX}
+                  y2={rulerY + 6 + tickHeight}
+                  stroke="#264a67"
+                  strokeWidth={isCentimeter ? 3 : isHalfCentimeter ? 2.2 : 1.55}
+                  strokeLinecap="round"
+                  vectorEffect="non-scaling-stroke"
+                />
+              );
+            })}
+
+            {Array.from({ length: measurement.rulerCm + 1 }, (_, centimeter) => {
+              const isFirst = centimeter === 0;
+              const isLast = centimeter === measurement.rulerCm;
+              const labelX = isFirst
+                ? rulerX + 1
+                : isLast
+                  ? rulerX + centimeter * 10 * millimeterWidth - 1
+                  : rulerX + centimeter * 10 * millimeterWidth;
+
+              return (
+                <text
+                  key={`label-${centimeter}`}
+                  x={labelX}
+                  y={rulerY + rulerHeight - 12}
+                  textAnchor={isFirst ? 'start' : isLast ? 'end' : 'middle'}
+                  fontSize="28"
+                  fontWeight="900"
+                  fill="#254f73"
+                  stroke="#f7fbff"
+                  strokeWidth="4"
+                  paintOrder="stroke"
+                >
+                  {centimeter}
+                </text>
+              );
+            })}
+          </svg>
+        </div>
+
+        <div className="mt-4 rounded-[1.5rem] border border-amber-200 bg-amber-50/85 px-4 py-4 shadow-sm sm:px-5">
+          <p className="break-keep text-[1.15rem] font-black leading-[1.55] text-slate-900 sm:text-[1.45rem] md:text-[2rem]">
+            {renderPromptWithHighlight(measurement.question)}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function formatDistanceMapPoints(points: DistanceMapPoint[]) {
+  return points.map((point) => `${point.x},${point.y}`).join(' ');
+}
+
+function getDistanceMapMidpoint(point: DistanceMapPoint, nextPoint: DistanceMapPoint) {
+  return {
+    x: (point.x + nextPoint.x) / 2,
+    y: (point.y + nextPoint.y) / 2,
+  };
+}
+
+function renderDistanceMapLandmark(landmark: DistanceMapLandmarkData, scale = 1) {
+  const transform = scale === 1
+    ? undefined
+    : `translate(${landmark.x} ${landmark.y}) scale(${scale}) translate(${-landmark.x} ${-landmark.y})`;
+
+  if (landmark.kind === 'home') {
+    return (
+      <g key={landmark.id} transform={transform}>
+        <polygon
+          points={`${landmark.x - 18},${landmark.y - 4} ${landmark.x},${landmark.y - 24} ${landmark.x + 18},${landmark.y - 4}`}
+          fill="#fb923c"
+          stroke="#c2410c"
+          strokeWidth="2.4"
+          vectorEffect="non-scaling-stroke"
+        />
+        <rect
+          x={landmark.x - 14}
+          y={landmark.y - 4}
+          width="28"
+          height="22"
+          rx="5"
+          fill="#fff7ed"
+          stroke="#c2410c"
+          strokeWidth="2.4"
+          vectorEffect="non-scaling-stroke"
+        />
+        <rect x={landmark.x - 4} y={landmark.y + 5} width="8" height="13" rx="2" fill="#fdba74" />
+        <text x={landmark.x} y={landmark.y + 38} textAnchor="middle" fontSize="18" fontWeight="900" fill="#7c2d12">
+          {landmark.label}
+        </text>
+      </g>
+    );
+  }
+
+  if (landmark.kind === 'reference') {
+    return (
+      <g key={landmark.id} transform={transform}>
+        <line
+          x1={landmark.x}
+          y1={landmark.y - 4}
+          x2={landmark.x}
+          y2={landmark.y + 18}
+          stroke="#0f172a"
+          strokeWidth="3.2"
+          vectorEffect="non-scaling-stroke"
+        />
+        <rect
+          x={landmark.x - 20}
+          y={landmark.y - 20}
+          width="40"
+          height="20"
+          rx="7"
+          fill="#e0f2fe"
+          stroke="#0284c7"
+          strokeWidth="2.4"
+          vectorEffect="non-scaling-stroke"
+        />
+        <text x={landmark.x} y={landmark.y - 6} textAnchor="middle" fontSize="11" fontWeight="900" fill="#0c4a6e">
+          BUS
+        </text>
+        <text x={landmark.x} y={landmark.y + 38} textAnchor="middle" fontSize="18" fontWeight="900" fill="#0c4a6e">
+          {landmark.label}
+        </text>
+      </g>
+    );
+  }
+
+  return (
+    <g key={landmark.id} transform={transform}>
+      <rect
+        x={landmark.x - 19}
+        y={landmark.y - 18}
+        width="38"
+        height="28"
+        rx="8"
+        fill={landmark.accent}
+        stroke="#334155"
+        strokeWidth="2.6"
+        vectorEffect="non-scaling-stroke"
+      />
+      <rect
+        x={landmark.x - 11}
+        y={landmark.y - 10}
+        width="22"
+        height="12"
+        rx="4"
+        fill="rgba(255,255,255,0.6)"
+      />
+      <text x={landmark.x} y={landmark.y + 30} textAnchor="middle" fontSize="18" fontWeight="900" fill="#1e293b">
+        {landmark.label}
+      </text>
+    </g>
+  );
+}
+
+const DISTANCE_CARD_VIEWBOX_WIDTH = 640;
+const DISTANCE_CARD_VIEWBOX_HEIGHT = 410;
+const DISTANCE_ROUTE_LEFT_X = 102;
+const DISTANCE_ROUTE_RIGHT_X = 538;
+const DISTANCE_ROUTE_Y = 196;
+const DISTANCE_LANDMARK_Y = 114;
+const DISTANCE_HOME_X = 72;
+const DISTANCE_TARGET_X = 568;
+const DISTANCE_DISPLAY_LANDMARK_SCALE = 1.18;
+const DISTANCE_ROUTE_STROKE_WIDTH = 32;
+const DISTANCE_PROGRESS_STROKE_WIDTH = 16;
+const DISTANCE_STEP_BUBBLE_RADIUS = 23;
+
+function getDistanceMapPathLength(points: DistanceMapPoint[]) {
+  let total = 0;
+
+  for (let index = 0; index < points.length - 1; index += 1) {
+    total += Math.hypot(points[index + 1].x - points[index].x, points[index + 1].y - points[index].y);
+  }
+
+  return total;
+}
+
+function relocateDistanceMapLandmark(landmark: DistanceMapLandmarkData, x: number, y: number): DistanceMapLandmarkData {
+  return { ...landmark, x, y };
+}
+
+function createHorizontalDistanceRoute(
+  units: number,
+  leftX = DISTANCE_ROUTE_LEFT_X,
+  rightX = DISTANCE_ROUTE_RIGHT_X,
+  y = DISTANCE_ROUTE_Y,
+) {
+  const safeUnits = Math.max(units, 1);
+  return Array.from({ length: safeUnits + 1 }, (_, index) => ({
+    x: leftX + ((rightX - leftX) * index) / safeUnits,
+    y,
+  }));
+}
+
+function createHorizontalDistanceSegmentLayouts(
+  segments: DistanceChunkSegmentData[],
+  leftX = DISTANCE_ROUTE_LEFT_X,
+  rightX = DISTANCE_ROUTE_RIGHT_X,
+  y = DISTANCE_ROUTE_Y,
+) {
+  const totalUnits = Math.max(1, segments.reduce((sum, segment) => sum + segment.units, 0));
+  const totalWidth = rightX - leftX;
+  let cursor = leftX;
+
+  return segments.map((segment) => {
+    const width = (totalWidth * segment.units) / totalUnits;
+    const startX = cursor;
+    const endX = startX + width;
+    cursor = endX;
+
+    return {
+      ...segment,
+      width,
+      centerX: (startX + endX) / 2,
+      points: [
+        { x: startX, y },
+        { x: endX, y },
+      ],
+    };
+  });
+}
+
+function renderDistanceReferenceBadge({
+  x,
+  y,
+  previewWidth,
+  fill,
+  stroke,
+  textColor,
+  lineColor,
+  lineStroke,
+}: {
+  x: number;
+  y: number;
+  previewWidth: number;
+  fill: string;
+  stroke: string;
+  textColor: string;
+  lineColor: string;
+  lineStroke: string;
+}) {
+  return (
+    <g transform={`translate(${x}, ${y})`} pointerEvents="none">
+      <rect width="196" height="78" rx="24" fill="#ffffff" stroke={stroke} strokeWidth="2.8" />
+      <text x="20" y="31" fontSize="19" fontWeight="900" fill={textColor}>기준 500m</text>
+      <line x1="20" y1="54" x2={20 + previewWidth} y2="54" stroke={lineColor} strokeWidth="12" strokeLinecap="round" />
+      <line x1="20" y1="54" x2={20 + previewWidth} y2="54" stroke={lineStroke} strokeWidth="4" strokeLinecap="round" strokeDasharray="11 8" />
+      <rect x="0" y="0" width="196" height="78" rx="24" fill="none" stroke={fill} strokeWidth="0.6" opacity="0.01" />
+    </g>
+  );
+}
+
+function getDistanceMapPointAtDistance(points: DistanceMapPoint[], distance: number) {
+  if (points.length === 0) {
+    return { x: 0, y: 0 };
+  }
+
+  if (points.length === 1 || distance <= 0) {
+    return points[0];
+  }
+
+  let remaining = distance;
+
+  for (let index = 0; index < points.length - 1; index += 1) {
+    const start = points[index];
+    const end = points[index + 1];
+    const segmentLength = Math.hypot(end.x - start.x, end.y - start.y);
+
+    if (segmentLength === 0) {
+      continue;
+    }
+
+    if (remaining <= segmentLength) {
+      const ratio = remaining / segmentLength;
+      return {
+        x: start.x + (end.x - start.x) * ratio,
+        y: start.y + (end.y - start.y) * ratio,
+      };
+    }
+
+    remaining -= segmentLength;
+  }
+
+  return points[points.length - 1];
+}
+
+function getDistanceMapPartialPoints(points: DistanceMapPoint[], distance: number) {
+  if (points.length === 0) {
+    return [];
+  }
+
+  if (points.length === 1) {
+    return [points[0], points[0]];
+  }
+
+  const clampedDistance = clamp(distance, 0, getDistanceMapPathLength(points));
+
+  if (clampedDistance === 0) {
+    return [points[0], points[0]];
+  }
+
+  const partial: DistanceMapPoint[] = [points[0]];
+  let remaining = clampedDistance;
+
+  for (let index = 0; index < points.length - 1; index += 1) {
+    const start = points[index];
+    const end = points[index + 1];
+    const segmentLength = Math.hypot(end.x - start.x, end.y - start.y);
+
+    if (segmentLength === 0) {
+      continue;
+    }
+
+    if (remaining >= segmentLength) {
+      partial.push(end);
+      remaining -= segmentLength;
+      continue;
+    }
+
+    partial.push(getDistanceMapPointAtDistance([start, end], remaining));
+    return partial;
+  }
+
+  return partial;
+}
+
+function getDistanceAlongDistanceMapPath(points: DistanceMapPoint[], point: DistanceMapPoint) {
+  if (points.length <= 1) {
+    return 0;
+  }
+
+  let bestDistance = Number.POSITIVE_INFINITY;
+  let bestAlong = 0;
+  let traversed = 0;
+
+  for (let index = 0; index < points.length - 1; index += 1) {
+    const start = points[index];
+    const end = points[index + 1];
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+    const lengthSquared = dx * dx + dy * dy;
+    const segmentLength = Math.sqrt(lengthSquared);
+
+    if (segmentLength === 0) {
+      continue;
+    }
+
+    const rawT = ((point.x - start.x) * dx + (point.y - start.y) * dy) / lengthSquared;
+    const t = clamp(rawT, 0, 1);
+    const projected = {
+      x: start.x + dx * t,
+      y: start.y + dy * t,
+    };
+    const distance = Math.hypot(projected.x - point.x, projected.y - point.y);
+
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      bestAlong = traversed + segmentLength * t;
+    }
+
+    traversed += segmentLength;
+  }
+
+  return bestAlong;
+}
+
+function getDistanceMapClientPoint(svg: SVGSVGElement | null, clientX: number, clientY: number) {
+  if (!svg) {
+    return null;
+  }
+
+  const rect = svg.getBoundingClientRect();
+
+  if (rect.width === 0 || rect.height === 0) {
+    return null;
+  }
+
+  return {
+    x: ((clientX - rect.left) / rect.width) * DISTANCE_CARD_VIEWBOX_WIDTH,
+    y: ((clientY - rect.top) / rect.height) * DISTANCE_CARD_VIEWBOX_HEIGHT,
+  };
+}
+
+function getSnappedDistanceUnits(distance: number, totalLength: number, units: number) {
+  if (units <= 0 || totalLength <= 0) {
+    return 0;
+  }
+
+  const unitLength = totalLength / units;
+  return clamp(Math.round(distance / unitLength), 0, units);
+}
+
+function getSnappedDistanceLength(totalLength: number, units: number, filledUnits: number) {
+  if (units <= 0 || totalLength <= 0) {
+    return 0;
+  }
+
+  return (totalLength * filledUnits) / units;
+}
+
+function createCenteredDistanceRowPositions(count: number, centerX: number, y: number, gap: number) {
+  if (count <= 0) {
+    return [];
+  }
+
+  const startX = centerX - (gap * (count - 1)) / 2;
+  return Array.from({ length: count }, (_, index) => ({
+    x: startX + gap * index,
+    y,
+  }));
+}
+
+function useDistancePathMeasure({
+  points,
+  units,
+  resetKey,
+}: {
+  points: DistanceMapPoint[];
+  units: number;
+  resetKey: string;
+}) {
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  const [filledUnits, setFilledUnits] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const totalLength = getDistanceMapPathLength(points);
+
+  useEffect(() => {
+    setFilledUnits(0);
+    setIsDragging(false);
+  }, [resetKey]);
+
+  const updateFromClientPoint = (clientX: number, clientY: number) => {
+    const nextPoint = getDistanceMapClientPoint(svgRef.current, clientX, clientY);
+
+    if (!nextPoint) {
+      return;
+    }
+
+    const nextDistance = getDistanceAlongDistanceMapPath(points, nextPoint);
+    setFilledUnits(getSnappedDistanceUnits(nextDistance, totalLength, units));
+  };
+
+  const getPathDragProps = () => ({
+    onPointerDown: (event: React.PointerEvent<SVGElement>) => {
+      event.preventDefault();
+      event.currentTarget.setPointerCapture(event.pointerId);
+      setIsDragging(true);
+      updateFromClientPoint(event.clientX, event.clientY);
+    },
+    onPointerMove: (event: React.PointerEvent<SVGElement>) => {
+      if (!isDragging) {
+        return;
+      }
+
+      updateFromClientPoint(event.clientX, event.clientY);
+    },
+    onPointerUp: (event: React.PointerEvent<SVGElement>) => {
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+
+      updateFromClientPoint(event.clientX, event.clientY);
+      setIsDragging(false);
+    },
+    onPointerCancel: (event: React.PointerEvent<SVGElement>) => {
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+
+      setIsDragging(false);
+    },
+  });
+
+  return {
+    svgRef,
+    filledUnits,
+    filledDistance: getSnappedDistanceLength(totalLength, units, filledUnits),
+    resetMeasure: () => {
+      setFilledUnits(0);
+      setIsDragging(false);
+    },
+    getPathDragProps,
+  };
+}
+
+function useDistanceSegmentMeasures({
+  segments,
+  resetKey,
+}: {
+  segments: DistanceChunkSegmentData[];
+  resetKey: string;
+}) {
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  const [filledUnitsById, setFilledUnitsById] = useState<Record<string, number>>(() => (
+    Object.fromEntries(segments.map((segment) => [segment.id, 0]))
+  ));
+  const [activeSegmentId, setActiveSegmentId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setFilledUnitsById(Object.fromEntries(segments.map((segment) => [segment.id, 0])));
+    setActiveSegmentId(null);
+  }, [resetKey, segments]);
+
+  const updateSegment = (segment: DistanceChunkSegmentData, clientX: number, clientY: number) => {
+    const nextPoint = getDistanceMapClientPoint(svgRef.current, clientX, clientY);
+
+    if (!nextPoint) {
+      return;
+    }
+
+    const totalLength = getDistanceMapPathLength(segment.points);
+    const distance = getDistanceAlongDistanceMapPath(segment.points, nextPoint);
+    const nextUnits = getSnappedDistanceUnits(distance, totalLength, segment.units);
+
+    setFilledUnitsById((prev) => (prev[segment.id] === nextUnits ? prev : { ...prev, [segment.id]: nextUnits }));
+  };
+
+  const getSegmentDragProps = (segment: DistanceChunkSegmentData) => ({
+    onPointerDown: (event: React.PointerEvent<SVGElement>) => {
+      event.preventDefault();
+      event.currentTarget.setPointerCapture(event.pointerId);
+      setActiveSegmentId(segment.id);
+      updateSegment(segment, event.clientX, event.clientY);
+    },
+    onPointerMove: (event: React.PointerEvent<SVGElement>) => {
+      if (activeSegmentId !== segment.id) {
+        return;
+      }
+
+      updateSegment(segment, event.clientX, event.clientY);
+    },
+    onPointerUp: (event: React.PointerEvent<SVGElement>) => {
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+
+      updateSegment(segment, event.clientX, event.clientY);
+      setActiveSegmentId(null);
+    },
+    onPointerCancel: (event: React.PointerEvent<SVGElement>) => {
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+
+      setActiveSegmentId(null);
+    },
+  });
+
+  return {
+    svgRef,
+    filledUnitsById,
+    resetMeasures: () => {
+      setFilledUnitsById(Object.fromEntries(segments.map((segment) => [segment.id, 0])));
+      setActiveSegmentId(null);
+    },
+    getSegmentDragProps,
+  };
+}
+
+function DistanceProblemShell({
+  leftBadge,
+  rightBadge,
+  onReset,
+  panelClassName,
+  children,
+}: {
+  leftBadge?: React.ReactNode;
+  rightBadge?: React.ReactNode;
+  onReset: () => void;
+  panelClassName: string;
+  children: React.ReactNode;
+}) {
+  const hasHeader = Boolean(leftBadge) || Boolean(rightBadge);
+
+  return (
+    <div className="mx-auto flex h-full w-full max-w-full flex-col text-left text-slate-900">
+      <div className="flex h-full flex-col rounded-[2rem] border border-slate-200 bg-slate-50 px-2 py-2 shadow-sm sm:px-3 sm:py-3">
+        {hasHeader ? (
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            {leftBadge}
+            {rightBadge}
+          </div>
+        ) : null}
+
+        <div className={`${hasHeader ? 'mt-2' : ''} flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.75rem] border border-slate-200 p-1.5 sm:p-2 ${panelClassName}`}>
+          <div className="min-h-0 flex-1 overflow-hidden rounded-[1.45rem] border border-white bg-white/80">
+            {children}
+          </div>
+
+          <div className="mt-2 flex justify-end">
+            <button
+              type="button"
+              onClick={onReset}
+              className="rounded-[1.3rem] border border-slate-300 bg-white px-4 py-2.5 text-sm font-black text-slate-700 transition hover:bg-slate-50 sm:min-w-[6.5rem]"
+            >
+              다시
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DistanceCompareProblemCard({
+  distanceMap,
+}: {
+  distanceMap: DistanceCompareProblemData;
+}) {
+  const totalSlots = distanceMap.compareSlotCount;
+  const targetUnits = Math.max(1, Math.round(distanceMap.targetMeters / distanceMap.referenceMeters));
+  const routePoints = createHorizontalDistanceRoute(totalSlots);
+  const routeStart = routePoints[0];
+  const routeEnd = routePoints[routePoints.length - 1];
+  const routeWidth = routeEnd.x - routeStart.x;
+  const routeCenters = routePoints.slice(0, -1).map((point, index) => getDistanceMapMidpoint(point, routePoints[index + 1]));
+  const referencePreviewWidth = Math.min(routeWidth / totalSlots, 136);
+  const homeLandmark = distanceMap.landmarks.find((landmark) => landmark.id === 'home') ?? null;
+  const targetLandmark = distanceMap.landmarks.find((landmark) => landmark.label === distanceMap.targetLabel) ?? null;
+  const homeDisplayLandmark = homeLandmark ? relocateDistanceMapLandmark(homeLandmark, DISTANCE_HOME_X, DISTANCE_LANDMARK_Y) : null;
+  const targetDisplayLandmark = targetLandmark ? relocateDistanceMapLandmark(targetLandmark, DISTANCE_TARGET_X, DISTANCE_LANDMARK_Y) : null;
+  const {
+    svgRef,
+    filledUnits,
+    filledDistance,
+    resetMeasure,
+    getPathDragProps,
+  } = useDistancePathMeasure({
+    points: routePoints,
+    units: totalSlots,
+    resetKey: [distanceMap.strategy, distanceMap.targetLabel, distanceMap.targetMeters].join('-'),
+  });
+  const targetDistance = getSnappedDistanceLength(routeWidth, totalSlots, targetUnits);
+  const targetEndX = routeStart.x + targetDistance;
+  const filledEndX = routeStart.x + filledDistance;
+
+  return (
+    <DistanceProblemShell
+      leftBadge={(
+        <div className="flex items-center gap-2 rounded-full bg-sky-50 px-3 py-2">
+          <span className="rounded-full bg-sky-500 px-3 py-1 text-sm font-black text-white">500m</span>
+          <span className="text-sm font-black text-sky-900">비교</span>
+        </div>
+      )}
+      rightBadge={(
+        <div className="rounded-full bg-white px-4 py-2 text-lg font-black text-slate-900 sm:text-xl">
+          집 → {distanceMap.targetLabel}
+        </div>
+      )}
+      onReset={resetMeasure}
+      panelClassName="bg-sky-50"
+    >
+      <svg
+        ref={svgRef}
+        viewBox={'0 0 ' + DISTANCE_CARD_VIEWBOX_WIDTH + ' ' + DISTANCE_CARD_VIEWBOX_HEIGHT}
+        className="block h-full w-full touch-none"
+        role="img"
+        aria-label="comparison distance card"
+      >
+        <rect x="0" y="0" width="640" height="410" rx="30" fill="#eff6ff" />
+
+        {renderDistanceReferenceBadge({
+          x: 28,
+          y: 24,
+          previewWidth: referencePreviewWidth,
+          fill: '#eff6ff',
+          stroke: '#93c5fd',
+          textColor: '#0c4a6e',
+          lineColor: '#7dd3fc',
+          lineStroke: '#0369a1',
+        })}
+
+        {homeDisplayLandmark ? renderDistanceMapLandmark(homeDisplayLandmark, DISTANCE_DISPLAY_LANDMARK_SCALE) : null}
+        {targetDisplayLandmark ? renderDistanceMapLandmark(targetDisplayLandmark, DISTANCE_DISPLAY_LANDMARK_SCALE) : null}
+
+        <line
+          x1={routeStart.x}
+          y1={DISTANCE_ROUTE_Y}
+          x2={routeEnd.x}
+          y2={DISTANCE_ROUTE_Y}
+          stroke="#dbeafe"
+          strokeWidth={DISTANCE_ROUTE_STROKE_WIDTH}
+          strokeLinecap="round"
+        />
+        <line
+          x1={routeStart.x}
+          y1={DISTANCE_ROUTE_Y}
+          x2={targetEndX}
+          y2={DISTANCE_ROUTE_Y}
+          stroke="#fdba74"
+          strokeWidth={DISTANCE_ROUTE_STROKE_WIDTH}
+          strokeLinecap="round"
+          opacity="0.78"
+        />
+        <line
+          x1={routeStart.x}
+          y1={DISTANCE_ROUTE_Y}
+          x2={filledEndX}
+          y2={DISTANCE_ROUTE_Y}
+          stroke="#38bdf8"
+          strokeWidth={DISTANCE_PROGRESS_STROKE_WIDTH}
+          strokeLinecap="round"
+        />
+
+        {routeCenters.map((point, index) => {
+          const unitNumber = index + 1;
+          const isFilled = filledUnits >= unitNumber;
+          const isTargetUnit = unitNumber <= targetUnits;
+          return (
+            <g key={'compare-slot-' + unitNumber} pointerEvents="none">
+              <circle
+                cx={point.x}
+                cy={DISTANCE_ROUTE_Y}
+                r={DISTANCE_STEP_BUBBLE_RADIUS}
+                fill={isFilled ? '#38bdf8' : '#ffffff'}
+                stroke={isTargetUnit ? '#f97316' : '#94a3b8'}
+                strokeWidth="4"
+              />
+              <text
+                x={point.x}
+                y={DISTANCE_ROUTE_Y + 7}
+                textAnchor="middle"
+                fontSize="21"
+                fontWeight="900"
+                fill={isFilled ? '#ffffff' : isTargetUnit ? '#c2410c' : '#475569'}
+              >
+                {unitNumber}
+              </text>
+            </g>
+          );
+        })}
+
+        <polyline
+          points={formatDistanceMapPoints(routePoints)}
+          fill="none"
+          stroke="transparent"
+          strokeWidth="76"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ touchAction: 'none', cursor: 'grab' }}
+          {...getPathDragProps()}
+        />
+      </svg>
+    </DistanceProblemShell>
+  );
+}
+
+function DistanceChunkProblemCard({
+  distanceMap,
+}: {
+  distanceMap: DistanceChunkProblemData;
+}) {
+  const segmentLayouts = createHorizontalDistanceSegmentLayouts(distanceMap.segments);
+  const routeStart = segmentLayouts[0]?.points[0] ?? { x: DISTANCE_ROUTE_LEFT_X, y: DISTANCE_ROUTE_Y };
+  const routeEnd = segmentLayouts[segmentLayouts.length - 1]?.points[1] ?? { x: DISTANCE_ROUTE_RIGHT_X, y: DISTANCE_ROUTE_Y };
+  const {
+    svgRef,
+    filledUnitsById,
+    resetMeasures,
+    getSegmentDragProps,
+  } = useDistanceSegmentMeasures({
+    segments: segmentLayouts,
+    resetKey: [distanceMap.strategy, distanceMap.targetLabel, distanceMap.targetMeters].join('-'),
+  });
+  const homeLandmark = distanceMap.landmarks.find((landmark) => landmark.id === 'home') ?? null;
+  const targetLandmark = distanceMap.landmarks.find((landmark) => landmark.label === distanceMap.targetLabel) ?? null;
+  const homeDisplayLandmark = homeLandmark ? relocateDistanceMapLandmark(homeLandmark, DISTANCE_HOME_X, DISTANCE_LANDMARK_Y) : null;
+  const targetDisplayLandmark = targetLandmark ? relocateDistanceMapLandmark(targetLandmark, DISTANCE_TARGET_X, DISTANCE_LANDMARK_Y) : null;
+
+  return (
+    <DistanceProblemShell
+      leftBadge={(
+        <div className="flex items-center gap-2 rounded-full bg-amber-50 px-3 py-2">
+          <span className="rounded-full bg-amber-400 px-3 py-1 text-sm font-black text-amber-950">나눠 보기</span>
+          <span className="text-sm font-black text-amber-900">묶기</span>
+        </div>
+      )}
+      rightBadge={(
+        <div className="rounded-full bg-white px-4 py-2 text-lg font-black text-slate-900 sm:text-xl">
+          집 → {distanceMap.targetLabel}
+        </div>
+      )}
+      onReset={resetMeasures}
+      panelClassName="bg-amber-50"
+    >
+      <svg
+        ref={svgRef}
+        viewBox={'0 0 ' + DISTANCE_CARD_VIEWBOX_WIDTH + ' ' + DISTANCE_CARD_VIEWBOX_HEIGHT}
+        className="block h-full w-full touch-none"
+        role="img"
+        aria-label="chunk distance card"
+      >
+        <rect x="0" y="0" width="640" height="410" rx="30" fill="#fffbeb" />
+
+        {homeDisplayLandmark ? renderDistanceMapLandmark(homeDisplayLandmark, DISTANCE_DISPLAY_LANDMARK_SCALE) : null}
+        {targetDisplayLandmark ? renderDistanceMapLandmark(targetDisplayLandmark, DISTANCE_DISPLAY_LANDMARK_SCALE) : null}
+
+        <line
+          x1={routeStart.x}
+          y1={DISTANCE_ROUTE_Y}
+          x2={routeEnd.x}
+          y2={DISTANCE_ROUTE_Y}
+          stroke="#fde68a"
+          strokeWidth={DISTANCE_ROUTE_STROKE_WIDTH}
+          strokeLinecap="round"
+          opacity="0.65"
+        />
+
+        {segmentLayouts.map((segment) => {
+          const filledCount = filledUnitsById[segment.id] ?? 0;
+          const filledDistance = getSnappedDistanceLength(segment.width, segment.units, filledCount);
+          const partialPoints = getDistanceMapPartialPoints(segment.points, filledDistance);
+          const boxWidth = segment.units >= 2 ? 194 : 146;
+          const slotGap = segment.units > 1 ? 60 : 0;
+
+          return (
+            <g key={'chunk-segment-' + segment.id}>
+              <polyline
+                points={formatDistanceMapPoints(segment.points)}
+                fill="none"
+                stroke={segment.color}
+                strokeWidth={DISTANCE_ROUTE_STROKE_WIDTH}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                opacity="0.32"
+              />
+              <polyline
+                points={formatDistanceMapPoints(partialPoints)}
+                fill="none"
+                stroke={segment.color}
+                strokeWidth={DISTANCE_PROGRESS_STROKE_WIDTH}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <line
+                x1={segment.centerX}
+                y1={DISTANCE_ROUTE_Y + 28}
+                x2={segment.centerX}
+                y2={248}
+                stroke="#fdba74"
+                strokeWidth="3"
+                strokeDasharray="6 7"
+                opacity="0.8"
+              />
+              <g transform={'translate(' + (segment.centerX - boxWidth / 2) + ', 248)'}>
+                <rect width={boxWidth} height="96" rx="22" fill="#ffffff" stroke={segment.color} strokeWidth="4" />
+                <rect x="16" y="16" width="42" height="10" rx="5" fill={segment.color} />
+                {Array.from({ length: segment.units }, (_, unitIndex) => {
+                  const slotX = boxWidth / 2 - (slotGap * (segment.units - 1)) / 2 + slotGap * unitIndex;
+                  const isFilled = unitIndex < filledCount;
+                  return (
+                    <circle
+                      key={segment.id + '-overlay-' + unitIndex}
+                      cx={slotX}
+                      cy="54"
+                      r="18"
+                      fill={isFilled ? segment.color : '#fff7ed'}
+                      stroke={isFilled ? '#7c2d12' : '#fdba74'}
+                      strokeWidth="4"
+                      strokeDasharray={isFilled ? undefined : '5 6'}
+                    />
+                  );
+                })}
+                <text x={boxWidth / 2} y="82" textAnchor="middle" fontSize="20" fontWeight="900" fill="#9a3412">?</text>
+              </g>
+            </g>
+          );
+        })}
+
+        {segmentLayouts.map((segment) => (
+          <polyline
+            key={'chunk-drag-' + segment.id}
+            points={formatDistanceMapPoints(segment.points)}
+            fill="none"
+            stroke="transparent"
+            strokeWidth="78"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{ touchAction: 'none', cursor: 'grab' }}
+            {...getSegmentDragProps(segment)}
+          />
+        ))}
+      </svg>
+    </DistanceProblemShell>
+  );
+}
+
+function DistanceUnitizeProblemCard({
+  distanceMap,
+}: {
+  distanceMap: DistanceUnitizeProblemData;
+}) {
+  const totalUnits = Math.max(1, distanceMap.targetRoute.length - 1);
+  const displayRoutePoints = createHorizontalDistanceRoute(totalUnits);
+  const routeStart = displayRoutePoints[0];
+  const routeEnd = displayRoutePoints[displayRoutePoints.length - 1];
+  const routeWidth = routeEnd.x - routeStart.x;
+  const {
+    svgRef,
+    filledUnits,
+    filledDistance,
+    resetMeasure,
+    getPathDragProps,
+  } = useDistancePathMeasure({
+    points: displayRoutePoints,
+    units: totalUnits,
+    resetKey: [distanceMap.strategy, distanceMap.targetLabel, distanceMap.targetMeters].join('-'),
+  });
+  const homeLandmark = distanceMap.landmarks.find((landmark) => landmark.id === 'home') ?? null;
+  const targetLandmark = distanceMap.landmarks.find((landmark) => landmark.label === distanceMap.targetLabel) ?? null;
+  const homeDisplayLandmark = homeLandmark ? relocateDistanceMapLandmark(homeLandmark, DISTANCE_HOME_X, DISTANCE_LANDMARK_Y) : null;
+  const targetDisplayLandmark = targetLandmark ? relocateDistanceMapLandmark(targetLandmark, DISTANCE_TARGET_X, DISTANCE_LANDMARK_Y) : null;
+  const referencePreviewWidth = Math.min(routeWidth / totalUnits, 136);
+  const unitCenters = displayRoutePoints.slice(0, -1).map((point, index) => getDistanceMapMidpoint(point, displayRoutePoints[index + 1]));
+  const filledEndX = routeStart.x + filledDistance;
+
+  return (
+    <DistanceProblemShell
+      rightBadge={(
+        <div className="rounded-full bg-white px-4 py-2 text-lg font-black text-slate-900 sm:text-xl">
+          집 → {distanceMap.targetLabel}
+        </div>
+      )}
+      onReset={resetMeasure}
+      panelClassName="bg-emerald-50"
+    >
+      <svg
+        ref={svgRef}
+        viewBox={'0 0 ' + DISTANCE_CARD_VIEWBOX_WIDTH + ' ' + DISTANCE_CARD_VIEWBOX_HEIGHT}
+        className="block h-full w-full touch-none"
+        role="img"
+        aria-label="unitize distance card"
+      >
+        <rect x="0" y="0" width="640" height="410" rx="30" fill="#f0fdf4" />
+
+        {renderDistanceReferenceBadge({
+          x: 28,
+          y: 24,
+          previewWidth: referencePreviewWidth,
+          fill: '#f0fdf4',
+          stroke: '#86efac',
+          textColor: '#166534',
+          lineColor: '#34d399',
+          lineStroke: '#047857',
+        })}
+
+        {homeDisplayLandmark ? renderDistanceMapLandmark(homeDisplayLandmark, DISTANCE_DISPLAY_LANDMARK_SCALE) : null}
+        {targetDisplayLandmark ? renderDistanceMapLandmark(targetDisplayLandmark, DISTANCE_DISPLAY_LANDMARK_SCALE) : null}
+
+        <line
+          x1={routeStart.x}
+          y1={DISTANCE_ROUTE_Y}
+          x2={routeEnd.x}
+          y2={DISTANCE_ROUTE_Y}
+          stroke="#d1fae5"
+          strokeWidth={DISTANCE_ROUTE_STROKE_WIDTH}
+          strokeLinecap="round"
+        />
+        <line
+          x1={routeStart.x}
+          y1={DISTANCE_ROUTE_Y}
+          x2={filledEndX}
+          y2={DISTANCE_ROUTE_Y}
+          stroke="#10b981"
+          strokeWidth={DISTANCE_PROGRESS_STROKE_WIDTH}
+          strokeLinecap="round"
+        />
+
+        {unitCenters.map((point, index) => {
+          const unitNumber = index + 1;
+          const isCompleted = filledUnits >= unitNumber;
+          return (
+            <g key={'unit-marker-' + unitNumber} pointerEvents="none">
+              <circle
+                cx={point.x}
+                cy={DISTANCE_ROUTE_Y}
+                r={DISTANCE_STEP_BUBBLE_RADIUS}
+                fill={isCompleted ? '#10b981' : '#ffffff'}
+                stroke={isCompleted ? '#047857' : '#fb923c'}
+                strokeWidth="4"
+              />
+              <text
+                x={point.x}
+                y={DISTANCE_ROUTE_Y + 7}
+                textAnchor="middle"
+                fontSize="21"
+                fontWeight="900"
+                fill={isCompleted ? '#ffffff' : '#c2410c'}
+              >
+                {unitNumber}
+              </text>
+            </g>
+          );
+        })}
+
+        <polyline
+          points={formatDistanceMapPoints(displayRoutePoints)}
+          fill="none"
+          stroke="transparent"
+          strokeWidth="76"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ touchAction: 'none', cursor: 'grab' }}
+          {...getPathDragProps()}
+        />
+      </svg>
+    </DistanceProblemShell>
+  );
+}
+
+function DistanceMapProblemCard({
+  distanceMap,
+}: {
+  distanceMap: DistanceMapProblemData;
+}) {
+  if (distanceMap.strategy === 'compare') {
+    return <DistanceCompareProblemCard distanceMap={distanceMap} />;
+  }
+
+  if (distanceMap.strategy === 'chunk') {
+    return <DistanceChunkProblemCard distanceMap={distanceMap} />;
+  }
+
+  return <DistanceUnitizeProblemCard distanceMap={distanceMap} />;
+}
+
 function createEstimationChoices(answer: number) {
   const roundedAnswer = clamp(
     roundToNearestUnit(answer, ESTIMATION_ROUNDING_UNIT),
@@ -1945,15 +4995,21 @@ export default function App() {
   const lowHealthPulsePlayedRef = useRef(false);
   const countdownDangerPlayedRef = useRef(false);
   const zeroTensBorrowCoachmarkLevelsRef = useRef(new Set<number>());
+  const unitSelectionChallengeLevelsRef = useRef(new Set<number>());
+  const developerProblemHistoryRef = useRef<DeveloperProblemSnapshot[]>([]);
+  const developerProblemHistoryIndexRef = useRef(-1);
   const isDeveloperShortcutEnabled = import.meta.env.DEV;
+  const [isDeveloperMode, setIsDeveloperMode] = useState(false);
   const [gameState, setGameState] = useState<GameState>('start');
   const [playerName, setPlayerName] = useState(DEFAULT_PLAYER_NAME);
   const [pendingPlayerName, setPendingPlayerName] = useState('');
   const [isNamePromptOpen, setIsNamePromptOpen] = useState(false);
   const [specialOpponentSelections, setSpecialOpponentSelections] = useState<SpecialOpponentSelections>(DEFAULT_SPECIAL_OPPONENT_SELECTIONS);
   const [level, setLevel] = useState(1);
-  const [problem, setProblem] = useState<Problem>(() => getProblemForTurn(1, 100));
+  const [problem, setProblem] = useState<Problem>(() => getProblemForTurn(DEFAULT_LEARNING_UNIT_ID, 1, 100));
   const [inputValue, setInputValue] = useState('');
+  const [unitInputValue, setUnitInputValue] = useState('');
+  const [isUnitMenuOpen, setIsUnitMenuOpen] = useState(false);
   const [builderSlotValues, setBuilderSlotValues] = useState<Record<string, string>>({});
   const [playerHP, setPlayerHP] = useState(100);
   const [opponentHP, setOpponentHP] = useState(100);
@@ -1961,6 +5017,13 @@ export default function App() {
   const [showMsg, setShowMsg] = useState(true);
   const [problemCoachmark, setProblemCoachmark] = useState<string | null>(null);
   const [battleDifficulty, setBattleDifficulty] = useState<BattleDifficulty>('normal');
+  const [selectedLearningUnitId, setSelectedLearningUnitId] = useState<LearningUnitId | null>(null);
+  const [isEstimation, setIsEstimation] = useState(false);
+  const [estimationProblem, setEstimationProblem] = useState<EstimationProblem | null>(null);
+  const [isUnitSelectionChallenge, setIsUnitSelectionChallenge] = useState(false);
+  const [unitSelectionChallenge, setUnitSelectionChallenge] = useState<UnitSelectionChallenge | null>(null);
+  const [isSpecialChallengeResolving, setIsSpecialChallengeResolving] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(ESTIMATION_TIME_LIMIT_SECONDS);
 
   const updateMessage = (msg: string) => {
     setMessage(msg);
@@ -2044,7 +5107,63 @@ export default function App() {
     });
   };
 
-  const setProblemWithCoachmark = (nextProblem: Problem, nextLevel: number) => {
+  const pushDeveloperProblemSnapshot = (snapshot: DeveloperProblemSnapshot) => {
+    const currentHistory = developerProblemHistoryRef.current;
+    const currentIndex = developerProblemHistoryIndexRef.current;
+    const trimmedHistory =
+      currentIndex >= 0 && currentIndex < currentHistory.length - 1
+        ? currentHistory.slice(0, currentIndex + 1)
+        : currentHistory.slice();
+
+    const lastSnapshot = trimmedHistory[trimmedHistory.length - 1];
+    if (
+      lastSnapshot &&
+      lastSnapshot.level === snapshot.level &&
+      lastSnapshot.opponentHP === snapshot.opponentHP &&
+      lastSnapshot.problem === snapshot.problem &&
+      lastSnapshot.problemCoachmark === snapshot.problemCoachmark
+    ) {
+      developerProblemHistoryRef.current = trimmedHistory;
+      developerProblemHistoryIndexRef.current = trimmedHistory.length - 1;
+      return;
+    }
+
+    const nextHistory = [...trimmedHistory, snapshot];
+    developerProblemHistoryRef.current = nextHistory;
+    developerProblemHistoryIndexRef.current = nextHistory.length - 1;
+  };
+
+  const resetDeveloperProblemHistory = () => {
+    developerProblemHistoryRef.current = [];
+    developerProblemHistoryIndexRef.current = -1;
+  };
+
+  const setProblemWithCoachmark = (
+    nextProblem: Problem,
+    nextLevel: number,
+    options: {
+      opponentHP?: number;
+      recordInDeveloperHistory?: boolean;
+    } = {},
+  ) => {
+    const nextOpponentHP = options.opponentHP ?? opponentHP;
+    setUnitInputValue('');
+    setIsUnitMenuOpen(false);
+
+    if (activeLearningUnitId !== 'unit2') {
+      setProblem(nextProblem);
+      setProblemCoachmark(null);
+      if (options.recordInDeveloperHistory !== false) {
+        pushDeveloperProblemSnapshot({
+          level: nextLevel,
+          opponentHP: nextOpponentHP,
+          problem: nextProblem,
+          problemCoachmark: null,
+        });
+      }
+      return;
+    }
+
     const shouldForceZeroTensBorrowProblem =
       zeroTensBorrowCoachmarkLevelsRef.current.size < MAX_ZERO_TENS_BORROW_COACHMARKS &&
       !zeroTensBorrowCoachmarkLevelsRef.current.has(nextLevel) &&
@@ -2066,10 +5185,26 @@ export default function App() {
     if (shouldShowZeroTensBorrowCoachmark) {
       zeroTensBorrowCoachmarkLevelsRef.current.add(nextLevel);
       setProblemCoachmark(ZERO_TENS_BORROW_COACHMARK_TEXT);
+      if (options.recordInDeveloperHistory !== false) {
+        pushDeveloperProblemSnapshot({
+          level: nextLevel,
+          opponentHP: nextOpponentHP,
+          problem: resolvedProblem,
+          problemCoachmark: ZERO_TENS_BORROW_COACHMARK_TEXT,
+        });
+      }
       return;
     }
 
     setProblemCoachmark(null);
+    if (options.recordInDeveloperHistory !== false) {
+      pushDeveloperProblemSnapshot({
+        level: nextLevel,
+        opponentHP: nextOpponentHP,
+        problem: resolvedProblem,
+        problemCoachmark: null,
+      });
+    }
   };
 
   const playVisualControlSound = (sound: VisualControlSound) => {
@@ -2105,6 +5240,7 @@ export default function App() {
   const [isOpponentAttacking, setIsOpponentAttacking] = useState(false);
   const [isOpponentHit, setIsOpponentHit] = useState(false);
   const [isPlayerHit, setIsPlayerHit] = useState(false);
+  const unitMenuRef = useRef<HTMLDivElement | null>(null);
   const playerCharacterImage = isPlayerHit
     ? playerHitImage
     : isAttacking
@@ -2125,6 +5261,12 @@ export default function App() {
   const displayPlayerName = playerName.trim() || DEFAULT_PLAYER_NAME;
   const trimmedPendingPlayerName = pendingPlayerName.trim();
   const hasPendingPlayerName = trimmedPendingPlayerName.length > 0;
+  const activeLearningUnitId = selectedLearningUnitId ?? DEFAULT_LEARNING_UNIT_ID;
+  const selectedLearningUnit = selectedLearningUnitId
+    ? LEARNING_UNITS.find((unit) => unit.id === selectedLearningUnitId) ?? null
+    : null;
+  const levelDescriptions = getLevelDescriptionsForUnit(activeLearningUnitId);
+  const totalLevels = getTotalLevelsForUnit(activeLearningUnitId);
   const maxHealth = 100;
   const battleDifficultyConfig = BATTLE_DIFFICULTY_CONFIG[battleDifficulty];
   const regularAttackDamage = battleDifficultyConfig.regularAttackDamage;
@@ -2132,17 +5274,15 @@ export default function App() {
   const estimationAttackDamage = battleDifficultyConfig.estimationAttackDamage;
   const estimationHitDamage = battleDifficultyConfig.estimationHitDamage;
 
-  const [isEstimation, setIsEstimation] = useState(false);
-  const [estimationProblem, setEstimationProblem] = useState<EstimationProblem | null>(null);
-  const [timeLeft, setTimeLeft] = useState(ESTIMATION_TIME_LIMIT_SECONDS);
   const [showHint, setShowHint] = useState(false);
-  const canUseHint = level <= 7;
+  const isSpecialChallengeActive = isEstimation || isUnitSelectionChallenge;
+  const canUseHint = activeLearningUnitId === 'unit2' && level <= 7;
   const isHintForced = canUseHint && opponentHP > 50;
-  const shouldRenderHorizontalEquation = level === 7 && !isHintForced && problem.kind === 'equation';
+  const shouldRenderHorizontalEquation = activeLearningUnitId === 'unit2' && level === 7 && !isHintForced && problem.kind === 'equation';
   const isResultScreen = gameState === 'win' || gameState === 'lose';
   const isWinResult = gameState === 'win';
   const defeatSceneImage = gameState === 'lose' ? getDefeatSceneImageForLevel(level, specialOpponentSelections) : null;
-  const currentLevelDescription = LEVEL_DESCRIPTIONS[level] ?? `${level}단계`;
+  const currentLevelDescription = levelDescriptions[level] ?? `${level}단계`;
   const finalRecordLabel = gameState === 'win' ? `${level}단계 클리어` : `${level}단계 도달`;
   const finalRecordTopic = currentLevelDescription.replace(/^\d+단계:\s*/, '');
   const builderSlotsById =
@@ -2150,6 +5290,93 @@ export default function App() {
       ? Object.fromEntries(problem.builder.slots.map((slot) => [slot.id, slot])) as Record<string, BuildSlotConfig>
       : {};
   const builderEvaluation = evaluateBuilderProblem(problem, builderSlotValues);
+  
+  const resetDeveloperBattleState = () => {
+    setIsAttacking(false);
+    setIsOpponentAttacking(false);
+    setIsOpponentHit(false);
+    setIsPlayerHit(false);
+    setIsEstimation(false);
+    setEstimationProblem(null);
+    setIsUnitSelectionChallenge(false);
+    setUnitSelectionChallenge(null);
+    setIsSpecialChallengeResolving(false);
+    setTimeLeft(ESTIMATION_TIME_LIMIT_SECONDS);
+    setInputValue('');
+    setUnitInputValue('');
+    setIsUnitMenuOpen(false);
+  };
+
+  const restoreDeveloperProblemSnapshot = useEffectEvent((historyIndex: number) => {
+    const snapshot = developerProblemHistoryRef.current[historyIndex];
+    if (!snapshot) {
+      updateMessage('이전 문제 기록이 없어요.');
+      playSound('ui', { gainMultiplier: 0.78, detune: -14 });
+      return;
+    }
+
+    resetDeveloperBattleState();
+    developerProblemHistoryIndexRef.current = historyIndex;
+    setLevel(snapshot.level);
+    setOpponentHP(snapshot.opponentHP);
+    setProblem(snapshot.problem);
+    setProblemCoachmark(snapshot.problemCoachmark);
+  });
+
+  const toggleDeveloperMode = useEffectEvent(() => {
+    const nextMode = !isDeveloperMode;
+    setIsDeveloperMode(nextMode);
+    playSound('ui', {
+      gainMultiplier: 0.82,
+      detune: nextMode ? 18 : -18,
+    });
+    updateMessage(nextMode ? '개발자 모드 켜짐' : '개발자 모드 꺼짐');
+  });
+
+  const moveToDeveloperLevel = useEffectEvent((targetLevel: number) => {
+    if (targetLevel < 1 || targetLevel > totalLevels) {
+      updateMessage(`현재 단원에는 ${targetLevel}단계가 없어요.`);
+      playSound('ui', { gainMultiplier: 0.78, detune: -12 });
+      return;
+    }
+
+    resetDeveloperBattleState();
+    setPlayerHP(100);
+    setLevel(targetLevel);
+    setOpponentHP(100);
+    setProblemWithCoachmark(getProblemForTurn(activeLearningUnitId, targetLevel, 100), targetLevel, { opponentHP: 100 });
+    playSound('ui', { gainMultiplier: 0.84, detune: 16 });
+    updateMessage(`개발자 모드: ${targetLevel}단계로 이동!`);
+  });
+
+  const moveToPreviousDeveloperProblem = useEffectEvent(() => {
+    const previousIndex = developerProblemHistoryIndexRef.current - 1;
+    if (previousIndex < 0) {
+      updateMessage('이전 문제는 더 없어요.');
+      playSound('ui', { gainMultiplier: 0.78, detune: -14 });
+      return;
+    }
+
+    restoreDeveloperProblemSnapshot(previousIndex);
+    playSound('ui', { gainMultiplier: 0.8, detune: -8 });
+    updateMessage('이전 문제로 이동!');
+  });
+
+  const moveToNextDeveloperProblem = useEffectEvent(() => {
+    const nextIndex = developerProblemHistoryIndexRef.current + 1;
+    if (nextIndex < developerProblemHistoryRef.current.length) {
+      restoreDeveloperProblemSnapshot(nextIndex);
+      playSound('ui', { gainMultiplier: 0.8, detune: 8 });
+      updateMessage('다음 문제로 이동!');
+      return;
+    }
+
+    resetDeveloperBattleState();
+    setProblemWithCoachmark(getProblemForTurn(activeLearningUnitId, level, opponentHP), level, { opponentHP });
+    playSound('ui', { gainMultiplier: 0.8, detune: 8 });
+    updateMessage('다음 문제로 이동!');
+  });
+
   const hintProblemText =
     problem.kind === 'builder'
       ? builderEvaluation?.status === 'ready'
@@ -2157,8 +5384,12 @@ export default function App() {
         : null
       : problem.text;
   const normalizedInputValue = inputValue.trim();
+  const normalizedUnitInputValue = normalizeAnswerUnit(unitInputValue);
   const parsedInputAnswer = Number.parseInt(normalizedInputValue, 10);
-  const hasValidAnswerInput = normalizedInputValue.length > 0 && !Number.isNaN(parsedInputAnswer);
+  const requiredAnswerUnit = problem.kind === 'builder' ? null : problem.answerUnit ?? null;
+  const answerUnitOptions = requiredAnswerUnit ? getAnswerUnitOptions(requiredAnswerUnit) : [];
+  const hasValidUnitInput = requiredAnswerUnit ? normalizedUnitInputValue.length > 0 : true;
+  const hasValidAnswerInput = normalizedInputValue.length > 0 && !Number.isNaN(parsedInputAnswer) && hasValidUnitInput;
   const canAttemptAttack =
     problem.kind === 'builder'
       ? hasValidAnswerInput && builderEvaluation?.status === 'ready'
@@ -2205,7 +5436,7 @@ export default function App() {
   }, [problem]);
 
   useEffect(() => {
-    if (isEstimation && timeLeft > 0) {
+    if (isSpecialChallengeActive && !isSpecialChallengeResolving && timeLeft > 0) {
       if (timeLeft === 5 && !countdownDangerPlayedRef.current) {
         countdownDangerPlayedRef.current = true;
         playSound('dangerPulse', { gainMultiplier: 0.95, detune: -40 });
@@ -2220,16 +5451,20 @@ export default function App() {
       }
       const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
       return () => clearTimeout(timer);
-    } else if (isEstimation && timeLeft === 0) {
-      checkEstimation(0); // Time out
+    } else if (isSpecialChallengeActive && !isSpecialChallengeResolving && timeLeft === 0) {
+      if (isEstimation) {
+        checkEstimation(0);
+      } else if (isUnitSelectionChallenge) {
+        resolveUnitSelectionResult(false);
+      }
     } else {
       countdownDangerPlayedRef.current = false;
     }
-  }, [isEstimation, timeLeft]);
+  }, [isEstimation, isSpecialChallengeActive, isSpecialChallengeResolving, isUnitSelectionChallenge, timeLeft]);
 
   useEffect(() => {
-    const shouldPulseLowHealth = gameState === 'playing' && !isEstimation && playerHP > 0 && playerHP <= 30;
-    setIsCritical(shouldPulseLowHealth || (isEstimation && timeLeft <= 5));
+    const shouldPulseLowHealth = gameState === 'playing' && !isSpecialChallengeActive && playerHP > 0 && playerHP <= 30;
+    setIsCritical(shouldPulseLowHealth || (isSpecialChallengeActive && timeLeft <= 5));
 
     if (shouldPulseLowHealth && !lowHealthPulsePlayedRef.current) {
       lowHealthPulsePlayedRef.current = true;
@@ -2240,7 +5475,7 @@ export default function App() {
     if (!shouldPulseLowHealth) {
       lowHealthPulsePlayedRef.current = false;
     }
-  }, [gameState, isEstimation, playerHP, timeLeft]);
+  }, [gameState, isSpecialChallengeActive, playerHP, timeLeft]);
 
   const toggleHint = () => {
     playSound('ui');
@@ -2267,14 +5502,34 @@ export default function App() {
   };
 
   const selectEstimationOption = (selected: number) => {
+    if (isSpecialChallengeResolving) {
+      return;
+    }
+
     playSound('submit', { gainMultiplier: 0.78, detune: 20 });
     playSound('ui');
     checkEstimation(selected);
   };
 
+  const selectUnitSelectionOption = (selected: string) => {
+    if (isSpecialChallengeResolving) {
+      return;
+    }
+
+    playSound('submit', { gainMultiplier: 0.8, detune: 12 });
+    playSound('ui');
+    resolveUnitSelectionResult(selected === unitSelectionChallenge?.answer);
+  };
+
   const queueEstimationChallenge = () => {
     window.setTimeout(() => {
       triggerEstimation();
+    }, 700);
+  };
+
+  const queueUnitSelectionChallenge = (challengeLevel: number) => {
+    window.setTimeout(() => {
+      triggerUnitSelectionChallenge(challengeLevel);
     }, 700);
   };
 
@@ -2284,7 +5539,7 @@ export default function App() {
       setIsOpponentAttacking(false);
       setLevel(nextLevel);
       setOpponentHP(100);
-      setProblemWithCoachmark(getProblemForTurn(nextLevel, 100), nextLevel);
+      setProblemWithCoachmark(getProblemForTurn(activeLearningUnitId, nextLevel, 100), nextLevel, { opponentHP: 100 });
       queueSound('levelUp', 180, {
         gainMultiplier: 1 + nextLevel * 0.025,
         detune: Math.min(nextLevel * 10, 90),
@@ -2300,15 +5555,30 @@ export default function App() {
     const nextEstimationProblem = createEstimationProblem();
 
     playSound('alert', { gainMultiplier: 1.08, detune: 25 });
+    setIsSpecialChallengeResolving(false);
     setEstimationProblem(nextEstimationProblem);
     setIsEstimation(true);
     setTimeLeft(ESTIMATION_TIME_LIMIT_SECONDS);
     updateMessage('갑작스러운 어림잡기 도전!');
   };
 
+  const triggerUnitSelectionChallenge = (challengeLevel: number) => {
+    const nextChallenge = createUnitSelectionChallenge(challengeLevel);
+
+    playSound('alert', { gainMultiplier: 1.03, detune: 5 });
+    setIsSpecialChallengeResolving(false);
+    setUnitSelectionChallenge(nextChallenge);
+    setIsUnitSelectionChallenge(true);
+    setTimeLeft(UNIT_SELECTION_TIME_LIMIT_SECONDS);
+    updateMessage('갑작스러운 단위 선택 도전!');
+  };
+
   const resolveEstimationResult = (isCorrectEstimation: boolean) => {
-    setIsEstimation(false);
-    setEstimationProblem(null);
+    if (isSpecialChallengeResolving) {
+      return;
+    }
+
+    setIsSpecialChallengeResolving(true);
     if (isCorrectEstimation) {
       playSound('correct', {
         gainMultiplier: 1.04 + level * 0.02,
@@ -2330,14 +5600,18 @@ export default function App() {
         updateMessage('정확한 어림잡기! 공격 성공!');
 
         if (newOpponentHP === 0) {
-          if (level < TOTAL_LEVELS) {
+          if (level < totalLevels) {
             scheduleNextLevelTransition(level + 1);
           } else {
             triggerBattleVictory(20);
           }
         } else {
-          setProblemWithCoachmark(getProblemForTurn(level, newOpponentHP), level);
+          setProblemWithCoachmark(getProblemForTurn(activeLearningUnitId, level, newOpponentHP), level, { opponentHP: newOpponentHP });
         }
+
+        setIsEstimation(false);
+        setEstimationProblem(null);
+        setIsSpecialChallengeResolving(false);
       }, ATTACK_POSE_DURATION_MS);
     } else {
       playSound('wrong', {
@@ -2363,12 +5637,89 @@ export default function App() {
           setGameState('lose');
           playSound('lose', { gainMultiplier: 1.06, detune: -20 });
         }
+
+        setIsEstimation(false);
+        setEstimationProblem(null);
+        setIsSpecialChallengeResolving(false);
       }, ATTACK_POSE_DURATION_MS);
     }
   };
 
   const checkEstimation = (selected: number) => {
     resolveEstimationResult(selected === estimationProblem?.answer);
+  };
+
+  const resolveUnitSelectionResult = (isCorrectSelection: boolean) => {
+    if (isSpecialChallengeResolving) {
+      return;
+    }
+
+    setIsSpecialChallengeResolving(true);
+    if (isCorrectSelection) {
+      playSound('correct', {
+        gainMultiplier: 1.02 + level * 0.02,
+        detune: Math.min(level * 7, 55),
+      });
+      setIsAttacking(true);
+      setTimeout(() => {
+        setIsAttacking(false);
+        setIsOpponentHit(true);
+        playSound('enemyHit', {
+          gainMultiplier: 1.08 + level * 0.02,
+          detune: Math.min(level * 10, 80),
+          noisePlaybackRateMultiplier: 1 + level * 0.01,
+        });
+        setTimeout(() => setIsOpponentHit(false), HIT_POSE_DURATION_MS);
+
+        const newOpponentHP = Math.max(0, opponentHP - estimationAttackDamage);
+        setOpponentHP(newOpponentHP);
+        updateMessage('알맞은 단위를 골랐다! 추가 공격 성공!');
+
+        if (newOpponentHP === 0) {
+          if (level < totalLevels) {
+            scheduleNextLevelTransition(level + 1);
+          } else {
+            triggerBattleVictory(22);
+          }
+        } else {
+          setProblemWithCoachmark(getProblemForTurn(activeLearningUnitId, level, newOpponentHP), level, { opponentHP: newOpponentHP });
+        }
+
+        setIsUnitSelectionChallenge(false);
+        setUnitSelectionChallenge(null);
+        setIsSpecialChallengeResolving(false);
+      }, ATTACK_POSE_DURATION_MS);
+      return;
+    }
+
+    playSound('wrong', {
+      gainMultiplier: previewRemainingHP(playerHP, estimationHitDamage) <= 30 ? 1.08 : 1,
+      detune: -24,
+    });
+    setIsOpponentAttacking(true);
+    setTimeout(() => {
+      setIsOpponentAttacking(false);
+      setIsPlayerHit(true);
+      playSound('playerHit', {
+        gainMultiplier: previewRemainingHP(playerHP, estimationHitDamage) <= 30 ? 1.12 : 1.04,
+        detune: -Math.min(level * 10, 70),
+        noisePlaybackRateMultiplier: 0.98,
+      });
+      setTimeout(() => setIsPlayerHit(false), HIT_POSE_DURATION_MS);
+
+      const newPlayerHP = Math.max(0, playerHP - estimationHitDamage);
+      setPlayerHP(newPlayerHP);
+      updateMessage('단위 선택 실패! 상대의 반격!');
+
+      if (newPlayerHP === 0) {
+        setGameState('lose');
+        playSound('lose', { gainMultiplier: 1.06, detune: -20 });
+      }
+
+      setIsUnitSelectionChallenge(false);
+      setUnitSelectionChallenge(null);
+      setIsSpecialChallengeResolving(false);
+    }, ATTACK_POSE_DURATION_MS);
   };
 
   const resolveProblemResult = (isCorrect: boolean) => {
@@ -2393,15 +5744,23 @@ export default function App() {
         updateMessage('공격 성공! 데미지를 입혔다!');
         
         if (newOpponentHP === 0) {
-          if (level < TOTAL_LEVELS) {
-            scheduleNextLevelTransition(level + 1, canOfferEstimation(100) && Math.random() < 0.15);
+          if (level < totalLevels) {
+            scheduleNextLevelTransition(level + 1, activeLearningUnitId === 'unit2' && canOfferEstimation(activeLearningUnitId, 100) && Math.random() < 0.15);
           } else {
             triggerBattleVictory(18);
           }
         } else {
-          setProblemWithCoachmark(getProblemForTurn(level, newOpponentHP), level);
-          if (canOfferEstimation(newOpponentHP) && Math.random() < 0.15) {
+          setProblemWithCoachmark(getProblemForTurn(activeLearningUnitId, level, newOpponentHP), level, { opponentHP: newOpponentHP });
+          if (activeLearningUnitId === 'unit2' && canOfferEstimation(activeLearningUnitId, newOpponentHP) && Math.random() < 0.15) {
             queueEstimationChallenge();
+          }
+          if (
+            activeLearningUnitId === 'unit3' &&
+            UNIT_SELECTION_CHALLENGE_LEVELS.has(level) &&
+            !unitSelectionChallengeLevelsRef.current.has(level)
+          ) {
+            unitSelectionChallengeLevelsRef.current.add(level);
+            queueUnitSelectionChallenge(level);
           }
         }
       }, ATTACK_POSE_DURATION_MS);
@@ -2431,12 +5790,13 @@ export default function App() {
       }, ATTACK_POSE_DURATION_MS);
     }
     setInputValue('');
+    setUnitInputValue('');
   };
 
   const checkAnswer = () => {
     if (!hasValidAnswerInput) {
       playSound('ui');
-      updateMessage('정답을 입력해야 공격할 수 있어!');
+      updateMessage(requiredAnswerUnit ? '숫자를 쓰고 단위 버튼도 골라야 공격할 수 있어!' : '정답을 입력해야 공격할 수 있어!');
       return;
     }
 
@@ -2452,6 +5812,10 @@ export default function App() {
       isCorrect = parsedInputAnswer === builderEvaluation.answer;
     }
 
+    if (requiredAnswerUnit) {
+      isCorrect = isCorrect && normalizedUnitInputValue === normalizeAnswerUnit(requiredAnswerUnit);
+    }
+
     playSound('submit', {
       gainMultiplier: problem.kind === 'builder' ? 0.82 : 0.9,
       detune: problem.kind === 'builder' ? -10 : 10,
@@ -2459,20 +5823,36 @@ export default function App() {
     resolveProblemResult(isCorrect);
   };
 
-  const triggerDeveloperAutoSolve = useEffectEvent(() => {
-    if (gameState !== 'playing') {
-      return;
-    }
-
-    if (isEstimation) {
-      if (estimationProblem) {
-        resolveEstimationResult(true);
+  useEffect(() => {
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!unitMenuRef.current) {
+        return;
       }
-      return;
-    }
 
-    resolveProblemResult(true);
-  });
+      if (!unitMenuRef.current.contains(event.target as Node)) {
+        setIsUnitMenuOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsUnitMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('pointerdown', handlePointerDown);
+    window.addEventListener('keydown', handleEscape);
+    return () => {
+      window.removeEventListener('pointerdown', handlePointerDown);
+      window.removeEventListener('keydown', handleEscape);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!requiredAnswerUnit) {
+      setIsUnitMenuOpen(false);
+    }
+  }, [requiredAnswerUnit]);
 
   useEffect(() => {
     if (!isDeveloperShortcutEnabled) {
@@ -2480,17 +5860,42 @@ export default function App() {
     }
 
     const handleDeveloperShortcut = (event: KeyboardEvent) => {
-      if (event.repeat || event.key !== 'Enter' || !event.ctrlKey || !event.altKey) {
+      if (event.repeat) {
         return;
       }
 
-      event.preventDefault();
-      triggerDeveloperAutoSolve();
+      if (event.key === 'Enter' && event.ctrlKey && event.altKey) {
+        event.preventDefault();
+        toggleDeveloperMode();
+        return;
+      }
+
+      if (!isDeveloperMode || gameState !== 'playing') {
+        return;
+      }
+
+      const targetLevel = getDeveloperLevelFromShortcut(event);
+      if (targetLevel !== null) {
+        event.preventDefault();
+        moveToDeveloperLevel(targetLevel);
+        return;
+      }
+
+      if (!event.ctrlKey && !event.altKey && !event.metaKey && event.key === 'ArrowRight') {
+        event.preventDefault();
+        moveToNextDeveloperProblem();
+        return;
+      }
+
+      if (!event.ctrlKey && !event.altKey && !event.metaKey && event.key === 'ArrowLeft') {
+        event.preventDefault();
+        moveToPreviousDeveloperProblem();
+      }
     };
 
     window.addEventListener('keydown', handleDeveloperShortcut);
     return () => window.removeEventListener('keydown', handleDeveloperShortcut);
-  }, [isDeveloperShortcutEnabled]);
+  }, [gameState, isDeveloperMode, isDeveloperShortcutEnabled]);
 
   const startGame = () => {
     const nextSpecialOpponentSelections = pickSpecialOpponentSelections();
@@ -2506,9 +5911,19 @@ export default function App() {
     setLevel(1);
     setPlayerHP(100);
     setOpponentHP(100);
+    resetDeveloperProblemHistory();
     zeroTensBorrowCoachmarkLevelsRef.current.clear();
-    setProblemWithCoachmark(getProblemForTurn(1, 100), 1);
+    unitSelectionChallengeLevelsRef.current.clear();
+    setIsEstimation(false);
+    setEstimationProblem(null);
+    setIsUnitSelectionChallenge(false);
+    setUnitSelectionChallenge(null);
+    setIsSpecialChallengeResolving(false);
+    setTimeLeft(ESTIMATION_TIME_LIMIT_SECONDS);
+    setProblemWithCoachmark(getProblemForTurn(activeLearningUnitId, 1, 100), 1, { opponentHP: 100 });
     setInputValue('');
+    setUnitInputValue('');
+    setIsUnitMenuOpen(false);
     updateMessage(getOpponentEntranceMessage(1, nextSpecialOpponentSelections));
   };
 
@@ -2518,6 +5933,19 @@ export default function App() {
     setGameState('start');
     setIsNamePromptOpen(false);
     setBattleDifficulty('normal');
+    setSelectedLearningUnitId(null);
+    resetDeveloperProblemHistory();
+    zeroTensBorrowCoachmarkLevelsRef.current.clear();
+    unitSelectionChallengeLevelsRef.current.clear();
+    setIsEstimation(false);
+    setEstimationProblem(null);
+    setIsUnitSelectionChallenge(false);
+    setUnitSelectionChallenge(null);
+    setIsSpecialChallengeResolving(false);
+    setTimeLeft(ESTIMATION_TIME_LIMIT_SECONDS);
+    setInputValue('');
+    setUnitInputValue('');
+    setIsUnitMenuOpen(false);
   };
 
   const openNamePrompt = () => {
@@ -2530,11 +5958,33 @@ export default function App() {
     setIsNamePromptOpen(false);
   };
 
-  const confirmPlayerNameAndStart = () => {
+  const confirmPlayerNameAndContinue = () => {
     if (!trimmedPendingPlayerName) return;
 
+    warmAudio();
+    playSound('ui');
     setPlayerName(trimmedPendingPlayerName);
     setIsNamePromptOpen(false);
+    setSelectedLearningUnitId(null);
+    setGameState('unitSelect');
+  };
+
+  const selectLearningUnit = (unitId: LearningUnitId) => {
+    const nextUnit = LEARNING_UNITS.find((unit) => unit.id === unitId);
+    if (!nextUnit?.isAvailable) {
+      return;
+    }
+
+    warmAudio();
+    playSound('ui');
+    setSelectedLearningUnitId(unitId);
+  };
+
+  const startSelectedUnit = () => {
+    if (!selectedLearningUnitId) {
+      return;
+    }
+
     startGame();
   };
 
@@ -2558,12 +6008,12 @@ export default function App() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.06, duration: 0.28, ease: 'easeOut' }}
-              className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-white/92 p-2 shadow-[0_22px_60px_rgba(15,23,42,0.34)]"
+              className="relative overflow-hidden rounded-[2rem] shadow-[0_28px_70px_rgba(2,6,23,0.34)]"
             >
               <img
                 src={startHeroImage}
                 alt="곰 마법사와 숲속 친구들이 등장하는 더하기와 빼기 대결 일러스트"
-                className="w-full rounded-[1.6rem] object-cover"
+                className="block w-full rounded-[2rem] object-cover"
                 draggable={false}
               />
             </motion.div>
@@ -2600,7 +6050,7 @@ export default function App() {
                   transition={{ duration: 0.2, ease: 'easeOut' }}
                   onSubmit={(event) => {
                     event.preventDefault();
-                    confirmPlayerNameAndStart();
+                    confirmPlayerNameAndContinue();
                   }}
                   className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-emerald-300/20 bg-[linear-gradient(180deg,rgba(15,23,42,0.98),rgba(15,23,42,0.94))] p-5 text-left shadow-[0_24px_80px_rgba(15,23,42,0.45)] sm:p-7"
                 >
@@ -2618,44 +6068,6 @@ export default function App() {
                       placeholder="이름"
                       className="mt-4 w-full rounded-2xl border-2 border-slate-600 bg-slate-950 px-4 py-3 text-xl font-black text-white outline-none transition focus:border-emerald-400 sm:mt-5 sm:px-5 sm:py-4 sm:text-2xl"
                     />
-                    <AnimatePresence initial={false}>
-                      {hasPendingPlayerName && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0, y: 12 }}
-                          animate={{ opacity: 1, height: 'auto', y: 0 }}
-                          exit={{ opacity: 0, height: 0, y: -8 }}
-                          transition={{ duration: 0.2, ease: 'easeOut' }}
-                          className="overflow-hidden"
-                        >
-                          <div className="mt-5 rounded-[1.6rem] border border-emerald-300/20 bg-slate-950/70 p-4">
-                            <div>
-                              <p className="text-sm font-black tracking-[0.18em] text-emerald-300">난이도</p>
-                            </div>
-                            <div className="mt-3 grid grid-cols-3 gap-2">
-                              {BATTLE_DIFFICULTY_ORDER.map((difficultyOption) => {
-                                const difficultyOptionConfig = BATTLE_DIFFICULTY_CONFIG[difficultyOption];
-                                const isSelectedDifficulty = battleDifficulty === difficultyOption;
-
-                                return (
-                                  <button
-                                    key={difficultyOption}
-                                    type="button"
-                                    onClick={() => changeBattleDifficulty(difficultyOption)}
-                                    className={`rounded-2xl border px-3 py-3 text-sm font-black transition ${
-                                      isSelectedDifficulty
-                                        ? 'border-emerald-300 bg-emerald-400 text-slate-950 shadow-[0_10px_24px_rgba(52,211,153,0.25)]'
-                                        : 'border-slate-600 bg-slate-900 text-slate-200 hover:border-emerald-300/50 hover:bg-slate-800'
-                                    }`}
-                                  >
-                                    {difficultyOptionConfig.label}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
                     <div className={`mt-5 flex flex-col-reverse gap-3 ${
                       hasPendingPlayerName
                         ? 'sm:grid sm:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]'
@@ -2691,6 +6103,132 @@ export default function App() {
               </motion.div>
             )}
           </AnimatePresence>
+        </motion.div>
+      )}
+
+      {gameState === 'unitSelect' && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.97, y: 16 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.28, ease: 'easeOut' }}
+          className="relative w-full max-w-6xl overflow-hidden rounded-[2rem] border-4 border-emerald-200/20 bg-[linear-gradient(180deg,rgba(15,23,42,0.98),rgba(30,41,59,0.96))] shadow-[0_30px_80px_rgba(15,23,42,0.48)]"
+        >
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(251,191,36,0.16),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(45,212,191,0.18),transparent_28%)]" />
+
+          <div className="relative flex flex-col gap-6 p-4 sm:gap-7 sm:p-6 lg:p-8">
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={returnToStartScreen}
+                className="rounded-full border border-slate-500 px-5 py-2 text-sm font-black text-slate-200 transition hover:bg-slate-800"
+              >
+                처음으로
+              </button>
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-2">
+              {LEARNING_UNITS.map((unit) => (
+                <motion.div
+                  key={unit.id}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.24, ease: 'easeOut' }}
+                  className={`flex h-full flex-col rounded-[1.75rem] border p-5 shadow-[0_18px_48px_rgba(15,23,42,0.28)] sm:p-6 ${
+                    selectedLearningUnitId === unit.id
+                      ? 'border-emerald-300/70 bg-[linear-gradient(180deg,rgba(15,23,42,0.94),rgba(16,185,129,0.16))]'
+                      : unit.isAvailable
+                        ? 'border-yellow-200/25 bg-[linear-gradient(180deg,rgba(15,23,42,0.92),rgba(51,65,85,0.92))]'
+                        : 'border-slate-700 bg-[linear-gradient(180deg,rgba(15,23,42,0.9),rgba(30,41,59,0.9))] opacity-80'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className={`text-sm font-black tracking-[0.18em] ${
+                        unit.isAvailable ? 'text-yellow-300' : 'text-cyan-200'
+                      }`}>
+                        {unit.chapterLabel}
+                      </p>
+                      <h3 className="mt-2 text-2xl font-black text-white sm:text-3xl">{unit.title}</h3>
+                    </div>
+                    <div className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl ${
+                      unit.isAvailable ? 'bg-yellow-400 text-slate-950' : 'bg-cyan-300 text-slate-950'
+                    }`}>
+                      {unit.isAvailable ? <Star className="h-5 w-5" /> : <Sparkles className="h-5 w-5" />}
+                    </div>
+                  </div>
+
+                  <div className="mt-6 flex flex-1 items-end">
+                    <button
+                      type="button"
+                      disabled={!unit.isAvailable}
+                      onPointerDown={warmAudio}
+                      onClick={() => selectLearningUnit(unit.id)}
+                      className={`flex w-full items-center justify-center rounded-full px-6 py-3 text-base font-black transition sm:text-lg ${
+                        !unit.isAvailable
+                          ? 'cursor-not-allowed bg-slate-700 text-slate-300'
+                          : selectedLearningUnitId === unit.id
+                            ? 'bg-emerald-400 text-slate-950'
+                            : 'bg-yellow-400 text-slate-950 hover:scale-[1.01] hover:bg-yellow-300'
+                      }`}
+                    >
+                      {!unit.isAvailable ? '준비 중' : selectedLearningUnitId === unit.id ? '선택됨' : '선택'}
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            <AnimatePresence initial={false}>
+              {selectedLearningUnit?.isAvailable && (
+                <motion.div
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 14 }}
+                  transition={{ duration: 0.22, ease: 'easeOut' }}
+                  className="rounded-[1.75rem] border border-emerald-300/20 bg-slate-950/45 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] sm:p-6"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-black tracking-[0.22em] text-emerald-300">난이도</p>
+                    <span className="rounded-full border border-slate-600 px-3 py-1 text-xs font-black text-slate-300">
+                      {selectedLearningUnit.chapterLabel}
+                    </span>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                    {BATTLE_DIFFICULTY_ORDER.map((difficultyOption) => {
+                      const difficultyOptionConfig = BATTLE_DIFFICULTY_CONFIG[difficultyOption];
+                      const isSelectedDifficulty = battleDifficulty === difficultyOption;
+
+                      return (
+                        <button
+                          key={difficultyOption}
+                          type="button"
+                          onPointerDown={warmAudio}
+                          onClick={() => changeBattleDifficulty(difficultyOption)}
+                          className={`rounded-2xl border px-4 py-4 text-left text-base font-black transition ${
+                            isSelectedDifficulty
+                              ? 'border-emerald-300 bg-emerald-400 text-slate-950 shadow-[0_10px_24px_rgba(52,211,153,0.25)]'
+                              : 'border-slate-600 bg-slate-900 text-slate-200 hover:border-emerald-300/50 hover:bg-slate-800'
+                          }`}
+                        >
+                          {difficultyOptionConfig.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <button
+                    type="button"
+                    onPointerDown={warmAudio}
+                    onClick={startSelectedUnit}
+                    className="mt-4 flex w-full items-center justify-center rounded-full bg-emerald-400 px-6 py-3 text-base font-black text-slate-950 transition hover:scale-[1.01] hover:bg-emerald-300 sm:text-lg"
+                  >
+                    시작
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </motion.div>
       )}
 
@@ -2830,17 +6368,22 @@ export default function App() {
               <div className="min-w-0 flex-1 rounded-2xl border-2 border-slate-700 bg-slate-900 px-3 py-2">
                 <div className="flex items-center gap-2 sm:gap-3">
                   <p className="min-w-0 max-w-full truncate text-xs font-black text-yellow-400 sm:max-w-[38%] sm:text-sm" title={currentLevelDescription}>{currentLevelDescription}</p>
+                  {isDeveloperShortcutEnabled && isDeveloperMode && (
+                    <span className="shrink-0 rounded-full border border-emerald-400/40 bg-emerald-500/15 px-2 py-1 text-[10px] font-black tracking-[0.18em] text-emerald-200">
+                      DEV
+                    </span>
+                  )}
                   <div className="flex flex-1 gap-1 min-w-0">
-                  {[...Array(TOTAL_LEVELS)].map((_, i) => (
+                  {[...Array(totalLevels)].map((_, i) => (
                       <div key={i} className={`h-2 flex-1 rounded-full ${i < level ? 'bg-yellow-500' : 'bg-slate-700'}`} />
                   ))}
                   </div>
-                  <span className="shrink-0 text-xs font-bold text-slate-300 sm:text-sm">{level} / {TOTAL_LEVELS}</span>
+                  <span className="shrink-0 text-xs font-bold text-slate-300 sm:text-sm">{level} / {totalLevels}</span>
                 </div>
               </div>{/*
 
                   <p className="text-xs font-black tracking-[0.18em] text-emerald-300">난이도</p>
-              */}{!isEstimation && canUseHint && !isHintForced && (
+              */}{!isSpecialChallengeActive && canUseHint && !isHintForced && (
                 <button
                   onClick={toggleHint}
                   className="inline-flex w-full shrink-0 items-center justify-center rounded-2xl border border-blue-400/30 bg-blue-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-blue-500 sm:w-auto"
@@ -2850,7 +6393,7 @@ export default function App() {
               )}
             </div>
 
-            {!isEstimation && problemCoachmark && (
+            {!isSpecialChallengeActive && problemCoachmark && (
               <div className="rounded-[28px] border border-sky-200 bg-sky-50 px-4 py-3 shadow-sm sm:px-5 sm:py-4">
                 <div className="flex items-start gap-3 sm:gap-4">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-pink-400 text-2xl font-black text-white sm:h-11 sm:w-11">
@@ -2872,9 +6415,49 @@ export default function App() {
                 <h2 className="text-4xl font-black text-yellow-400 mb-4">어림잡기 도전! ({timeLeft}초)</h2>
                 <p className="mb-3 text-base font-bold text-amber-100 sm:text-lg">{estimationProblem?.prompt}</p>
                 <p className="mb-6 text-[clamp(2.5rem,12vw,4.5rem)] font-mono font-bold sm:mb-8">{estimationProblem?.question} = ?</p>
+                {isSpecialChallengeResolving && (
+                  <p className="mb-4 text-sm font-bold text-yellow-200 sm:text-base">결과를 확인하는 중입니다...</p>
+                )}
                 <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
                   {estimationProblem?.options.map(opt => (
-                    <button key={opt} onClick={() => selectEstimationOption(opt)} className="bg-slate-700 hover:bg-slate-600 text-3xl font-bold p-6 rounded-2xl border-2 border-slate-500">약 {opt}</button>
+                    <button
+                      key={opt}
+                      onClick={() => selectEstimationOption(opt)}
+                      disabled={isSpecialChallengeResolving}
+                      className="rounded-2xl border-2 border-slate-500 bg-slate-700 p-6 text-3xl font-bold disabled:cursor-wait disabled:opacity-60 enabled:hover:bg-slate-600"
+                    >
+                      약 {opt}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            ) : isUnitSelectionChallenge ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.35, ease: 'easeOut' }}
+                className="flex min-h-0 flex-1 flex-col items-center justify-center rounded-3xl border-4 border-cyan-400 bg-slate-900 p-5 text-center text-slate-100 shadow-inner sm:p-6 lg:p-8"
+              >
+                <p className="mb-3 rounded-full bg-cyan-400/15 px-4 py-1 text-sm font-black tracking-[0.08em] text-cyan-200 sm:text-base">
+                  {unitSelectionChallenge?.badge} ({timeLeft}초)
+                </p>
+                <h2 className="mb-4 text-4xl font-black text-cyan-300">단위 선택 도전!</h2>
+                <p className="mb-8 max-w-3xl break-keep text-[1.2rem] font-black leading-[1.6] text-slate-100 sm:text-[1.65rem] md:text-[2.15rem]">
+                  {unitSelectionChallenge?.prompt}
+                </p>
+                {isSpecialChallengeResolving && (
+                  <p className="mb-4 text-sm font-bold text-cyan-100 sm:text-base">결과를 확인하는 중입니다...</p>
+                )}
+                <div className={`grid w-full gap-3 ${unitSelectionChallenge && unitSelectionChallenge.options.length === 2 ? 'sm:grid-cols-2' : 'sm:grid-cols-3'} sm:gap-4`}>
+                  {unitSelectionChallenge?.options.map((option) => (
+                    <button
+                      key={option}
+                      onClick={() => selectUnitSelectionOption(option)}
+                      disabled={isSpecialChallengeResolving}
+                      className="rounded-2xl border-2 border-cyan-200/30 bg-slate-700 p-5 text-lg font-black leading-[1.45] text-white transition disabled:cursor-wait disabled:opacity-60 enabled:hover:bg-slate-600 sm:min-h-[7rem] sm:text-2xl"
+                    >
+                      {option}
+                    </button>
                   ))}
                 </div>
               </motion.div>
@@ -2937,15 +6520,23 @@ export default function App() {
                 initial={{ opacity: 0, scale: 0.9, y: 10 }} 
                 animate={{ opacity: 1, scale: 1, y: 0 }} 
                 transition={{ duration: 0.4, ease: "easeOut" }} 
-                className={`flex min-h-0 flex-1 rounded-3xl border-8 border-slate-200 bg-white p-4 shadow-inner sm:p-6 lg:p-8 ${
-                  problem.kind !== 'equation'
-                    ? 'flex flex-col justify-center overflow-y-auto'
+                className={`flex min-h-0 flex-1 rounded-3xl border-8 border-slate-200 bg-white shadow-inner ${
+                  problem.kind === 'distanceMap'
+                    ? 'flex flex-col overflow-hidden p-2 sm:p-3 lg:p-3'
+                    : problem.kind !== 'equation'
+                      ? 'flex flex-col justify-center overflow-y-auto p-4 sm:p-6 lg:p-8'
                     : shouldRenderHorizontalEquation
-                      ? 'flex items-center justify-center overflow-y-auto text-center text-[clamp(3.6rem,12vw,6.8rem)] leading-tight font-black font-mono text-slate-900'
-                      : 'flex flex-col items-center justify-center text-[clamp(3.5rem,18vw,8rem)] leading-none font-black font-mono text-slate-900'
+                      ? 'items-center justify-center overflow-y-auto p-4 text-center text-[clamp(3.6rem,12vw,6.8rem)] leading-tight font-black font-mono text-slate-900 sm:p-6 lg:p-8'
+                      : 'flex flex-col items-center justify-center p-4 text-[clamp(3.5rem,18vw,8rem)] leading-none font-black font-mono text-slate-900 sm:p-6 lg:p-8'
                 }`}
               >
-                {problem.kind === 'story' ? (
+                {problem.kind === 'distanceMap' && problem.distanceMap ? (
+                    <DistanceMapProblemCard
+                      distanceMap={problem.distanceMap}
+                    />
+                ) : problem.kind === 'measurement' && problem.measurement ? (
+                  <MeasurementProblemCard measurement={problem.measurement} />
+                ) : problem.kind === 'story' ? (
                   <div className="mx-auto flex w-full max-w-[52rem] flex-col gap-4 text-left text-slate-900 sm:gap-6">
                     {getStoryPromptLines(problem.prompt).map((line, index, lines) => {
                       const isQuestionLine = lines.length === 1 || index === lines.length - 1;
@@ -3038,28 +6629,86 @@ export default function App() {
             )}
             </div>
 
-            {!isEstimation && (
+            {!isSpecialChallengeActive && (
               <div className="flex flex-col gap-3 shrink-0">
-                <div className="grid grid-cols-1 items-stretch gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
-                  <input 
-                  type="number" 
-                  inputMode="numeric"
-                  value={inputValue} 
-                  onChange={e => setInputValue(e.target.value)} 
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' && !e.ctrlKey && !e.altKey) {
-                      e.preventDefault();
-                      checkAnswer();
-                    }
-                  }}
-                  className="min-w-0 rounded-2xl border-4 border-slate-500 bg-slate-700 px-4 py-3 text-center text-2xl font-black outline-none focus:border-emerald-500 sm:text-3xl" 
-                  placeholder={problem.kind === 'builder' ? '답' : '정답 입력'} 
-                />
+                <div className="grid grid-cols-[minmax(0,1fr)_auto] items-stretch gap-3">
+                  <div className="flex min-w-0 items-center gap-3 rounded-2xl border-4 border-slate-500 bg-slate-700 px-4 py-2 focus-within:border-emerald-500">
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      value={inputValue}
+                      onChange={e => setInputValue(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' && !e.ctrlKey && !e.altKey) {
+                          e.preventDefault();
+                          checkAnswer();
+                        }
+                      }}
+                      className="min-w-0 flex-1 bg-transparent py-2 text-center text-2xl font-black text-slate-100 outline-none placeholder:text-slate-400 sm:text-3xl"
+                      placeholder={problem.kind === 'builder' ? '답' : requiredAnswerUnit ? '숫자 입력' : '정답 입력'}
+                    />
+                    {requiredAnswerUnit && (
+                      <div ref={unitMenuRef} className="relative shrink-0 pl-1">
+                        <button
+                          type="button"
+                          onClick={() => setIsUnitMenuOpen((prev) => !prev)}
+                          className={`flex min-h-[3.75rem] min-w-[7.75rem] items-center justify-between rounded-2xl border-2 px-4 py-3 text-lg font-black outline-none transition sm:min-h-[4rem] sm:min-w-[8.5rem] sm:text-xl ${
+                            unitInputValue
+                              ? 'border-cyan-300 bg-[linear-gradient(180deg,#67e8f9,#22d3ee)] text-slate-950 shadow-[0_0_18px_rgba(34,211,238,0.22)]'
+                              : 'border-slate-300/60 bg-[linear-gradient(180deg,#334155,#1e293b)] text-slate-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]'
+                          }`}
+                          aria-haspopup="listbox"
+                          aria-expanded={isUnitMenuOpen}
+                        >
+                          <span className="truncate">{unitInputValue || '단위'}</span>
+                          <ChevronDown
+                            size={20}
+                            className={`shrink-0 transition-transform ${isUnitMenuOpen ? 'rotate-180' : ''}`}
+                          />
+                        </button>
+                        <AnimatePresence>
+                          {isUnitMenuOpen && (
+                            <motion.div
+                              initial={{ opacity: 0, y: 10, scale: 0.96 }}
+                              animate={{ opacity: 1, y: 0, scale: 1 }}
+                              exit={{ opacity: 0, y: 8, scale: 0.97 }}
+                              transition={{ duration: 0.16, ease: 'easeOut' }}
+                              className="absolute bottom-[calc(100%+0.7rem)] right-0 z-30 w-[8.5rem] overflow-hidden rounded-[1.35rem] border-2 border-cyan-200/80 bg-[linear-gradient(180deg,rgba(30,41,59,0.98),rgba(15,23,42,0.98))] p-2 shadow-[0_18px_44px_rgba(15,23,42,0.42)]"
+                            >
+                              {answerUnitOptions.map((option) => {
+                                const isSelected = normalizeAnswerUnit(unitInputValue) === normalizeAnswerUnit(option);
+                                return (
+                                  <button
+                                    key={option}
+                                    type="button"
+                                    onClick={() => {
+                                      setUnitInputValue(option);
+                                      setIsUnitMenuOpen(false);
+                                    }}
+                                    className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-lg font-black transition ${
+                                      isSelected
+                                        ? 'bg-[linear-gradient(180deg,#3b82f6,#2563eb)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]'
+                                        : 'text-slate-100 hover:bg-white/10'
+                                    }`}
+                                    role="option"
+                                    aria-selected={isSelected}
+                                  >
+                                    <span>{option}</span>
+                                    {isSelected ? <Check size={18} className="shrink-0" /> : <span className="w-[18px]" aria-hidden="true" />}
+                                  </button>
+                                );
+                              })}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    )}
+                  </div>
                   <button
                     type="button"
                     disabled={!canAttemptAttack}
                     onClick={checkAnswer}
-                    className={`flex w-full min-w-0 items-center justify-center gap-2 rounded-2xl px-6 py-3 text-lg font-black text-white shadow-lg sm:min-w-[170px] sm:w-auto sm:text-xl ${
+                    className={`flex w-full min-w-0 items-center justify-center gap-2 rounded-2xl px-5 py-3 text-lg font-black text-white shadow-lg sm:min-w-[170px] sm:w-auto sm:px-6 sm:text-xl ${
                       canAttemptAttack
                         ? 'bg-emerald-600 hover:bg-emerald-500'
                         : 'cursor-not-allowed bg-slate-500 opacity-60'
