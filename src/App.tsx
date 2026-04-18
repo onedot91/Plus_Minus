@@ -3,7 +3,7 @@ import { Sword, Heart, RotateCcw, Play, Sparkles, Star, ChevronDown, Check } fro
 import { motion, AnimatePresence } from 'motion/react';
 import { VisualCalculator, type VisualControlSound } from './components/VisualCalculator';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import startHeroImage from './assets/Intro2.jpeg';
+import startHeroImage from './assets/intro-math-game.jpeg';
 import stage1DefeatSceneImage from './assets/stage1-defeat-scene-cutout.png';
 import stage1ChurusigiDefeatSceneImage from './assets/stage1-churusigi-defeat-scene.jpeg';
 import stage2DefeatSceneImage from './assets/stage2-defeat-scene.jpeg';
@@ -78,7 +78,7 @@ type BattleDifficulty = 'easy' | 'normal' | 'hard';
 
 type LearningUnitId = 'unit2' | 'unit3';
 
-type ProblemKind = 'equation' | 'story' | 'builder' | 'measurement' | 'distanceMap';
+type ProblemKind = 'equation' | 'story' | 'builder' | 'measurement' | 'distanceMap' | 'distanceWorksheet';
 type MeasurementObjectKind = 'seed' | 'rice' | 'eraser' | 'leaf' | 'paperStrip' | 'stick' | 'pencil' | 'chocolate';
 type DistanceEstimationStrategy = 'compare' | 'chunk' | 'unitize';
 
@@ -110,6 +110,7 @@ interface Problem {
   builder?: BuilderProblemData;
   measurement?: MeasurementProblemData;
   distanceMap?: DistanceMapProblemData;
+  distanceWorksheet?: DistanceWorksheetProblemData;
 }
 
 interface EstimationProblem {
@@ -124,6 +125,53 @@ interface UnitSelectionChallenge {
   prompt: string;
   options: string[];
   answer: string;
+}
+
+type DistanceWorksheetInputKind = 'number' | 'place';
+type DistanceWorksheetMapVariant = 'meadow' | 'river' | 'town' | 'campus' | 'orchard';
+
+interface DistanceWorksheetLandmarkData {
+  id: string;
+  label: string;
+  dotIndex: number;
+  row: 'top' | 'bottom';
+  accent: string;
+  icon: 'bookstore' | 'station' | 'market' | 'fountain' | 'park' | 'bank' | 'school' | 'hospital' | 'library';
+}
+
+interface DistanceWorksheetPromptData {
+  id: string;
+  prefix: string;
+  suffix: string;
+  answer: string;
+  kind: DistanceWorksheetInputKind;
+  answerUnit?: string;
+}
+
+interface DistanceWorksheetReferenceData {
+  fromDotIndex: number;
+  toDotIndex: number;
+  label: string;
+}
+
+interface DistanceWorksheetProblemData {
+  title: string;
+  instruction: string;
+  mapVariant: DistanceWorksheetMapVariant;
+  dotCount: number;
+  landmarks: DistanceWorksheetLandmarkData[];
+  reference: DistanceWorksheetReferenceData;
+  prompt: DistanceWorksheetPromptData;
+}
+
+interface DistanceWorksheetProblemSetData {
+  title: string;
+  instruction: string;
+  mapVariant: DistanceWorksheetMapVariant;
+  dotCount: number;
+  landmarks: DistanceWorksheetLandmarkData[];
+  reference: DistanceWorksheetReferenceData;
+  prompts: DistanceWorksheetPromptData[];
 }
 
 interface DeveloperProblemSnapshot {
@@ -160,9 +208,11 @@ interface DistanceMapLandmarkData {
 interface DistanceEstimationBaseData {
   title: string;
   question: string;
+  sentence: string;
   referenceMeters: number;
   targetLabel: string;
   targetMeters: number;
+  estimatedKilometers: number;
   strategy: DistanceEstimationStrategy;
   landmarks: DistanceMapLandmarkData[];
 }
@@ -1589,16 +1639,31 @@ function createMeasurementProblem({
 function createDistanceMapProblem(distanceMap: DistanceMapProblemData): Problem {
   return {
     text: '',
-    prompt: distanceMap.question,
-    answer: distanceMap.targetMeters,
+    prompt: `${distanceMap.question}\n${distanceMap.sentence}`,
+    answer: distanceMap.estimatedKilometers,
     kind: 'distanceMap',
-    answerUnit: 'm',
     distanceMap,
+  };
+}
+
+function createDistanceWorksheetProblem(distanceWorksheet: DistanceWorksheetProblemData): Problem {
+  return {
+    text: '',
+    prompt: `${distanceWorksheet.instruction}\n${distanceWorksheet.prompt.prefix}□${distanceWorksheet.prompt.suffix}`,
+    answer: 0,
+    answerUnit: distanceWorksheet.prompt.answerUnit,
+    kind: 'distanceWorksheet',
+    distanceWorksheet,
   };
 }
 
 function normalizeAnswerUnit(unit: string) {
   return unit.trim().replace(/\s+/g, '').toLowerCase();
+}
+
+function normalizeDistanceWorksheetAnswer(value: string, kind: DistanceWorksheetInputKind) {
+  const trimmed = value.trim();
+  return kind === 'number' ? trimmed.replace(/\D/g, '') : trimmed.replace(/\s+/g, '');
 }
 
 function getAnswerUnitOptions(expectedUnit: string) {
@@ -1737,7 +1802,7 @@ const UNIT_SELECTION_CHALLENGE_POOLS: Partial<Record<number, UnitSelectionChalle
     },
     {
       badge: '거리 단위 선택',
-      prompt: '서울에서 여수까지의 거리는 약 328 □입니다.',
+      prompt: '서울에서 대구까지의 거리는 약 237 □입니다.',
       options: ['mm', 'm', 'km'],
       answer: 'km',
     },
@@ -2092,17 +2157,15 @@ function joinDistanceSegments(segments: DistanceChunkSegmentData[]) {
 }
 
 function createDistanceMapScenario(config: DistanceScenarioConfig): Problem {
+  const estimatedKilometers = Math.round(config.targetMeters / 1000);
   const base = {
     title: '거리 어림',
-    question:
-      config.strategy === 'compare'
-        ? '몇 개쯤?'
-        : config.strategy === 'chunk'
-          ? '나눠서 몇 m?'
-          : '몇 번?',
+    question: '그림을 보고 거리를 어림해 보세요.',
+    sentence: `집에서 ${config.targetLabel}까지의 거리는 약 □ km입니다.`,
     referenceMeters: DISTANCE_MAP_REFERENCE_METERS,
     targetLabel: config.targetLabel,
     targetMeters: config.targetMeters,
+    estimatedKilometers,
     strategy: config.strategy,
     landmarks: DISTANCE_MAP_LANDMARKS,
   } as const;
@@ -2148,7 +2211,7 @@ const DISTANCE_COMPARE_SCENARIOS: DistanceCompareScenarioConfig[] = [
   {
     strategy: 'compare',
     targetLabel: '공원',
-    targetMeters: 1000,
+    targetMeters: 2000,
     targetRoute: [
       DISTANCE_MAP_HOME_POINT,
       { x: 362, y: 96 },
@@ -2162,9 +2225,9 @@ const DISTANCE_CHUNK_SCENARIOS: DistanceChunkScenarioConfig[] = [
   {
     strategy: 'chunk',
     targetLabel: '경찰서',
-    targetMeters: 1500,
+    targetMeters: 2000,
     segments: [
-      { id: 'police-1', color: '#fb923c', points: [DISTANCE_MAP_HOME_POINT, { x: 276, y: 150 }], units: 1 },
+      { id: 'police-1', color: '#fb923c', points: [DISTANCE_MAP_HOME_POINT, { x: 276, y: 150 }], units: 2 },
       { id: 'police-2', color: '#f59e0b', points: [{ x: 276, y: 150 }, { x: 218, y: 242 }], units: 1 },
       { id: 'police-3', color: '#facc15', points: [{ x: 218, y: 242 }, DISTANCE_MAP_POLICE_POINT], units: 1 },
     ],
@@ -2197,13 +2260,12 @@ const DISTANCE_UNITIZE_SCENARIOS: DistanceUnitizeScenarioConfig[] = [
   {
     strategy: 'unitize',
     targetLabel: '과학관',
-    targetMeters: 2500,
+    targetMeters: 2000,
     targetRoute: [
       DISTANCE_MAP_HOME_POINT,
       { x: 360, y: 110 },
       { x: 442, y: 152 },
       { x: 500, y: 208 },
-      { x: 528, y: 238 },
       DISTANCE_MAP_SCIENCE_POINT,
     ],
   },
@@ -2213,6 +2275,118 @@ const DISTANCE_STAGE7_SCENARIOS: DistanceScenarioConfig[] = [
   ...DISTANCE_COMPARE_SCENARIOS,
   ...DISTANCE_CHUNK_SCENARIOS,
   ...DISTANCE_UNITIZE_SCENARIOS,
+];
+
+const DISTANCE_WORKSHEET_TITLE = '거리 어림';
+const DISTANCE_WORKSHEET_INSTRUCTION = '그림을 보고 두 장소 사이의 거리를 어림하여 문장을 완성해 보세요.';
+
+const DISTANCE_WORKSHEET_PROBLEM_SETS: DistanceWorksheetProblemSetData[] = [
+  {
+    title: DISTANCE_WORKSHEET_TITLE,
+    instruction: DISTANCE_WORKSHEET_INSTRUCTION,
+    mapVariant: 'meadow',
+    dotCount: 7,
+    reference: { fromDotIndex: 2, toDotIndex: 3, label: '약 1 km' },
+    landmarks: [
+      { id: 'bookstore-a', label: '서점', dotIndex: 0, row: 'top', accent: '#60a5fa', icon: 'bookstore' },
+      { id: 'station-a', label: '기차역', dotIndex: 1, row: 'bottom', accent: '#38bdf8', icon: 'station' },
+      { id: 'market-a', label: '시장', dotIndex: 2, row: 'top', accent: '#7dd3fc', icon: 'market' },
+      { id: 'fountain-a', label: '분수대', dotIndex: 3, row: 'top', accent: '#60a5fa', icon: 'fountain' },
+      { id: 'park-a', label: '공원', dotIndex: 4, row: 'top', accent: '#86efac', icon: 'park' },
+      { id: 'bank-a', label: '은행', dotIndex: 5, row: 'top', accent: '#93c5fd', icon: 'bank' },
+      { id: 'school-a', label: '학교', dotIndex: 6, row: 'top', accent: '#bfdbfe', icon: 'school' },
+    ],
+    prompts: [
+      { id: 'a-distance', prefix: '분수대에서 은행까지의 거리는 약 ', suffix: '입니다.', answer: '2', kind: 'number', answerUnit: 'km' },
+      { id: 'a-place', prefix: '기차역에서 ', suffix: '까지의 거리는 약 3 km입니다.', answer: '공원', kind: 'place' },
+      { id: 'a-condition', prefix: '서점에서 거리가 약 5 km 떨어진 곳은 ', suffix: '입니다.', answer: '은행', kind: 'place' },
+    ],
+  },
+  {
+    title: DISTANCE_WORKSHEET_TITLE,
+    instruction: DISTANCE_WORKSHEET_INSTRUCTION,
+    mapVariant: 'town',
+    dotCount: 7,
+    reference: { fromDotIndex: 1, toDotIndex: 2, label: '약 1 km' },
+    landmarks: [
+      { id: 'library-b', label: '도서관', dotIndex: 0, row: 'top', accent: '#60a5fa', icon: 'library' },
+      { id: 'station-b', label: '버스터미널', dotIndex: 1, row: 'bottom', accent: '#38bdf8', icon: 'station' },
+      { id: 'hospital-b', label: '병원', dotIndex: 2, row: 'top', accent: '#fda4af', icon: 'hospital' },
+      { id: 'park-b', label: '공원', dotIndex: 3, row: 'top', accent: '#86efac', icon: 'park' },
+      { id: 'market-b', label: '마트', dotIndex: 4, row: 'top', accent: '#7dd3fc', icon: 'market' },
+      { id: 'bank-b', label: '은행', dotIndex: 5, row: 'top', accent: '#93c5fd', icon: 'bank' },
+      { id: 'school-b', label: '학교', dotIndex: 6, row: 'top', accent: '#bfdbfe', icon: 'school' },
+    ],
+    prompts: [
+      { id: 'b-distance', prefix: '병원에서 은행까지의 거리는 약 ', suffix: '입니다.', answer: '3', kind: 'number', answerUnit: 'km' },
+      { id: 'b-place', prefix: '버스터미널에서 ', suffix: '까지의 거리는 약 4 km입니다.', answer: '은행', kind: 'place' },
+      { id: 'b-condition', prefix: '도서관에서 거리가 약 6 km 떨어진 곳은 ', suffix: '입니다.', answer: '학교', kind: 'place' },
+    ],
+  },
+  {
+    title: DISTANCE_WORKSHEET_TITLE,
+    instruction: DISTANCE_WORKSHEET_INSTRUCTION,
+    mapVariant: 'river',
+    dotCount: 8,
+    reference: { fromDotIndex: 4, toDotIndex: 5, label: '약 1 km' },
+    landmarks: [
+      { id: 'park-c', label: '공원', dotIndex: 0, row: 'top', accent: '#86efac', icon: 'park' },
+      { id: 'market-c', label: '시장', dotIndex: 1, row: 'top', accent: '#7dd3fc', icon: 'market' },
+      { id: 'station-c', label: '버스터미널', dotIndex: 2, row: 'bottom', accent: '#38bdf8', icon: 'station' },
+      { id: 'library-c', label: '도서관', dotIndex: 3, row: 'top', accent: '#60a5fa', icon: 'library' },
+      { id: 'fountain-c', label: '분수대', dotIndex: 4, row: 'top', accent: '#93c5fd', icon: 'fountain' },
+      { id: 'hospital-c', label: '병원', dotIndex: 5, row: 'bottom', accent: '#fda4af', icon: 'hospital' },
+      { id: 'bank-c', label: '은행', dotIndex: 6, row: 'top', accent: '#fde68a', icon: 'bank' },
+      { id: 'school-c', label: '학교', dotIndex: 7, row: 'top', accent: '#bfdbfe', icon: 'school' },
+    ],
+    prompts: [
+      { id: 'c-distance', prefix: '도서관에서 학교까지의 거리는 약 ', suffix: '입니다.', answer: '4', kind: 'number', answerUnit: 'km' },
+      { id: 'c-place', prefix: '버스터미널에서 ', suffix: '까지의 거리는 약 4 km입니다.', answer: '은행', kind: 'place' },
+      { id: 'c-condition', prefix: '공원에서 거리가 약 7 km 떨어진 곳은 ', suffix: '입니다.', answer: '학교', kind: 'place' },
+    ],
+  },
+  {
+    title: DISTANCE_WORKSHEET_TITLE,
+    instruction: DISTANCE_WORKSHEET_INSTRUCTION,
+    mapVariant: 'campus',
+    dotCount: 6,
+    reference: { fromDotIndex: 0, toDotIndex: 1, label: '약 1 km' },
+    landmarks: [
+      { id: 'bookstore-d', label: '서점', dotIndex: 0, row: 'top', accent: '#60a5fa', icon: 'bookstore' },
+      { id: 'park-d', label: '공원', dotIndex: 1, row: 'bottom', accent: '#86efac', icon: 'park' },
+      { id: 'bank-d', label: '은행', dotIndex: 2, row: 'top', accent: '#fde68a', icon: 'bank' },
+      { id: 'hospital-d', label: '병원', dotIndex: 3, row: 'top', accent: '#fda4af', icon: 'hospital' },
+      { id: 'fountain-d', label: '분수대', dotIndex: 4, row: 'bottom', accent: '#93c5fd', icon: 'fountain' },
+      { id: 'school-d', label: '학교', dotIndex: 5, row: 'top', accent: '#bfdbfe', icon: 'school' },
+    ],
+    prompts: [
+      { id: 'd-distance', prefix: '은행에서 학교까지의 거리는 약 ', suffix: '입니다.', answer: '3', kind: 'number', answerUnit: 'km' },
+      { id: 'd-place', prefix: '공원에서 ', suffix: '까지의 거리는 약 4 km입니다.', answer: '학교', kind: 'place' },
+      { id: 'd-condition', prefix: '서점에서 거리가 약 4 km 떨어진 곳은 ', suffix: '입니다.', answer: '분수대', kind: 'place' },
+    ],
+  },
+  {
+    title: DISTANCE_WORKSHEET_TITLE,
+    instruction: DISTANCE_WORKSHEET_INSTRUCTION,
+    mapVariant: 'orchard',
+    dotCount: 8,
+    reference: { fromDotIndex: 2, toDotIndex: 3, label: '약 1 km' },
+    landmarks: [
+      { id: 'library-e', label: '도서관', dotIndex: 0, row: 'top', accent: '#60a5fa', icon: 'library' },
+      { id: 'market-e', label: '마트', dotIndex: 1, row: 'top', accent: '#7dd3fc', icon: 'market' },
+      { id: 'park-e', label: '공원', dotIndex: 2, row: 'bottom', accent: '#86efac', icon: 'park' },
+      { id: 'station-e', label: '버스터미널', dotIndex: 3, row: 'bottom', accent: '#38bdf8', icon: 'station' },
+      { id: 'hospital-e', label: '병원', dotIndex: 4, row: 'top', accent: '#fda4af', icon: 'hospital' },
+      { id: 'market-outer-e', label: '시장', dotIndex: 5, row: 'top', accent: '#fcd34d', icon: 'market' },
+      { id: 'bank-e', label: '은행', dotIndex: 6, row: 'top', accent: '#fde68a', icon: 'bank' },
+      { id: 'school-e', label: '학교', dotIndex: 7, row: 'top', accent: '#bfdbfe', icon: 'school' },
+    ],
+    prompts: [
+      { id: 'e-distance', prefix: '버스터미널에서 학교까지의 거리는 약 ', suffix: '입니다.', answer: '4', kind: 'number', answerUnit: 'km' },
+      { id: 'e-place', prefix: '도서관에서 ', suffix: '까지의 거리는 약 5 km입니다.', answer: '시장', kind: 'place' },
+      { id: 'e-condition', prefix: '마트에서 거리가 약 6 km 떨어진 곳은 ', suffix: '입니다.', answer: '학교', kind: 'place' },
+    ],
+  },
 ];
 
 const UNIT3_PROBLEM_FACTORIES: Record<number, Array<() => Problem>> = {
@@ -2368,7 +2542,9 @@ const UNIT3_PROBLEM_FACTORIES: Record<number, Array<() => Problem>> = {
     },
   ],
   7: [
-    ...DISTANCE_STAGE7_SCENARIOS.map((scenario) => () => createDistanceMapScenario(scenario)),
+    ...DISTANCE_WORKSHEET_PROBLEM_SETS.flatMap(({ prompts, ...worksheetBase }) => (
+      prompts.map((prompt) => () => createDistanceWorksheetProblem({ ...worksheetBase, prompt }))
+    )),
   ],
   8: [
     () => createPromptProblem(
@@ -4080,11 +4256,11 @@ function renderDistanceReferenceBadge({
 }) {
   return (
     <g transform={`translate(${x}, ${y})`} pointerEvents="none">
-      <rect width="196" height="78" rx="24" fill="#ffffff" stroke={stroke} strokeWidth="2.8" />
-      <text x="20" y="31" fontSize="19" fontWeight="900" fill={textColor}>기준 500m</text>
-      <line x1="20" y1="54" x2={20 + previewWidth} y2="54" stroke={lineColor} strokeWidth="12" strokeLinecap="round" />
-      <line x1="20" y1="54" x2={20 + previewWidth} y2="54" stroke={lineStroke} strokeWidth="4" strokeLinecap="round" strokeDasharray="11 8" />
-      <rect x="0" y="0" width="196" height="78" rx="24" fill="none" stroke={fill} strokeWidth="0.6" opacity="0.01" />
+      <rect width="222" height="78" rx="24" fill="#ffffff" stroke={stroke} strokeWidth="2.8" />
+      <text x="18" y="31" fontSize="18" fontWeight="900" fill={textColor}>집→정류장 500m</text>
+      <line x1="18" y1="54" x2={18 + previewWidth} y2="54" stroke={lineColor} strokeWidth="12" strokeLinecap="round" />
+      <line x1="18" y1="54" x2={18 + previewWidth} y2="54" stroke={lineStroke} strokeWidth="4" strokeLinecap="round" strokeDasharray="11 8" />
+      <rect x="0" y="0" width="222" height="78" rx="24" fill="none" stroke={fill} strokeWidth="0.6" opacity="0.01" />
     </g>
   );
 }
@@ -4441,10 +4617,415 @@ function DistanceProblemShell({
   );
 }
 
+function renderDistanceWorksheetLandmarkIcon(
+  landmark: DistanceWorksheetLandmarkData,
+  x: number,
+  y: number,
+) {
+  const stroke = '#475569';
+
+  if (landmark.icon === 'fountain') {
+    return (
+      <g>
+        <rect x={x - 18} y={y + 10} width="36" height="8" rx="4" fill="#bfdbfe" stroke={stroke} strokeWidth="2" />
+        <path d={`M ${x} ${y - 20} C ${x - 10} ${y - 2}, ${x - 10} ${y + 12}, ${x} ${y + 4} C ${x + 10} ${y + 12}, ${x + 10} ${y - 2}, ${x} ${y - 20}`} fill="#7dd3fc" opacity="0.9" />
+        <circle cx={x} cy={y - 24} r="6" fill="#38bdf8" />
+      </g>
+    );
+  }
+
+  if (landmark.icon === 'station') {
+    return (
+      <g>
+        <rect x={x - 26} y={y - 4} width="52" height="22" rx="6" fill="#fca5a5" stroke={stroke} strokeWidth="2" />
+        <rect x={x - 18} y={y + 2} width="12" height="16" rx="3" fill="#fff7ed" />
+        <rect x={x + 4} y={y + 2} width="14" height="10" rx="3" fill="#dbeafe" />
+        <path d={`M ${x - 30} ${y + 20} H ${x + 30}`} stroke="#334155" strokeWidth="3" strokeLinecap="round" />
+        <path d={`M ${x - 26} ${y + 26} H ${x + 26}`} stroke="#94a3b8" strokeWidth="4" strokeLinecap="round" />
+      </g>
+    );
+  }
+
+  if (landmark.icon === 'bank') {
+    return (
+      <g>
+        <polygon points={`${x - 24},${y - 8} ${x},${y - 24} ${x + 24},${y - 8}`} fill="#fef3c7" stroke={stroke} strokeWidth="2" />
+        <rect x={x - 24} y={y - 8} width="48" height="28" rx="6" fill="#fde68a" stroke={stroke} strokeWidth="2" />
+        {[-12, 0, 12].map((offset) => (
+          <rect key={offset} x={x + offset - 3} y={y - 2} width="6" height="16" rx="2" fill="#fff7ed" />
+        ))}
+      </g>
+    );
+  }
+
+  if (landmark.icon === 'school') {
+    return (
+      <g>
+        <polygon points={`${x - 28},${y - 6} ${x},${y - 28} ${x + 28},${y - 6}`} fill="#f87171" stroke={stroke} strokeWidth="2" />
+        <rect x={x - 24} y={y - 6} width="48" height="30" rx="6" fill="#e0f2fe" stroke={stroke} strokeWidth="2" />
+        <rect x={x - 6} y={y + 6} width="12" height="18" rx="3" fill="#fff7ed" />
+        <circle cx={x} cy={y - 14} r="5" fill="#fde68a" stroke={stroke} strokeWidth="1.5" />
+      </g>
+    );
+  }
+
+  if (landmark.icon === 'market') {
+    return (
+      <g>
+        <rect x={x - 22} y={y - 4} width="44" height="24" rx="6" fill="#bbf7d0" stroke={stroke} strokeWidth="2" />
+        <rect x={x - 24} y={y - 14} width="48" height="10" rx="4" fill="#fcd34d" stroke={stroke} strokeWidth="2" />
+        {[-16, -4, 8].map((offset) => (
+          <rect key={offset} x={x + offset} y={y + 2} width="8" height="8" rx="2" fill="#fff7ed" />
+        ))}
+      </g>
+    );
+  }
+
+  if (landmark.icon === 'bookstore' || landmark.icon === 'library') {
+    return (
+      <g>
+        <rect x={x - 24} y={y - 8} width="48" height="30" rx="7" fill="#bae6fd" stroke={stroke} strokeWidth="2" />
+        <rect x={x - 18} y={y - 2} width="12" height="12" rx="3" fill="#fff7ed" />
+        <rect x={x} y={y - 2} width="14" height="18" rx="3" fill="#fef3c7" />
+      </g>
+    );
+  }
+
+  if (landmark.icon === 'hospital') {
+    return (
+      <g>
+        <rect x={x - 24} y={y - 8} width="48" height="30" rx="7" fill="#fecdd3" stroke={stroke} strokeWidth="2" />
+        <rect x={x - 5} y={y - 2} width="10" height="16" rx="2" fill="#ffffff" />
+        <rect x={x - 10} y={y + 3} width="20" height="6" rx="2" fill="#ffffff" />
+      </g>
+    );
+  }
+
+  return (
+    <g>
+      <circle cx={x} cy={y - 4} r="15" fill="#86efac" stroke={stroke} strokeWidth="2" />
+      <rect x={x - 4} y={y + 8} width="8" height="14" rx="3" fill="#a16207" />
+    </g>
+  );
+}
+
+function renderDistanceWorksheetMapBackdrop(variant: DistanceWorksheetMapVariant, roadY: number) {
+  const roadTopY = roadY - 37;
+  const greenBandY = roadY + 27;
+
+  if (variant === 'river') {
+    return (
+      <>
+        <rect x="28" y="26" width="704" height="264" rx="88" fill="#dcfce7" />
+        <path
+          d="M68 82 C166 42, 262 52, 356 92 C454 134, 574 126, 692 80 L692 150 C586 180, 468 186, 352 154 C246 124, 158 116, 68 146 Z"
+          fill="#bfdbfe"
+          opacity="0.95"
+        />
+        <rect x="52" y={roadTopY} width="656" height="58" rx="29" fill="#fde68a" />
+        <path
+          d="M62 242 C176 220, 294 218, 404 234 C518 250, 610 250, 700 236"
+          stroke="#67e8f9"
+          strokeWidth="18"
+          strokeLinecap="round"
+          opacity="0.78"
+        />
+        <rect x="74" y={greenBandY + 8} width="612" height="10" rx="5" fill="#34d399" opacity="0.74" />
+        {[108, 182, 560, 634].map((x, index) => (
+          <g key={`river-tree-${index}`} opacity="0.82">
+            <circle cx={x} cy={88 + (index % 2) * 16} r="15" fill="#4ade80" />
+            <rect x={x - 3} y={99 + (index % 2) * 16} width="6" height="16" rx="3" fill="#a16207" />
+          </g>
+        ))}
+      </>
+    );
+  }
+
+  if (variant === 'town') {
+    return (
+      <>
+        <rect x="28" y="26" width="704" height="264" rx="88" fill="#dbeafe" />
+        <path d="M72 98 C186 62, 304 62, 412 92 C512 118, 610 116, 688 88 L688 154 L72 154 Z" fill="#bfdbfe" opacity="0.82" />
+        <rect x="84" y="74" width="86" height="44" rx="18" fill="#fef2f2" opacity="0.88" />
+        <rect x="590" y="78" width="92" height="42" rx="18" fill="#e2e8f0" opacity="0.96" />
+        <rect x="52" y={roadTopY} width="656" height="62" rx="22" fill="#d6d3d1" />
+        <rect x="52" y={greenBandY} width="656" height="20" rx="10" fill="#fca5a5" opacity="0.72" />
+        {[0, 1, 2, 3].map((index) => (
+          <rect
+            key={`town-crosswalk-${index}`}
+            x={326 + index * 14}
+            y={roadTopY + 14}
+            width="8"
+            height="34"
+            rx="3"
+            fill="#f8fafc"
+            opacity="0.82"
+          />
+        ))}
+        {[132, 214, 514, 620].map((x, index) => (
+          <g key={`town-tree-${index}`} opacity="0.8">
+            <circle cx={x} cy={94 + (index % 2) * 14} r="13" fill="#4ade80" />
+            <rect x={x - 3} y={104 + (index % 2) * 14} width="6" height="16" rx="3" fill="#a16207" />
+          </g>
+        ))}
+      </>
+    );
+  }
+
+  if (variant === 'campus') {
+    return (
+      <>
+        <rect x="28" y="26" width="704" height="264" rx="88" fill="#fef3c7" />
+        <path
+          d="M84 88 C186 42, 314 42, 404 86 C504 136, 606 130, 680 92 L680 168 L84 168 Z"
+          fill="#dcfce7"
+          opacity="0.96"
+        />
+        <path d="M110 142 C204 108, 322 104, 430 130 C532 156, 614 154, 670 136" stroke="#f9a8d4" strokeWidth="22" strokeLinecap="round" opacity="0.34" />
+        <rect x="52" y={roadTopY} width="656" height="64" rx="32" fill="#fdba74" />
+        <rect x="70" y={greenBandY + 2} width="620" height="16" rx="8" fill="#93c5fd" opacity="0.5" />
+        {[114, 196, 560, 640].map((x, index) => (
+          <g key={`campus-tree-${index}`} opacity="0.82">
+            <circle cx={x} cy={90 + (index % 2) * 18} r="15" fill="#4ade80" />
+            <rect x={x - 3} y={102 + (index % 2) * 18} width="6" height="16" rx="3" fill="#a16207" />
+          </g>
+        ))}
+        {[154, 604].map((x, index) => (
+          <circle key={`campus-flower-${index}`} cx={x} cy={242 + index * 4} r="7" fill="#f9a8d4" opacity="0.7" />
+        ))}
+      </>
+    );
+  }
+
+  if (variant === 'orchard') {
+    return (
+      <>
+        <rect x="28" y="26" width="704" height="264" rx="88" fill="#ecfccb" />
+        <path
+          d="M76 92 C182 50, 292 56, 386 92 C482 126, 586 126, 684 90 L684 158 L76 158 Z"
+          fill="#fde68a"
+          opacity="0.42"
+        />
+        <path d="M86 128 C214 150, 330 150, 448 128 C562 108, 638 104, 686 124" stroke="#86efac" strokeWidth="20" strokeLinecap="round" opacity="0.62" />
+        <rect x="52" y={roadTopY} width="656" height="60" rx="30" fill="#f5d38e" />
+        <rect x="64" y={greenBandY + 2} width="632" height="18" rx="9" fill="#4ade80" opacity="0.7" />
+        {[114, 170, 226, 562, 618].map((x, index) => (
+          <g key={`orchard-tree-${index}`} opacity="0.84">
+            <circle cx={x} cy={88 + (index % 2) * 18} r="14" fill="#4ade80" />
+            <rect x={x - 3} y={98 + (index % 2) * 18} width="6" height="16" rx="3" fill="#a16207" />
+            <circle cx={x - 7} cy={82 + (index % 2) * 18} r="3" fill="#fb7185" />
+            <circle cx={x + 6} cy={92 + (index % 2) * 18} r="3" fill="#f97316" />
+          </g>
+        ))}
+      </>
+    );
+  }
+
+  return (
+    <>
+      <rect x="28" y="26" width="704" height="264" rx="88" fill="#d9f99d" />
+      <path d="M72 92 C180 40, 290 42, 366 84 C450 130, 566 126, 688 72 L688 160 L72 160 Z" fill="#bbf7d0" opacity="0.7" />
+      <rect x="52" y={roadTopY} width="656" height="62" rx="31" fill="#f5d38e" />
+      <rect x="52" y={greenBandY} width="656" height="20" rx="10" fill="#86efac" opacity="0.85" />
+      {[126, 182, 540, 616].map((x, index) => (
+        <g key={`meadow-tree-${index}`} opacity="0.82">
+          <circle cx={x} cy={86 + (index % 2) * 18} r="14" fill="#4ade80" />
+          <rect x={x - 3} y={96 + (index % 2) * 18} width="6" height="16" rx="3" fill="#a16207" />
+        </g>
+      ))}
+    </>
+  );
+}
+
+function DistanceWorksheetProblemCard({
+  distanceWorksheet,
+}: {
+  distanceWorksheet: DistanceWorksheetProblemData;
+}) {
+  const viewBoxWidth = 760;
+  const viewBoxHeight = 360;
+  const leftX = 90;
+  const rightX = 670;
+  const roadY = 205;
+  const dotXs = Array.from({ length: distanceWorksheet.dotCount }, (_, index) => (
+    leftX + ((rightX - leftX) * index) / Math.max(distanceWorksheet.dotCount - 1, 1)
+  ));
+
+  return (
+    <div className="mx-auto flex h-full w-full max-w-[58rem] flex-col overflow-hidden rounded-[2rem] border-4 border-slate-200 bg-white shadow-sm">
+      <div className="border-b border-slate-200 bg-slate-50/90 px-4 py-3 sm:px-6">
+        <p className="break-keep text-base font-black text-slate-900 sm:text-[1.15rem]">
+          {distanceWorksheet.instruction}
+        </p>
+      </div>
+
+      <div className="px-3 pt-3 sm:px-5 sm:pt-5">
+        <svg viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`} className="block w-full" role="img" aria-label="거리 어림 학습지 그림">
+          {renderDistanceWorksheetMapBackdrop(distanceWorksheet.mapVariant, roadY)}
+
+          {distanceWorksheet.landmarks.map((landmark) => {
+            const x = dotXs[landmark.dotIndex] ?? leftX;
+            const iconY = landmark.row === 'top' ? 126 : 248;
+            const labelY = landmark.row === 'top' ? 50 : 286;
+            const textY = landmark.row === 'top' ? 70 : 306;
+            const labelWidth = Math.min(134, Math.max(76, landmark.label.length * 20));
+            return (
+              <g key={landmark.id}>
+                <rect
+                  x={x - labelWidth / 2}
+                  y={labelY}
+                  width={labelWidth}
+                  height="28"
+                  rx="11"
+                  fill="#e0f2fe"
+                  stroke="#7dd3fc"
+                  strokeWidth="2"
+                />
+                <text x={x} y={textY} textAnchor="middle" fontSize="18" fontWeight="900" fill="#1e3a8a">
+                  {landmark.label}
+                </text>
+                {renderDistanceWorksheetLandmarkIcon(landmark, x, iconY)}
+              </g>
+            );
+          })}
+
+          {dotXs.map((x, index) => (
+            <circle key={`dot-${index}`} cx={x} cy={roadY} r="4.5" fill="#111827" />
+          ))}
+
+          {(() => {
+            const fromX = dotXs[distanceWorksheet.reference.fromDotIndex] ?? leftX;
+            const toX = dotXs[distanceWorksheet.reference.toDotIndex] ?? rightX;
+            return (
+              <g>
+                <line x1={fromX} y1={182} x2={toX} y2={182} stroke="#ef4444" strokeWidth="4" strokeLinecap="round" />
+                <line x1={fromX} y1={182} x2={fromX} y2={roadY} stroke="#ef4444" strokeWidth="3" />
+                <line x1={toX} y1={182} x2={toX} y2={roadY} stroke="#ef4444" strokeWidth="3" />
+                <text x={(fromX + toX) / 2} y={172} textAnchor="middle" fontSize="26" fontWeight="900" fill="#ca8a04">
+                  {distanceWorksheet.reference.label}
+                </text>
+              </g>
+            );
+          })()}
+        </svg>
+      </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-5">
+        <div className="flex items-start gap-3">
+          <span className="mt-[0.55rem] h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-500" aria-hidden="true" />
+          <p className="min-w-0 break-keep text-[1.08rem] font-black leading-[1.9] text-slate-900 sm:text-[1.35rem]">
+            <span>{distanceWorksheet.prompt.prefix}</span>
+            <span className={`mx-2 inline-flex h-11 rounded-2xl border-2 border-slate-300 bg-white align-middle shadow-sm ${
+              distanceWorksheet.prompt.kind === 'number' ? 'w-20 sm:w-24' : 'w-28 sm:w-36'
+            }`} aria-hidden="true" />
+            <span>{distanceWorksheet.prompt.suffix}</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DistanceStrategyBadge({
+  label,
+  cue,
+  containerClassName,
+  chipClassName,
+  cueClassName,
+}: {
+  label: string;
+  cue: string;
+  containerClassName: string;
+  chipClassName: string;
+  cueClassName: string;
+}) {
+  return (
+    <div className={`flex flex-wrap items-center gap-2 rounded-full px-3 py-2 ${containerClassName}`}>
+      <span className={`rounded-full px-3 py-1 text-sm font-black ${chipClassName}`}>{label}</span>
+      <span className={`text-sm font-black ${cueClassName}`}>{cue}</span>
+    </div>
+  );
+}
+
+function DistanceSentenceField({
+  distanceMap,
+  answerValue,
+  onAnswerChange,
+  onSubmit,
+}: {
+  distanceMap: DistanceMapProblemData;
+  answerValue: string;
+  onAnswerChange: (value: string) => void;
+  onSubmit: () => void;
+}) {
+  return (
+    <div className="border-t border-slate-200 bg-white/90 px-4 py-4 sm:px-6">
+      <p className="break-keep text-[1.05rem] font-black leading-[1.9] text-slate-900 sm:text-[1.35rem]">
+        <span>집에서 {distanceMap.targetLabel}까지의 거리는 약 </span>
+        <label className="mx-2 inline-flex h-12 w-20 items-center justify-center rounded-2xl border-2 border-slate-400 bg-white align-middle shadow-sm sm:h-14 sm:w-24">
+          <span className="sr-only">{distanceMap.targetLabel}까지의 거리</span>
+          <input
+            type="number"
+            inputMode="numeric"
+            value={answerValue}
+            onChange={(event) => onAnswerChange(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' && !event.ctrlKey && !event.altKey) {
+                event.preventDefault();
+                onSubmit();
+              }
+            }}
+            className="w-full bg-transparent px-2 text-center text-xl font-black text-slate-900 outline-none placeholder:text-slate-300 sm:text-2xl"
+            placeholder="?"
+          />
+        </label>
+        <span>km입니다.</span>
+      </p>
+    </div>
+  );
+}
+
+function DistanceWorksheetLayout({
+  distanceMap,
+  answerValue,
+  onAnswerChange,
+  onSubmit,
+  children,
+}: {
+  distanceMap: DistanceMapProblemData;
+  answerValue: string;
+  onAnswerChange: (value: string) => void;
+  onSubmit: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex h-full flex-col">
+      <div className="border-b border-slate-200 bg-white/80 px-4 py-3 sm:px-5">
+        <p className="text-sm font-black text-slate-700 sm:text-base">{distanceMap.question}</p>
+      </div>
+      <div className="min-h-0 flex-1">
+        {children}
+      </div>
+      <DistanceSentenceField
+        distanceMap={distanceMap}
+        answerValue={answerValue}
+        onAnswerChange={onAnswerChange}
+        onSubmit={onSubmit}
+      />
+    </div>
+  );
+}
+
 function DistanceCompareProblemCard({
   distanceMap,
+  answerValue,
+  onAnswerChange,
+  onSubmit,
 }: {
   distanceMap: DistanceCompareProblemData;
+  answerValue: string;
+  onAnswerChange: (value: string) => void;
+  onSubmit: () => void;
 }) {
   const totalSlots = distanceMap.compareSlotCount;
   const targetUnits = Math.max(1, Math.round(distanceMap.targetMeters / distanceMap.referenceMeters));
@@ -4476,10 +5057,13 @@ function DistanceCompareProblemCard({
   return (
     <DistanceProblemShell
       leftBadge={(
-        <div className="flex items-center gap-2 rounded-full bg-sky-50 px-3 py-2">
-          <span className="rounded-full bg-sky-500 px-3 py-1 text-sm font-black text-white">500m</span>
-          <span className="text-sm font-black text-sky-900">비교</span>
-        </div>
+        <DistanceStrategyBadge
+          label="비교"
+          cue="500m 몇 번?"
+          containerClassName="bg-sky-50"
+          chipClassName="bg-sky-500 text-white"
+          cueClassName="text-sky-900"
+        />
       )}
       rightBadge={(
         <div className="rounded-full bg-white px-4 py-2 text-lg font-black text-slate-900 sm:text-xl">
@@ -4489,105 +5073,118 @@ function DistanceCompareProblemCard({
       onReset={resetMeasure}
       panelClassName="bg-sky-50"
     >
-      <svg
-        ref={svgRef}
-        viewBox={'0 0 ' + DISTANCE_CARD_VIEWBOX_WIDTH + ' ' + DISTANCE_CARD_VIEWBOX_HEIGHT}
-        className="block h-full w-full touch-none"
-        role="img"
-        aria-label="comparison distance card"
+      <DistanceWorksheetLayout
+        distanceMap={distanceMap}
+        answerValue={answerValue}
+        onAnswerChange={onAnswerChange}
+        onSubmit={onSubmit}
       >
-        <rect x="0" y="0" width="640" height="410" rx="30" fill="#eff6ff" />
+        <svg
+          ref={svgRef}
+          viewBox={'0 0 ' + DISTANCE_CARD_VIEWBOX_WIDTH + ' ' + DISTANCE_CARD_VIEWBOX_HEIGHT}
+          className="block h-full w-full touch-none"
+          role="img"
+          aria-label="comparison distance card"
+        >
+          <rect x="0" y="0" width="640" height="410" rx="30" fill="#eff6ff" />
 
-        {renderDistanceReferenceBadge({
-          x: 28,
-          y: 24,
-          previewWidth: referencePreviewWidth,
-          fill: '#eff6ff',
-          stroke: '#93c5fd',
-          textColor: '#0c4a6e',
-          lineColor: '#7dd3fc',
-          lineStroke: '#0369a1',
-        })}
+          {renderDistanceReferenceBadge({
+            x: 28,
+            y: 24,
+            previewWidth: referencePreviewWidth,
+            fill: '#eff6ff',
+            stroke: '#93c5fd',
+            textColor: '#0c4a6e',
+            lineColor: '#7dd3fc',
+            lineStroke: '#0369a1',
+          })}
 
-        {homeDisplayLandmark ? renderDistanceMapLandmark(homeDisplayLandmark, DISTANCE_DISPLAY_LANDMARK_SCALE) : null}
-        {targetDisplayLandmark ? renderDistanceMapLandmark(targetDisplayLandmark, DISTANCE_DISPLAY_LANDMARK_SCALE) : null}
+          {homeDisplayLandmark ? renderDistanceMapLandmark(homeDisplayLandmark, DISTANCE_DISPLAY_LANDMARK_SCALE) : null}
+          {targetDisplayLandmark ? renderDistanceMapLandmark(targetDisplayLandmark, DISTANCE_DISPLAY_LANDMARK_SCALE) : null}
 
-        <line
-          x1={routeStart.x}
-          y1={DISTANCE_ROUTE_Y}
-          x2={routeEnd.x}
-          y2={DISTANCE_ROUTE_Y}
-          stroke="#dbeafe"
-          strokeWidth={DISTANCE_ROUTE_STROKE_WIDTH}
-          strokeLinecap="round"
-        />
-        <line
-          x1={routeStart.x}
-          y1={DISTANCE_ROUTE_Y}
-          x2={targetEndX}
-          y2={DISTANCE_ROUTE_Y}
-          stroke="#fdba74"
-          strokeWidth={DISTANCE_ROUTE_STROKE_WIDTH}
-          strokeLinecap="round"
-          opacity="0.78"
-        />
-        <line
-          x1={routeStart.x}
-          y1={DISTANCE_ROUTE_Y}
-          x2={filledEndX}
-          y2={DISTANCE_ROUTE_Y}
-          stroke="#38bdf8"
-          strokeWidth={DISTANCE_PROGRESS_STROKE_WIDTH}
-          strokeLinecap="round"
-        />
+          <line
+            x1={routeStart.x}
+            y1={DISTANCE_ROUTE_Y}
+            x2={routeEnd.x}
+            y2={DISTANCE_ROUTE_Y}
+            stroke="#dbeafe"
+            strokeWidth={DISTANCE_ROUTE_STROKE_WIDTH}
+            strokeLinecap="round"
+          />
+          <line
+            x1={routeStart.x}
+            y1={DISTANCE_ROUTE_Y}
+            x2={targetEndX}
+            y2={DISTANCE_ROUTE_Y}
+            stroke="#fdba74"
+            strokeWidth={DISTANCE_ROUTE_STROKE_WIDTH}
+            strokeLinecap="round"
+            opacity="0.78"
+          />
+          <line
+            x1={routeStart.x}
+            y1={DISTANCE_ROUTE_Y}
+            x2={filledEndX}
+            y2={DISTANCE_ROUTE_Y}
+            stroke="#38bdf8"
+            strokeWidth={DISTANCE_PROGRESS_STROKE_WIDTH}
+            strokeLinecap="round"
+          />
 
-        {routeCenters.map((point, index) => {
-          const unitNumber = index + 1;
-          const isFilled = filledUnits >= unitNumber;
-          const isTargetUnit = unitNumber <= targetUnits;
-          return (
-            <g key={'compare-slot-' + unitNumber} pointerEvents="none">
-              <circle
-                cx={point.x}
-                cy={DISTANCE_ROUTE_Y}
-                r={DISTANCE_STEP_BUBBLE_RADIUS}
-                fill={isFilled ? '#38bdf8' : '#ffffff'}
-                stroke={isTargetUnit ? '#f97316' : '#94a3b8'}
-                strokeWidth="4"
-              />
-              <text
-                x={point.x}
-                y={DISTANCE_ROUTE_Y + 7}
-                textAnchor="middle"
-                fontSize="21"
-                fontWeight="900"
-                fill={isFilled ? '#ffffff' : isTargetUnit ? '#c2410c' : '#475569'}
-              >
-                {unitNumber}
-              </text>
-            </g>
-          );
-        })}
+          {routeCenters.map((point, index) => {
+            const unitNumber = index + 1;
+            const isFilled = filledUnits >= unitNumber;
+            const isTargetUnit = unitNumber <= targetUnits;
+            return (
+              <g key={'compare-slot-' + unitNumber} pointerEvents="none">
+                <circle
+                  cx={point.x}
+                  cy={DISTANCE_ROUTE_Y}
+                  r={DISTANCE_STEP_BUBBLE_RADIUS}
+                  fill={isFilled ? '#38bdf8' : '#ffffff'}
+                  stroke={isTargetUnit ? '#f97316' : '#94a3b8'}
+                  strokeWidth="4"
+                />
+                <text
+                  x={point.x}
+                  y={DISTANCE_ROUTE_Y + 7}
+                  textAnchor="middle"
+                  fontSize="21"
+                  fontWeight="900"
+                  fill={isFilled ? '#ffffff' : isTargetUnit ? '#c2410c' : '#475569'}
+                >
+                  {unitNumber}
+                </text>
+              </g>
+            );
+          })}
 
-        <polyline
-          points={formatDistanceMapPoints(routePoints)}
-          fill="none"
-          stroke="transparent"
-          strokeWidth="76"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          style={{ touchAction: 'none', cursor: 'grab' }}
-          {...getPathDragProps()}
-        />
-      </svg>
+          <polyline
+            points={formatDistanceMapPoints(routePoints)}
+            fill="none"
+            stroke="transparent"
+            strokeWidth="76"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{ touchAction: 'none', cursor: 'grab' }}
+            {...getPathDragProps()}
+          />
+        </svg>
+      </DistanceWorksheetLayout>
     </DistanceProblemShell>
   );
 }
 
 function DistanceChunkProblemCard({
   distanceMap,
+  answerValue,
+  onAnswerChange,
+  onSubmit,
 }: {
   distanceMap: DistanceChunkProblemData;
+  answerValue: string;
+  onAnswerChange: (value: string) => void;
+  onSubmit: () => void;
 }) {
   const segmentLayouts = createHorizontalDistanceSegmentLayouts(distanceMap.segments);
   const routeStart = segmentLayouts[0]?.points[0] ?? { x: DISTANCE_ROUTE_LEFT_X, y: DISTANCE_ROUTE_Y };
@@ -4609,10 +5206,13 @@ function DistanceChunkProblemCard({
   return (
     <DistanceProblemShell
       leftBadge={(
-        <div className="flex items-center gap-2 rounded-full bg-amber-50 px-3 py-2">
-          <span className="rounded-full bg-amber-400 px-3 py-1 text-sm font-black text-amber-950">나눠 보기</span>
-          <span className="text-sm font-black text-amber-900">묶기</span>
-        </div>
+        <DistanceStrategyBadge
+          label="묶기"
+          cue="500m씩"
+          containerClassName="bg-amber-50"
+          chipClassName="bg-amber-400 text-amber-950"
+          cueClassName="text-amber-900"
+        />
       )}
       rightBadge={(
         <div className="rounded-full bg-white px-4 py-2 text-lg font-black text-slate-900 sm:text-xl">
@@ -4622,112 +5222,125 @@ function DistanceChunkProblemCard({
       onReset={resetMeasures}
       panelClassName="bg-amber-50"
     >
-      <svg
-        ref={svgRef}
-        viewBox={'0 0 ' + DISTANCE_CARD_VIEWBOX_WIDTH + ' ' + DISTANCE_CARD_VIEWBOX_HEIGHT}
-        className="block h-full w-full touch-none"
-        role="img"
-        aria-label="chunk distance card"
+      <DistanceWorksheetLayout
+        distanceMap={distanceMap}
+        answerValue={answerValue}
+        onAnswerChange={onAnswerChange}
+        onSubmit={onSubmit}
       >
-        <rect x="0" y="0" width="640" height="410" rx="30" fill="#fffbeb" />
+        <svg
+          ref={svgRef}
+          viewBox={'0 0 ' + DISTANCE_CARD_VIEWBOX_WIDTH + ' ' + DISTANCE_CARD_VIEWBOX_HEIGHT}
+          className="block h-full w-full touch-none"
+          role="img"
+          aria-label="chunk distance card"
+        >
+          <rect x="0" y="0" width="640" height="410" rx="30" fill="#fffbeb" />
 
-        {homeDisplayLandmark ? renderDistanceMapLandmark(homeDisplayLandmark, DISTANCE_DISPLAY_LANDMARK_SCALE) : null}
-        {targetDisplayLandmark ? renderDistanceMapLandmark(targetDisplayLandmark, DISTANCE_DISPLAY_LANDMARK_SCALE) : null}
+          {homeDisplayLandmark ? renderDistanceMapLandmark(homeDisplayLandmark, DISTANCE_DISPLAY_LANDMARK_SCALE) : null}
+          {targetDisplayLandmark ? renderDistanceMapLandmark(targetDisplayLandmark, DISTANCE_DISPLAY_LANDMARK_SCALE) : null}
 
-        <line
-          x1={routeStart.x}
-          y1={DISTANCE_ROUTE_Y}
-          x2={routeEnd.x}
-          y2={DISTANCE_ROUTE_Y}
-          stroke="#fde68a"
-          strokeWidth={DISTANCE_ROUTE_STROKE_WIDTH}
-          strokeLinecap="round"
-          opacity="0.65"
-        />
-
-        {segmentLayouts.map((segment) => {
-          const filledCount = filledUnitsById[segment.id] ?? 0;
-          const filledDistance = getSnappedDistanceLength(segment.width, segment.units, filledCount);
-          const partialPoints = getDistanceMapPartialPoints(segment.points, filledDistance);
-          const boxWidth = segment.units >= 2 ? 194 : 146;
-          const slotGap = segment.units > 1 ? 60 : 0;
-
-          return (
-            <g key={'chunk-segment-' + segment.id}>
-              <polyline
-                points={formatDistanceMapPoints(segment.points)}
-                fill="none"
-                stroke={segment.color}
-                strokeWidth={DISTANCE_ROUTE_STROKE_WIDTH}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                opacity="0.32"
-              />
-              <polyline
-                points={formatDistanceMapPoints(partialPoints)}
-                fill="none"
-                stroke={segment.color}
-                strokeWidth={DISTANCE_PROGRESS_STROKE_WIDTH}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <line
-                x1={segment.centerX}
-                y1={DISTANCE_ROUTE_Y + 28}
-                x2={segment.centerX}
-                y2={248}
-                stroke="#fdba74"
-                strokeWidth="3"
-                strokeDasharray="6 7"
-                opacity="0.8"
-              />
-              <g transform={'translate(' + (segment.centerX - boxWidth / 2) + ', 248)'}>
-                <rect width={boxWidth} height="96" rx="22" fill="#ffffff" stroke={segment.color} strokeWidth="4" />
-                <rect x="16" y="16" width="42" height="10" rx="5" fill={segment.color} />
-                {Array.from({ length: segment.units }, (_, unitIndex) => {
-                  const slotX = boxWidth / 2 - (slotGap * (segment.units - 1)) / 2 + slotGap * unitIndex;
-                  const isFilled = unitIndex < filledCount;
-                  return (
-                    <circle
-                      key={segment.id + '-overlay-' + unitIndex}
-                      cx={slotX}
-                      cy="54"
-                      r="18"
-                      fill={isFilled ? segment.color : '#fff7ed'}
-                      stroke={isFilled ? '#7c2d12' : '#fdba74'}
-                      strokeWidth="4"
-                      strokeDasharray={isFilled ? undefined : '5 6'}
-                    />
-                  );
-                })}
-                <text x={boxWidth / 2} y="82" textAnchor="middle" fontSize="20" fontWeight="900" fill="#9a3412">?</text>
-              </g>
-            </g>
-          );
-        })}
-
-        {segmentLayouts.map((segment) => (
-          <polyline
-            key={'chunk-drag-' + segment.id}
-            points={formatDistanceMapPoints(segment.points)}
-            fill="none"
-            stroke="transparent"
-            strokeWidth="78"
+          <line
+            x1={routeStart.x}
+            y1={DISTANCE_ROUTE_Y}
+            x2={routeEnd.x}
+            y2={DISTANCE_ROUTE_Y}
+            stroke="#fde68a"
+            strokeWidth={DISTANCE_ROUTE_STROKE_WIDTH}
             strokeLinecap="round"
-            strokeLinejoin="round"
-            style={{ touchAction: 'none', cursor: 'grab' }}
-            {...getSegmentDragProps(segment)}
+            opacity="0.65"
           />
-        ))}
-      </svg>
+
+          {segmentLayouts.map((segment) => {
+            const filledCount = filledUnitsById[segment.id] ?? 0;
+            const filledDistance = getSnappedDistanceLength(segment.width, segment.units, filledCount);
+            const partialPoints = getDistanceMapPartialPoints(segment.points, filledDistance);
+            const boxWidth = segment.units >= 2 ? 194 : 146;
+            const slotGap = segment.units > 1 ? 60 : 0;
+
+            return (
+              <g key={'chunk-segment-' + segment.id}>
+                <polyline
+                  points={formatDistanceMapPoints(segment.points)}
+                  fill="none"
+                  stroke={segment.color}
+                  strokeWidth={DISTANCE_ROUTE_STROKE_WIDTH}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  opacity="0.32"
+                />
+                <polyline
+                  points={formatDistanceMapPoints(partialPoints)}
+                  fill="none"
+                  stroke={segment.color}
+                  strokeWidth={DISTANCE_PROGRESS_STROKE_WIDTH}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <line
+                  x1={segment.centerX}
+                  y1={DISTANCE_ROUTE_Y + 28}
+                  x2={segment.centerX}
+                  y2={248}
+                  stroke="#fdba74"
+                  strokeWidth="3"
+                  strokeDasharray="6 7"
+                  opacity="0.8"
+                />
+                <g transform={'translate(' + (segment.centerX - boxWidth / 2) + ', 248)'}>
+                  <rect width={boxWidth} height="96" rx="22" fill="#ffffff" stroke={segment.color} strokeWidth="4" />
+                  <rect x="16" y="16" width="42" height="10" rx="5" fill={segment.color} />
+                  {Array.from({ length: segment.units }, (_, unitIndex) => {
+                    const slotX = boxWidth / 2 - (slotGap * (segment.units - 1)) / 2 + slotGap * unitIndex;
+                    const isFilled = unitIndex < filledCount;
+                    return (
+                      <circle
+                        key={segment.id + '-overlay-' + unitIndex}
+                        cx={slotX}
+                        cy="54"
+                        r="18"
+                        fill={isFilled ? segment.color : '#fff7ed'}
+                        stroke={isFilled ? '#7c2d12' : '#fdba74'}
+                        strokeWidth="4"
+                        strokeDasharray={isFilled ? undefined : '5 6'}
+                      />
+                    );
+                  })}
+                  <text x={boxWidth / 2} y="82" textAnchor="middle" fontSize="20" fontWeight="900" fill="#9a3412">?</text>
+                </g>
+              </g>
+            );
+          })}
+
+          {segmentLayouts.map((segment) => (
+            <polyline
+              key={'chunk-drag-' + segment.id}
+              points={formatDistanceMapPoints(segment.points)}
+              fill="none"
+              stroke="transparent"
+              strokeWidth="78"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ touchAction: 'none', cursor: 'grab' }}
+              {...getSegmentDragProps(segment)}
+            />
+          ))}
+        </svg>
+      </DistanceWorksheetLayout>
     </DistanceProblemShell>
   );
 }
 
 function DistanceUnitizeProblemCard({
   distanceMap,
+  answerValue,
+  onAnswerChange,
+  onSubmit,
 }: {
   distanceMap: DistanceUnitizeProblemData;
+  answerValue: string;
+  onAnswerChange: (value: string) => void;
+  onSubmit: () => void;
 }) {
   const totalUnits = Math.max(1, distanceMap.targetRoute.length - 1);
   const displayRoutePoints = createHorizontalDistanceRoute(totalUnits);
@@ -4755,6 +5368,15 @@ function DistanceUnitizeProblemCard({
 
   return (
     <DistanceProblemShell
+      leftBadge={(
+        <DistanceStrategyBadge
+          label="단위화"
+          cue="1칸=500m"
+          containerClassName="bg-emerald-50"
+          chipClassName="bg-emerald-500 text-white"
+          cueClassName="text-emerald-900"
+        />
+      )}
       rightBadge={(
         <div className="rounded-full bg-white px-4 py-2 text-lg font-black text-slate-900 sm:text-xl">
           집 → {distanceMap.targetLabel}
@@ -4763,104 +5385,138 @@ function DistanceUnitizeProblemCard({
       onReset={resetMeasure}
       panelClassName="bg-emerald-50"
     >
-      <svg
-        ref={svgRef}
-        viewBox={'0 0 ' + DISTANCE_CARD_VIEWBOX_WIDTH + ' ' + DISTANCE_CARD_VIEWBOX_HEIGHT}
-        className="block h-full w-full touch-none"
-        role="img"
-        aria-label="unitize distance card"
+      <DistanceWorksheetLayout
+        distanceMap={distanceMap}
+        answerValue={answerValue}
+        onAnswerChange={onAnswerChange}
+        onSubmit={onSubmit}
       >
-        <rect x="0" y="0" width="640" height="410" rx="30" fill="#f0fdf4" />
+        <svg
+          ref={svgRef}
+          viewBox={'0 0 ' + DISTANCE_CARD_VIEWBOX_WIDTH + ' ' + DISTANCE_CARD_VIEWBOX_HEIGHT}
+          className="block h-full w-full touch-none"
+          role="img"
+          aria-label="unitize distance card"
+        >
+          <rect x="0" y="0" width="640" height="410" rx="30" fill="#f0fdf4" />
 
-        {renderDistanceReferenceBadge({
-          x: 28,
-          y: 24,
-          previewWidth: referencePreviewWidth,
-          fill: '#f0fdf4',
-          stroke: '#86efac',
-          textColor: '#166534',
-          lineColor: '#34d399',
-          lineStroke: '#047857',
-        })}
+          {renderDistanceReferenceBadge({
+            x: 28,
+            y: 24,
+            previewWidth: referencePreviewWidth,
+            fill: '#f0fdf4',
+            stroke: '#86efac',
+            textColor: '#166534',
+            lineColor: '#34d399',
+            lineStroke: '#047857',
+          })}
 
-        {homeDisplayLandmark ? renderDistanceMapLandmark(homeDisplayLandmark, DISTANCE_DISPLAY_LANDMARK_SCALE) : null}
-        {targetDisplayLandmark ? renderDistanceMapLandmark(targetDisplayLandmark, DISTANCE_DISPLAY_LANDMARK_SCALE) : null}
+          {homeDisplayLandmark ? renderDistanceMapLandmark(homeDisplayLandmark, DISTANCE_DISPLAY_LANDMARK_SCALE) : null}
+          {targetDisplayLandmark ? renderDistanceMapLandmark(targetDisplayLandmark, DISTANCE_DISPLAY_LANDMARK_SCALE) : null}
 
-        <line
-          x1={routeStart.x}
-          y1={DISTANCE_ROUTE_Y}
-          x2={routeEnd.x}
-          y2={DISTANCE_ROUTE_Y}
-          stroke="#d1fae5"
-          strokeWidth={DISTANCE_ROUTE_STROKE_WIDTH}
-          strokeLinecap="round"
-        />
-        <line
-          x1={routeStart.x}
-          y1={DISTANCE_ROUTE_Y}
-          x2={filledEndX}
-          y2={DISTANCE_ROUTE_Y}
-          stroke="#10b981"
-          strokeWidth={DISTANCE_PROGRESS_STROKE_WIDTH}
-          strokeLinecap="round"
-        />
+          <line
+            x1={routeStart.x}
+            y1={DISTANCE_ROUTE_Y}
+            x2={routeEnd.x}
+            y2={DISTANCE_ROUTE_Y}
+            stroke="#d1fae5"
+            strokeWidth={DISTANCE_ROUTE_STROKE_WIDTH}
+            strokeLinecap="round"
+          />
+          <line
+            x1={routeStart.x}
+            y1={DISTANCE_ROUTE_Y}
+            x2={filledEndX}
+            y2={DISTANCE_ROUTE_Y}
+            stroke="#10b981"
+            strokeWidth={DISTANCE_PROGRESS_STROKE_WIDTH}
+            strokeLinecap="round"
+          />
 
-        {unitCenters.map((point, index) => {
-          const unitNumber = index + 1;
-          const isCompleted = filledUnits >= unitNumber;
-          return (
-            <g key={'unit-marker-' + unitNumber} pointerEvents="none">
-              <circle
-                cx={point.x}
-                cy={DISTANCE_ROUTE_Y}
-                r={DISTANCE_STEP_BUBBLE_RADIUS}
-                fill={isCompleted ? '#10b981' : '#ffffff'}
-                stroke={isCompleted ? '#047857' : '#fb923c'}
-                strokeWidth="4"
-              />
-              <text
-                x={point.x}
-                y={DISTANCE_ROUTE_Y + 7}
-                textAnchor="middle"
-                fontSize="21"
-                fontWeight="900"
-                fill={isCompleted ? '#ffffff' : '#c2410c'}
-              >
-                {unitNumber}
-              </text>
-            </g>
-          );
-        })}
+          {unitCenters.map((point, index) => {
+            const unitNumber = index + 1;
+            const isCompleted = filledUnits >= unitNumber;
+            return (
+              <g key={'unit-marker-' + unitNumber} pointerEvents="none">
+                <circle
+                  cx={point.x}
+                  cy={DISTANCE_ROUTE_Y}
+                  r={DISTANCE_STEP_BUBBLE_RADIUS}
+                  fill={isCompleted ? '#10b981' : '#ffffff'}
+                  stroke={isCompleted ? '#047857' : '#fb923c'}
+                  strokeWidth="4"
+                />
+                <text
+                  x={point.x}
+                  y={DISTANCE_ROUTE_Y + 7}
+                  textAnchor="middle"
+                  fontSize="21"
+                  fontWeight="900"
+                  fill={isCompleted ? '#ffffff' : '#c2410c'}
+                >
+                  {unitNumber}
+                </text>
+              </g>
+            );
+          })}
 
-        <polyline
-          points={formatDistanceMapPoints(displayRoutePoints)}
-          fill="none"
-          stroke="transparent"
-          strokeWidth="76"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          style={{ touchAction: 'none', cursor: 'grab' }}
-          {...getPathDragProps()}
-        />
-      </svg>
+          <polyline
+            points={formatDistanceMapPoints(displayRoutePoints)}
+            fill="none"
+            stroke="transparent"
+            strokeWidth="76"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{ touchAction: 'none', cursor: 'grab' }}
+            {...getPathDragProps()}
+          />
+        </svg>
+      </DistanceWorksheetLayout>
     </DistanceProblemShell>
   );
 }
 
 function DistanceMapProblemCard({
   distanceMap,
+  answerValue,
+  onAnswerChange,
+  onSubmit,
 }: {
   distanceMap: DistanceMapProblemData;
+  answerValue: string;
+  onAnswerChange: (value: string) => void;
+  onSubmit: () => void;
 }) {
   if (distanceMap.strategy === 'compare') {
-    return <DistanceCompareProblemCard distanceMap={distanceMap} />;
+    return (
+      <DistanceCompareProblemCard
+        distanceMap={distanceMap}
+        answerValue={answerValue}
+        onAnswerChange={onAnswerChange}
+        onSubmit={onSubmit}
+      />
+    );
   }
 
   if (distanceMap.strategy === 'chunk') {
-    return <DistanceChunkProblemCard distanceMap={distanceMap} />;
+    return (
+      <DistanceChunkProblemCard
+        distanceMap={distanceMap}
+        answerValue={answerValue}
+        onAnswerChange={onAnswerChange}
+        onSubmit={onSubmit}
+      />
+    );
   }
 
-  return <DistanceUnitizeProblemCard distanceMap={distanceMap} />;
+  return (
+    <DistanceUnitizeProblemCard
+      distanceMap={distanceMap}
+      answerValue={answerValue}
+      onAnswerChange={onAnswerChange}
+      onSubmit={onSubmit}
+    />
+  );
 }
 
 function createEstimationChoices(answer: number) {
@@ -5386,12 +6042,24 @@ export default function App() {
   const normalizedInputValue = inputValue.trim();
   const normalizedUnitInputValue = normalizeAnswerUnit(unitInputValue);
   const parsedInputAnswer = Number.parseInt(normalizedInputValue, 10);
+  const currentDistanceWorksheetPrompt =
+    problem.kind === 'distanceWorksheet' ? problem.distanceWorksheet?.prompt ?? null : null;
+  const normalizedDistanceWorksheetInput = currentDistanceWorksheetPrompt
+    ? normalizeDistanceWorksheetAnswer(normalizedInputValue, currentDistanceWorksheetPrompt.kind)
+    : '';
   const requiredAnswerUnit = problem.kind === 'builder' ? null : problem.answerUnit ?? null;
   const answerUnitOptions = requiredAnswerUnit ? getAnswerUnitOptions(requiredAnswerUnit) : [];
   const hasValidUnitInput = requiredAnswerUnit ? normalizedUnitInputValue.length > 0 : true;
   const hasValidAnswerInput = normalizedInputValue.length > 0 && !Number.isNaN(parsedInputAnswer) && hasValidUnitInput;
+  const hasValidDistanceWorksheetInput =
+    currentDistanceWorksheetPrompt !== null &&
+    normalizedDistanceWorksheetInput.length > 0 &&
+    hasValidUnitInput;
+  const usesTextAnswerInput = currentDistanceWorksheetPrompt?.kind === 'place';
   const canAttemptAttack =
-    problem.kind === 'builder'
+    problem.kind === 'distanceWorksheet'
+      ? Boolean(hasValidDistanceWorksheetInput)
+      : problem.kind === 'builder'
       ? hasValidAnswerInput && builderEvaluation?.status === 'ready'
       : hasValidAnswerInput;
   const battleShellResponsiveClass = isShortViewport
@@ -5794,6 +6462,29 @@ export default function App() {
   };
 
   const checkAnswer = () => {
+    if (problem.kind === 'distanceWorksheet' && problem.distanceWorksheet) {
+      if (!hasValidDistanceWorksheetInput) {
+        playSound('ui');
+        updateMessage(requiredAnswerUnit ? '숫자를 쓰고 단위 버튼도 골라야 공격할 수 있어!' : '정답을 입력해야 공격할 수 있어!');
+        return;
+      }
+
+      let isCorrect =
+        normalizeDistanceWorksheetAnswer(normalizedInputValue, problem.distanceWorksheet.prompt.kind)
+        === normalizeDistanceWorksheetAnswer(problem.distanceWorksheet.prompt.answer, problem.distanceWorksheet.prompt.kind);
+
+      if (requiredAnswerUnit) {
+        isCorrect = isCorrect && normalizedUnitInputValue === normalizeAnswerUnit(requiredAnswerUnit);
+      }
+
+      playSound('submit', {
+        gainMultiplier: 0.9,
+        detune: 10,
+      });
+      resolveProblemResult(isCorrect);
+      return;
+    }
+
     if (!hasValidAnswerInput) {
       playSound('ui');
       updateMessage(requiredAnswerUnit ? '숫자를 쓰고 단위 버튼도 골라야 공격할 수 있어!' : '정답을 입력해야 공격할 수 있어!');
@@ -6012,7 +6703,7 @@ export default function App() {
             >
               <img
                 src={startHeroImage}
-                alt="곰 마법사와 숲속 친구들이 등장하는 더하기와 빼기 대결 일러스트"
+                alt="숲속에서 동물 친구들이 숫자와 수학 기호를 들고 있는 수학 게임 인트로 그림"
                 className="block w-full rounded-[2rem] object-cover"
                 draggable={false}
               />
@@ -6521,7 +7212,7 @@ export default function App() {
                 animate={{ opacity: 1, scale: 1, y: 0 }} 
                 transition={{ duration: 0.4, ease: "easeOut" }} 
                 className={`flex min-h-0 flex-1 rounded-3xl border-8 border-slate-200 bg-white shadow-inner ${
-                  problem.kind === 'distanceMap'
+                  problem.kind === 'distanceMap' || problem.kind === 'distanceWorksheet'
                     ? 'flex flex-col overflow-hidden p-2 sm:p-3 lg:p-3'
                     : problem.kind !== 'equation'
                       ? 'flex flex-col justify-center overflow-y-auto p-4 sm:p-6 lg:p-8'
@@ -6530,9 +7221,16 @@ export default function App() {
                       : 'flex flex-col items-center justify-center p-4 text-[clamp(3.5rem,18vw,8rem)] leading-none font-black font-mono text-slate-900 sm:p-6 lg:p-8'
                 }`}
               >
-                {problem.kind === 'distanceMap' && problem.distanceMap ? (
+                {problem.kind === 'distanceWorksheet' && problem.distanceWorksheet ? (
+                    <DistanceWorksheetProblemCard
+                      distanceWorksheet={problem.distanceWorksheet}
+                    />
+                ) : problem.kind === 'distanceMap' && problem.distanceMap ? (
                     <DistanceMapProblemCard
                       distanceMap={problem.distanceMap}
+                      answerValue={inputValue}
+                      onAnswerChange={setInputValue}
+                      onSubmit={checkAnswer}
                     />
                 ) : problem.kind === 'measurement' && problem.measurement ? (
                   <MeasurementProblemCard measurement={problem.measurement} />
@@ -6634,8 +7332,8 @@ export default function App() {
                 <div className="grid grid-cols-[minmax(0,1fr)_auto] items-stretch gap-3">
                   <div className="flex min-w-0 items-center gap-3 rounded-2xl border-4 border-slate-500 bg-slate-700 px-4 py-2 focus-within:border-emerald-500">
                     <input
-                      type="number"
-                      inputMode="numeric"
+                      type={usesTextAnswerInput ? 'text' : 'number'}
+                      inputMode={usesTextAnswerInput ? 'text' : 'numeric'}
                       value={inputValue}
                       onChange={e => setInputValue(e.target.value)}
                       onKeyDown={e => {
@@ -6645,7 +7343,17 @@ export default function App() {
                         }
                       }}
                       className="min-w-0 flex-1 bg-transparent py-2 text-center text-2xl font-black text-slate-100 outline-none placeholder:text-slate-400 sm:text-3xl"
-                      placeholder={problem.kind === 'builder' ? '답' : requiredAnswerUnit ? '숫자 입력' : '정답 입력'}
+                      placeholder={
+                        problem.kind === 'builder'
+                          ? '답'
+                          : problem.kind === 'distanceWorksheet'
+                            ? usesTextAnswerInput
+                              ? '장소 이름 입력'
+                              : '숫자 입력'
+                            : requiredAnswerUnit
+                              ? '숫자 입력'
+                              : '정답 입력'
+                      }
                     />
                     {requiredAnswerUnit && (
                       <div ref={unitMenuRef} className="relative shrink-0 pl-1">
