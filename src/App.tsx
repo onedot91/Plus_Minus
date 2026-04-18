@@ -111,7 +111,19 @@ type BattleDifficulty = 'easy' | 'normal' | 'hard';
 type LearningUnitId = 'unit2' | 'unit3';
 
 type ProblemKind = 'equation' | 'story' | 'builder' | 'measurement' | 'distanceMap' | 'distanceWorksheet';
-type MeasurementObjectKind = 'seed' | 'rice' | 'eraser' | 'leaf' | 'paperStrip' | 'stick' | 'pencil' | 'chocolate';
+type MeasurementObjectKind =
+  | 'seed'
+  | 'rice'
+  | 'eraser'
+  | 'leaf'
+  | 'paperStrip'
+  | 'stick'
+  | 'pencil'
+  | 'paperClip'
+  | 'toothpick'
+  | 'crayon'
+  | 'chalk'
+  | 'chocolate';
 type DistanceEstimationStrategy = 'compare' | 'chunk' | 'unitize';
 
 interface BuildSlotConfig {
@@ -2125,14 +2137,15 @@ const UNIT_SELECTION_CHALLENGE_POOLS: Partial<Record<number, UnitSelectionChalle
   ],
 };
 
+// Use more concrete everyday objects here so the picture supports real-world length sense.
 const SMALL_MEASUREMENT_FACTORY_CONFIGS: MeasurementFactoryConfig[] = [
   {
     title: '그림을 보고 작은 눈금을 세어 보세요.',
-    question: '씨앗의 길이는 몇 mm인가요?',
+    question: '사과씨의 길이는 몇 mm인가요?',
     objectKind: 'seed',
-    objectLabel: '씨앗',
-    minLengthMm: 4,
-    maxLengthMm: 9,
+    objectLabel: '사과씨',
+    minLengthMm: 5,
+    maxLengthMm: 7,
     shiftedStartMinMm: 1,
     shiftedStartMaxMm: 4,
   },
@@ -2142,15 +2155,15 @@ const SMALL_MEASUREMENT_FACTORY_CONFIGS: MeasurementFactoryConfig[] = [
     objectKind: 'rice',
     objectLabel: '쌀알',
     minLengthMm: 5,
-    maxLengthMm: 9,
-    shiftedStartMinMm: 2,
+    maxLengthMm: 8,
+    shiftedStartMinMm: 1,
     shiftedStartMaxMm: 5,
   },
   {
     title: '그림을 보고 작은 눈금을 세어 보세요.',
-    question: '종이띠의 길이는 몇 mm인가요?',
+    question: '짧게 자른 종이띠의 길이는 몇 mm인가요?',
     objectKind: 'paperStrip',
-    objectLabel: '종이띠',
+    objectLabel: '짧은 종이띠',
     minLengthMm: 6,
     maxLengthMm: 9,
     shiftedStartMinMm: 1,
@@ -2158,9 +2171,9 @@ const SMALL_MEASUREMENT_FACTORY_CONFIGS: MeasurementFactoryConfig[] = [
   },
   {
     title: '그림을 보고 작은 눈금을 세어 보세요.',
-    question: '초콜릿 조각의 길이는 몇 mm인가요?',
+    question: '작은 초콜릿 조각의 길이는 몇 mm인가요?',
     objectKind: 'chocolate',
-    objectLabel: '초콜릿 조각',
+    objectLabel: '작은 초콜릿 조각',
     minLengthMm: 7,
     maxLengthMm: 10,
     shiftedStartMinMm: 1,
@@ -2174,58 +2187,68 @@ const LARGE_MEASUREMENT_FACTORY_CONFIGS: MeasurementFactoryConfig[] = [
     question: '지우개의 길이는 몇 mm인가요?',
     objectKind: 'eraser',
     objectLabel: '지우개',
-    minLengthMm: 32,
-    maxLengthMm: 46,
+    minLengthMm: 35,
+    maxLengthMm: 48,
     shiftedStartMinMm: 1,
     shiftedStartMaxMm: 4,
   },
   {
     title: '그림을 보고 길이를 재어 보세요.',
-    question: '나뭇잎의 길이는 몇 mm인가요?',
-    objectKind: 'leaf',
-    objectLabel: '나뭇잎',
-    minLengthMm: 35,
-    maxLengthMm: 48,
+    question: '클립의 길이는 몇 mm인가요?',
+    objectKind: 'paperClip',
+    objectLabel: '클립',
+    minLengthMm: 28,
+    maxLengthMm: 33,
     shiftedStartMinMm: 1,
-    shiftedStartMaxMm: 6,
+    shiftedStartMaxMm: 5,
+  },
+  {
+    title: '그림을 보고 길이를 재어 보세요.',
+    question: '초콜릿 한 칸의 길이는 몇 mm인가요?',
+    objectKind: 'chocolate',
+    objectLabel: '초콜릿 한 칸',
+    minLengthMm: 30,
+    maxLengthMm: 38,
+    shiftedStartMinMm: 1,
+    shiftedStartMaxMm: 4,
+  },
+  {
+    title: '그림을 보고 길이를 재어 보세요.',
+    question: '이쑤시개의 길이는 몇 mm인가요?',
+    objectKind: 'toothpick',
+    objectLabel: '이쑤시개',
+    minLengthMm: 62,
+    maxLengthMm: 65,
+    shiftedStartMinMm: 1,
+    shiftedStartMaxMm: 5,
   },
   {
     title: '그림을 보고 길이를 재어 보세요.',
     question: '연필의 길이는 몇 mm인가요?',
     objectKind: 'pencil',
     objectLabel: '연필',
-    minLengthMm: 44,
-    maxLengthMm: 58,
+    minLengthMm: 82,
+    maxLengthMm: 96,
     shiftedStartMinMm: 1,
     shiftedStartMaxMm: 5,
   },
   {
     title: '그림을 보고 길이를 재어 보세요.',
-    question: '막대의 길이는 몇 mm인가요?',
-    objectKind: 'stick',
-    objectLabel: '막대',
-    minLengthMm: 50,
-    maxLengthMm: 67,
+    question: '색연필의 길이는 몇 mm인가요?',
+    objectKind: 'crayon',
+    objectLabel: '색연필',
+    minLengthMm: 84,
+    maxLengthMm: 90,
     shiftedStartMinMm: 1,
     shiftedStartMaxMm: 5,
   },
   {
     title: '그림을 보고 길이를 재어 보세요.',
-    question: '종이띠의 길이는 몇 mm인가요?',
-    objectKind: 'paperStrip',
-    objectLabel: '종이띠',
-    minLengthMm: 38,
-    maxLengthMm: 52,
-    shiftedStartMinMm: 1,
-    shiftedStartMaxMm: 4,
-  },
-  {
-    title: '그림을 보고 길이를 재어 보세요.',
-    question: '초콜릿 조각의 길이는 몇 mm인가요?',
-    objectKind: 'chocolate',
-    objectLabel: '초콜릿 조각',
-    minLengthMm: 40,
-    maxLengthMm: 54,
+    question: '분필의 길이는 몇 mm인가요?',
+    objectKind: 'chalk',
+    objectLabel: '분필',
+    minLengthMm: 82,
+    maxLengthMm: 85,
     shiftedStartMinMm: 1,
     shiftedStartMaxMm: 4,
   },
@@ -2590,12 +2613,15 @@ const UNIT3_PROBLEM_FACTORIES: Record<number, Array<() => Problem>> = {
       );
     },
     () => {
-      const first = randomInt(45, 88);
-      const second = randomInt(first + 5, first + 32);
+      const shorter = randomInt(45, 88);
+      const longer = randomInt(shorter + 5, shorter + 32);
+      const options = shuffleValues([
+        `막대 ${formatLengthValue(longer)}`,
+        `지우개 ${formatLengthValue(shorter)}`,
+      ]);
       return createPromptProblem(
-        `막대는 ${formatLengthValue(second)}, 지우개는 ${formatLengthValue(first)}입니다.\n막대가 지우개보다 몇 mm 더 긴가요?`,
-        second - first,
-        'mm',
+        buildNumberedOptionsPrompt('더 긴 것을 고르면 몇 번일까요?', options),
+        options.findIndex((option) => option.startsWith('막대')) + 1,
       );
     },
     () => {
@@ -3822,6 +3848,63 @@ function MeasurementObjectIllustration({
     );
   }
 
+  if (kind === 'paperClip') {
+    const outerStroke = 6.2;
+    const innerStroke = 5;
+    const outerX = x + outerStroke / 2;
+    const outerY = y + 8;
+    const outerWidth = width - outerStroke;
+    const outerHeight = 40;
+    const innerX = x + width * 0.22;
+    const innerY = y + 17;
+    const innerWidth = width * 0.45;
+    const innerHeight = 22;
+    const outerGapX = outerX + outerWidth;
+    const innerGapX = innerX + innerWidth;
+
+    return (
+      <g>
+        <ellipse cx={x + width / 2} cy={y + 58} rx={width * 0.22} ry={3.1} fill="#d7dde5" opacity="0.16" />
+        <rect
+          x={outerX}
+          y={outerY}
+          width={outerWidth}
+          height={outerHeight}
+          rx="18"
+          fill="none"
+          stroke="#98a4b7"
+          strokeWidth={outerStroke}
+          vectorEffect="non-scaling-stroke"
+        />
+        <rect
+          x={innerX}
+          y={innerY}
+          width={innerWidth}
+          height={innerHeight}
+          rx="12"
+          fill="none"
+          stroke="#bcc5d4"
+          strokeWidth={innerStroke}
+          vectorEffect="non-scaling-stroke"
+        />
+        <path
+          d={`M ${outerGapX} ${outerY + 5} V ${outerY + 19}`}
+          stroke="#fbfdff"
+          strokeWidth="8"
+          strokeLinecap="round"
+          vectorEffect="non-scaling-stroke"
+        />
+        <path
+          d={`M ${innerGapX} ${innerY + 5} V ${innerY + 14}`}
+          stroke="#fbfdff"
+          strokeWidth="7"
+          strokeLinecap="round"
+          vectorEffect="non-scaling-stroke"
+        />
+      </g>
+    );
+  }
+
   if (kind === 'chocolate') {
     const top = y + 12;
     const height = 24;
@@ -3853,57 +3936,110 @@ function MeasurementObjectIllustration({
     );
   }
 
-  if (kind === 'eraser') {
+  if (kind === 'toothpick') {
+    const centerY = y + 24;
+    const halfHeight = 4.5;
+    const tipWidth = Math.max(14, width * 0.035);
+
     return (
       <g>
-        <ellipse cx={x + width / 2} cy={y + 54} rx={width * 0.3} ry={3.6} fill="#d7dde5" opacity="0.18" />
+        <ellipse cx={x + width / 2} cy={y + 38} rx={width * 0.24} ry={2.6} fill="#d7dde5" opacity="0.12" />
+        <path
+          d={[
+            `M ${left} ${centerY}`,
+            `L ${left + tipWidth} ${centerY - halfHeight}`,
+            `H ${right - tipWidth}`,
+            `L ${right} ${centerY}`,
+            `L ${right - tipWidth} ${centerY + halfHeight}`,
+            `H ${left + tipWidth}`,
+            'Z',
+          ].join(' ')}
+          fill="#e7c08b"
+          stroke="#b9874f"
+          strokeWidth="2"
+          vectorEffect="non-scaling-stroke"
+        />
+        <path
+          d={`M ${left + tipWidth + 4} ${centerY - 1.4} H ${right - tipWidth - 4}`}
+          stroke="#f6d8aa"
+          strokeWidth="1.2"
+          opacity="0.9"
+          vectorEffect="non-scaling-stroke"
+        />
+      </g>
+    );
+  }
+
+  if (kind === 'eraser') {
+    const bodyTop = y + 3;
+    const bodyHeight = 58;
+    const bodyBottom = bodyTop + bodyHeight;
+    const wrapperX = x;
+    const wrapperWidth = width * 0.84;
+    const wrapperTop = y;
+    const wrapperHeight = 66;
+    const labelX = wrapperX + wrapperWidth * 0.22;
+    const labelWidth = wrapperWidth * 0.56;
+    const labelY = y + 18;
+    const labelHeight = 30;
+
+    return (
+      <g>
+        <ellipse cx={x + width / 2} cy={y + 73} rx={width * 0.31} ry={5.8} fill="#d7dde5" opacity="0.18" />
         <rect
           x={x}
-          y={y + 16}
+          y={bodyTop}
           width={width}
-          height="30"
-          rx="6"
+          height={bodyHeight}
+          rx="14"
           fill="#83c85d"
           stroke="#5d9b3e"
           strokeWidth="2.4"
           vectorEffect="non-scaling-stroke"
         />
         <path
-          d={`M ${x + 5} ${y + 21} H ${x + width - 5}`}
+          d={`M ${x + 8} ${bodyTop + 7} H ${x + width - 8}`}
           stroke="#c8eca7"
-          strokeWidth="1.7"
+          strokeWidth="2.3"
           opacity="0.75"
           vectorEffect="non-scaling-stroke"
         />
+        <path
+          d={`M ${x + 8} ${bodyBottom - 8} H ${x + width - 8}`}
+          stroke="#649f42"
+          strokeWidth="1.9"
+          opacity="0.28"
+          vectorEffect="non-scaling-stroke"
+        />
         <rect
-          x={x + width * 0.28}
-          y={y + 13}
-          width={width * 0.44}
-          height="36"
-          rx="4"
+          x={wrapperX}
+          y={wrapperTop}
+          width={wrapperWidth}
+          height={wrapperHeight}
+          rx="8"
           fill="#f5efdf"
           stroke="#cbbb90"
           strokeWidth="2"
           vectorEffect="non-scaling-stroke"
         />
         <path
-          d={`M ${x + width * 0.33} ${y + 17} V ${y + 45}`}
+          d={`M ${wrapperX + wrapperWidth * 0.08} ${wrapperTop + 5} V ${wrapperTop + wrapperHeight - 5}`}
           stroke="#d7c79e"
           strokeWidth="1.2"
           vectorEffect="non-scaling-stroke"
         />
         <path
-          d={`M ${x + width * 0.67} ${y + 17} V ${y + 45}`}
+          d={`M ${wrapperX + wrapperWidth - wrapperWidth * 0.08} ${wrapperTop + 5} V ${wrapperTop + wrapperHeight - 5}`}
           stroke="#d7c79e"
           strokeWidth="1.2"
           vectorEffect="non-scaling-stroke"
         />
         <rect
-          x={x + width * 0.38}
-          y={y + 20}
-          width={width * 0.24}
-          height="18"
-          rx="4"
+          x={labelX}
+          y={labelY}
+          width={labelWidth}
+          height={labelHeight}
+          rx="7"
           fill="#98cf6d"
           stroke="#6aa548"
           strokeWidth="1.4"
@@ -3911,9 +4047,9 @@ function MeasurementObjectIllustration({
         />
         <text
           x={x + width / 2}
-          y={y + 34}
+          y={labelY + 20}
           textAnchor="middle"
-          fontSize={Math.min(14, Math.max(9, width * 0.055))}
+          fontSize={Math.min(16, Math.max(10, width * 0.054))}
           fontWeight="800"
           fill="#5a7c3d"
         >
@@ -3946,6 +4082,119 @@ function MeasurementObjectIllustration({
     );
   }
 
+  if (kind === 'crayon') {
+    const top = y + 5;
+    const bottom = y + 53;
+    const centerY = (top + bottom) / 2;
+    const tipWidth = Math.max(22, width * 0.14);
+    const tailBevel = Math.max(8, width * 0.035);
+    const bodyStart = x + tipWidth;
+    const coreStart = x + Math.max(7, tipWidth * 0.28);
+
+    return (
+      <g>
+        <ellipse cx={x + width / 2} cy={y + 61} rx={width * 0.25} ry={4.4} fill="#d7dde5" opacity="0.16" />
+        <path
+          d={`M ${x} ${centerY} L ${bodyStart} ${top} L ${bodyStart} ${bottom} Z`}
+          fill="#e9cfaa"
+          stroke="#bb8e58"
+          strokeWidth="2"
+          vectorEffect="non-scaling-stroke"
+        />
+        <path
+          d={[
+            `M ${bodyStart} ${top}`,
+            `H ${right - tailBevel}`,
+            `L ${right} ${centerY}`,
+            `L ${right - tailBevel} ${bottom}`,
+            `H ${bodyStart}`,
+            'Z',
+          ].join(' ')}
+          fill="#e25858"
+          stroke="#b63e3e"
+          strokeWidth="2.4"
+          vectorEffect="non-scaling-stroke"
+        />
+        <path
+          d={`M ${bodyStart + 8} ${top + 8} H ${right - tailBevel - 8}`}
+          stroke="#ffaaaa"
+          strokeWidth="2.5"
+          opacity="0.78"
+          vectorEffect="non-scaling-stroke"
+        />
+        <path
+          d={`M ${bodyStart + 8} ${bottom - 9} H ${right - tailBevel - 8}`}
+          stroke="#c84848"
+          strokeWidth="2"
+          opacity="0.34"
+          vectorEffect="non-scaling-stroke"
+        />
+        <path
+          d={`M ${bodyStart + 12} ${top + 4} V ${bottom - 4}`}
+          stroke="#cf4a4a"
+          strokeWidth="1.5"
+          opacity="0.46"
+          vectorEffect="non-scaling-stroke"
+        />
+        <path
+          d={`M ${bodyStart + 20} ${top + 3} V ${bottom - 3}`}
+          stroke="#cf4a4a"
+          strokeWidth="1.3"
+          opacity="0.34"
+          vectorEffect="non-scaling-stroke"
+        />
+        <path
+          d={`M ${coreStart} ${centerY} L ${x} ${centerY}`}
+          stroke="#7a2d2d"
+          strokeWidth="2.4"
+          strokeLinecap="round"
+          vectorEffect="non-scaling-stroke"
+        />
+      </g>
+    );
+  }
+
+  if (kind === 'chalk') {
+    const top = y + 12;
+    const bottom = y + 34;
+    const bevel = Math.max(8, width * 0.06);
+
+    return (
+      <g>
+        <ellipse cx={x + width / 2} cy={y + 41} rx={width * 0.22} ry={3} fill="#d7dde5" opacity="0.14" />
+        <path
+          d={[
+            `M ${left + bevel} ${top}`,
+            `H ${right - bevel}`,
+            `L ${right} ${y + 23}`,
+            `L ${right - bevel} ${bottom}`,
+            `H ${left + bevel}`,
+            `L ${left} ${y + 23}`,
+            'Z',
+          ].join(' ')}
+          fill="#fbfcff"
+          stroke="#cfd8e3"
+          strokeWidth="2.1"
+          vectorEffect="non-scaling-stroke"
+        />
+        <path
+          d={`M ${left + bevel + 4} ${top + 4} H ${right - bevel - 4}`}
+          stroke="#ffffff"
+          strokeWidth="1.5"
+          opacity="0.95"
+          vectorEffect="non-scaling-stroke"
+        />
+        <path
+          d={`M ${left + bevel + 8} ${bottom - 5} H ${right - bevel - 8}`}
+          stroke="#dbe4ef"
+          strokeWidth="1.3"
+          opacity="0.8"
+          vectorEffect="non-scaling-stroke"
+        />
+      </g>
+    );
+  }
+
   if (kind === 'paperStrip') {
     const top = y + 11;
     const bottom = y + 33;
@@ -3971,21 +4220,22 @@ function MeasurementObjectIllustration({
   }
 
   if (kind === 'pencil') {
-    const top = y + 14;
-    const bottom = y + 34;
-    const eraserWidth = Math.max(11, width * 0.14);
-    const ferruleWidth = Math.max(7, width * 0.08);
-    const tipWidth = Math.max(14, width * 0.14);
+    const top = y + 4;
+    const bottom = y + 50;
+    const centerY = (top + bottom) / 2;
+    const eraserWidth = Math.max(16, width * 0.17);
+    const ferruleWidth = Math.max(10, width * 0.1);
+    const tipWidth = Math.max(20, width * 0.16);
     const woodStart = right - tipWidth;
     const leadStart = right - Math.max(6, tipWidth * 0.3);
     const bodyWidth = width - eraserWidth - ferruleWidth - tipWidth;
 
     return (
       <g>
-        <ellipse cx={x + width / 2} cy={y + 41} rx={width * 0.28} ry={3.1} fill="#d7dde5" opacity="0.16" />
-        <rect x={x} y={top} width={eraserWidth} height={bottom - top} rx="3" fill="#ee8ea5" stroke="#c96279" strokeWidth="1.9" vectorEffect="non-scaling-stroke" />
+        <ellipse cx={x + width / 2} cy={y + 58} rx={width * 0.28} ry={4.3} fill="#d7dde5" opacity="0.16" />
+        <rect x={x} y={top} width={eraserWidth} height={bottom - top} rx="6" fill="#ee8ea5" stroke="#c96279" strokeWidth="1.9" vectorEffect="non-scaling-stroke" />
         <rect x={x + eraserWidth} y={top} width={ferruleWidth} height={bottom - top} fill="#d7dce4" stroke="#9da7b4" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
-        <path d={`M ${x + eraserWidth + ferruleWidth * 0.5} ${top + 1} V ${bottom - 1}`} stroke="#aeb6c1" strokeWidth="0.9" vectorEffect="non-scaling-stroke" />
+        <path d={`M ${x + eraserWidth + ferruleWidth * 0.5} ${top + 1} V ${bottom - 1}`} stroke="#aeb6c1" strokeWidth="1.1" vectorEffect="non-scaling-stroke" />
         <rect
           x={x + eraserWidth + ferruleWidth}
           y={top}
@@ -3997,23 +4247,30 @@ function MeasurementObjectIllustration({
           vectorEffect="non-scaling-stroke"
         />
         <path
-          d={`M ${x + eraserWidth + ferruleWidth + 4} ${top + 4} H ${woodStart - 5}`}
+          d={`M ${x + eraserWidth + ferruleWidth + 6} ${top + 7} H ${woodStart - 7}`}
           stroke="#ffe291"
-          strokeWidth="1.3"
+          strokeWidth="1.9"
           opacity="0.85"
           vectorEffect="non-scaling-stroke"
         />
         <path
-          d={`M ${woodStart} ${top} L ${leadStart} ${y + 24} L ${woodStart} ${bottom} Z`}
+          d={`M ${x + eraserWidth + ferruleWidth + 6} ${bottom - 8} H ${woodStart - 7}`}
+          stroke="#d49a23"
+          strokeWidth="1.7"
+          opacity="0.28"
+          vectorEffect="non-scaling-stroke"
+        />
+        <path
+          d={`M ${woodStart} ${top} L ${leadStart} ${centerY} L ${woodStart} ${bottom} Z`}
           fill="#ead0a8"
           stroke="#b98949"
           strokeWidth="1.7"
           vectorEffect="non-scaling-stroke"
         />
         <path
-          d={`M ${leadStart} ${y + 24} L ${right} ${y + 24}`}
+          d={`M ${leadStart} ${centerY} L ${right} ${centerY}`}
           stroke="#45484e"
-          strokeWidth="1.8"
+          strokeWidth="2.2"
           strokeLinecap="round"
           vectorEffect="non-scaling-stroke"
         />
