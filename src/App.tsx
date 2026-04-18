@@ -1179,7 +1179,7 @@ const UNIT_LEVEL_DESCRIPTIONS: Record<LearningUnitId, string[]> = {
     '1단계: 1mm가 왜 필요할까',
     '2단계: 1cm와 1mm의 관계',
     '3단계: 길이 재기',
-    '4단계: 약으로 나타내기와 비교',
+    '4단계: 길이 비교',
     '5단계: 1km가 왜 필요할까',
     '6단계: 1km와 1m의 관계',
     '7단계: 거리 어림',
