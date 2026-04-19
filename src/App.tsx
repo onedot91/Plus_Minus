@@ -103,6 +103,14 @@ import unit3Level8LabulabuAttackImage from './assets/unit3-level8-labulabu-attac
 import unit3Level8LabulabuDefaultImage from './assets/unit3-level8-labulabu-default.png';
 import unit3Level8LabulabuDefeatSceneImage from './assets/unit3-level8-labulabu-defeat-scene.png';
 import unit3Level8LabulabuHitImage from './assets/unit3-level8-labulabu-hit.png';
+import unit3Level9GimgangrimAttackImage from './assets/unit3-level9-gimgangrim-attack.jpeg';
+import unit3Level9GimgangrimDefaultImage from './assets/unit3-level9-gimgangrim-default.jpeg';
+import unit3Level9GimgangrimDefeatSceneImage from './assets/unit3-level9-gimgangrim-defeat-scene.jpeg';
+import unit3Level9GimgangrimHitImage from './assets/unit3-level9-gimgangrim-hit.jpeg';
+import unit3Level10RobloxAttackImage from './assets/unit3-level10-roblox-attack.jpeg';
+import unit3Level10RobloxDefaultImage from './assets/unit3-level10-roblox-default.jpeg';
+import unit3Level10RobloxDefeatSceneImage from './assets/unit3-level10-roblox-defeat-scene.jpeg';
+import unit3Level10RobloxHitImage from './assets/unit3-level10-roblox-hit.jpeg';
 
 type GameState = 'start' | 'unitSelect' | 'playing' | 'win' | 'lose';
 
@@ -110,7 +118,7 @@ type BattleDifficulty = 'easy' | 'normal' | 'hard';
 
 type LearningUnitId = 'unit2' | 'unit3';
 
-type ProblemKind = 'equation' | 'story' | 'builder' | 'measurement' | 'distanceMap' | 'distanceWorksheet';
+type ProblemKind = 'equation' | 'story' | 'builder' | 'measurement' | 'distanceMap' | 'distanceWorksheet' | 'clockReading';
 type MeasurementObjectKind =
   | 'seed'
   | 'rice'
@@ -156,6 +164,7 @@ interface Problem {
   measurement?: MeasurementProblemData;
   distanceMap?: DistanceMapProblemData;
   distanceWorksheet?: DistanceWorksheetProblemData;
+  clockReading?: ClockReadingProblemData;
 }
 
 interface EstimationProblem {
@@ -234,6 +243,24 @@ interface MeasurementProblemData {
   startMm: number;
   lengthMm: number;
   rulerCm: number;
+}
+
+interface ClockReadingProblemData {
+  title: string;
+  question: string;
+  hour: number;
+  minute: number;
+  second: number;
+  editableParts: ClockInputPart[];
+}
+
+type ClockInputPart = 'hours' | 'minutes' | 'seconds';
+type ClockReadingDifficulty = 1 | 2 | 3 | 4 | 5;
+
+interface ClockReadingAnswerInput {
+  hours: string;
+  minutes: string;
+  seconds: string;
 }
 
 interface DistanceMapPoint {
@@ -320,6 +347,8 @@ interface SpecialOpponentConfig {
   defeatSceneImage: string;
   spriteClassName?: string;
   defeatSceneClassName?: string;
+  removeSpriteBlackBackground?: boolean;
+  removeDefeatSceneBlackBackground?: boolean;
 }
 
 interface SpecialOpponentSelections {
@@ -338,6 +367,157 @@ interface BattleDifficultyConfig {
   regularHitDamage: number;
   estimationAttackDamage: number;
   estimationHitDamage: number;
+}
+
+const EDGE_BLACK_TRANSPARENT_THRESHOLD = 84;
+const edgeBlackTransparentImageCache = new Map<string, string>();
+
+function isNearBlackPixel(data: Uint8ClampedArray, offset: number, threshold: number) {
+  return (
+    data[offset + 3] > 0 &&
+    data[offset] <= threshold &&
+    data[offset + 1] <= threshold &&
+    data[offset + 2] <= threshold
+  );
+}
+
+function createEdgeBlackTransparentImage(src: string, image: HTMLImageElement, threshold: number) {
+  const canvas = document.createElement('canvas');
+  const width = image.naturalWidth;
+  const height = image.naturalHeight;
+
+  if (!width || !height) {
+    return src;
+  }
+
+  canvas.width = width;
+  canvas.height = height;
+
+  const context = canvas.getContext('2d');
+  if (!context) {
+    return src;
+  }
+
+  context.drawImage(image, 0, 0, width, height);
+
+  const imageData = context.getImageData(0, 0, width, height);
+  const { data } = imageData;
+  const pixelCount = width * height;
+  const visited = new Uint8Array(pixelCount);
+  const queue = new Int32Array(pixelCount);
+  let head = 0;
+  let tail = 0;
+
+  const enqueue = (x: number, y: number) => {
+    if (x < 0 || x >= width || y < 0 || y >= height) {
+      return;
+    }
+
+    const pixelIndex = y * width + x;
+    if (visited[pixelIndex]) {
+      return;
+    }
+
+    const offset = pixelIndex * 4;
+    if (!isNearBlackPixel(data, offset, threshold)) {
+      return;
+    }
+
+    visited[pixelIndex] = 1;
+    queue[tail++] = pixelIndex;
+  };
+
+  for (let x = 0; x < width; x += 1) {
+    enqueue(x, 0);
+    enqueue(x, height - 1);
+  }
+
+  for (let y = 1; y < height - 1; y += 1) {
+    enqueue(0, y);
+    enqueue(width - 1, y);
+  }
+
+  while (head < tail) {
+    const pixelIndex = queue[head++];
+    const x = pixelIndex % width;
+    const y = Math.floor(pixelIndex / width);
+
+    enqueue(x - 1, y);
+    enqueue(x + 1, y);
+    enqueue(x, y - 1);
+    enqueue(x, y + 1);
+  }
+
+  for (let pixelIndex = 0; pixelIndex < pixelCount; pixelIndex += 1) {
+    if (visited[pixelIndex]) {
+      data[pixelIndex * 4 + 3] = 0;
+    }
+  }
+
+  context.putImageData(imageData, 0, 0);
+  return canvas.toDataURL('image/png');
+}
+
+function useEdgeBlackTransparentImage(src: string | null, enabled = false, threshold = EDGE_BLACK_TRANSPARENT_THRESHOLD) {
+  const [processedSrc, setProcessedSrc] = useState<string | null>(src);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!src) {
+      setProcessedSrc(null);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    if (!enabled || typeof window === 'undefined') {
+      setProcessedSrc(src);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    const cacheKey = `${src}::${threshold}`;
+    const cachedImage = edgeBlackTransparentImageCache.get(cacheKey);
+    if (cachedImage) {
+      setProcessedSrc(cachedImage);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    setProcessedSrc(src);
+
+    const image = new Image();
+    image.decoding = 'async';
+    image.onload = () => {
+      try {
+        const transparentImage = createEdgeBlackTransparentImage(src, image, threshold);
+        edgeBlackTransparentImageCache.set(cacheKey, transparentImage);
+
+        if (!cancelled) {
+          setProcessedSrc(transparentImage);
+        }
+      } catch {
+        if (!cancelled) {
+          setProcessedSrc(src);
+        }
+      }
+    };
+    image.onerror = () => {
+      if (!cancelled) {
+        setProcessedSrc(src);
+      }
+    };
+    image.src = src;
+
+    return () => {
+      cancelled = true;
+    };
+  }, [src, enabled, threshold]);
+
+  return processedSrc ?? src;
 }
 
 interface LearningUnitConfig {
@@ -1113,6 +1293,28 @@ const UNIT3_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
     },
     defeatSceneImage: unit3Level8LabulabuDefeatSceneImage,
   },
+  9: {
+    name: '김강림',
+    spriteSet: {
+      attack: unit3Level9GimgangrimAttackImage,
+      default: unit3Level9GimgangrimDefaultImage,
+      hit: unit3Level9GimgangrimHitImage,
+    },
+    defeatSceneImage: unit3Level9GimgangrimDefeatSceneImage,
+    removeSpriteBlackBackground: true,
+    removeDefeatSceneBlackBackground: true,
+  },
+  10: {
+    name: '로블럭스',
+    spriteSet: {
+      attack: unit3Level10RobloxAttackImage,
+      default: unit3Level10RobloxDefaultImage,
+      hit: unit3Level10RobloxHitImage,
+    },
+    defeatSceneImage: unit3Level10RobloxDefeatSceneImage,
+    removeSpriteBlackBackground: true,
+    removeDefeatSceneBlackBackground: true,
+  },
 };
 const LEVEL_OPPONENT_SPRITES: Partial<Record<number, CharacterSpriteSet>> = {
   1: {
@@ -1183,11 +1385,10 @@ const UNIT_LEVEL_DESCRIPTIONS: Record<LearningUnitId, string[]> = {
     '5단계: 1km가 왜 필요할까',
     '6단계: 1km와 1m의 관계',
     '7단계: 거리 어림',
-    '8단계: 시각과 시간 구별',
-    '9단계: 1초와 1분의 관계',
-    '10단계: 초 단위까지 시각 읽기',
-    '11단계: 시간의 덧셈',
-    '12단계: 시간의 뺄셈과 종합',
+    '8단계: 1초가 왜 필요할까?',
+    '9단계: 초 단위까지 시각 읽기',
+    '10단계: 시간의 덧셈',
+    '11단계: 시간의 뺄셈과 종합',
   ],
 };
 
@@ -1292,7 +1493,7 @@ const LEARNING_UNITS: LearningUnitConfig[] = [
 const FINAL_BUILDER_HP = 25;
 const ESTIMATION_SAFE_HP = 40;
 const UNIT_SELECTION_TIME_LIMIT_SECONDS = 15;
-const UNIT_SELECTION_CHALLENGE_LEVELS = new Set<number>([2, 4, 7, 9, 11, 12]);
+const UNIT_SELECTION_CHALLENGE_LEVELS = new Set<number>([2, 4, 7, 8, 10, 11]);
 const MAX_ZERO_TENS_BORROW_COACHMARKS = 3;
 const ZERO_TENS_BORROW_COACHMARK_TITLE = '생각해보기';
 const ZERO_TENS_BORROW_COACHMARK_TEXT = '십의 자리가 0인 수에서 일의 자리로 어떻게 받아내림을 할까요?';
@@ -1708,25 +1909,87 @@ function splitClockSeconds(totalSeconds: number) {
   };
 }
 
-function createClockReadingChoiceProblem(): Problem {
-  const hour = randomInt(1, 11);
-  const nextHour = hour + 1;
-  const minuteMark = randomInt(0, 11);
-  const secondMark = randomInt(0, 11);
-  const minute = minuteMark * 5;
-  const second = secondMark * 5;
-  const correct = formatClockTime(hour, minute, second);
-  const wrongHour = formatClockTime(nextHour, minute, second);
-  const wrongMinuteSecond = formatClockTime(hour, second, minute === second ? (second + 5) % 60 : minute);
-  const options = shuffleValues([correct, wrongHour, wrongMinuteSecond]);
+function getClockReadingPartValue(clockReading: ClockReadingProblemData, part: ClockInputPart) {
+  if (part === 'hours') {
+    return clockReading.hour;
+  }
 
-  return createPromptProblem(
-    buildNumberedOptionsPrompt(
-      `시침은 ${hour}과 ${nextHour} 사이, 분침은 ${minuteMark === 0 ? 12 : minuteMark}, 초침은 ${secondMark === 0 ? 12 : secondMark}를 가리킵니다.\n알맞은 시각은 몇 번인가요?`,
-      options,
-    ),
-    options.indexOf(correct) + 1,
-  );
+  if (part === 'minutes') {
+    return clockReading.minute;
+  }
+
+  return clockReading.second;
+}
+
+function formatClockReadingBlankText(
+  hour: number,
+  minute: number,
+  second: number,
+  editableParts: ClockInputPart[],
+) {
+  const values: Record<ClockInputPart, string> = {
+    hours: editableParts.includes('hours') ? '□시' : `${hour}시`,
+    minutes: editableParts.includes('minutes') ? '□분' : `${minute}분`,
+    seconds: editableParts.includes('seconds') ? '□초' : `${second}초`,
+  };
+
+  return `${values.hours} ${values.minutes} ${values.seconds}`;
+}
+
+function getClockReadingDifficulty(problemSequence?: number, opponentHP = 100): ClockReadingDifficulty {
+  if (problemSequence !== undefined) {
+    return Math.min(Math.max(problemSequence, 1), 5) as ClockReadingDifficulty;
+  }
+
+  if (opponentHP <= 20) return 5;
+  if (opponentHP <= 40) return 4;
+  if (opponentHP <= 60) return 3;
+  if (opponentHP <= 80) return 2;
+  return 1;
+}
+
+function getClockReadingEditableParts(_difficulty: ClockReadingDifficulty): ClockInputPart[] {
+  return ['hours', 'minutes', 'seconds'];
+}
+
+function createClockReadingVisualProblem(difficulty: ClockReadingDifficulty = 3): Problem {
+  const hour = randomInt(1, 12);
+  const minute =
+    difficulty === 1
+      ? sample([0, 15, 30, 45])
+      : difficulty === 2 || difficulty === 3
+        ? randomInt(0, 11) * 5
+        : randomInt(0, 59);
+  // Exclude 0 seconds so learners always read the second hand, while keeping the
+  // minute hand close enough to the current minute for elementary learners.
+  const second =
+    difficulty === 1
+      ? sample([5, 10])
+      : difficulty === 2
+        ? sample([5, 10, 15])
+        : difficulty === 3 || difficulty === 4
+        ? sample([5, 10, 15])
+        : sample([5, 10, 15, 20]);
+  const editableParts = getClockReadingEditableParts(difficulty);
+  const question =
+    editableParts.length === 3
+      ? '시침, 분침, 초침이 가리키는 시각을 차례대로 써 보세요.'
+      : `시계가 가리키는 시각은 ${formatClockReadingBlankText(hour, minute, second, editableParts)}입니다. 빈칸에 알맞은 수를 써 보세요.`;
+
+  return {
+    text: '',
+    prompt: '시계 그림을 보고 시각을 읽어 보세요.',
+    answer: hour * 3600 + minute * 60 + second,
+    kind: 'clockReading',
+    clockReading: {
+      title: '시계 그림을 보고 시각을 읽어 보세요.',
+      question,
+      hour,
+      minute,
+      second,
+      editableParts,
+    },
+  };
 }
 
 function createMillimeterNeedIntroProblem(): Problem {
@@ -1784,6 +2047,36 @@ function createKilometerNeedChoiceProblem(): Problem {
       options,
     ),
     options.indexOf('[[편하게]]') + 1,
+  );
+}
+
+function createSecondNeedIntroProblem(): Problem {
+  const options = ['시간', '초', '분'];
+  const situations = [
+    '눈을 한 번 깜빡이는 데 걸리는 시간은 1분보다 훨씬 짧았습니다.\n분으로만 나타내면 얼마나 걸렸는지 자세히 말하기 어렵습니다.',
+    '박수 한 번 치는 데 걸리는 시간은 아주 짧았습니다.\n분으로만 나타내면 걸린 시간을 정확하게 말하기 어렵습니다.',
+    '엘리베이터 문이 닫히는 데 걸린 시간은 1분보다 훨씬 짧았습니다.\n짧은 시간을 분으로만 나타내면 불편합니다.',
+    '공을 한 번 던지고 받는 데 걸리는 시간은 매우 짧았습니다.\n분으로만 나타내면 얼마나 걸렸는지 알기 어렵습니다.',
+    '출발 신호를 듣고 한 걸음 떼는 데 걸리는 시간은 아주 짧았습니다.\n이처럼 짧은 시간은 분보다 더 작은 단위가 필요합니다.',
+  ];
+
+  return createPromptProblem(
+    buildNumberedOptionsPrompt(
+      `${sample(situations)}\n더 [[정확하게]] 나타내기 위해 필요한 단위는 무엇일까요?`,
+      options,
+    ),
+    options.indexOf('초') + 1,
+  );
+}
+
+function createSecondNeedChoiceProblem(): Problem {
+  const options = ['[[정확하게]]', '[[편하게]]'];
+  return createPromptProblem(
+    buildNumberedOptionsPrompt(
+      '초는 분보다 짧은 시간을 더 어떻게 나타내기 위해 필요한 단위일까요?',
+      options,
+    ),
+    options.indexOf('[[정확하게]]') + 1,
   );
 }
 
@@ -2043,7 +2336,7 @@ const UNIT_SELECTION_CHALLENGE_POOLS: Partial<Record<number, UnitSelectionChalle
       answer: '2km 300m',
     },
   ],
-  9: [
+  8: [
     {
       badge: '시간 단위 선택',
       prompt: '박수 한 번 치는 데 걸리는 시간은 약 1 □입니다.',
@@ -2087,7 +2380,7 @@ const UNIT_SELECTION_CHALLENGE_POOLS: Partial<Record<number, UnitSelectionChalle
       answer: '초',
     },
   ],
-  11: [
+  10: [
     {
       badge: '시간 판단하기',
       prompt: '단위를 잘못 사용한 문장은 어느 것일까요?',
@@ -2149,7 +2442,7 @@ const UNIT_SELECTION_CHALLENGE_POOLS: Partial<Record<number, UnitSelectionChalle
       answer: '학급 회의를 하는 데 20분쯤 걸립니다.',
     },
   ],
-  12: [
+  11: [
     {
       badge: '시간 단위 선택',
       prompt: '멀리 있는 놀이공원까지 차를 타고 가는 시간은 약 1 □ 30 □입니다.',
@@ -2773,36 +3066,6 @@ const UNIT3_PROBLEM_FACTORIES: Record<number, Array<() => Problem>> = {
     )),
   ],
   8: [
-    () => createPromptProblem(
-      '다음 중 시간을 나타내는 것은 몇 번인가요?\n1) 오전 9시 15분 20초\n2) 3분 25초\n3) 오후 1시 5분 10초',
-      2,
-    ),
-    () => createPromptProblem(
-      '다음 중 시각을 나타내는 것은 몇 번인가요?\n1) 45초\n2) 2시간 10분\n3) 오전 7시 30분 5초',
-      3,
-    ),
-    () => createPromptProblem(
-      '다음 중 얼마나 걸렸는지를 나타내는 것은 몇 번인가요?\n1) 오후 4시 12분 30초\n2) 12분 8초\n3) 오전 10시',
-      2,
-    ),
-    () => createPromptProblem(
-      '다음 중 시각을 나타내는 것은 몇 번인가요?\n1) 1시간 15분\n2) 오후 6시 40분\n3) 25초',
-      2,
-    ),
-    () => createPromptProblem(
-      '다음 중 시간을 나타내는 것은 몇 번인가요?\n1) 오전 8시 20분\n2) 45분 10초\n3) 오후 3시 5분',
-      2,
-    ),
-    () => createPromptProblem(
-      '다음 중 어떤 때를 나타내는 것은 몇 번인가요?\n1) 2시간 5분\n2) 50초\n3) 오전 7시 50분',
-      3,
-    ),
-    () => createPromptProblem(
-      '다음 중 얼마나 걸렸는지를 나타내는 것은 몇 번인가요?\n1) 오후 2시 30분\n2) 1시간 8분\n3) 오전 11시 15분',
-      2,
-    ),
-  ],
-  9: [
     () => createPromptProblem('1분은 몇 초인가요?', 60, '초'),
     () => createPromptProblem('85초는 1분 □초입니다.\n□에 들어갈 수는?', 25),
     () => createPromptProblem('2분 35초는 몇 초인가요?', 155, '초'),
@@ -2826,8 +3089,8 @@ const UNIT3_PROBLEM_FACTORIES: Record<number, Array<() => Problem>> = {
       return createPromptProblem(`${minutes * 60}초는 몇 분인가요?`, minutes, '분');
     },
   ],
-  10: [createClockReadingChoiceProblem],
-  11: [
+  9: [createClockReadingVisualProblem],
+  10: [
     () => {
       const firstMinutes = randomInt(1, 6);
       const firstSeconds = randomInt(15, 55);
@@ -2880,7 +3143,7 @@ const UNIT3_PROBLEM_FACTORIES: Record<number, Array<() => Problem>> = {
       }
     },
   ],
-  12: [
+  11: [
     () => {
       const secondMinutes = randomInt(2, 4);
       const secondSeconds = randomInt(15, 45);
@@ -2952,7 +3215,7 @@ const UNIT3_PROBLEM_FACTORIES: Record<number, Array<() => Problem>> = {
 };
 
 function createUnitSelectionChallenge(level: number): UnitSelectionChallenge {
-  const pool = UNIT_SELECTION_CHALLENGE_POOLS[level] ?? UNIT_SELECTION_CHALLENGE_POOLS[12] ?? [];
+  const pool = UNIT_SELECTION_CHALLENGE_POOLS[level] ?? UNIT_SELECTION_CHALLENGE_POOLS[11] ?? [];
   return sample(pool);
 }
 
@@ -2977,7 +3240,21 @@ function generateUnit3Problem(level: number, opponentHP: number, problemSequence
     }
   }
 
-  const factories = UNIT3_PROBLEM_FACTORIES[level] ?? UNIT3_PROBLEM_FACTORIES[12];
+  if (level === 8) {
+    if (problemSequence === 1 || (problemSequence === undefined && opponentHP === 100)) {
+      return createSecondNeedIntroProblem();
+    }
+
+    if (problemSequence === 2) {
+      return createSecondNeedChoiceProblem();
+    }
+  }
+
+  if (level === 9) {
+    return createClockReadingVisualProblem(getClockReadingDifficulty(problemSequence, opponentHP));
+  }
+
+  const factories = UNIT3_PROBLEM_FACTORIES[level] ?? UNIT3_PROBLEM_FACTORIES[11];
 
   if ((level === 1 || level === 3) && opponentHP >= 50) {
     const zeroStartFactories = factories.filter((_, index) => index % 2 === 0);
@@ -4577,6 +4854,176 @@ function MeasurementProblemCard({ measurement }: { measurement: MeasurementProbl
           <p className="break-keep text-[1.15rem] font-black leading-[1.55] text-slate-900 sm:text-[1.45rem] md:text-[2rem]">
             {renderPromptWithHighlight(measurement.question)}
           </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function getClockFacePoint(cx: number, cy: number, radius: number, degrees: number) {
+  const radians = (degrees - 90) * (Math.PI / 180);
+  return {
+    x: cx + Math.cos(radians) * radius,
+    y: cy + Math.sin(radians) * radius,
+  };
+}
+
+function AnalogClockFigure({ hour, minute, second }: { hour: number; minute: number; second: number }) {
+  const cx = 180;
+  const cy = 180;
+  const radius = 128;
+  const minuteProgress = minute + second / 60;
+  const hourProgress = (hour % 12) + minuteProgress / 60;
+  const hourDegrees = hourProgress * 30;
+  const minuteDegrees = minuteProgress * 6;
+  const secondDegrees = second * 6;
+  const hourPoint = getClockFacePoint(cx, cy, radius * 0.47, hourDegrees);
+  const minutePoint = getClockFacePoint(cx, cy, radius * 0.72, minuteDegrees);
+  const secondPoint = getClockFacePoint(cx, cy, radius * 0.82, secondDegrees);
+  const secondTailPoint = getClockFacePoint(cx, cy, radius * 0.18, secondDegrees + 180);
+
+  return (
+    <svg viewBox="0 0 360 360" className="block w-full" role="img" aria-label={`${hour}시 ${minute}분 ${second}초를 가리키는 시계`}>
+      <circle cx={cx} cy={cy} r="144" fill="#c8e19a" />
+      <circle cx={cx} cy={cy} r="130" fill="#ffffff" stroke="#dbe6f3" strokeWidth="2" />
+      {Array.from({ length: 60 }, (_, tickIndex) => {
+        const isHourTick = tickIndex % 5 === 0;
+        const outer = getClockFacePoint(cx, cy, radius - 4, tickIndex * 6);
+        const inner = getClockFacePoint(cx, cy, isHourTick ? radius - 18 : radius - 11, tickIndex * 6);
+
+        return (
+          <line
+            key={`clock-tick-${tickIndex}`}
+            x1={outer.x}
+            y1={outer.y}
+            x2={inner.x}
+            y2={inner.y}
+            stroke={isHourTick ? '#111827' : '#4b5563'}
+            strokeWidth={isHourTick ? 3.4 : 1.5}
+            strokeLinecap="round"
+          />
+        );
+      })}
+      {Array.from({ length: 12 }, (_, index) => {
+        const value = index + 1;
+        const labelPoint = getClockFacePoint(cx, cy, radius - 38, value * 30);
+        return (
+          <text
+            key={`clock-number-${value}`}
+            x={labelPoint.x}
+            y={labelPoint.y + 7}
+            textAnchor="middle"
+            fontSize="31"
+            fontWeight="900"
+            fill="#111827"
+          >
+            {value}
+          </text>
+        );
+      })}
+      <line x1={cx} y1={cy} x2={hourPoint.x} y2={hourPoint.y} stroke="#23a34a" strokeWidth="10" strokeLinecap="round" />
+      <line x1={cx} y1={cy} x2={minutePoint.x} y2={minutePoint.y} stroke="#ef4444" strokeWidth="7" strokeLinecap="round" />
+      <line x1={secondTailPoint.x} y1={secondTailPoint.y} x2={secondPoint.x} y2={secondPoint.y} stroke="#1f2937" strokeWidth="2.4" strokeLinecap="round" />
+      <circle cx={cx} cy={cy} r="8.5" fill="#ffd166" stroke="#f59e0b" strokeWidth="2.2" />
+      <circle cx={cx} cy={cy} r="2.8" fill="#f8fafc" />
+    </svg>
+  );
+}
+
+function ClockReadingProblemCard({
+  clockReading,
+  answerValue,
+  onAnswerChange,
+  onSubmit,
+}: {
+  clockReading: ClockReadingProblemData;
+  answerValue: ClockReadingAnswerInput;
+  onAnswerChange: (part: ClockInputPart, value: string) => void;
+  onSubmit: () => void;
+}) {
+  const fields: Array<{ key: ClockInputPart; label: string; placeholder: string }> = [
+    { key: 'hours', label: '시', placeholder: '시' },
+    { key: 'minutes', label: '분', placeholder: '분' },
+    { key: 'seconds', label: '초', placeholder: '초' },
+  ];
+
+  return (
+    <div className="mx-auto flex w-full max-w-[56rem] flex-col gap-4 text-left text-slate-900 sm:gap-5">
+      <div className="rounded-[2rem] border border-slate-200 bg-slate-50/85 px-4 py-4 shadow-sm sm:px-6 sm:py-5 md:px-8 md:py-7">
+        <p className="text-[1.1rem] font-black leading-[1.5] text-slate-900 sm:text-[1.4rem] md:text-[1.85rem]">
+          {clockReading.title}
+        </p>
+
+        <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(15rem,18rem)] lg:items-center">
+          <div className="overflow-hidden rounded-[1.75rem] border border-sky-200 bg-white p-3 shadow-[inset_0_2px_14px_rgba(148,163,184,0.12)] sm:p-4">
+            <div className="mx-auto w-full max-w-[20rem]">
+              <AnalogClockFigure hour={clockReading.hour} minute={clockReading.minute} second={clockReading.second} />
+            </div>
+          </div>
+
+          <div className="rounded-[1.75rem] border border-emerald-200 bg-emerald-50/85 px-4 py-4 shadow-sm sm:px-5">
+            <div className="grid gap-2 text-sm font-bold text-slate-700 sm:text-base">
+              <div className="flex items-center gap-2 rounded-2xl bg-white/80 px-3 py-2">
+                <span className="inline-block h-3 w-3 rounded-full bg-[#23a34a]" />
+                <span>짧고 굵은 초록색은 시침</span>
+              </div>
+              <div className="flex items-center gap-2 rounded-2xl bg-white/80 px-3 py-2">
+                <span className="inline-block h-3 w-3 rounded-full bg-[#ef4444]" />
+                <span>길고 굵은 빨간색은 분침</span>
+              </div>
+              <div className="flex items-center gap-2 rounded-2xl bg-white/80 px-3 py-2">
+                <span className="inline-block h-3 w-3 rounded-full bg-[#1f2937]" />
+                <span>가늘고 긴 검은색은 초침</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 grid grid-cols-3 gap-3 sm:gap-4">
+          {fields.map((field) => (
+            (() => {
+              const isEditable = clockReading.editableParts.includes(field.key);
+              const displayValue = isEditable
+                ? answerValue[field.key]
+                : String(getClockReadingPartValue(clockReading, field.key));
+
+              return (
+                <label
+                  key={field.key}
+                  className={`flex items-center justify-center gap-2 rounded-[1.5rem] border px-3 py-3 shadow-sm sm:gap-3 sm:px-4 sm:py-4 ${
+                    isEditable
+                      ? 'border-slate-200 bg-white'
+                      : 'border-emerald-200 bg-emerald-50/80'
+                  }`}
+                >
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    maxLength={2}
+                    value={displayValue}
+                    disabled={!isEditable}
+                    readOnly={!isEditable}
+                    onChange={(event) => onAnswerChange(field.key, event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' && !event.ctrlKey && !event.altKey) {
+                        event.preventDefault();
+                        onSubmit();
+                      }
+                    }}
+                    className={`w-full min-w-0 rounded-2xl border-2 px-3 py-3 text-center text-xl font-black text-slate-900 outline-none transition sm:text-2xl ${
+                      isEditable
+                        ? 'border-slate-200 bg-slate-50 focus:border-sky-400 focus:bg-white'
+                        : 'border-emerald-200 bg-white text-emerald-700'
+                    }`}
+                    placeholder={isEditable ? field.placeholder : ''}
+                    aria-label={field.label}
+                  />
+                  <span className="shrink-0 text-2xl font-black text-slate-900 sm:text-3xl">{field.label}</span>
+                </label>
+              );
+            })()
+          ))}
         </div>
       </div>
     </div>
@@ -6188,6 +6635,7 @@ export default function App() {
   const [problem, setProblem] = useState<Problem>(() => getProblemForTurn(DEFAULT_LEARNING_UNIT_ID, 1, 100));
   const [inputValue, setInputValue] = useState('');
   const [unitInputValue, setUnitInputValue] = useState('');
+  const [clockAnswerInput, setClockAnswerInput] = useState<ClockReadingAnswerInput>({ hours: '', minutes: '', seconds: '' });
   const [isUnitMenuOpen, setIsUnitMenuOpen] = useState(false);
   const [builderSlotValues, setBuilderSlotValues] = useState<Record<string, string>>({});
   const [playerHP, setPlayerHP] = useState(100);
@@ -6342,6 +6790,7 @@ export default function App() {
   ) => {
     const nextOpponentHP = options.opponentHP ?? opponentHP;
     setUnitInputValue('');
+    setClockAnswerInput({ hours: '', minutes: '', seconds: '' });
     setIsUnitMenuOpen(false);
 
     if (activeLearningUnitId !== 'unit2') {
@@ -6475,6 +6924,14 @@ export default function App() {
   const isResultScreen = gameState === 'win' || gameState === 'lose';
   const isWinResult = gameState === 'win';
   const defeatSceneImage = gameState === 'lose' ? getDefeatSceneImageForLevel(activeLearningUnitId, level, specialOpponentSelections) : null;
+  const processedOpponentCharacterImage = useEdgeBlackTransparentImage(
+    opponentCharacterImage,
+    currentSpecialOpponent?.removeSpriteBlackBackground ?? false,
+  );
+  const processedDefeatSceneImage = useEdgeBlackTransparentImage(
+    defeatSceneImage,
+    currentSpecialOpponent?.removeDefeatSceneBlackBackground ?? false,
+  );
   const currentLevelDescription = levelDescriptions[level] ?? `${level}단계`;
   const finalRecordLabel = gameState === 'win' ? `${level}단계 클리어` : `${level}단계 도달`;
   const finalRecordTopic = currentLevelDescription.replace(/^\d+단계:\s*/, '');
@@ -6497,6 +6954,7 @@ export default function App() {
     setTimeLeft(ESTIMATION_TIME_LIMIT_SECONDS);
     setInputValue('');
     setUnitInputValue('');
+    setClockAnswerInput({ hours: '', minutes: '', seconds: '' });
     setIsUnitMenuOpen(false);
   };
 
@@ -6579,6 +7037,15 @@ export default function App() {
   const normalizedInputValue = inputValue.trim();
   const normalizedUnitInputValue = normalizeAnswerUnit(unitInputValue);
   const parsedInputAnswer = Number.parseInt(normalizedInputValue, 10);
+  const isClockReadingProblem = problem.kind === 'clockReading' && problem.clockReading !== undefined;
+  const parsedClockAnswer = {
+    hours: Number.parseInt(clockAnswerInput.hours.trim(), 10),
+    minutes: Number.parseInt(clockAnswerInput.minutes.trim(), 10),
+    seconds: Number.parseInt(clockAnswerInput.seconds.trim(), 10),
+  };
+  const editableClockParts = problem.kind === 'clockReading' && problem.clockReading
+    ? problem.clockReading.editableParts
+    : [];
   const currentDistanceWorksheetPrompt =
     problem.kind === 'distanceWorksheet' ? problem.distanceWorksheet?.prompt ?? null : null;
   const normalizedDistanceWorksheetInput = currentDistanceWorksheetPrompt
@@ -6593,15 +7060,24 @@ export default function App() {
     currentDistanceWorksheetPrompt !== null &&
     normalizedDistanceWorksheetInput.length > 0 &&
     hasValidUnitInput;
+  const hasValidClockReadingInput =
+    isClockReadingProblem &&
+    editableClockParts.every((part) => {
+      const value = clockAnswerInput[part].trim();
+      return value.length > 0 && !Number.isNaN(Number.parseInt(value, 10));
+    });
   const usesTextAnswerInput = currentDistanceWorksheetPrompt?.kind === 'place';
   const canAttemptAttack =
-    problem.kind === 'distanceWorksheet'
+    isClockReadingProblem
+      ? hasValidClockReadingInput
+      : problem.kind === 'distanceWorksheet'
       ? Boolean(hasValidDistanceWorksheetInput)
       : problem.kind === 'builder'
       ? hasValidAnswerInput && builderEvaluation?.status === 'ready'
       : hasValidAnswerInput;
   const storyPromptSections = problem.kind === 'story' ? splitStoryPromptSections(problem.prompt) : null;
   const hasNumberedStoryOptions = Boolean(storyPromptSections && storyPromptSections.optionLines.length >= 2);
+  const shouldHighlightPromptNumbers = !(activeLearningUnitId === 'unit3' && level === 8);
   const isCompactBattleViewport =
     isShortViewport || (activeLearningUnitId === 'unit3' && level >= 8) || hasNumberedStoryOptions;
   const battleShellWidthClass = isCompactBattleViewport ? 'max-w-7xl' : 'max-w-[78rem]';
@@ -6647,6 +7123,10 @@ export default function App() {
     }
 
     setBuilderSlotValues({});
+  }, [problem]);
+
+  useEffect(() => {
+    setClockAnswerInput({ hours: '', minutes: '', seconds: '' });
   }, [problem]);
 
   useEffect(() => {
@@ -6713,6 +7193,11 @@ export default function App() {
     }
 
     setBuilderSlotValues((prev) => ({ ...prev, [slotId]: sanitized }));
+  };
+
+  const handleClockAnswerChange = (part: ClockInputPart, nextValue: string) => {
+    const sanitized = nextValue.replace(/\D/g, '').slice(0, 2);
+    setClockAnswerInput((prev) => ({ ...prev, [part]: sanitized }));
   };
 
   const selectEstimationOption = (selected: number) => {
@@ -7005,9 +7490,31 @@ export default function App() {
     }
     setInputValue('');
     setUnitInputValue('');
+    setClockAnswerInput({ hours: '', minutes: '', seconds: '' });
   };
 
   const checkAnswer = () => {
+    if (problem.kind === 'clockReading' && problem.clockReading) {
+      if (!hasValidClockReadingInput) {
+        playSound('ui');
+        updateMessage('빈칸을 모두 채워야 공격할 수 있어!');
+        return;
+      }
+
+      const isCorrect = problem.clockReading.editableParts.every((part) => {
+        const expectedValue = getClockReadingPartValue(problem.clockReading!, part);
+        const answerValue = parsedClockAnswer[part];
+        return answerValue === expectedValue;
+      });
+
+      playSound('submit', {
+        gainMultiplier: 0.9,
+        detune: 10,
+      });
+      resolveProblemResult(isCorrect);
+      return;
+    }
+
     if (problem.kind === 'distanceWorksheet' && problem.distanceWorksheet) {
       if (!hasValidDistanceWorksheetInput) {
         playSound('ui');
@@ -7161,6 +7668,7 @@ export default function App() {
     setProblemWithCoachmark(getNextProblemForTurn(activeLearningUnitId, 1, 100), 1, { opponentHP: 100 });
     setInputValue('');
     setUnitInputValue('');
+    setClockAnswerInput({ hours: '', minutes: '', seconds: '' });
     setIsUnitMenuOpen(false);
     updateMessage(getOpponentEntranceMessage(activeLearningUnitId, 1, nextSpecialOpponentSelections));
   };
@@ -7184,6 +7692,7 @@ export default function App() {
     setTimeLeft(ESTIMATION_TIME_LIMIT_SECONDS);
     setInputValue('');
     setUnitInputValue('');
+    setClockAnswerInput({ hours: '', minutes: '', seconds: '' });
     setIsUnitMenuOpen(false);
   };
 
@@ -7508,7 +8017,7 @@ export default function App() {
                 >
                   {opponentSpriteSet && opponentCharacterImage ? (
                     <img
-                      src={opponentCharacterImage}
+                      src={processedOpponentCharacterImage ?? opponentCharacterImage}
                       alt={`${currentOpponentName} 캐릭터`}
                       className={`h-full max-h-full w-auto max-w-full translate-y-2 object-contain select-none drop-shadow-[0_18px_24px_rgba(15,23,42,0.35)] ${opponentImageClassName}`}
                       draggable={false}
@@ -7762,6 +8271,8 @@ export default function App() {
                 className={`flex min-h-0 flex-1 rounded-3xl border-8 border-slate-200 bg-white shadow-inner ${
                   problem.kind === 'distanceMap' || problem.kind === 'distanceWorksheet'
                     ? 'flex flex-col overflow-hidden p-2 sm:p-3 lg:p-3'
+                    : problem.kind === 'clockReading'
+                      ? 'flex flex-col overflow-y-auto p-2 sm:p-3 lg:p-3'
                     : hasNumberedStoryOptions
                       ? 'flex flex-col overflow-hidden p-3 sm:p-4 lg:p-5'
                     : problem.kind !== 'equation'
@@ -7784,6 +8295,13 @@ export default function App() {
                     />
                 ) : problem.kind === 'measurement' && problem.measurement ? (
                   <MeasurementProblemCard measurement={problem.measurement} />
+                ) : problem.kind === 'clockReading' && problem.clockReading ? (
+                  <ClockReadingProblemCard
+                    clockReading={problem.clockReading}
+                    answerValue={clockAnswerInput}
+                    onAnswerChange={handleClockAnswerChange}
+                    onSubmit={checkAnswer}
+                  />
                 ) : problem.kind === 'story' ? (
                   hasNumberedStoryOptions && storyPromptSections ? (
                     <div className={`mx-auto flex h-full w-full max-w-[54rem] flex-col text-left text-slate-900 ${isCompactBattleViewport ? 'gap-3' : 'gap-4 sm:gap-5'}`}>
@@ -7815,7 +8333,7 @@ export default function App() {
                                       : 'text-[1.1rem] font-bold leading-[1.72] text-slate-700 sm:text-[1.35rem] lg:text-[1.75rem]'
                                 }`}
                               >
-                                {renderPromptWithHighlight(line, level !== 9)}
+                                {renderPromptWithHighlight(line, shouldHighlightPromptNumbers)}
                               </p>
                             </div>
                           );
@@ -7841,7 +8359,7 @@ export default function App() {
                                   : 'text-[1.35rem] font-black leading-[1.48] sm:text-[1.7rem] lg:text-[2.15rem]'
                               }`}
                             >
-                              {renderPromptWithHighlight(line, level !== 9)}
+                              {renderPromptWithHighlight(line, shouldHighlightPromptNumbers)}
                             </p>
                           </div>
                         ))}
@@ -7878,7 +8396,7 @@ export default function App() {
                                     : 'text-[1.1rem] font-bold leading-[1.72] text-slate-700 sm:text-[1.45rem] md:text-[2rem]'
                               }`}
                             >
-                              {renderPromptWithHighlight(line, level !== 9)}
+                              {renderPromptWithHighlight(line, shouldHighlightPromptNumbers)}
                             </p>
                           </div>
                         );
@@ -7953,98 +8471,12 @@ export default function App() {
 
             {!isSpecialChallengeActive && (
               <div className={`shrink-0 flex flex-col ${battleInputResponsiveClass}`}>
-                <div className={`grid grid-cols-[minmax(0,1fr)_auto] items-stretch ${battleInputResponsiveClass}`}>
-                  <div className={`flex min-w-0 items-center rounded-2xl border-4 border-slate-500 bg-slate-700 px-4 focus-within:border-emerald-500 ${
-                    isCompactBattleViewport ? 'gap-2 py-1.5' : 'gap-3 py-2'
-                  }`}>
-                    <input
-                      type={usesTextAnswerInput ? 'text' : 'number'}
-                      inputMode={usesTextAnswerInput ? 'text' : 'numeric'}
-                      value={inputValue}
-                      onChange={e => setInputValue(e.target.value)}
-                      onKeyDown={e => {
-                        if (e.key === 'Enter' && !e.ctrlKey && !e.altKey) {
-                          e.preventDefault();
-                          checkAnswer();
-                        }
-                      }}
-                      className={`min-w-0 flex-1 bg-transparent text-center font-black text-slate-100 outline-none placeholder:text-slate-400 ${
-                        isCompactBattleViewport ? 'py-1.5 text-xl sm:text-2xl' : 'py-2 text-2xl sm:text-3xl'
-                      }`}
-                      placeholder={
-                        problem.kind === 'builder'
-                          ? '답'
-                          : problem.kind === 'distanceWorksheet'
-                            ? usesTextAnswerInput
-                              ? '장소 이름 입력'
-                              : '숫자 입력'
-                            : requiresUnitSelection
-                              ? '숫자 입력'
-                              : '정답 입력'
-                      }
-                    />
-                    {requiresUnitSelection && (
-                      <div ref={unitMenuRef} className="relative shrink-0 pl-1">
-                        <button
-                          type="button"
-                          onClick={() => setIsUnitMenuOpen((prev) => !prev)}
-                          className={`flex min-h-[3.75rem] min-w-[7.75rem] items-center justify-between rounded-2xl border-2 px-4 py-3 text-lg font-black outline-none transition sm:min-h-[4rem] sm:min-w-[8.5rem] sm:text-xl ${
-                            unitInputValue
-                              ? 'border-cyan-300 bg-[linear-gradient(180deg,#67e8f9,#22d3ee)] text-slate-950 shadow-[0_0_18px_rgba(34,211,238,0.22)]'
-                              : 'border-slate-300/60 bg-[linear-gradient(180deg,#334155,#1e293b)] text-slate-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]'
-                          }`}
-                          aria-haspopup="listbox"
-                          aria-expanded={isUnitMenuOpen}
-                        >
-                          <span className="truncate">{unitInputValue || '단위'}</span>
-                          <ChevronDown
-                            size={20}
-                            className={`shrink-0 transition-transform ${isUnitMenuOpen ? 'rotate-180' : ''}`}
-                          />
-                        </button>
-                        <AnimatePresence>
-                          {isUnitMenuOpen && (
-                            <motion.div
-                              initial={{ opacity: 0, y: 10, scale: 0.96 }}
-                              animate={{ opacity: 1, y: 0, scale: 1 }}
-                              exit={{ opacity: 0, y: 8, scale: 0.97 }}
-                              transition={{ duration: 0.16, ease: 'easeOut' }}
-                              className="absolute bottom-[calc(100%+0.7rem)] right-0 z-30 w-[8.5rem] overflow-hidden rounded-[1.35rem] border-2 border-cyan-200/80 bg-[linear-gradient(180deg,rgba(30,41,59,0.98),rgba(15,23,42,0.98))] p-2 shadow-[0_18px_44px_rgba(15,23,42,0.42)]"
-                            >
-                              {answerUnitOptions.map((option) => {
-                                const isSelected = normalizeAnswerUnit(unitInputValue) === normalizeAnswerUnit(option);
-                                return (
-                                  <button
-                                    key={option}
-                                    type="button"
-                                    onClick={() => {
-                                      setUnitInputValue(option);
-                                      setIsUnitMenuOpen(false);
-                                    }}
-                                    className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-lg font-black transition ${
-                                      isSelected
-                                        ? 'bg-[linear-gradient(180deg,#3b82f6,#2563eb)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]'
-                                        : 'text-slate-100 hover:bg-white/10'
-                                    }`}
-                                    role="option"
-                                    aria-selected={isSelected}
-                                  >
-                                    <span>{option}</span>
-                                    {isSelected ? <Check size={18} className="shrink-0" /> : <span className="w-[18px]" aria-hidden="true" />}
-                                  </button>
-                                );
-                              })}
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    )}
-                  </div>
+                {isClockReadingProblem ? (
                   <button
                     type="button"
                     disabled={!canAttemptAttack}
                     onClick={checkAnswer}
-                    className={`flex w-full min-w-0 items-center justify-center gap-2 rounded-2xl px-5 py-3 text-lg font-black text-white shadow-lg sm:min-w-[170px] sm:w-auto sm:px-6 sm:text-xl ${
+                    className={`flex w-full min-w-0 items-center justify-center gap-2 rounded-2xl px-5 py-3 text-lg font-black text-white shadow-lg sm:px-6 sm:text-xl ${
                       canAttemptAttack
                         ? 'bg-emerald-600 hover:bg-emerald-500'
                         : 'cursor-not-allowed bg-slate-500 opacity-60'
@@ -8052,7 +8484,108 @@ export default function App() {
                   >
                     <Sword size={22} /> 공격!
                   </button>
-                </div>
+                ) : (
+                  <div className={`grid grid-cols-[minmax(0,1fr)_auto] items-stretch ${battleInputResponsiveClass}`}>
+                    <div className={`flex min-w-0 items-center rounded-2xl border-4 border-slate-500 bg-slate-700 px-4 focus-within:border-emerald-500 ${
+                      isCompactBattleViewport ? 'gap-2 py-1.5' : 'gap-3 py-2'
+                    }`}>
+                      <input
+                        type={usesTextAnswerInput ? 'text' : 'number'}
+                        inputMode={usesTextAnswerInput ? 'text' : 'numeric'}
+                        value={inputValue}
+                        onChange={e => setInputValue(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter' && !e.ctrlKey && !e.altKey) {
+                            e.preventDefault();
+                            checkAnswer();
+                          }
+                        }}
+                        className={`min-w-0 flex-1 bg-transparent text-center font-black text-slate-100 outline-none placeholder:text-slate-400 ${
+                          isCompactBattleViewport ? 'py-1.5 text-xl sm:text-2xl' : 'py-2 text-2xl sm:text-3xl'
+                        }`}
+                        placeholder={
+                          problem.kind === 'builder'
+                            ? '답'
+                            : problem.kind === 'distanceWorksheet'
+                              ? usesTextAnswerInput
+                                ? '장소 이름 입력'
+                                : '숫자 입력'
+                              : requiresUnitSelection
+                                ? '숫자 입력'
+                                : '정답 입력'
+                        }
+                      />
+                      {requiresUnitSelection && (
+                        <div ref={unitMenuRef} className="relative shrink-0 pl-1">
+                          <button
+                            type="button"
+                            onClick={() => setIsUnitMenuOpen((prev) => !prev)}
+                            className={`flex min-h-[3.75rem] min-w-[7.75rem] items-center justify-between rounded-2xl border-2 px-4 py-3 text-lg font-black outline-none transition sm:min-h-[4rem] sm:min-w-[8.5rem] sm:text-xl ${
+                              unitInputValue
+                                ? 'border-cyan-300 bg-[linear-gradient(180deg,#67e8f9,#22d3ee)] text-slate-950 shadow-[0_0_18px_rgba(34,211,238,0.22)]'
+                                : 'border-slate-300/60 bg-[linear-gradient(180deg,#334155,#1e293b)] text-slate-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]'
+                            }`}
+                            aria-haspopup="listbox"
+                            aria-expanded={isUnitMenuOpen}
+                          >
+                            <span className="truncate">{unitInputValue || '단위'}</span>
+                            <ChevronDown
+                              size={20}
+                              className={`shrink-0 transition-transform ${isUnitMenuOpen ? 'rotate-180' : ''}`}
+                            />
+                          </button>
+                          <AnimatePresence>
+                            {isUnitMenuOpen && (
+                              <motion.div
+                                initial={{ opacity: 0, y: 10, scale: 0.96 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 8, scale: 0.97 }}
+                                transition={{ duration: 0.16, ease: 'easeOut' }}
+                                className="absolute bottom-[calc(100%+0.7rem)] right-0 z-30 w-[8.5rem] overflow-hidden rounded-[1.35rem] border-2 border-cyan-200/80 bg-[linear-gradient(180deg,rgba(30,41,59,0.98),rgba(15,23,42,0.98))] p-2 shadow-[0_18px_44px_rgba(15,23,42,0.42)]"
+                              >
+                                {answerUnitOptions.map((option) => {
+                                  const isSelected = normalizeAnswerUnit(unitInputValue) === normalizeAnswerUnit(option);
+                                  return (
+                                    <button
+                                      key={option}
+                                      type="button"
+                                      onClick={() => {
+                                        setUnitInputValue(option);
+                                        setIsUnitMenuOpen(false);
+                                      }}
+                                      className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-lg font-black transition ${
+                                        isSelected
+                                          ? 'bg-[linear-gradient(180deg,#3b82f6,#2563eb)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]'
+                                          : 'text-slate-100 hover:bg-white/10'
+                                      }`}
+                                      role="option"
+                                      aria-selected={isSelected}
+                                    >
+                                      <span>{option}</span>
+                                      {isSelected ? <Check size={18} className="shrink-0" /> : <span className="w-[18px]" aria-hidden="true" />}
+                                    </button>
+                                  );
+                                })}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      disabled={!canAttemptAttack}
+                      onClick={checkAnswer}
+                      className={`flex w-full min-w-0 items-center justify-center gap-2 rounded-2xl px-5 py-3 text-lg font-black text-white shadow-lg sm:min-w-[170px] sm:w-auto sm:px-6 sm:text-xl ${
+                        canAttemptAttack
+                          ? 'bg-emerald-600 hover:bg-emerald-500'
+                          : 'cursor-not-allowed bg-slate-500 opacity-60'
+                      }`}
+                    >
+                      <Sword size={22} /> 공격!
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -8146,7 +8679,7 @@ export default function App() {
                 배틀 승리!
               </motion.h1>
             </div>
-          ) : defeatSceneImage ? (
+          ) : processedDefeatSceneImage ? (
             <div className="relative mb-4 sm:mb-5">
               <motion.div
                 className="mx-auto w-full max-w-[20rem] overflow-hidden rounded-[1.75rem] border border-slate-500/80 bg-slate-900/80 p-2 shadow-[0_22px_60px_rgba(15,23,42,0.4)] sm:max-w-[22rem]"
@@ -8154,7 +8687,7 @@ export default function App() {
                 transition={{ repeat: Infinity, duration: 3.4, ease: 'easeInOut' }}
               >
                 <img
-                  src={defeatSceneImage}
+                  src={processedDefeatSceneImage}
                   alt="1단계 패배 장면"
                   className={`mx-auto aspect-square max-h-[34svh] w-full rounded-[1.35rem] object-contain sm:max-h-[38svh] ${defeatSceneImageClassName}`}
                   draggable={false}
