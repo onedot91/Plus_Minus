@@ -161,6 +161,10 @@ interface BuilderProblemData {
   validate: (left: number, right: number) => boolean;
 }
 
+interface BuilderTemplate extends BuilderProblemData {
+  templateId: string;
+}
+
 interface Problem {
   text: string;
   prompt: string;
@@ -192,7 +196,7 @@ interface UnitSelectionChallenge {
 }
 
 type DistanceWorksheetInputKind = 'number' | 'place';
-type DistanceWorksheetMapVariant = 'meadow' | 'river' | 'town' | 'campus' | 'orchard';
+type DistanceWorksheetMapVariant = 'meadow' | 'river' | 'town' | 'campus' | 'orchard' | 'harbor' | 'village';
 
 interface DistanceWorksheetLandmarkData {
   id: string;
@@ -1704,6 +1708,16 @@ function createBuilderSlot(id: string, label: string, min: number, max: number):
   };
 }
 
+const previousBuilderTemplateIdByLevel: Partial<Record<number, string>> = {};
+
+function pickBuilderTemplate(level: number, templates: BuilderTemplate[]) {
+  const previousTemplateId = previousBuilderTemplateIdByLevel[level];
+  const candidates = templates.filter((template) => template.templateId !== previousTemplateId);
+  const selectedTemplate = sample(candidates.length > 0 ? candidates : templates);
+  previousBuilderTemplateIdByLevel[level] = selectedTemplate.templateId;
+  return selectedTemplate;
+}
+
 const STORY_TEMPLATE_POOLS: Record<number, StoryTemplatePool> = {
   8: {
     '+': [
@@ -1948,6 +1962,14 @@ function buildNumberedOptionsPrompt(question: string, options: string[]) {
   return `${question}\n${options.map((option, index) => `${index + 1}) ${option}`).join('\n')}`;
 }
 
+function createShuffledOptionsProblem(question: string, options: string[], correctOption: string) {
+  const shuffledOptions = shuffleValues(options);
+  return createPromptProblem(
+    buildNumberedOptionsPrompt(question, shuffledOptions),
+    shuffledOptions.indexOf(correctOption) + 1,
+  );
+}
+
 function formatClockTime(hours: number, minutes: number, seconds?: number) {
   if (seconds === undefined) {
     return `${hours}시 ${minutes}분`;
@@ -2119,6 +2141,96 @@ function createStoryTimeAdditionProblem(
   });
 }
 
+const CLOCK_TIME_ADDITION_PRESENTATIONS = [
+  {
+    title: '시계 그림으로 시간을 더해 보세요.',
+    instruction: '시작 시각과 더할 시간을 보고, 결과 시각을 써 보세요.',
+  },
+  {
+    title: '시계를 보고 지난 뒤의 시각을 구해 보세요.',
+    instruction: '처음 시각에서 몇 분 몇 초가 지난 뒤의 시각을 적어 보세요.',
+  },
+  {
+    title: '시각이 어떻게 바뀌는지 생각해 보세요.',
+    instruction: '주어진 시각에 시간을 더한 뒤의 결과를 구해 보세요.',
+  },
+] as const;
+
+const BAR_TIME_ADDITION_PRESENTATIONS = [
+  {
+    title: '띠모형으로 시간을 합쳐 보세요.',
+    instruction: '두 시간 띠가 모여 하나가 되는 모습을 보고 합한 시간을 구해 보세요.',
+  },
+  {
+    title: '띠를 보고 더해진 시간을 구해 보세요.',
+    instruction: '앞의 시간과 뒤의 시간이 이어진 전체 시간을 적어 보세요.',
+  },
+  {
+    title: '시간 띠를 이어 붙여 보세요.',
+    instruction: '두 구간의 시간을 합쳐 전체 시간이 얼마인지 생각해 보세요.',
+  },
+] as const;
+
+const VERTICAL_TIME_ADDITION_PRESENTATIONS = [
+  {
+    title: '세로식으로 시간을 더해 보세요.',
+    instruction: '세로식을 보고 시간, 분, 초를 차례대로 계산해 보세요.',
+  },
+  {
+    title: '세로 계산으로 시간을 더해 보세요.',
+    instruction: '초부터 차례대로 더하며 결과를 구해 보세요.',
+  },
+  {
+    title: '시간 세로셈을 완성해 보세요.',
+    instruction: '올림이 있는지 살피며 계산 결과를 적어 보세요.',
+  },
+] as const;
+
+const CLOCK_TIME_SUBTRACTION_PRESENTATIONS = [
+  {
+    title: '시계 그림으로 시간을 빼 보세요.',
+    instruction: '시작 시각과 뺄 시간을 보고, 결과 시각을 써 보세요.',
+  },
+  {
+    title: '시계를 보고 전의 시각을 구해 보세요.',
+    instruction: '주어진 시각에서 몇 분 몇 초 전인지 계산해 보세요.',
+  },
+  {
+    title: '시각에서 시간을 빼 보세요.',
+    instruction: '시계에 나타난 시각에서 주어진 시간을 뺀 결과를 구해 보세요.',
+  },
+] as const;
+
+const BAR_TIME_SUBTRACTION_PRESENTATIONS = [
+  {
+    title: '띠모형으로 시간을 빼 보세요.',
+    instruction: '처음 시간과 뺄 시간을 보고 남은 시간을 구해 보세요.',
+  },
+  {
+    title: '시간 띠에서 남은 시간을 찾아보세요.',
+    instruction: '전체 시간에서 일부 시간을 덜어낸 뒤 남은 시간을 적어 보세요.',
+  },
+  {
+    title: '띠모형으로 남은 시간을 계산해 보세요.',
+    instruction: '두 시간 띠의 차이를 생각하며 답을 구해 보세요.',
+  },
+] as const;
+
+const VERTICAL_TIME_SUBTRACTION_PRESENTATIONS = [
+  {
+    title: '세로식으로 시간을 빼 보세요.',
+    instruction: '세로식을 보고 시간, 분, 초를 차례대로 계산해 보세요.',
+  },
+  {
+    title: '세로 계산으로 시간을 빼 보세요.',
+    instruction: '필요한 곳에서 받아내림하며 결과를 구해 보세요.',
+  },
+  {
+    title: '시간 세로셈을 완성해 보세요.',
+    instruction: '초와 분의 받아내림을 살피며 차를 계산해 보세요.',
+  },
+] as const;
+
 function createClockTimeAdditionProblem(step = 1): Problem {
   while (true) {
     const startHour = randomInt(1, 10);
@@ -2149,9 +2261,10 @@ function createClockTimeAdditionProblem(step = 1): Problem {
     const result = splitClockSeconds(startHour * 3600 + startMinute * 60 + startSecond + addMinutes * 60 + addSeconds);
 
     if (result.hours <= 12) {
+      const presentation = sample(CLOCK_TIME_ADDITION_PRESENTATIONS);
       return createTimeAdditionProblem({
-        title: '시계 그림으로 시간을 더해 보세요.',
-        instruction: '시작 시각과 더할 시간을 보고, 결과 시각을 써 보세요.',
+        title: presentation.title,
+        instruction: presentation.instruction,
         mode: 'clock',
         operation: '+',
         left: { hours: startHour, minutes: startMinute, seconds: startSecond },
@@ -2187,9 +2300,10 @@ function createBarModelTimeAdditionProblem(step = 1): Problem {
       continue;
     }
 
+    const presentation = sample(BAR_TIME_ADDITION_PRESENTATIONS);
     return createTimeAdditionProblem({
-      title: '띠모형으로 시간을 합쳐 보세요.',
-      instruction: '두 시간 띠가 모여 하나가 되는 모습을 보고 합한 시간을 구해 보세요.',
+      title: presentation.title,
+      instruction: presentation.instruction,
       mode: 'bar',
       operation: '+',
       left: { hours: 0, minutes: leftMinutes, seconds: leftSeconds },
@@ -2236,9 +2350,10 @@ function createVerticalTimeAdditionProblem(step = 1): Problem {
       continue;
     }
 
+    const presentation = sample(VERTICAL_TIME_ADDITION_PRESENTATIONS);
     return createTimeAdditionProblem({
-      title: '세로식으로 시간을 더해 보세요.',
-      instruction: '세로식을 보고 시간, 분, 초를 차례대로 계산해 보세요.',
+      title: presentation.title,
+      instruction: presentation.instruction,
       mode: 'vertical',
       operation: '+',
       left,
@@ -2281,9 +2396,10 @@ function createClockTimeSubtractionProblem(step = 1): Problem {
     const result = splitClockSeconds(resultSeconds);
 
     if (result.hours >= 1) {
+      const presentation = sample(CLOCK_TIME_SUBTRACTION_PRESENTATIONS);
       return createTimeAdditionProblem({
-        title: '시계 그림으로 시간을 빼 보세요.',
-        instruction: '시작 시각과 뺄 시간을 보고, 결과 시각을 써 보세요.',
+        title: presentation.title,
+        instruction: presentation.instruction,
         mode: 'clock',
         operation: '-',
         left: { hours: startHour, minutes: startMinute, seconds: startSecond },
@@ -2318,9 +2434,10 @@ function createBarModelTimeSubtractionProblem(step = 1): Problem {
     const result = splitClockSeconds(resultSeconds);
 
     if (toTotalTimeSeconds(result) > 0) {
+      const presentation = sample(BAR_TIME_SUBTRACTION_PRESENTATIONS);
       return createTimeAdditionProblem({
-        title: '띠모형으로 시간을 빼 보세요.',
-        instruction: '처음 시간과 뺄 시간을 보고 남은 시간을 구해 보세요.',
+        title: presentation.title,
+        instruction: presentation.instruction,
         mode: 'bar',
         operation: '-',
         left: { hours: 0, minutes: leftMinutes, seconds: leftSeconds },
@@ -2368,9 +2485,10 @@ function createVerticalTimeSubtractionProblem(step = 1): Problem {
       continue;
     }
 
+    const presentation = sample(VERTICAL_TIME_SUBTRACTION_PRESENTATIONS);
     return createTimeAdditionProblem({
-      title: '세로식으로 시간을 빼 보세요.',
-      instruction: '세로식을 보고 시간, 분, 초를 차례대로 계산해 보세요.',
+      title: presentation.title,
+      instruction: presentation.instruction,
       mode: 'vertical',
       operation: '-',
       left,
@@ -3236,25 +3354,27 @@ function createMillimeterNeedIntroProblem(): Problem {
     '단추 한 개의 두께를 재었더니 1cm보다 짧았습니다.\n0cm라고 하면 너무 작고, 1cm라고 하면 너무 크게 나타납니다.',
     '짧게 자른 종이띠의 길이를 재었더니 1cm보다 짧았습니다.\ncm만으로는 길이를 자세히 나타내기 어렵습니다.',
     '손톱의 두께를 재어 보니 1cm보다 짧았습니다.\ncm로만 나타내면 얼마나 되는지 정확히 말하기 어렵습니다.',
+    '도화지에 그은 작은 선의 길이를 재었더니 1cm보다 짧았습니다.\ncm로만 쓰면 실제 길이와 비슷하게 나타내기 어렵습니다.',
+    '작은 스티커 한 조각의 길이를 재었더니 1cm보다 짧았습니다.\ncm보다 더 잘게 나타낼 단위가 필요합니다.',
+    '연필심 굵기를 자로 재어 보니 1cm보다 훨씬 짧았습니다.\ncm만으로는 길이를 바르게 말하기 어렵습니다.',
   ];
-  return createPromptProblem(
-    buildNumberedOptionsPrompt(
-      `${sample(situations)}\n더 [[정확하게]] 나타내기 위해 필요한 단위는 무엇일까요?`,
-      options,
-    ),
-    options.indexOf('mm') + 1,
-  );
+  const questions = [
+    '더 [[정확하게]] 나타내기 위해 필요한 단위는 무엇일까요?',
+    '이 길이를 [[딱 맞게]] 나타내려면 어떤 단위가 필요할까요?',
+    'cm보다 더 잘게 나타내려면 어떤 단위를 써야 할까요?',
+  ];
+  return createShuffledOptionsProblem(`${sample(situations)}\n${sample(questions)}`, options, 'mm');
 }
 
 function createMillimeterNeedChoiceProblem(): Problem {
   const options = ['[[정확하게]]', '[[편하게]]'];
-  return createPromptProblem(
-    buildNumberedOptionsPrompt(
-      'mm는 cm보다 길이를 더 어떻게 나타내기 위해 필요한 단위일까요?',
-      options,
-    ),
-    options.indexOf('[[정확하게]]') + 1,
-  );
+  const questions = [
+    'mm는 cm보다 길이를 더 어떻게 나타내기 위해 필요한 단위일까요?',
+    '1cm보다 짧은 길이를 나타낼 때 mm는 어떤 점에서 더 좋을까요?',
+    'mm를 사용하면 cm보다 길이를 어떻게 나타낼 수 있을까요?',
+    '아주 짧은 길이를 말할 때 mm가 필요한 까닭은 무엇일까요?',
+  ];
+  return createShuffledOptionsProblem(sample(questions), options, '[[정확하게]]');
 }
 
 function createKilometerNeedIntroProblem(): Problem {
@@ -3265,25 +3385,27 @@ function createKilometerNeedIntroProblem(): Problem {
     '학교에서 수련원까지 버스로 가는 거리를 m로 나타내면 수가 너무 커집니다.',
     '우리 집에서 할머니 댁까지 차로 가는 먼 거리를 m로 나타내면 아주 큰 수가 됩니다.',
     '도시와 도시 사이의 거리를 m로 나타내면 숫자가 너무 길어집니다.',
+    '고속도로를 따라 멀리 이동한 거리를 m로 나타내면 숫자가 너무 커집니다.',
+    '기차를 타고 다른 도시까지 가는 거리를 m로만 쓰면 읽기 불편합니다.',
+    '멀리 떨어진 놀이공원까지의 거리를 m로 나타내면 수가 너무 길어집니다.',
   ];
-  return createPromptProblem(
-    buildNumberedOptionsPrompt(
-      `${sample(situations)}\n더 [[편하게]] 나타내기 위해 필요한 단위는 무엇일까요?`,
-      options,
-    ),
-    options.indexOf('km') + 1,
-  );
+  const questions = [
+    '더 [[편하게]] 나타내기 위해 필요한 단위는 무엇일까요?',
+    '이처럼 먼 거리를 나타낼 때 쓰기 좋은 단위는 무엇일까요?',
+    '숫자가 너무 길어지지 않게 하려면 어떤 단위를 써야 할까요?',
+  ];
+  return createShuffledOptionsProblem(`${sample(situations)}\n${sample(questions)}`, options, 'km');
 }
 
 function createKilometerNeedChoiceProblem(): Problem {
   const options = ['[[정확하게]]', '[[편하게]]'];
-  return createPromptProblem(
-    buildNumberedOptionsPrompt(
-      'km는 m보다 먼 거리를 더 어떻게 나타내기 위해 필요한 단위일까요?',
-      options,
-    ),
-    options.indexOf('[[편하게]]') + 1,
-  );
+  const questions = [
+    'km는 m보다 먼 거리를 더 어떻게 나타내기 위해 필요한 단위일까요?',
+    '아주 먼 거리를 말할 때 km를 쓰는 까닭은 무엇일까요?',
+    'km를 사용하면 먼 거리를 m보다 어떻게 나타낼 수 있을까요?',
+    '먼 거리를 나타낼 때 km가 좋은 점은 무엇일까요?',
+  ];
+  return createShuffledOptionsProblem(sample(questions), options, '[[편하게]]');
 }
 
 function createSecondNeedIntroProblem(): Problem {
@@ -3294,26 +3416,27 @@ function createSecondNeedIntroProblem(): Problem {
     '엘리베이터 문이 닫히는 데 걸린 시간은 1분보다 훨씬 짧았습니다.\n짧은 시간을 분으로만 나타내면 불편합니다.',
     '공을 한 번 던지고 받는 데 걸리는 시간은 매우 짧았습니다.\n분으로만 나타내면 얼마나 걸렸는지 알기 어렵습니다.',
     '출발 신호를 듣고 한 걸음 떼는 데 걸리는 시간은 아주 짧았습니다.\n이처럼 짧은 시간은 분보다 더 작은 단위가 필요합니다.',
+    '촛불을 후 하고 끄는 데 걸리는 시간은 매우 짧았습니다.\n분으로만 쓰면 실제 느낌과 다르게 나타납니다.',
+    '문자를 한 번 눌러 보내는 데 걸리는 시간은 아주 짧았습니다.\n이런 시간은 분보다 더 작은 단위가 필요합니다.',
+    '리모컨 버튼을 한 번 누르는 데 걸리는 시간은 거의 잠깐입니다.\n분으로는 자세히 나타내기 어렵습니다.',
   ];
-
-  return createPromptProblem(
-    buildNumberedOptionsPrompt(
-      `${sample(situations)}\n더 [[정확하게]] 나타내기 위해 필요한 단위는 무엇일까요?`,
-      options,
-    ),
-    options.indexOf('초') + 1,
-  );
+  const questions = [
+    '더 [[정확하게]] 나타내기 위해 필요한 단위는 무엇일까요?',
+    '이처럼 짧은 시간을 나타내려면 어떤 단위가 필요할까요?',
+    '분보다 더 작은 단위로 나타내려면 무엇을 써야 할까요?',
+  ];
+  return createShuffledOptionsProblem(`${sample(situations)}\n${sample(questions)}`, options, '초');
 }
 
 function createSecondNeedChoiceProblem(): Problem {
   const options = ['[[정확하게]]', '[[편하게]]'];
-  return createPromptProblem(
-    buildNumberedOptionsPrompt(
-      '초는 분보다 짧은 시간을 더 어떻게 나타내기 위해 필요한 단위일까요?',
-      options,
-    ),
-    options.indexOf('[[정확하게]]') + 1,
-  );
+  const questions = [
+    '초는 분보다 짧은 시간을 더 어떻게 나타내기 위해 필요한 단위일까요?',
+    '아주 짧은 시간을 나타낼 때 초를 쓰는 까닭은 무엇일까요?',
+    '초를 사용하면 짧은 시간을 분보다 어떻게 나타낼 수 있을까요?',
+    '짧은 시간을 말할 때 초가 필요한 이유는 무엇일까요?',
+  ];
+  return createShuffledOptionsProblem(sample(questions), options, '[[정확하게]]');
 }
 
 function createEquationProblem(a: number, b: number, op: '+' | '-', answer: number): Problem {
@@ -3985,6 +4108,29 @@ const DISTANCE_COMPARE_SCENARIOS: DistanceCompareScenarioConfig[] = [
       DISTANCE_MAP_PARK_POINT,
     ],
   },
+  {
+    strategy: 'compare',
+    targetLabel: '경찰서',
+    targetMeters: 1500,
+    targetRoute: [
+      DISTANCE_MAP_HOME_POINT,
+      { x: 238, y: 124 },
+      { x: 194, y: 208 },
+      DISTANCE_MAP_POLICE_POINT,
+    ],
+  },
+  {
+    strategy: 'compare',
+    targetLabel: '축구장',
+    targetMeters: 2500,
+    targetRoute: [
+      DISTANCE_MAP_HOME_POINT,
+      { x: 352, y: 118 },
+      { x: 388, y: 196 },
+      { x: 382, y: 276 },
+      DISTANCE_MAP_STADIUM_POINT,
+    ],
+  },
 ];
 
 const DISTANCE_CHUNK_SCENARIOS: DistanceChunkScenarioConfig[] = [
@@ -4006,6 +4152,26 @@ const DISTANCE_CHUNK_SCENARIOS: DistanceChunkScenarioConfig[] = [
       { id: 'science-1', color: '#38bdf8', points: [DISTANCE_MAP_HOME_POINT, { x: 360, y: 110 }, { x: 442, y: 152 }], units: 2 },
       { id: 'science-2', color: '#818cf8', points: [{ x: 442, y: 152 }, { x: 500, y: 208 }], units: 1 },
       { id: 'science-3', color: '#f472b6', points: [{ x: 500, y: 208 }, { x: 528, y: 238 }, DISTANCE_MAP_SCIENCE_POINT], units: 1 },
+    ],
+  },
+  {
+    strategy: 'chunk',
+    targetLabel: '공원',
+    targetMeters: 2500,
+    segments: [
+      { id: 'park-1', color: '#38bdf8', points: [DISTANCE_MAP_HOME_POINT, { x: 344, y: 102 }, { x: 414, y: 104 }], units: 2 },
+      { id: 'park-2', color: '#60a5fa', points: [{ x: 414, y: 104 }, { x: 476, y: 108 }], units: 1 },
+      { id: 'park-3', color: '#22c55e', points: [{ x: 476, y: 108 }, DISTANCE_MAP_PARK_POINT], units: 2 },
+    ],
+  },
+  {
+    strategy: 'chunk',
+    targetLabel: '도서관',
+    targetMeters: 1500,
+    segments: [
+      { id: 'library-1', color: '#f59e0b', points: [DISTANCE_MAP_HOME_POINT, { x: 252, y: 110 }], units: 1 },
+      { id: 'library-2', color: '#fbbf24', points: [{ x: 252, y: 110 }, { x: 208, y: 128 }], units: 1 },
+      { id: 'library-3', color: '#34d399', points: [{ x: 208, y: 128 }, DISTANCE_MAP_LIBRARY_POINT], units: 1 },
     ],
   },
 ];
@@ -4033,6 +4199,30 @@ const DISTANCE_UNITIZE_SCENARIOS: DistanceUnitizeScenarioConfig[] = [
       { x: 442, y: 152 },
       { x: 500, y: 208 },
       DISTANCE_MAP_SCIENCE_POINT,
+    ],
+  },
+  {
+    strategy: 'unitize',
+    targetLabel: '경찰서',
+    targetMeters: 1500,
+    targetRoute: [
+      DISTANCE_MAP_HOME_POINT,
+      { x: 256, y: 122 },
+      { x: 214, y: 214 },
+      DISTANCE_MAP_POLICE_POINT,
+    ],
+  },
+  {
+    strategy: 'unitize',
+    targetLabel: '공원',
+    targetMeters: 2500,
+    targetRoute: [
+      DISTANCE_MAP_HOME_POINT,
+      { x: 340, y: 102 },
+      { x: 410, y: 102 },
+      { x: 470, y: 106 },
+      { x: 508, y: 110 },
+      DISTANCE_MAP_PARK_POINT,
     ],
   },
 ];
@@ -4153,6 +4343,49 @@ const DISTANCE_WORKSHEET_PROBLEM_SETS: DistanceWorksheetProblemSetData[] = [
       { id: 'e-condition', prefix: '마트에서 거리가 약 6 km 떨어진 곳은 ', suffix: '입니다.', answer: '학교', kind: 'place' },
     ],
   },
+  {
+    title: DISTANCE_WORKSHEET_TITLE,
+    instruction: DISTANCE_WORKSHEET_INSTRUCTION,
+    mapVariant: 'harbor',
+    dotCount: 7,
+    reference: { fromDotIndex: 3, toDotIndex: 4, label: '약 1 km' },
+    landmarks: [
+      { id: 'library-f', label: '도서관', dotIndex: 0, row: 'top', accent: '#60a5fa', icon: 'library' },
+      { id: 'park-f', label: '공원', dotIndex: 1, row: 'bottom', accent: '#86efac', icon: 'park' },
+      { id: 'station-f', label: '버스터미널', dotIndex: 2, row: 'bottom', accent: '#38bdf8', icon: 'station' },
+      { id: 'market-f', label: '시장', dotIndex: 3, row: 'top', accent: '#7dd3fc', icon: 'market' },
+      { id: 'hospital-f', label: '병원', dotIndex: 4, row: 'top', accent: '#fda4af', icon: 'hospital' },
+      { id: 'bank-f', label: '은행', dotIndex: 5, row: 'top', accent: '#fde68a', icon: 'bank' },
+      { id: 'school-f', label: '학교', dotIndex: 6, row: 'top', accent: '#bfdbfe', icon: 'school' },
+    ],
+    prompts: [
+      { id: 'f-distance', prefix: '버스터미널에서 학교까지의 거리는 약 ', suffix: '입니다.', answer: '4', kind: 'number', answerUnit: 'km' },
+      { id: 'f-place', prefix: '도서관에서 ', suffix: '까지의 거리는 약 6 km입니다.', answer: '학교', kind: 'place' },
+      { id: 'f-condition', prefix: '시장에서 거리가 약 2 km 떨어진 곳은 ', suffix: '입니다.', answer: '은행', kind: 'place' },
+    ],
+  },
+  {
+    title: DISTANCE_WORKSHEET_TITLE,
+    instruction: DISTANCE_WORKSHEET_INSTRUCTION,
+    mapVariant: 'village',
+    dotCount: 8,
+    reference: { fromDotIndex: 1, toDotIndex: 2, label: '약 1 km' },
+    landmarks: [
+      { id: 'bookstore-g', label: '서점', dotIndex: 0, row: 'top', accent: '#60a5fa', icon: 'bookstore' },
+      { id: 'fountain-g', label: '분수대', dotIndex: 1, row: 'top', accent: '#93c5fd', icon: 'fountain' },
+      { id: 'school-g', label: '학교', dotIndex: 2, row: 'top', accent: '#bfdbfe', icon: 'school' },
+      { id: 'park-g', label: '공원', dotIndex: 3, row: 'bottom', accent: '#86efac', icon: 'park' },
+      { id: 'hospital-g', label: '병원', dotIndex: 4, row: 'top', accent: '#fda4af', icon: 'hospital' },
+      { id: 'bank-g', label: '은행', dotIndex: 5, row: 'top', accent: '#fde68a', icon: 'bank' },
+      { id: 'market-g', label: '마트', dotIndex: 6, row: 'top', accent: '#7dd3fc', icon: 'market' },
+      { id: 'station-g', label: '버스터미널', dotIndex: 7, row: 'bottom', accent: '#38bdf8', icon: 'station' },
+    ],
+    prompts: [
+      { id: 'g-distance', prefix: '공원에서 버스터미널까지의 거리는 약 ', suffix: '입니다.', answer: '4', kind: 'number', answerUnit: 'km' },
+      { id: 'g-place', prefix: '서점에서 ', suffix: '까지의 거리는 약 6 km입니다.', answer: '마트', kind: 'place' },
+      { id: 'g-condition', prefix: '분수대에서 거리가 약 4 km 떨어진 곳은 ', suffix: '입니다.', answer: '은행', kind: 'place' },
+    ],
+  },
 ];
 
 const UNIT3_PROBLEM_FACTORIES: Record<number, Array<() => Problem>> = {
@@ -4197,6 +4430,51 @@ const UNIT3_PROBLEM_FACTORIES: Record<number, Array<() => Problem>> = {
       const shownMillimeters = isCorrect ? toMillimeters(centimeters) : toMillimeters(centimeters) + sample([1, 2, 3, 4]);
       return createPromptProblem(
         `${centimeters}cm는 ${shownMillimeters}mm와 같습니다.\n맞으면 1, 틀리면 2를 쓰세요.`,
+        isCorrect ? 1 : 2,
+      );
+    },
+    () => {
+      const centimeters = randomInt(2, 7);
+      const millimeters = randomInt(1, 9);
+      return createPromptProblem(
+        `□cm ${millimeters}mm는 ${toMillimeters(centimeters, millimeters)}mm입니다.\n□에 들어갈 수는?`,
+        centimeters,
+      );
+    },
+    () => {
+      const totalMillimeters = randomInt(24, 88);
+      const correctText = formatLengthAsMixedUnits(totalMillimeters);
+      const wrongValues = new Set<number>();
+      while (wrongValues.size < 2) {
+        const candidate = totalMillimeters + sample([-4, -3, -2, 2, 3, 4]);
+        if (candidate > 10 && candidate !== totalMillimeters) {
+          wrongValues.add(candidate);
+        }
+      }
+      return createShuffledOptionsProblem(
+        `${totalMillimeters}mm와 같은 것을 고르면 몇 번일까요?`,
+        [correctText, ...[...wrongValues].map((value) => formatLengthAsMixedUnits(value))],
+        correctText,
+      );
+    },
+    () => {
+      const shorter = randomInt(2, 6);
+      const longer = shorter + randomInt(1, 3);
+      const extraMillimeters = randomInt(1, 9);
+      return createPromptProblem(
+        `${shorter}cm와 ${longer}cm ${extraMillimeters}mm 중 더 긴 것은 몇 mm인가요?`,
+        toMillimeters(longer, extraMillimeters),
+        'mm',
+      );
+    },
+    () => {
+      const centimeters = randomInt(2, 7);
+      const millimeters = randomInt(1, 9);
+      const totalMillimeters = toMillimeters(centimeters, millimeters);
+      const isCorrect = Math.random() < 0.5;
+      const shownMillimeters = isCorrect ? totalMillimeters : totalMillimeters + sample([-3, -2, -1, 1, 2, 3]);
+      return createPromptProblem(
+        `${centimeters}cm ${millimeters}mm는 ${shownMillimeters}mm와 같습니다.\n맞으면 1, 틀리면 2를 쓰세요.`,
         isCorrect ? 1 : 2,
       );
     },
@@ -4273,6 +4551,37 @@ const UNIT3_PROBLEM_FACTORIES: Record<number, Array<() => Problem>> = {
         isCorrect ? 1 : 2,
       );
     },
+    () => {
+      const kilometers = randomInt(2, 9);
+      return createPromptProblem(`${kilometers * 1000}m는 □km입니다.\n□에 들어갈 수는?`, kilometers);
+    },
+    () => {
+      const kilometers = randomInt(2, 9);
+      return createPromptProblem(`□km는 ${kilometers * 1000}m입니다.\n□에 들어갈 수는?`, kilometers);
+    },
+    () => {
+      const kilometers = randomInt(2, 8);
+      const correctText = `${kilometers * 1000}m`;
+      return createShuffledOptionsProblem(
+        `${kilometers}km와 같은 것을 고르면 몇 번일까요?`,
+        [correctText, `${kilometers * 100}m`, `${kilometers}m`],
+        correctText,
+      );
+    },
+    () => {
+      const shorter = randomInt(2, 5);
+      const longer = shorter + randomInt(1, 3);
+      return createPromptProblem(`${shorter}km와 ${longer}km 중 더 먼 거리는 몇 m인가요?`, longer * 1000, 'm');
+    },
+    () => {
+      const kilometers = randomInt(2, 8);
+      const isCorrect = Math.random() < 0.5;
+      const shownKilometers = isCorrect ? kilometers : kilometers + sample([-1, 1]);
+      return createPromptProblem(
+        `${kilometers * 1000}m는 ${shownKilometers}km입니다.\n맞으면 1, 틀리면 2를 쓰세요.`,
+        isCorrect ? 1 : 2,
+      );
+    },
   ],
   6: [
     () => {
@@ -4317,6 +4626,7 @@ const UNIT3_PROBLEM_FACTORIES: Record<number, Array<() => Problem>> = {
     },
   ],
   7: [
+    ...DISTANCE_STAGE7_SCENARIOS.map((config) => () => createDistanceMapScenario(config)),
     ...DISTANCE_WORKSHEET_PROBLEM_SETS.flatMap(({ prompts, ...worksheetBase }) => (
       prompts.map((prompt) => () => createDistanceWorksheetProblem({ ...worksheetBase, prompt }))
     )),
@@ -4343,6 +4653,48 @@ const UNIT3_PROBLEM_FACTORIES: Record<number, Array<() => Problem>> = {
     () => {
       const minutes = randomInt(3, 6);
       return createPromptProblem(`${minutes * 60}초는 몇 분인가요?`, minutes, '분');
+    },
+    () => {
+      const minutes = randomInt(2, 6);
+      return createPromptProblem(`${minutes * 60}초는 □분입니다.\n□에 들어갈 수는?`, minutes);
+    },
+    () => {
+      const minutes = randomInt(2, 5);
+      const seconds = randomInt(5, 55);
+      const totalSeconds = minutes * 60 + seconds;
+      const correctText = formatDuration(0, minutes, seconds);
+      const wrongValues = new Set<number>();
+      while (wrongValues.size < 2) {
+        const candidate = totalSeconds + sample([-15, -10, -5, 5, 10, 15]);
+        if (candidate > 60 && candidate !== totalSeconds) {
+          wrongValues.add(candidate);
+        }
+      }
+      return createShuffledOptionsProblem(
+        `${totalSeconds}초와 같은 것을 고르면 몇 번일까요?`,
+        [correctText, ...[...wrongValues].map((value) => {
+          const converted = splitClockSeconds(value);
+          return formatDuration(0, converted.minutes, converted.seconds);
+        })],
+        correctText,
+      );
+    },
+    () => {
+      const minutes = randomInt(2, 5);
+      const isCorrect = Math.random() < 0.5;
+      const shownSeconds = isCorrect ? minutes * 60 : minutes * 60 + sample([-20, -10, 10, 20]);
+      return createPromptProblem(
+        `${minutes}분은 ${shownSeconds}초입니다.\n맞으면 1, 틀리면 2를 쓰세요.`,
+        isCorrect ? 1 : 2,
+      );
+    },
+    () => {
+      const minutes = randomInt(2, 5);
+      const seconds = randomInt(10, 50);
+      return createPromptProblem(
+        `${minutes}분 ${seconds}초는 ${minutes}분보다 □초 더 깁니다.\n□에 들어갈 수는?`,
+        seconds,
+      );
     },
   ],
   9: [createClockReadingVisualProblem],
@@ -4627,8 +4979,9 @@ function createBuilderProblem(level: number): Problem {
 
   switch (level) {
     case 1:
-      builder = sample([
+      builder = pickBuilderTemplate(level, [
         {
+          templateId: 'level1-mid-mid',
           title: baseTitle,
           instruction: '받아올림 없는 덧셈',
           helperText: '칸별 숫자 범위를 확인해 주세요.',
@@ -4643,6 +4996,7 @@ function createBuilderProblem(level: number): Problem {
           validate: (left, right) => left + right <= 999 && countCarries(left, right) === 0,
         },
         {
+          templateId: 'level1-top-hund-bottom-tens',
           title: baseTitle,
           instruction: '받아올림 없는 덧셈',
           helperText: '칸별 숫자 범위를 확인해 주세요.',
@@ -4657,6 +5011,7 @@ function createBuilderProblem(level: number): Problem {
           validate: (left, right) => left + right <= 999 && countCarries(left, right) === 0,
         },
         {
+          templateId: 'level1-top-ones-bottom-hund',
           title: baseTitle,
           instruction: '받아올림 없는 덧셈',
           helperText: '칸별 숫자 범위를 확인해 주세요.',
@@ -4670,11 +5025,57 @@ function createBuilderProblem(level: number): Problem {
           invalidMessage: '받아올림이 생기지 않도록 빈칸의 수를 다시 골라 주세요.',
           validate: (left, right) => left + right <= 999 && countCarries(left, right) === 0,
         },
+        {
+          templateId: 'level1-alt-mid-mid',
+          title: baseTitle,
+          instruction: '받아올림 없는 덧셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '+',
+          topTemplate: '1[a]3',
+          bottomTemplate: '2[b]5',
+          slots: [
+            createBuilderSlot('a', '윗수의 십의 자리', 0, 4),
+            createBuilderSlot('b', '아랫수의 십의 자리', 0, 4),
+          ],
+          invalidMessage: '받아올림이 생기지 않도록 빈칸의 수를 다시 골라 주세요.',
+          validate: (left, right) => left + right <= 999 && countCarries(left, right) === 0,
+        },
+        {
+          templateId: 'level1-alt-top-hund-bottom-tens',
+          title: baseTitle,
+          instruction: '받아올림 없는 덧셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '+',
+          topTemplate: '[a]13',
+          bottomTemplate: '2[b]4',
+          slots: [
+            createBuilderSlot('a', '윗수의 백의 자리', 1, 6),
+            createBuilderSlot('b', '아랫수의 십의 자리', 0, 4),
+          ],
+          invalidMessage: '받아올림이 생기지 않도록 빈칸의 수를 다시 골라 주세요.',
+          validate: (left, right) => left + right <= 999 && countCarries(left, right) === 0,
+        },
+        {
+          templateId: 'level1-alt-mid-mid-2',
+          title: baseTitle,
+          instruction: '받아올림 없는 덧셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '+',
+          topTemplate: '3[a]2',
+          bottomTemplate: '1[b]4',
+          slots: [
+            createBuilderSlot('a', '윗수의 십의 자리', 0, 4),
+            createBuilderSlot('b', '아랫수의 십의 자리', 0, 4),
+          ],
+          invalidMessage: '받아올림이 생기지 않도록 빈칸의 수를 다시 골라 주세요.',
+          validate: (left, right) => left + right <= 999 && countCarries(left, right) === 0,
+        },
       ]);
       break;
     case 2:
-      builder = sample([
+      builder = pickBuilderTemplate(level, [
         {
+          templateId: 'level2-mid-mid',
           title: baseTitle,
           instruction: '받아내림 없는 뺄셈',
           helperText: '칸별 숫자 범위를 확인해 주세요.',
@@ -4689,6 +5090,7 @@ function createBuilderProblem(level: number): Problem {
           validate: (left, right) => left > right && countBorrows(left, right) === 0,
         },
         {
+          templateId: 'level2-top-hund-bottom-tens',
           title: baseTitle,
           instruction: '받아내림 없는 뺄셈',
           helperText: '칸별 숫자 범위를 확인해 주세요.',
@@ -4703,6 +5105,7 @@ function createBuilderProblem(level: number): Problem {
           validate: (left, right) => left > right && countBorrows(left, right) === 0,
         },
         {
+          templateId: 'level2-top-ones-bottom-hund',
           title: baseTitle,
           instruction: '받아내림 없는 뺄셈',
           helperText: '칸별 숫자 범위를 확인해 주세요.',
@@ -4716,11 +5119,57 @@ function createBuilderProblem(level: number): Problem {
           invalidMessage: '받아내림이 생기지 않도록 제시된 범위 안에서 다시 만들어 주세요.',
           validate: (left, right) => left > right && countBorrows(left, right) === 0,
         },
+        {
+          templateId: 'level2-alt-mid-mid',
+          title: baseTitle,
+          instruction: '받아내림 없는 뺄셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '-',
+          topTemplate: '7[a]8',
+          bottomTemplate: '2[b]3',
+          slots: [
+            createBuilderSlot('a', '윗수의 십의 자리', 5, 9),
+            createBuilderSlot('b', '아랫수의 십의 자리', 0, 4),
+          ],
+          invalidMessage: '받아내림이 생기지 않도록 제시된 범위 안에서 다시 만들어 주세요.',
+          validate: (left, right) => left > right && countBorrows(left, right) === 0,
+        },
+        {
+          templateId: 'level2-alt-top-hund-bottom-tens',
+          title: baseTitle,
+          instruction: '받아내림 없는 뺄셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '-',
+          topTemplate: '[a]75',
+          bottomTemplate: '3[b]2',
+          slots: [
+            createBuilderSlot('a', '윗수의 백의 자리', 5, 9),
+            createBuilderSlot('b', '아랫수의 십의 자리', 0, 6),
+          ],
+          invalidMessage: '받아내림이 생기지 않도록 제시된 범위 안에서 다시 만들어 주세요.',
+          validate: (left, right) => left > right && countBorrows(left, right) === 0,
+        },
+        {
+          templateId: 'level2-alt-top-tens-bottom-hund',
+          title: baseTitle,
+          instruction: '받아내림 없는 뺄셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '-',
+          topTemplate: '9[a]4',
+          bottomTemplate: '[b]21',
+          slots: [
+            createBuilderSlot('a', '윗수의 십의 자리', 2, 9),
+            createBuilderSlot('b', '아랫수의 백의 자리', 1, 8),
+          ],
+          invalidMessage: '받아내림이 생기지 않도록 제시된 범위 안에서 다시 만들어 주세요.',
+          validate: (left, right) => left > right && countBorrows(left, right) === 0,
+        },
       ]);
       break;
     case 3:
-      builder = sample([
+      builder = pickBuilderTemplate(level, [
         {
+          templateId: 'level3-mid-mid',
           title: baseTitle,
           instruction: '받아올림 1번 덧셈',
           helperText: '칸별 숫자 범위를 확인해 주세요.',
@@ -4735,6 +5184,7 @@ function createBuilderProblem(level: number): Problem {
           validate: (left, right) => left + right <= 999 && countCarries(left, right) === 1,
         },
         {
+          templateId: 'level3-top-hund-bottom-ones',
           title: baseTitle,
           instruction: '받아올림 1번 덧셈',
           helperText: '칸별 숫자 범위를 확인해 주세요.',
@@ -4749,6 +5199,7 @@ function createBuilderProblem(level: number): Problem {
           validate: (left, right) => left + right <= 999 && countCarries(left, right) === 1,
         },
         {
+          templateId: 'level3-top-ones-bottom-hund',
           title: baseTitle,
           instruction: '받아올림 1번 덧셈',
           helperText: '칸별 숫자 범위를 확인해 주세요.',
@@ -4762,11 +5213,57 @@ function createBuilderProblem(level: number): Problem {
           invalidMessage: '받아올림이 꼭 1번만 생기도록 다시 만들어 주세요.',
           validate: (left, right) => left + right <= 999 && countCarries(left, right) === 1,
         },
+        {
+          templateId: 'level3-alt-mid-mid',
+          title: baseTitle,
+          instruction: '받아올림 1번 덧셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '+',
+          topTemplate: '4[a]8',
+          bottomTemplate: '2[b]1',
+          slots: [
+            createBuilderSlot('a', '윗수의 십의 자리', 5, 9),
+            createBuilderSlot('b', '아랫수의 십의 자리', 5, 9),
+          ],
+          invalidMessage: '받아올림이 꼭 1번만 생기도록 다시 만들어 주세요.',
+          validate: (left, right) => left + right <= 999 && countCarries(left, right) === 1,
+        },
+        {
+          templateId: 'level3-alt-mid-mid-2',
+          title: baseTitle,
+          instruction: '받아올림 1번 덧셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '+',
+          topTemplate: '5[a]4',
+          bottomTemplate: '2[b]5',
+          slots: [
+            createBuilderSlot('a', '윗수의 십의 자리', 6, 9),
+            createBuilderSlot('b', '아랫수의 십의 자리', 4, 5),
+          ],
+          invalidMessage: '받아올림이 꼭 1번만 생기도록 다시 만들어 주세요.',
+          validate: (left, right) => left + right <= 999 && countCarries(left, right) === 1,
+        },
+        {
+          templateId: 'level3-alt-top-tens-bottom-hund',
+          title: baseTitle,
+          instruction: '받아올림 1번 덧셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '+',
+          topTemplate: '1[a]9',
+          bottomTemplate: '[b]30',
+          slots: [
+            createBuilderSlot('a', '윗수의 십의 자리', 7, 9),
+            createBuilderSlot('b', '아랫수의 백의 자리', 1, 7),
+          ],
+          invalidMessage: '받아올림이 꼭 1번만 생기도록 다시 만들어 주세요.',
+          validate: (left, right) => left + right <= 999 && countCarries(left, right) === 1,
+        },
       ]);
       break;
     case 4:
-      builder = sample([
+      builder = pickBuilderTemplate(level, [
         {
+          templateId: 'level4-mid-mid',
           title: baseTitle,
           instruction: '받아내림 1번 뺄셈',
           helperText: '칸별 숫자 범위를 확인해 주세요.',
@@ -4781,6 +5278,7 @@ function createBuilderProblem(level: number): Problem {
           validate: (left, right) => left > right && countBorrows(left, right) === 1,
         },
         {
+          templateId: 'level4-top-hund-bottom-ones',
           title: baseTitle,
           instruction: '받아내림 1번 뺄셈',
           helperText: '칸별 숫자 범위를 확인해 주세요.',
@@ -4795,6 +5293,7 @@ function createBuilderProblem(level: number): Problem {
           validate: (left, right) => left > right && countBorrows(left, right) === 1,
         },
         {
+          templateId: 'level4-top-tens-bottom-hund',
           title: baseTitle,
           instruction: '받아내림 1번 뺄셈',
           helperText: '칸별 숫자 범위를 확인해 주세요.',
@@ -4808,11 +5307,57 @@ function createBuilderProblem(level: number): Problem {
           invalidMessage: '받아내림이 정확히 1번 생기도록 다시 만들어 주세요.',
           validate: (left, right) => left > right && countBorrows(left, right) === 1,
         },
+        {
+          templateId: 'level4-alt-ones-borrow',
+          title: baseTitle,
+          instruction: '받아내림 1번 뺄셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '-',
+          topTemplate: '8[a]2',
+          bottomTemplate: '3[b]5',
+          slots: [
+            createBuilderSlot('a', '윗수의 십의 자리', 6, 9),
+            createBuilderSlot('b', '아랫수의 십의 자리', 0, 5),
+          ],
+          invalidMessage: '받아내림이 정확히 1번 생기도록 다시 만들어 주세요.',
+          validate: (left, right) => left > right && countBorrows(left, right) === 1,
+        },
+        {
+          templateId: 'level4-alt-top-hund-bottom-tens',
+          title: baseTitle,
+          instruction: '받아내림 1번 뺄셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '-',
+          topTemplate: '[a]40',
+          bottomTemplate: '2[b]7',
+          slots: [
+            createBuilderSlot('a', '윗수의 백의 자리', 5, 9),
+            createBuilderSlot('b', '아랫수의 십의 자리', 0, 3),
+          ],
+          invalidMessage: '받아내림이 정확히 1번 생기도록 다시 만들어 주세요.',
+          validate: (left, right) => left > right && countBorrows(left, right) === 1,
+        },
+        {
+          templateId: 'level4-alt-mid-mid-2',
+          title: baseTitle,
+          instruction: '받아내림 1번 뺄셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '-',
+          topTemplate: '7[a]3',
+          bottomTemplate: '4[b]8',
+          slots: [
+            createBuilderSlot('a', '윗수의 십의 자리', 5, 9),
+            createBuilderSlot('b', '아랫수의 십의 자리', 0, 4),
+          ],
+          invalidMessage: '받아내림이 정확히 1번 생기도록 다시 만들어 주세요.',
+          validate: (left, right) => left > right && countBorrows(left, right) === 1,
+        },
       ]);
       break;
     case 5:
-      builder = sample([
+      builder = pickBuilderTemplate(level, [
         {
+          templateId: 'level5-mid-mid',
           title: baseTitle,
           instruction: '받아올림 2번 이상 덧셈',
           helperText: '칸별 숫자 범위를 확인해 주세요.',
@@ -4827,6 +5372,7 @@ function createBuilderProblem(level: number): Problem {
           validate: (left, right) => countCarries(left, right) >= 2,
         },
         {
+          templateId: 'level5-top-hund-bottom-tens',
           title: baseTitle,
           instruction: '받아올림 2번 이상 덧셈',
           helperText: '칸별 숫자 범위를 확인해 주세요.',
@@ -4841,6 +5387,7 @@ function createBuilderProblem(level: number): Problem {
           validate: (left, right) => countCarries(left, right) >= 2,
         },
         {
+          templateId: 'level5-top-ones-bottom-hund',
           title: baseTitle,
           instruction: '받아올림 2번 이상 덧셈',
           helperText: '칸별 숫자 범위를 확인해 주세요.',
@@ -4854,11 +5401,57 @@ function createBuilderProblem(level: number): Problem {
           invalidMessage: '받아올림이 2번 이상 생기도록 다시 만들어 주세요.',
           validate: (left, right) => countCarries(left, right) >= 2,
         },
+        {
+          templateId: 'level5-alt-mid-mid',
+          title: baseTitle,
+          instruction: '받아올림 2번 이상 덧셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '+',
+          topTemplate: '5[a]7',
+          bottomTemplate: '2[b]6',
+          slots: [
+            createBuilderSlot('a', '윗수의 십의 자리', 5, 9),
+            createBuilderSlot('b', '아랫수의 십의 자리', 5, 9),
+          ],
+          invalidMessage: '받아올림이 2번 이상 생기도록 다시 만들어 주세요.',
+          validate: (left, right) => countCarries(left, right) >= 2,
+        },
+        {
+          templateId: 'level5-alt-top-hund-bottom-tens',
+          title: baseTitle,
+          instruction: '받아올림 2번 이상 덧셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '+',
+          topTemplate: '[a]89',
+          bottomTemplate: '1[b]7',
+          slots: [
+            createBuilderSlot('a', '윗수의 백의 자리', 1, 7),
+            createBuilderSlot('b', '아랫수의 십의 자리', 1, 9),
+          ],
+          invalidMessage: '받아올림이 2번 이상 생기도록 다시 만들어 주세요.',
+          validate: (left, right) => countCarries(left, right) >= 2,
+        },
+        {
+          templateId: 'level5-alt-mid-mid-2',
+          title: baseTitle,
+          instruction: '받아올림 2번 이상 덧셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '+',
+          topTemplate: '7[a]9',
+          bottomTemplate: '1[b]4',
+          slots: [
+            createBuilderSlot('a', '윗수의 십의 자리', 5, 9),
+            createBuilderSlot('b', '아랫수의 십의 자리', 4, 9),
+          ],
+          invalidMessage: '받아올림이 2번 이상 생기도록 다시 만들어 주세요.',
+          validate: (left, right) => countCarries(left, right) >= 2,
+        },
       ]);
       break;
     case 6:
-      builder = sample([
+      builder = pickBuilderTemplate(level, [
         {
+          templateId: 'level6-top-tens-bottom-hund',
           title: baseTitle,
           instruction: '받아내림 2번 뺄셈',
           helperText: '칸별 숫자 범위를 확인해 주세요.',
@@ -4873,6 +5466,7 @@ function createBuilderProblem(level: number): Problem {
           validate: (left, right) => left > right && countBorrows(left, right) === 2,
         },
         {
+          templateId: 'level6-top-hund-bottom-hund',
           title: baseTitle,
           instruction: '받아내림 2번 뺄셈',
           helperText: '칸별 숫자 범위를 확인해 주세요.',
@@ -4887,6 +5481,7 @@ function createBuilderProblem(level: number): Problem {
           validate: (left, right) => left > right && countBorrows(left, right) === 2,
         },
         {
+          templateId: 'level6-mid-mid',
           title: baseTitle,
           instruction: '받아내림 2번 뺄셈',
           helperText: '칸별 숫자 범위를 확인해 주세요.',
@@ -4896,6 +5491,51 @@ function createBuilderProblem(level: number): Problem {
           slots: [
             createBuilderSlot('a', '윗수의 십의 자리', 0, 4),
             createBuilderSlot('b', '아랫수의 십의 자리', 5, 9),
+          ],
+          invalidMessage: '받아내림이 2번 생기도록 다시 만들어 주세요.',
+          validate: (left, right) => left > right && countBorrows(left, right) === 2,
+        },
+        {
+          templateId: 'level6-alt-mid-mid',
+          title: baseTitle,
+          instruction: '받아내림 2번 뺄셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '-',
+          topTemplate: '7[a]1',
+          bottomTemplate: '4[b]8',
+          slots: [
+            createBuilderSlot('a', '윗수의 십의 자리', 0, 4),
+            createBuilderSlot('b', '아랫수의 십의 자리', 5, 9),
+          ],
+          invalidMessage: '받아내림이 2번 생기도록 다시 만들어 주세요.',
+          validate: (left, right) => left > right && countBorrows(left, right) === 2,
+        },
+        {
+          templateId: 'level6-alt-top-hund-bottom-tens',
+          title: baseTitle,
+          instruction: '받아내림 2번 뺄셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '-',
+          topTemplate: '[a]20',
+          bottomTemplate: '3[b]6',
+          slots: [
+            createBuilderSlot('a', '윗수의 백의 자리', 5, 9),
+            createBuilderSlot('b', '아랫수의 십의 자리', 5, 9),
+          ],
+          invalidMessage: '받아내림이 2번 생기도록 다시 만들어 주세요.',
+          validate: (left, right) => left > right && countBorrows(left, right) === 2,
+        },
+        {
+          templateId: 'level6-alt-top-hund-bottom-tens-2',
+          title: baseTitle,
+          instruction: '받아내림 2번 뺄셈',
+          helperText: '칸별 숫자 범위를 확인해 주세요.',
+          op: '-',
+          topTemplate: '[a]41',
+          bottomTemplate: '2[b]8',
+          slots: [
+            createBuilderSlot('a', '윗수의 백의 자리', 4, 9),
+            createBuilderSlot('b', '아랫수의 십의 자리', 4, 9),
           ],
           invalidMessage: '받아내림이 2번 생기도록 다시 만들어 주세요.',
           validate: (left, right) => left > right && countBorrows(left, right) === 2,
@@ -8702,6 +9342,52 @@ function renderDistanceWorksheetMapBackdrop(variant: DistanceWorksheetMapVariant
     );
   }
 
+  if (variant === 'harbor') {
+    return (
+      <>
+        <rect x="28" y="26" width="704" height="264" rx="88" fill="#dbeafe" />
+        <path
+          d="M70 92 C180 52, 304 56, 410 96 C514 136, 610 136, 688 92 L688 154 L70 154 Z"
+          fill="#93c5fd"
+          opacity="0.84"
+        />
+        <path d="M78 246 C188 222, 306 220, 424 238 C538 254, 626 252, 692 238" stroke="#67e8f9" strokeWidth="20" strokeLinecap="round" opacity="0.66" />
+        <rect x="52" y={roadTopY} width="656" height="60" rx="30" fill="#fde68a" />
+        <rect x="70" y={greenBandY + 2} width="620" height="14" rx="7" fill="#38bdf8" opacity="0.34" />
+        {[116, 184, 566, 632].map((x, index) => (
+          <g key={`harbor-anchor-${index}`} opacity="0.82">
+            <circle cx={x} cy={90 + (index % 2) * 14} r="12" fill="#f8fafc" stroke="#0f172a" strokeWidth="2.3" />
+            <path d={`M${x} ${102 + (index % 2) * 14} v18 M${x - 10} ${112 + (index % 2) * 14} q10 10 20 0`} stroke="#0f172a" strokeWidth="2.3" fill="none" strokeLinecap="round" />
+          </g>
+        ))}
+      </>
+    );
+  }
+
+  if (variant === 'village') {
+    return (
+      <>
+        <rect x="28" y="26" width="704" height="264" rx="88" fill="#fef3c7" />
+        <path
+          d="M78 90 C186 48, 304 52, 404 88 C506 124, 596 124, 682 88 L682 158 L78 158 Z"
+          fill="#bbf7d0"
+          opacity="0.9"
+        />
+        <path d="M98 138 C210 114, 332 112, 448 130 C564 148, 632 146, 682 132" stroke="#f9a8d4" strokeWidth="18" strokeLinecap="round" opacity="0.42" />
+        <rect x="52" y={roadTopY} width="656" height="60" rx="30" fill="#fdba74" />
+        <rect x="64" y={greenBandY + 2} width="632" height="18" rx="9" fill="#86efac" opacity="0.72" />
+        {[112, 170, 228, 554, 612].map((x, index) => (
+          <g key={`village-tree-${index}`} opacity="0.84">
+            <circle cx={x} cy={88 + (index % 2) * 18} r="14" fill="#4ade80" />
+            <rect x={x - 3} y={98 + (index % 2) * 18} width="6" height="16" rx="3" fill="#a16207" />
+            <circle cx={x - 8} cy={82 + (index % 2) * 18} r="3" fill="#f59e0b" />
+            <circle cx={x + 7} cy={92 + (index % 2) * 18} r="3" fill="#fb7185" />
+          </g>
+        ))}
+      </>
+    );
+  }
+
   return (
     <>
       <rect x="28" y="26" width="704" height="264" rx="88" fill="#d9f99d" />
@@ -11013,68 +11699,90 @@ export default function App() {
           initial={{ opacity: 0, scale: 0.97, y: 16 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.28, ease: 'easeOut' }}
-          className="relative w-full max-w-6xl overflow-hidden rounded-[2rem] border-4 border-emerald-200/20 bg-[linear-gradient(180deg,rgba(15,23,42,0.98),rgba(30,41,59,0.96))] shadow-[0_30px_80px_rgba(15,23,42,0.48)]"
+          className="relative w-full max-w-6xl overflow-hidden rounded-[2.25rem] border border-cyan-100/15 bg-[linear-gradient(180deg,rgba(5,10,22,0.98),rgba(15,23,42,0.97)_38%,rgba(17,24,39,0.96))] shadow-[0_34px_120px_rgba(2,8,23,0.72),inset_0_1px_0_rgba(255,255,255,0.04)]"
         >
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(251,191,36,0.16),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(45,212,191,0.18),transparent_28%)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(250,204,21,0.14),transparent_24%),radial-gradient(circle_at_top_right,rgba(34,211,238,0.1),transparent_20%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.18),transparent_28%),linear-gradient(180deg,rgba(255,255,255,0.02),transparent_26%)]" />
+          <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
 
-          <div className="relative flex flex-col gap-6 p-4 sm:gap-7 sm:p-6 lg:p-8">
+          <div className="relative flex flex-col gap-5 p-4 sm:gap-6 sm:p-6 lg:gap-7 lg:p-8">
             <div className="flex justify-end">
               <button
                 type="button"
                 onClick={returnToStartScreen}
-                className="rounded-full border border-slate-500 px-5 py-2 text-sm font-black text-slate-200 transition hover:bg-slate-800"
+                className="rounded-full border border-slate-500/70 bg-slate-950/30 px-5 py-2.5 text-sm font-black text-slate-100 shadow-[0_10px_30px_rgba(2,8,23,0.32)] backdrop-blur-sm transition duration-300 hover:border-cyan-300/45 hover:bg-slate-900/70 hover:text-white"
               >
                 처음으로
               </button>
             </div>
 
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid gap-4 lg:gap-5 lg:grid-cols-2">
               {LEARNING_UNITS.map((unit) => (
                 <motion.div
                   key={unit.id}
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.24, ease: 'easeOut' }}
-                  className={`flex h-full flex-col rounded-[1.75rem] border p-5 shadow-[0_18px_48px_rgba(15,23,42,0.28)] sm:p-6 ${
+                  className={`group relative flex h-full min-h-[16rem] flex-col overflow-hidden rounded-[1.9rem] border p-5 transition duration-300 sm:min-h-[17.25rem] sm:p-6 ${
                     selectedLearningUnitId === unit.id
-                      ? 'border-emerald-300/70 bg-[linear-gradient(180deg,rgba(15,23,42,0.94),rgba(16,185,129,0.16))]'
+                      ? 'border-emerald-300/55 bg-[linear-gradient(180deg,rgba(8,15,28,0.98),rgba(10,30,35,0.96)_48%,rgba(9,53,61,0.92))] shadow-[0_28px_72px_rgba(6,182,212,0.12),0_22px_56px_rgba(16,185,129,0.22),inset_0_1px_0_rgba(255,255,255,0.08)] ring-1 ring-emerald-300/20'
                       : unit.isAvailable
-                        ? 'border-yellow-200/25 bg-[linear-gradient(180deg,rgba(15,23,42,0.92),rgba(51,65,85,0.92))]'
-                        : 'border-slate-700 bg-[linear-gradient(180deg,rgba(15,23,42,0.9),rgba(30,41,59,0.9))] opacity-80'
+                        ? 'border-yellow-300/22 bg-[linear-gradient(180deg,rgba(8,15,28,0.98),rgba(20,29,46,0.96)_48%,rgba(33,42,62,0.94))] shadow-[0_24px_56px_rgba(2,8,23,0.52),inset_0_1px_0_rgba(255,255,255,0.05)] hover:-translate-y-0.5 hover:border-yellow-300/38 hover:shadow-[0_32px_72px_rgba(2,8,23,0.62),0_20px_48px_rgba(250,204,21,0.12),inset_0_1px_0_rgba(255,255,255,0.06)]'
+                        : 'border-slate-700/90 bg-[linear-gradient(180deg,rgba(12,18,30,0.96),rgba(30,41,59,0.9))] opacity-80 saturate-75 shadow-[0_18px_42px_rgba(2,8,23,0.36)]'
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className={`text-sm font-black tracking-[0.18em] ${
-                        unit.isAvailable ? 'text-yellow-300' : 'text-cyan-200'
-                      }`}>
-                        {unit.chapterLabel}
-                      </p>
-                      <h3 className="mt-2 text-2xl font-black text-white sm:text-3xl">{unit.title}</h3>
-                    </div>
-                    <div className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl ${
-                      unit.isAvailable ? 'bg-yellow-400 text-slate-950' : 'bg-cyan-300 text-slate-950'
-                    }`}>
-                      {unit.isAvailable ? <Star className="h-5 w-5" /> : <Sparkles className="h-5 w-5" />}
-                    </div>
-                  </div>
+                  <div className={`pointer-events-none absolute inset-0 ${
+                    selectedLearningUnitId === unit.id
+                      ? 'bg-[radial-gradient(circle_at_bottom_left,rgba(16,185,129,0.22),transparent_40%),radial-gradient(circle_at_top_right,rgba(45,212,191,0.16),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.03),transparent_24%)]'
+                      : unit.isAvailable
+                        ? 'bg-[radial-gradient(circle_at_bottom_right,rgba(250,204,21,0.18),transparent_36%),radial-gradient(circle_at_top_left,rgba(34,211,238,0.08),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.02),transparent_24%)]'
+                        : 'bg-[linear-gradient(180deg,rgba(255,255,255,0.02),transparent_24%)]'
+                  }`} />
+                  <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
 
-                  <div className="mt-6 flex flex-1 items-end">
-                    <button
-                      type="button"
-                      disabled={!unit.isAvailable}
-                      onPointerDown={warmAudio}
-                      onClick={() => selectLearningUnit(unit.id)}
-                      className={`flex w-full items-center justify-center rounded-full px-6 py-3 text-base font-black transition sm:text-lg ${
-                        !unit.isAvailable
-                          ? 'cursor-not-allowed bg-slate-700 text-slate-300'
-                          : selectedLearningUnitId === unit.id
-                            ? 'bg-emerald-400 text-slate-950'
-                            : 'bg-yellow-400 text-slate-950 hover:scale-[1.01] hover:bg-yellow-300'
-                      }`}
-                    >
-                      {!unit.isAvailable ? '준비 중' : selectedLearningUnitId === unit.id ? '선택됨' : '선택'}
-                    </button>
+                  <div className="relative flex h-full flex-col">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="max-w-[85%]">
+                        <p className={`text-[0.95rem] font-black tracking-[0.22em] ${
+                          selectedLearningUnitId === unit.id
+                            ? 'text-emerald-200'
+                            : unit.isAvailable
+                              ? 'text-yellow-200'
+                              : 'text-cyan-100/80'
+                        }`}>
+                          {unit.chapterLabel}
+                        </p>
+                        <h3 className="mt-3 text-[clamp(2rem,5vw,3.15rem)] font-black leading-[0.98] tracking-[-0.03em] text-white">
+                          {unit.title}
+                        </h3>
+                      </div>
+                      <div className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.1rem] border shadow-[0_16px_34px_rgba(15,23,42,0.28)] ${
+                        selectedLearningUnitId === unit.id
+                          ? 'border-yellow-200/35 bg-[linear-gradient(135deg,rgba(250,204,21,1),rgba(245,158,11,0.94))] text-slate-950 shadow-[0_16px_36px_rgba(250,204,21,0.34)]'
+                          : unit.isAvailable
+                            ? 'border-yellow-200/20 bg-[linear-gradient(135deg,rgba(250,204,21,0.98),rgba(234,179,8,0.92))] text-slate-950 shadow-[0_14px_34px_rgba(250,204,21,0.26)]'
+                            : 'border-cyan-200/20 bg-cyan-300/90 text-slate-950'
+                      }`}>
+                        {unit.isAvailable ? <Star className="h-5 w-5" /> : <Sparkles className="h-5 w-5" />}
+                      </div>
+                    </div>
+
+                    <div className="mt-7 flex flex-1 items-end">
+                      <button
+                        type="button"
+                        disabled={!unit.isAvailable}
+                        onPointerDown={warmAudio}
+                        onClick={() => selectLearningUnit(unit.id)}
+                        className={`flex min-h-[4.75rem] w-full items-center justify-center rounded-[1.4rem] border px-6 py-4 text-base font-black tracking-[0.01em] transition duration-300 sm:text-lg ${
+                          !unit.isAvailable
+                            ? 'cursor-not-allowed border-slate-600 bg-slate-700/80 text-slate-300'
+                            : selectedLearningUnitId === unit.id
+                              ? 'border-emerald-200/25 bg-[linear-gradient(135deg,rgba(45,212,191,1),rgba(16,185,129,0.94))] text-slate-950 shadow-[0_18px_38px_rgba(16,185,129,0.34),inset_0_1px_0_rgba(255,255,255,0.25)]'
+                              : 'border-yellow-200/18 bg-[linear-gradient(135deg,rgba(250,204,21,0.98),rgba(234,179,8,0.92))] text-slate-950 shadow-[0_14px_34px_rgba(250,204,21,0.28)] hover:-translate-y-0.5 hover:border-yellow-100/28 hover:shadow-[0_20px_42px_rgba(250,204,21,0.34)]'
+                        }`}
+                      >
+                        {!unit.isAvailable ? '준비 중' : selectedLearningUnitId === unit.id ? '선택됨' : '선택'}
+                      </button>
+                    </div>
                   </div>
                 </motion.div>
               ))}
@@ -11087,46 +11795,57 @@ export default function App() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 14 }}
                   transition={{ duration: 0.22, ease: 'easeOut' }}
-                  className="rounded-[1.75rem] border border-emerald-300/20 bg-slate-950/45 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] sm:p-6"
+                  className="relative overflow-hidden rounded-[1.9rem] border border-cyan-200/12 bg-[linear-gradient(180deg,rgba(7,13,25,0.94),rgba(9,15,29,0.88)_55%,rgba(10,23,36,0.92))] p-5 shadow-[0_28px_68px_rgba(2,8,23,0.48),inset_0_1px_0_rgba(255,255,255,0.06)] sm:p-6"
                 >
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-sm font-black tracking-[0.22em] text-emerald-300">난이도</p>
-                    <span className="rounded-full border border-slate-600 px-3 py-1 text-xs font-black text-slate-300">
-                      {selectedLearningUnit.chapterLabel}
-                    </span>
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.16),transparent_34%),radial-gradient(circle_at_top_left,rgba(34,211,238,0.08),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.03),transparent_22%)]" />
+                  <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+
+                  <div className="relative">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-black tracking-[0.24em] text-emerald-200">난이도</p>
+                      <span className="rounded-full border border-slate-500/70 bg-slate-950/35 px-3 py-1 text-xs font-black text-slate-200 shadow-[0_8px_20px_rgba(2,8,23,0.24)]">
+                        {selectedLearningUnit.chapterLabel}
+                      </span>
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                      {BATTLE_DIFFICULTY_ORDER.map((difficultyOption) => {
+                        const difficultyOptionConfig = BATTLE_DIFFICULTY_CONFIG[difficultyOption];
+                        const isSelectedDifficulty = battleDifficulty === difficultyOption;
+                        const selectedDifficultyClass =
+                          difficultyOption === 'easy'
+                            ? 'border-cyan-300/75 bg-[linear-gradient(135deg,rgba(34,211,238,0.34),rgba(8,47,73,0.96))] text-cyan-50 shadow-[0_18px_40px_rgba(34,211,238,0.2),inset_0_1px_0_rgba(255,255,255,0.14)]'
+                            : difficultyOption === 'normal'
+                              ? 'border-emerald-300/75 bg-[linear-gradient(135deg,rgba(45,212,191,0.36),rgba(5,150,105,0.96))] text-emerald-50 shadow-[0_18px_40px_rgba(16,185,129,0.24),inset_0_1px_0_rgba(255,255,255,0.14)]'
+                              : 'border-yellow-300/85 bg-[linear-gradient(135deg,rgba(250,204,21,0.44),rgba(180,83,9,0.98))] text-slate-950 shadow-[0_18px_40px_rgba(234,179,8,0.28),inset_0_1px_0_rgba(255,255,255,0.18)]';
+
+                        return (
+                          <button
+                            key={difficultyOption}
+                            type="button"
+                            onPointerDown={warmAudio}
+                            onClick={() => changeBattleDifficulty(difficultyOption)}
+                            className={`min-h-[5rem] rounded-[1.35rem] border px-4 py-4 text-left text-base font-black transition duration-300 sm:px-5 sm:py-5 ${
+                              isSelectedDifficulty
+                                ? selectedDifficultyClass
+                                : 'border-slate-600/90 bg-slate-950/50 text-slate-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:-translate-y-0.5 hover:border-slate-400/80 hover:bg-slate-900/80 hover:text-white'
+                            }`}
+                          >
+                            {difficultyOptionConfig.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <button
+                      type="button"
+                      onPointerDown={warmAudio}
+                      onClick={startSelectedUnit}
+                      className="mt-5 flex min-h-[5rem] w-full items-center justify-center rounded-[1.5rem] border border-emerald-100/20 bg-[linear-gradient(135deg,rgba(45,212,191,1),rgba(16,185,129,0.94))] px-6 py-4 text-lg font-black text-slate-950 shadow-[0_28px_56px_rgba(16,185,129,0.38),inset_0_1px_0_rgba(255,255,255,0.24)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_34px_68px_rgba(16,185,129,0.44),inset_0_1px_0_rgba(255,255,255,0.26)] sm:text-xl"
+                    >
+                      시작
+                    </button>
                   </div>
-
-                  <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
-                    {BATTLE_DIFFICULTY_ORDER.map((difficultyOption) => {
-                      const difficultyOptionConfig = BATTLE_DIFFICULTY_CONFIG[difficultyOption];
-                      const isSelectedDifficulty = battleDifficulty === difficultyOption;
-
-                      return (
-                        <button
-                          key={difficultyOption}
-                          type="button"
-                          onPointerDown={warmAudio}
-                          onClick={() => changeBattleDifficulty(difficultyOption)}
-                          className={`rounded-2xl border px-4 py-4 text-left text-base font-black transition ${
-                            isSelectedDifficulty
-                              ? 'border-emerald-300 bg-emerald-400 text-slate-950 shadow-[0_10px_24px_rgba(52,211,153,0.25)]'
-                              : 'border-slate-600 bg-slate-900 text-slate-200 hover:border-emerald-300/50 hover:bg-slate-800'
-                          }`}
-                        >
-                          {difficultyOptionConfig.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <button
-                    type="button"
-                    onPointerDown={warmAudio}
-                    onClick={startSelectedUnit}
-                    className="mt-4 flex w-full items-center justify-center rounded-full bg-emerald-400 px-6 py-3 text-base font-black text-slate-950 transition hover:scale-[1.01] hover:bg-emerald-300 sm:text-lg"
-                  >
-                    시작
-                  </button>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -11164,7 +11883,7 @@ export default function App() {
                     x: isOpponentAttacking ? [0, 50, -300, 0] : isOpponentHit ? [0, -20, 20, -20, 0] : 0,
                     rotate: isOpponentAttacking ? [0, 30, -60, 0] : 0,
                     scale: isOpponentAttacking ? [1, 0.7, 2.5, 1] : isOpponentHit ? [1, 0.9, 1] : 1,
-                    filter: isOpponentAttacking ? 'brightness(1.1) drop-shadow(0 0 5px rgba(239, 68, 68, 0.3))' : isOpponentHit ? 'brightness(2) saturate(2)' : 'brightness(1)'
+                    filter: isOpponentAttacking ? 'brightness(1.06) drop-shadow(0 0 4px rgba(239, 68, 68, 0.22))' : isOpponentHit ? 'brightness(1.75) saturate(1.65)' : 'brightness(1)'
                   }}
                   transition={{ duration: isOpponentAttacking ? ATTACK_MOTION_DURATION_S : HIT_MOTION_DURATION_S, ease: "backOut" }}
                   className="relative flex h-full max-h-full w-full max-w-full items-center justify-center overflow-visible"
@@ -11182,8 +11901,8 @@ export default function App() {
                   {isOpponentAttacking && (
                     <motion.div
                       initial={{ opacity: 0, scale: 0 }}
-                      animate={{ opacity: 0.5, scale: 1.2 }}
-                      className="pointer-events-none absolute -top-2 -left-2 h-10 w-10 rounded-full bg-red-300 blur-lg"
+                        animate={{ opacity: 0.38, scale: 1.1 }}
+                        className="pointer-events-none absolute -top-2 -left-2 h-10 w-10 rounded-full bg-red-300 blur-lg"
                     />
                   )}
                 </motion.div>
@@ -11225,7 +11944,7 @@ export default function App() {
                     x: isAttacking ? [0, -100, 300, 0] : isPlayerHit ? [0, -20, 20, -20, 0] : 0,
                     rotate: isAttacking ? [0, -30, 60, 0] : 0,
                     scale: isAttacking ? [1, 0.8, 2, 1] : isPlayerHit ? [1, 0.9, 1] : 1,
-                    filter: isAttacking ? 'brightness(5) drop-shadow(0 0 30px rgba(16, 185, 129, 1))' : isPlayerHit ? 'brightness(2) saturate(2)' : 'brightness(1)'
+                    filter: isAttacking ? 'brightness(3.8) drop-shadow(0 0 22px rgba(16, 185, 129, 0.78))' : isPlayerHit ? 'brightness(1.75) saturate(1.65)' : 'brightness(1)'
                   }}
                   transition={{ duration: isAttacking ? ATTACK_MOTION_DURATION_S : HIT_MOTION_DURATION_S, ease: "backOut" }}
                   className="relative flex h-full max-h-full w-full max-w-full items-center justify-center overflow-visible"
@@ -11239,8 +11958,8 @@ export default function App() {
                   {isAttacking && (
                     <motion.div
                       initial={{ opacity: 0, scale: 0, rotate: 0 }}
-                      animate={{ opacity: 1, scale: 2, rotate: 45 }}
-                      className="pointer-events-none absolute -top-10 -right-10 h-10 w-40 rounded-full bg-emerald-400 blur-xl"
+                        animate={{ opacity: 0.82, scale: 1.75, rotate: 45 }}
+                        className="pointer-events-none absolute -top-10 -right-10 h-10 w-40 rounded-full bg-emerald-400 blur-xl"
                     />
                   )}
                 </motion.div>
