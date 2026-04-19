@@ -1731,23 +1731,59 @@ function createClockReadingChoiceProblem(): Problem {
 
 function createMillimeterNeedIntroProblem(): Problem {
   const options = ['m', 'mm', 'km'];
+  const situations = [
+    '사과씨의 길이를 자로 재었더니 1cm보다 짧았습니다.\n그런데 0cm라고 하기는 어렵고, 1cm라고 하기도 어렵습니다.',
+    '쌀알의 길이를 자로 재었더니 1cm보다 짧았습니다.\ncm로만 나타내면 얼마나 되는지 딱 맞게 말하기 어렵습니다.',
+    '단추 한 개의 두께를 재었더니 1cm보다 짧았습니다.\n0cm라고 하면 너무 작고, 1cm라고 하면 너무 크게 나타납니다.',
+    '짧게 자른 종이띠의 길이를 재었더니 1cm보다 짧았습니다.\ncm만으로는 길이를 자세히 나타내기 어렵습니다.',
+    '손톱의 두께를 재어 보니 1cm보다 짧았습니다.\ncm로만 나타내면 얼마나 되는지 정확히 말하기 어렵습니다.',
+  ];
   return createPromptProblem(
     buildNumberedOptionsPrompt(
-      '사과씨의 길이를 자로 재었더니 1cm보다 짧았습니다.\n그런데 0cm라고 하기는 어렵고, 1cm라고 하기도 어렵습니다.\n더 [[정확하게]] 나타내기 위해 필요한 단위는 무엇일까요?',
+      `${sample(situations)}\n더 [[정확하게]] 나타내기 위해 필요한 단위는 무엇일까요?`,
       options,
     ),
     options.indexOf('mm') + 1,
   );
 }
 
-function createKilometerNeedIntroProblem(): Problem {
-  const options = ['cm', 'km', 'mm'];
+function createMillimeterNeedChoiceProblem(): Problem {
+  const options = ['[[정확하게]]', '[[편하게]]'];
   return createPromptProblem(
     buildNumberedOptionsPrompt(
-      '서울에서 부산까지의 거리를 m로 나타내면 아주 큰 수가 됩니다.\n더 [[편하게]] 나타내기 위해 필요한 단위는 무엇일까요?',
+      'mm는 cm보다 길이를 더 어떻게 나타내기 위해 필요한 단위일까요?',
+      options,
+    ),
+    options.indexOf('[[정확하게]]') + 1,
+  );
+}
+
+function createKilometerNeedIntroProblem(): Problem {
+  const options = ['cm', 'km', 'mm'];
+  const situations = [
+    '서울에서 부산까지의 거리를 m로 나타내면 아주 큰 수가 됩니다.',
+    '서울에서 대구까지의 거리를 m로 나타내면 아주 큰 수가 됩니다.',
+    '학교에서 수련원까지 버스로 가는 거리를 m로 나타내면 수가 너무 커집니다.',
+    '우리 집에서 할머니 댁까지 차로 가는 먼 거리를 m로 나타내면 아주 큰 수가 됩니다.',
+    '도시와 도시 사이의 거리를 m로 나타내면 숫자가 너무 길어집니다.',
+  ];
+  return createPromptProblem(
+    buildNumberedOptionsPrompt(
+      `${sample(situations)}\n더 [[편하게]] 나타내기 위해 필요한 단위는 무엇일까요?`,
       options,
     ),
     options.indexOf('km') + 1,
+  );
+}
+
+function createKilometerNeedChoiceProblem(): Problem {
+  const options = ['[[정확하게]]', '[[편하게]]'];
+  return createPromptProblem(
+    buildNumberedOptionsPrompt(
+      'km는 m보다 먼 거리를 더 어떻게 나타내기 위해 필요한 단위일까요?',
+      options,
+    ),
+    options.indexOf('[[편하게]]') + 1,
   );
 }
 
@@ -2920,14 +2956,24 @@ function createUnitSelectionChallenge(level: number): UnitSelectionChallenge {
   return sample(pool);
 }
 
-function generateUnit3Problem(level: number, opponentHP: number): Problem {
-  if (opponentHP === 100) {
-    if (level === 1) {
+function generateUnit3Problem(level: number, opponentHP: number, problemSequence?: number): Problem {
+  if (level === 1) {
+    if (problemSequence === 1 || (problemSequence === undefined && opponentHP === 100)) {
       return createMillimeterNeedIntroProblem();
     }
 
-    if (level === 5) {
+    if (problemSequence === 2) {
+      return createMillimeterNeedChoiceProblem();
+    }
+  }
+
+  if (level === 5) {
+    if (problemSequence === 1 || (problemSequence === undefined && opponentHP === 100)) {
       return createKilometerNeedIntroProblem();
+    }
+
+    if (problemSequence === 2) {
+      return createKilometerNeedChoiceProblem();
     }
   }
 
@@ -3601,9 +3647,9 @@ function generateRegularProblem(level: number, options: RegularProblemOptions = 
   return createEquationProblem(a, b, op, answer);
 }
 
-function getProblemForTurn(unitId: LearningUnitId, level: number, opponentHP: number): Problem {
+function getProblemForTurn(unitId: LearningUnitId, level: number, opponentHP: number, problemSequence?: number): Problem {
   if (unitId === 'unit3') {
-    return generateUnit3Problem(level, opponentHP);
+    return generateUnit3Problem(level, opponentHP, problemSequence);
   }
 
   return isFinalBuilderTurn(level, opponentHP) ? createBuilderProblem(level) : generateRegularProblem(level);
@@ -6128,6 +6174,7 @@ export default function App() {
   const countdownDangerPlayedRef = useRef(false);
   const zeroTensBorrowCoachmarkLevelsRef = useRef(new Set<number>());
   const unitSelectionChallengeLevelsRef = useRef(new Set<number>());
+  const unit3ProblemSequenceRef = useRef<Record<number, number>>({});
   const developerProblemHistoryRef = useRef<DeveloperProblemSnapshot[]>([]);
   const developerProblemHistoryIndexRef = useRef(-1);
   const isDeveloperShortcutEnabled = import.meta.env.DEV;
@@ -6269,6 +6316,20 @@ export default function App() {
   const resetDeveloperProblemHistory = () => {
     developerProblemHistoryRef.current = [];
     developerProblemHistoryIndexRef.current = -1;
+  };
+
+  const getNextProblemForTurn = (targetUnitId: LearningUnitId, targetLevel: number, targetOpponentHP: number) => {
+    if (targetUnitId !== 'unit3') {
+      return getProblemForTurn(targetUnitId, targetLevel, targetOpponentHP);
+    }
+
+    const nextProblemSequence =
+      targetOpponentHP === 100
+        ? 1
+        : (unit3ProblemSequenceRef.current[targetLevel] ?? 1) + 1;
+
+    unit3ProblemSequenceRef.current[targetLevel] = nextProblemSequence;
+    return getProblemForTurn(targetUnitId, targetLevel, targetOpponentHP, nextProblemSequence);
   };
 
   const setProblemWithCoachmark = (
@@ -6476,7 +6537,7 @@ export default function App() {
     setPlayerHP(100);
     setLevel(targetLevel);
     setOpponentHP(100);
-    setProblemWithCoachmark(getProblemForTurn(activeLearningUnitId, targetLevel, 100), targetLevel, { opponentHP: 100 });
+    setProblemWithCoachmark(getNextProblemForTurn(activeLearningUnitId, targetLevel, 100), targetLevel, { opponentHP: 100 });
     playSound('ui', { gainMultiplier: 0.84, detune: 16 });
     updateMessage(`개발자 모드: ${targetLevel}단계로 이동!`);
   });
@@ -6504,7 +6565,7 @@ export default function App() {
     }
 
     resetDeveloperBattleState();
-    setProblemWithCoachmark(getProblemForTurn(activeLearningUnitId, level, opponentHP), level, { opponentHP });
+    setProblemWithCoachmark(getNextProblemForTurn(activeLearningUnitId, level, opponentHP), level, { opponentHP });
     playSound('ui', { gainMultiplier: 0.8, detune: 8 });
     updateMessage('다음 문제로 이동!');
   });
@@ -6692,7 +6753,7 @@ export default function App() {
       setIsOpponentAttacking(false);
       setLevel(nextLevel);
       setOpponentHP(100);
-      setProblemWithCoachmark(getProblemForTurn(activeLearningUnitId, nextLevel, 100), nextLevel, { opponentHP: 100 });
+      setProblemWithCoachmark(getNextProblemForTurn(activeLearningUnitId, nextLevel, 100), nextLevel, { opponentHP: 100 });
       queueSound('levelUp', 180, {
         gainMultiplier: 1 + nextLevel * 0.025,
         detune: Math.min(nextLevel * 10, 90),
@@ -6759,7 +6820,7 @@ export default function App() {
             triggerBattleVictory(20);
           }
         } else {
-          setProblemWithCoachmark(getProblemForTurn(activeLearningUnitId, level, newOpponentHP), level, { opponentHP: newOpponentHP });
+          setProblemWithCoachmark(getNextProblemForTurn(activeLearningUnitId, level, newOpponentHP), level, { opponentHP: newOpponentHP });
         }
 
         setIsEstimation(false);
@@ -6835,7 +6896,7 @@ export default function App() {
             triggerBattleVictory(22);
           }
         } else {
-          setProblemWithCoachmark(getProblemForTurn(activeLearningUnitId, level, newOpponentHP), level, { opponentHP: newOpponentHP });
+          setProblemWithCoachmark(getNextProblemForTurn(activeLearningUnitId, level, newOpponentHP), level, { opponentHP: newOpponentHP });
         }
 
         setIsUnitSelectionChallenge(false);
@@ -6903,7 +6964,7 @@ export default function App() {
             triggerBattleVictory(18);
           }
         } else {
-          setProblemWithCoachmark(getProblemForTurn(activeLearningUnitId, level, newOpponentHP), level, { opponentHP: newOpponentHP });
+          setProblemWithCoachmark(getNextProblemForTurn(activeLearningUnitId, level, newOpponentHP), level, { opponentHP: newOpponentHP });
           if (activeLearningUnitId === 'unit2' && canOfferEstimation(activeLearningUnitId, newOpponentHP) && Math.random() < 0.15) {
             queueEstimationChallenge();
           }
@@ -7090,13 +7151,14 @@ export default function App() {
     resetDeveloperProblemHistory();
     zeroTensBorrowCoachmarkLevelsRef.current.clear();
     unitSelectionChallengeLevelsRef.current.clear();
+    unit3ProblemSequenceRef.current = {};
     setIsEstimation(false);
     setEstimationProblem(null);
     setIsUnitSelectionChallenge(false);
     setUnitSelectionChallenge(null);
     setIsSpecialChallengeResolving(false);
     setTimeLeft(ESTIMATION_TIME_LIMIT_SECONDS);
-    setProblemWithCoachmark(getProblemForTurn(activeLearningUnitId, 1, 100), 1, { opponentHP: 100 });
+    setProblemWithCoachmark(getNextProblemForTurn(activeLearningUnitId, 1, 100), 1, { opponentHP: 100 });
     setInputValue('');
     setUnitInputValue('');
     setIsUnitMenuOpen(false);
@@ -7113,6 +7175,7 @@ export default function App() {
     resetDeveloperProblemHistory();
     zeroTensBorrowCoachmarkLevelsRef.current.clear();
     unitSelectionChallengeLevelsRef.current.clear();
+    unit3ProblemSequenceRef.current = {};
     setIsEstimation(false);
     setEstimationProblem(null);
     setIsUnitSelectionChallenge(false);
