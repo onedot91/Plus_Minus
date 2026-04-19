@@ -111,6 +111,14 @@ import unit3Level10RobloxAttackImage from './assets/unit3-level10-roblox-attack.
 import unit3Level10RobloxDefaultImage from './assets/unit3-level10-roblox-default.jpeg';
 import unit3Level10RobloxDefeatSceneImage from './assets/unit3-level10-roblox-defeat-scene.jpeg';
 import unit3Level10RobloxHitImage from './assets/unit3-level10-roblox-hit.jpeg';
+import unit3Level11EnglishBirdAttackImage from './assets/unit3-level11-english-bird-attack.jpeg';
+import unit3Level11EnglishBirdDefaultImage from './assets/unit3-level11-english-bird-default.jpeg';
+import unit3Level11EnglishBirdDefeatSceneImage from './assets/unit3-level11-english-bird-defeat-scene.jpeg';
+import unit3Level11EnglishBirdHitImage from './assets/unit3-level11-english-bird-hit.jpeg';
+import unit3Level12AkmagomaAttackImage from './assets/unit3-level12-akmagoma-attack.jpeg';
+import unit3Level12AkmagomaDefaultImage from './assets/unit3-level12-akmagoma-default.jpeg';
+import unit3Level12AkmagomaDefeatSceneImage from './assets/unit3-level12-akmagoma-defeat-scene.jpeg';
+import unit3Level12AkmagomaHitImage from './assets/unit3-level12-akmagoma-hit.jpeg';
 
 type GameState = 'start' | 'unitSelect' | 'playing' | 'win' | 'lose';
 
@@ -118,7 +126,7 @@ type BattleDifficulty = 'easy' | 'normal' | 'hard';
 
 type LearningUnitId = 'unit2' | 'unit3';
 
-type ProblemKind = 'equation' | 'story' | 'builder' | 'measurement' | 'distanceMap' | 'distanceWorksheet' | 'clockReading';
+type ProblemKind = 'equation' | 'story' | 'builder' | 'measurement' | 'distanceMap' | 'distanceWorksheet' | 'clockReading' | 'timeAddition';
 type MeasurementObjectKind =
   | 'seed'
   | 'rice'
@@ -160,11 +168,13 @@ interface Problem {
   kind: ProblemKind;
   answerUnit?: string;
   requiresUnitSelection?: boolean;
+  storyTable?: StoryPromptTableData;
   builder?: BuilderProblemData;
   measurement?: MeasurementProblemData;
   distanceMap?: DistanceMapProblemData;
   distanceWorksheet?: DistanceWorksheetProblemData;
   clockReading?: ClockReadingProblemData;
+  timeAddition?: TimeAdditionProblemData;
 }
 
 interface EstimationProblem {
@@ -256,6 +266,38 @@ interface ClockReadingProblemData {
 
 type ClockInputPart = 'hours' | 'minutes' | 'seconds';
 type ClockReadingDifficulty = 1 | 2 | 3 | 4 | 5;
+type TimeAdditionMode = 'clock' | 'bar' | 'vertical' | 'story';
+type TimeArithmeticOperation = '+' | '-';
+interface TimeValue {
+  hours: number;
+  minutes: number;
+  seconds: number;
+}
+
+interface TimeStoryHighlight {
+  label: string;
+  value: string;
+}
+
+interface StoryPromptTableData {
+  headers: string[];
+  rows: Array<{
+    cells: string[];
+  }>;
+}
+
+interface TimeAdditionProblemData {
+  title: string;
+  instruction: string;
+  mode: TimeAdditionMode;
+  operation: TimeArithmeticOperation;
+  left: TimeValue;
+  right: TimeValue;
+  result: TimeValue;
+  editableParts: ClockInputPart[];
+  storyLines?: string[];
+  storyHighlights?: TimeStoryHighlight[];
+}
 
 interface ClockReadingAnswerInput {
   hours: string;
@@ -607,6 +649,8 @@ interface SoundPlaybackOptions {
   detune?: number;
   noisePlaybackRateMultiplier?: number;
 }
+
+type AnimationSoundPlayer = (effectName: SoundEffectName, options?: SoundPlaybackOptions) => void;
 
 interface AudioEngine {
   version: number;
@@ -1315,6 +1359,28 @@ const UNIT3_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
     removeSpriteBlackBackground: true,
     removeDefeatSceneBlackBackground: true,
   },
+  11: {
+    name: '영어 잘하는 새',
+    spriteSet: {
+      attack: unit3Level11EnglishBirdAttackImage,
+      default: unit3Level11EnglishBirdDefaultImage,
+      hit: unit3Level11EnglishBirdHitImage,
+    },
+    defeatSceneImage: unit3Level11EnglishBirdDefeatSceneImage,
+    removeSpriteBlackBackground: true,
+    removeDefeatSceneBlackBackground: true,
+  },
+  12: {
+    name: '악마고마',
+    spriteSet: {
+      attack: unit3Level12AkmagomaAttackImage,
+      default: unit3Level12AkmagomaDefaultImage,
+      hit: unit3Level12AkmagomaHitImage,
+    },
+    defeatSceneImage: unit3Level12AkmagomaDefeatSceneImage,
+    removeSpriteBlackBackground: true,
+    removeDefeatSceneBlackBackground: true,
+  },
 };
 const LEVEL_OPPONENT_SPRITES: Partial<Record<number, CharacterSpriteSet>> = {
   1: {
@@ -1388,7 +1454,8 @@ const UNIT_LEVEL_DESCRIPTIONS: Record<LearningUnitId, string[]> = {
     '8단계: 1초가 왜 필요할까?',
     '9단계: 초 단위까지 시각 읽기',
     '10단계: 시간의 덧셈',
-    '11단계: 시간의 뺄셈과 종합',
+    '11단계: 시간의 뺄셈',
+    '12단계: 시간의 덧셈과 뺄셈 종합',
   ],
 };
 
@@ -1432,7 +1499,7 @@ const DEFEAT_SCENE_IMAGES: Partial<Record<number, string>> = {
   8: stage8DefeatSceneImage,
   9: stage9DefeatSceneImage,
 };
-const RECORD_BOARD_URL = 'https://padlet.com/hyong4115_/3-3-77v0oraqzx1gqvn2';
+const RECORD_BOARD_URL = 'https://padlet.com/hyong4115edu/padlet-khqcsms45f1diiig';
 const VICTORY_CONFETTI = [
   { left: '6%', top: '12%', className: 'h-3 w-14 rounded-full bg-yellow-300/90', duration: 3.6, delay: 0.15, drift: 10 },
   { left: '17%', top: '27%', className: 'h-4 w-4 rounded-full bg-amber-100/95', duration: 4.1, delay: 0.75, drift: -8 },
@@ -1493,10 +1560,16 @@ const LEARNING_UNITS: LearningUnitConfig[] = [
 const FINAL_BUILDER_HP = 25;
 const ESTIMATION_SAFE_HP = 40;
 const UNIT_SELECTION_TIME_LIMIT_SECONDS = 15;
-const UNIT_SELECTION_CHALLENGE_LEVELS = new Set<number>([2, 4, 7, 8, 10, 11]);
+const UNIT_SELECTION_CHALLENGE_LEVELS = new Set<number>([2, 4, 7, 8]);
 const MAX_ZERO_TENS_BORROW_COACHMARKS = 3;
 const ZERO_TENS_BORROW_COACHMARK_TITLE = '생각해보기';
 const ZERO_TENS_BORROW_COACHMARK_TEXT = '십의 자리가 0인 수에서 일의 자리로 어떻게 받아내림을 할까요?';
+const UNIT3_SECRET_CODE_GATE = {
+  unitId: 'unit3' as const,
+  fromLevel: 7,
+  nextLevel: 8,
+  answer: '시각과 시간',
+};
 const ATTACK_POSE_DURATION_MS = 850;
 const HIT_POSE_DURATION_MS = 700;
 const ATTACK_MOTION_DURATION_S = 0.4;
@@ -1909,6 +1982,38 @@ function splitClockSeconds(totalSeconds: number) {
   };
 }
 
+function splitAnimatedClockSeconds(totalSeconds: number) {
+  const secondsInHalfDay = 12 * 3600;
+  const normalizedTotalSeconds = ((totalSeconds % secondsInHalfDay) + secondsInHalfDay) % secondsInHalfDay;
+  const hours = Math.floor(normalizedTotalSeconds / 3600);
+
+  return {
+    hours: hours === 0 ? 12 : hours,
+    minutes: Math.floor((normalizedTotalSeconds % 3600) / 60),
+    seconds: normalizedTotalSeconds % 60,
+  };
+}
+
+function toTotalTimeSeconds(value: TimeValue) {
+  return value.hours * 3600 + value.minutes * 60 + value.seconds;
+}
+
+function getTimeValueSignature(value: TimeValue) {
+  return `${value.hours}:${value.minutes}:${value.seconds}`;
+}
+
+function getTimeValuePartValue(value: TimeValue, part: ClockInputPart) {
+  if (part === 'hours') {
+    return value.hours;
+  }
+
+  if (part === 'minutes') {
+    return value.minutes;
+  }
+
+  return value.seconds;
+}
+
 function getClockReadingPartValue(clockReading: ClockReadingProblemData, part: ClockInputPart) {
   if (part === 'hours') {
     return clockReading.hour;
@@ -1990,6 +2095,1137 @@ function createClockReadingVisualProblem(difficulty: ClockReadingDifficulty = 3)
       editableParts,
     },
   };
+}
+
+function createTimeAdditionProblem(timeAddition: TimeAdditionProblemData): Problem {
+  return {
+    text: '',
+    prompt: `${timeAddition.mode}:${getTimeValueSignature(timeAddition.left)}${timeAddition.operation}${getTimeValueSignature(timeAddition.right)}`,
+    answer: toTotalTimeSeconds(timeAddition.result),
+    kind: 'timeAddition',
+    timeAddition,
+  };
+}
+
+function createStoryTimeAdditionProblem(
+  timeAddition: Omit<TimeAdditionProblemData, 'mode'> & {
+    storyLines: string[];
+    storyHighlights?: TimeStoryHighlight[];
+  },
+): Problem {
+  return createTimeAdditionProblem({
+    ...timeAddition,
+    mode: 'story',
+  });
+}
+
+function createClockTimeAdditionProblem(step = 1): Problem {
+  while (true) {
+    const startHour = randomInt(1, 10);
+    const startMinute =
+      step === 1
+        ? sample([5, 10, 15, 20, 25, 30, 35, 40])
+        : step === 2
+          ? randomInt(10, 45)
+          : randomInt(35, 55);
+    const startSecond =
+      step === 1
+        ? sample([10, 20, 30])
+        : step === 2
+          ? sample([15, 25, 35, 45])
+          : sample([20, 30, 40, 50]);
+    const addMinutes =
+      step === 1
+        ? randomInt(1, 5)
+        : step === 2
+          ? randomInt(2, 8)
+          : randomInt(8, 18);
+    const addSeconds =
+      step === 1
+        ? sample([10, 20])
+        : step === 2
+          ? sample([15, 20, 25, 30])
+          : sample([15, 25, 35, 45]);
+    const result = splitClockSeconds(startHour * 3600 + startMinute * 60 + startSecond + addMinutes * 60 + addSeconds);
+
+    if (result.hours <= 12) {
+      return createTimeAdditionProblem({
+        title: '시계 그림으로 시간을 더해 보세요.',
+        instruction: '시작 시각과 더할 시간을 보고, 결과 시각을 써 보세요.',
+        mode: 'clock',
+        operation: '+',
+        left: { hours: startHour, minutes: startMinute, seconds: startSecond },
+        right: { hours: 0, minutes: addMinutes, seconds: addSeconds },
+        result,
+        editableParts: ['hours', 'minutes', 'seconds'],
+      });
+    }
+  }
+}
+
+function createBarModelTimeAdditionProblem(step = 1): Problem {
+  while (true) {
+    const leftMinutes = step === 1 ? randomInt(1, 2) : step === 2 ? randomInt(2, 3) : randomInt(2, 4);
+    const rightMinutes = step === 1 ? randomInt(1, 2) : step === 2 ? randomInt(1, 3) : randomInt(2, 4);
+    const leftSeconds =
+      step === 1
+        ? sample([10, 20, 30])
+        : step === 2
+          ? sample([20, 30, 40])
+          : sample([20, 30, 40, 50]);
+    const rightSeconds =
+      step === 1
+        ? sample([10, 20, 30])
+        : step === 2
+          ? sample([20, 30, 40])
+          : sample([10, 20, 30, 40]);
+    const totalSeconds = leftMinutes * 60 + leftSeconds + rightMinutes * 60 + rightSeconds;
+    const result = splitClockSeconds(totalSeconds);
+    const hasSecondCarry = leftSeconds + rightSeconds >= 60;
+
+    if ((step === 1 && hasSecondCarry) || (step >= 2 && !hasSecondCarry)) {
+      continue;
+    }
+
+    return createTimeAdditionProblem({
+      title: '띠모형으로 시간을 합쳐 보세요.',
+      instruction: '두 시간 띠가 모여 하나가 되는 모습을 보고 합한 시간을 구해 보세요.',
+      mode: 'bar',
+      operation: '+',
+      left: { hours: 0, minutes: leftMinutes, seconds: leftSeconds },
+      right: { hours: 0, minutes: rightMinutes, seconds: rightSeconds },
+      result,
+      editableParts: ['minutes', 'seconds'],
+    });
+  }
+}
+
+function createVerticalTimeAdditionProblem(step = 1): Problem {
+  while (true) {
+    const left = {
+      hours: randomInt(1, step >= 3 ? 5 : 4),
+      minutes: randomInt(step === 1 ? 10 : 20, 55),
+      seconds: randomInt(step === 1 ? 10 : 20, 55),
+    };
+    const right = {
+      hours: randomInt(step === 1 ? 0 : 1, step >= 4 ? 3 : 2),
+      minutes: randomInt(10, 50),
+      seconds: randomInt(10, 50),
+    };
+    const result = splitClockSeconds(toTotalTimeSeconds(left) + toTotalTimeSeconds(right));
+    const hasSecondCarry = left.seconds + right.seconds >= 60;
+    const hasMinuteCarry = left.minutes + right.minutes + (hasSecondCarry ? 1 : 0) >= 60;
+
+    if (result.hours > 12) {
+      continue;
+    }
+
+    if (step === 1 && (hasSecondCarry || hasMinuteCarry)) {
+      continue;
+    }
+
+    if (step === 2 && (!hasSecondCarry || hasMinuteCarry)) {
+      continue;
+    }
+
+    if (step === 3 && (!hasSecondCarry || !hasMinuteCarry)) {
+      continue;
+    }
+
+    if (step >= 4 && !hasMinuteCarry) {
+      continue;
+    }
+
+    return createTimeAdditionProblem({
+      title: '세로식으로 시간을 더해 보세요.',
+      instruction: '세로식을 보고 시간, 분, 초를 차례대로 계산해 보세요.',
+      mode: 'vertical',
+      operation: '+',
+      left,
+      right,
+      result,
+      editableParts: ['hours', 'minutes', 'seconds'],
+    });
+  }
+}
+
+const UNIT3_FIXED_TIME_PROBLEM_COUNT = 4;
+
+function createClockTimeSubtractionProblem(step = 1): Problem {
+  while (true) {
+    const startHour = randomInt(2, 11);
+    const startMinute =
+      step === 1
+        ? sample([20, 25, 30, 35, 40, 45, 50])
+        : randomInt(10, 55);
+    const startSecond =
+      step === 1
+        ? sample([20, 30, 40, 50])
+        : sample([10, 20, 30, 40, 50]);
+    const subtractMinutes =
+      step === 1
+        ? randomInt(1, 5)
+        : randomInt(3, 10);
+    const subtractSeconds =
+      step === 1
+        ? sample([10, 20])
+        : sample([10, 20, 30, 40]);
+    const hasSecondBorrow = startSecond < subtractSeconds;
+    const hasMinuteBorrow = startMinute - (hasSecondBorrow ? 1 : 0) < subtractMinutes;
+
+    if (step === 1 && (hasSecondBorrow || hasMinuteBorrow)) {
+      continue;
+    }
+
+    const resultSeconds = startHour * 3600 + startMinute * 60 + startSecond - (subtractMinutes * 60 + subtractSeconds);
+    const result = splitClockSeconds(resultSeconds);
+
+    if (result.hours >= 1) {
+      return createTimeAdditionProblem({
+        title: '시계 그림으로 시간을 빼 보세요.',
+        instruction: '시작 시각과 뺄 시간을 보고, 결과 시각을 써 보세요.',
+        mode: 'clock',
+        operation: '-',
+        left: { hours: startHour, minutes: startMinute, seconds: startSecond },
+        right: { hours: 0, minutes: subtractMinutes, seconds: subtractSeconds },
+        result,
+        editableParts: ['hours', 'minutes', 'seconds'],
+      });
+    }
+  }
+}
+
+function createBarModelTimeSubtractionProblem(step = 1): Problem {
+  while (true) {
+    const leftMinutes = step === 1 ? randomInt(3, 5) : randomInt(4, 6);
+    const rightMinutes = step === 1 ? randomInt(1, 2) : randomInt(2, 3);
+    const leftSeconds =
+      step === 1
+        ? sample([20, 30, 40, 50])
+        : sample([10, 20, 30, 40, 50]);
+    const rightSeconds =
+      step === 1
+        ? sample([10, 20])
+        : sample([10, 20, 30, 40]);
+    const hasSecondBorrow = leftSeconds < rightSeconds;
+    const hasMinuteBorrow = leftMinutes - (hasSecondBorrow ? 1 : 0) < rightMinutes;
+
+    if (step === 1 && (hasSecondBorrow || hasMinuteBorrow)) {
+      continue;
+    }
+
+    const resultSeconds = leftMinutes * 60 + leftSeconds - (rightMinutes * 60 + rightSeconds);
+    const result = splitClockSeconds(resultSeconds);
+
+    if (toTotalTimeSeconds(result) > 0) {
+      return createTimeAdditionProblem({
+        title: '띠모형으로 시간을 빼 보세요.',
+        instruction: '처음 시간과 뺄 시간을 보고 남은 시간을 구해 보세요.',
+        mode: 'bar',
+        operation: '-',
+        left: { hours: 0, minutes: leftMinutes, seconds: leftSeconds },
+        right: { hours: 0, minutes: rightMinutes, seconds: rightSeconds },
+        result,
+        editableParts: ['minutes', 'seconds'],
+      });
+    }
+  }
+}
+
+function createVerticalTimeSubtractionProblem(step = 1): Problem {
+  while (true) {
+    const left = {
+      hours: randomInt(2, step === 1 ? 4 : 5),
+      minutes: randomInt(15, 55),
+      seconds: randomInt(10, 55),
+    };
+    const right = {
+      hours: randomInt(0, 2),
+      minutes: randomInt(10, 50),
+      seconds: randomInt(10, 50),
+    };
+    const leftTotalSeconds = toTotalTimeSeconds(left);
+    const rightTotalSeconds = toTotalTimeSeconds(right);
+
+    if (rightTotalSeconds >= leftTotalSeconds) {
+      continue;
+    }
+
+    const result = splitClockSeconds(leftTotalSeconds - rightTotalSeconds);
+    const hasSecondBorrow = left.seconds < right.seconds;
+    const hasMinuteBorrow = left.minutes - (hasSecondBorrow ? 1 : 0) < right.minutes;
+    const borrowCount = Number(hasSecondBorrow) + Number(hasMinuteBorrow);
+
+    if (result.hours < 1) {
+      continue;
+    }
+
+    if (step === 1 && borrowCount !== 0) {
+      continue;
+    }
+
+    if (step >= 2 && borrowCount !== 1) {
+      continue;
+    }
+
+    return createTimeAdditionProblem({
+      title: '세로식으로 시간을 빼 보세요.',
+      instruction: '세로식을 보고 시간, 분, 초를 차례대로 계산해 보세요.',
+      mode: 'vertical',
+      operation: '-',
+      left,
+      right,
+      result,
+      editableParts: ['hours', 'minutes', 'seconds'],
+    });
+  }
+}
+
+function createLevel10TimeAdditionProblem(problemSequence = 1, _opponentHP = 100): Problem {
+  const resolvedSequence = Math.min(Math.max(problemSequence, 1), UNIT3_FIXED_TIME_PROBLEM_COUNT);
+
+  if (resolvedSequence === 1) {
+    return createClockTimeAdditionProblem(1);
+  }
+
+  if (resolvedSequence === 2) {
+    return createBarModelTimeAdditionProblem(1);
+  }
+
+  if (resolvedSequence === 3) {
+    return createVerticalTimeAdditionProblem(1);
+  }
+
+  return createVerticalTimeAdditionProblem(2);
+}
+
+function createLevel11TimeSubtractionProblem(problemSequence = 1, _opponentHP = 100): Problem {
+  const resolvedSequence = Math.min(Math.max(problemSequence, 1), UNIT3_FIXED_TIME_PROBLEM_COUNT);
+
+  if (resolvedSequence === 1) {
+    return createClockTimeSubtractionProblem(1);
+  }
+
+  if (resolvedSequence === 2) {
+    return createBarModelTimeSubtractionProblem(1);
+  }
+
+  if (resolvedSequence === 3) {
+    return createVerticalTimeSubtractionProblem(1);
+  }
+
+  return createVerticalTimeSubtractionProblem(2);
+}
+
+type Level12TemplateId =
+  | 'eventStartTime'
+  | 'activityDuration'
+  | 'tripArrivalTime'
+  | 'dailyPracticeTotal'
+  | 'activityStartTime'
+  | 'elapsedTime'
+  | 'remainingUntilEvent'
+  | 'remainingAfterUse';
+
+type Level12OperationGroup = 'addition' | 'subtraction';
+
+const LEVEL12_ADDITION_TEMPLATE_IDS: Level12TemplateId[] = [
+  'eventStartTime',
+  'activityDuration',
+  'tripArrivalTime',
+  'dailyPracticeTotal',
+];
+
+const LEVEL12_SUBTRACTION_TEMPLATE_IDS: Level12TemplateId[] = [
+  'activityStartTime',
+  'elapsedTime',
+  'remainingUntilEvent',
+  'remainingAfterUse',
+];
+
+const LEVEL12_TEMPLATE_OPERATIONS: Record<Level12TemplateId, Level12OperationGroup> = {
+  eventStartTime: 'addition',
+  activityDuration: 'addition',
+  tripArrivalTime: 'addition',
+  dailyPracticeTotal: 'addition',
+  activityStartTime: 'subtraction',
+  elapsedTime: 'subtraction',
+  remainingUntilEvent: 'subtraction',
+  remainingAfterUse: 'subtraction',
+};
+
+const LEVEL12_DEFAULT_TEMPLATE_ORDER: Level12TemplateId[] = [
+  'eventStartTime',
+  'elapsedTime',
+  'activityDuration',
+  'activityStartTime',
+];
+
+const LEVEL12_OPERATION_PATTERNS: Level12OperationGroup[][] = [
+  ['addition', 'subtraction', 'addition', 'subtraction'],
+  ['addition', 'addition', 'subtraction', 'subtraction'],
+  ['subtraction', 'addition', 'addition', 'subtraction'],
+  ['subtraction', 'addition', 'subtraction', 'addition'],
+  ['addition', 'subtraction', 'subtraction', 'addition'],
+  ['subtraction', 'subtraction', 'addition', 'addition'],
+];
+
+function pickLevel12TemplateSubset(
+  pool: Level12TemplateId[],
+  blockedIds: Set<Level12TemplateId>,
+  count: number,
+) {
+  const available = shuffleValues(pool.filter((id) => !blockedIds.has(id)));
+  const fallback = shuffleValues(pool.filter((id) => blockedIds.has(id)));
+  return [...available, ...fallback].slice(0, count);
+}
+
+function buildLevel12RoundTemplateOrder(previousOrder: Level12TemplateId[] = []) {
+  const previousAdditionIds = new Set(previousOrder.filter((id) => LEVEL12_TEMPLATE_OPERATIONS[id] === 'addition'));
+  const previousSubtractionIds = new Set(previousOrder.filter((id) => LEVEL12_TEMPLATE_OPERATIONS[id] === 'subtraction'));
+  const additionTemplates = shuffleValues(pickLevel12TemplateSubset(LEVEL12_ADDITION_TEMPLATE_IDS, previousAdditionIds, 2));
+  const subtractionTemplates = shuffleValues(
+    pickLevel12TemplateSubset(LEVEL12_SUBTRACTION_TEMPLATE_IDS, previousSubtractionIds, 2),
+  );
+  const operationPattern = sample(LEVEL12_OPERATION_PATTERNS);
+  let additionIndex = 0;
+  let subtractionIndex = 0;
+
+  return operationPattern.map((group) =>
+    group === 'addition' ? additionTemplates[additionIndex++] : subtractionTemplates[subtractionIndex++],
+  );
+}
+
+function createLevel12MovieStartTimeProblem(): Problem {
+  const scenarios = [
+    {
+      title: '영화가 시작하는 시각을 구해 보세요.',
+      instruction: '주어진 말을 읽고 영화가 시작하는 시각을 시와 분으로 써 보세요.',
+      waitLabel: '영화 시작까지',
+      line2: (waitText: string) => `영화는 ${waitText} 후에 시작합니다.`,
+      question: '영화가 시작하는 시각은 언제인가요?',
+    },
+    {
+      title: '인형극이 시작하는 시각을 구해 보세요.',
+      instruction: '주어진 말을 읽고 인형극이 시작하는 시각을 시와 분으로 써 보세요.',
+      waitLabel: '인형극 시작까지',
+      line2: (waitText: string) => `인형극은 ${waitText} 후에 시작합니다.`,
+      question: '인형극이 시작하는 시각은 언제인가요?',
+    },
+    {
+      title: '마술 공연이 시작하는 시각을 구해 보세요.',
+      instruction: '주어진 말을 읽고 마술 공연이 시작하는 시각을 시와 분으로 써 보세요.',
+      waitLabel: '공연 시작까지',
+      line2: (waitText: string) => `마술 공연은 ${waitText} 후에 시작합니다.`,
+      question: '마술 공연이 시작하는 시각은 언제인가요?',
+    },
+    {
+      title: '낭독회가 시작하는 시각을 구해 보세요.',
+      instruction: '주어진 말을 읽고 낭독회가 시작하는 시각을 시와 분으로 써 보세요.',
+      waitLabel: '낭독회 시작까지',
+      line2: (waitText: string) => `낭독회는 ${waitText} 후에 시작합니다.`,
+      question: '낭독회가 시작하는 시각은 언제인가요?',
+    },
+  ];
+  const scenario = sample(scenarios);
+
+  while (true) {
+    const currentHour = randomInt(7, 11);
+    const currentMinute = sample([25, 30, 35, 40, 45, 50, 55]);
+    const waitMinutes = sample([10, 15, 20, 25, 30, 35]);
+    const result = splitClockSeconds(currentHour * 3600 + currentMinute * 60 + waitMinutes * 60);
+
+    if (result.hours > 12 || result.hours === currentHour) {
+      continue;
+    }
+
+    return createStoryTimeAdditionProblem({
+      title: scenario.title,
+      instruction: scenario.instruction,
+      operation: '+',
+      left: { hours: currentHour, minutes: currentMinute, seconds: 0 },
+      right: { hours: 0, minutes: waitMinutes, seconds: 0 },
+      result,
+      editableParts: ['hours', 'minutes'],
+      storyHighlights: [
+        { label: '지금 시각', value: formatClockTime(currentHour, currentMinute) },
+        { label: scenario.waitLabel, value: formatDuration(0, waitMinutes) },
+      ],
+      storyLines: [
+        `지금 시각은 ${formatClockTime(currentHour, currentMinute)}입니다.`,
+        scenario.line2(formatDuration(0, waitMinutes)),
+        scenario.question,
+      ],
+    });
+  }
+}
+
+function createLevel12DrawingDurationProblem(): Problem {
+  const scenarios = [
+    {
+      title: '그림을 완성하는 데 걸린 시간을 구해 보세요.',
+      instruction: '두 활동에 걸린 시간을 합해서 전체 걸린 시간을 써 보세요.',
+      leftLabel: '밑그림',
+      rightLabel: '색칠',
+      storyLines: (leftText: string, rightText: string) => [
+        `지민이는 ${leftText} 동안 밑그림을 그리고,`,
+        `${rightText} 동안 색칠하여 그림을 완성했습니다.`,
+        '그림을 완성하는 데 걸린 시간은 모두 얼마인가요?',
+      ],
+    },
+    {
+      title: '과학 관찰 기록을 마치는 데 걸린 시간을 구해 보세요.',
+      instruction: '두 활동에 걸린 시간을 합해서 전체 걸린 시간을 써 보세요.',
+      leftLabel: '관찰',
+      rightLabel: '기록 정리',
+      storyLines: (leftText: string, rightText: string) => [
+        `도윤이는 ${leftText} 동안 식물을 관찰하고,`,
+        `${rightText} 동안 관찰 기록을 정리했습니다.`,
+        '관찰 기록을 마치는 데 걸린 시간은 모두 얼마인가요?',
+      ],
+    },
+    {
+      title: '모형을 만드는 데 걸린 시간을 구해 보세요.',
+      instruction: '두 활동에 걸린 시간을 합해서 전체 걸린 시간을 써 보세요.',
+      leftLabel: '부품 고르기',
+      rightLabel: '조립하기',
+      storyLines: (leftText: string, rightText: string) => [
+        `서준이는 ${leftText} 동안 부품을 고르고,`,
+        `${rightText} 동안 모형을 조립했습니다.`,
+        '모형을 만드는 데 걸린 시간은 모두 얼마인가요?',
+      ],
+    },
+    {
+      title: '독서 활동에 걸린 시간을 구해 보세요.',
+      instruction: '두 활동에 걸린 시간을 합해서 전체 걸린 시간을 써 보세요.',
+      leftLabel: '책 읽기',
+      rightLabel: '독서록 쓰기',
+      storyLines: (leftText: string, rightText: string) => [
+        `하린이는 ${leftText} 동안 책을 읽고,`,
+        `${rightText} 동안 독서록을 썼습니다.`,
+        '독서 활동에 걸린 시간은 모두 얼마인가요?',
+      ],
+    },
+  ];
+  const scenario = sample(scenarios);
+
+  while (true) {
+    const sketchMinutes = randomInt(6, 16);
+    const sketchSeconds = sample([10, 20, 30, 40, 50]);
+    const colorMinutes = randomInt(22, 38);
+    const colorSeconds = sample([15, 25, 35, 45, 50]);
+    const result = splitClockSeconds(sketchMinutes * 60 + sketchSeconds + colorMinutes * 60 + colorSeconds);
+
+    if (result.hours > 0 || sketchSeconds + colorSeconds < 60) {
+      continue;
+    }
+
+    const sketchText = formatDuration(0, sketchMinutes, sketchSeconds);
+    const colorText = formatDuration(0, colorMinutes, colorSeconds);
+
+    return createStoryTimeAdditionProblem({
+      title: scenario.title,
+      instruction: scenario.instruction,
+      operation: '+',
+      left: { hours: 0, minutes: sketchMinutes, seconds: sketchSeconds },
+      right: { hours: 0, minutes: colorMinutes, seconds: colorSeconds },
+      result,
+      editableParts: ['minutes', 'seconds'],
+      storyHighlights: [
+        { label: scenario.leftLabel, value: sketchText },
+        { label: scenario.rightLabel, value: colorText },
+      ],
+      storyLines: scenario.storyLines(sketchText, colorText),
+    });
+  }
+}
+
+function createLevel12TripArrivalTimeProblem(): Problem {
+  const scenarios = [
+    {
+      title: '도착 시각을 구해 보세요.',
+      instruction: '출발 시각과 걸린 시간을 보고 도착 시각을 구해 보세요.',
+      startLabel: '출발 시각',
+      durationLabel: '이동 시간',
+      storyLines: (startText: string, durationText: string) => [
+        `민서는 ${startText}에 체험학습 버스를 탔습니다.`,
+        `버스를 타고 ${durationText} 동안 이동했습니다.`,
+        '도착한 시각은 언제인가요?',
+      ],
+    },
+    {
+      title: '수영장에 도착한 시각을 구해 보세요.',
+      instruction: '출발 시각과 걸린 시간을 보고 도착 시각을 구해 보세요.',
+      startLabel: '출발 시각',
+      durationLabel: '걸린 시간',
+      storyLines: (startText: string, durationText: string) => [
+        `유나는 ${startText}에 집에서 출발했습니다.`,
+        `${durationText} 동안 이동하여 수영장에 도착했습니다.`,
+        '수영장에 도착한 시각은 언제인가요?',
+      ],
+    },
+    {
+      title: '도서관에 도착한 시각을 구해 보세요.',
+      instruction: '출발 시각과 걸린 시간을 보고 도착 시각을 구해 보세요.',
+      startLabel: '출발 시각',
+      durationLabel: '이동 시간',
+      storyLines: (startText: string, durationText: string) => [
+        `지후는 ${startText}에 학교를 출발했습니다.`,
+        `도서관까지 가는 데 ${durationText}이 걸렸습니다.`,
+        '도서관에 도착한 시각은 언제인가요?',
+      ],
+    },
+    {
+      title: '체육관에 도착한 시각을 구해 보세요.',
+      instruction: '출발 시각과 걸린 시간을 보고 도착 시각을 구해 보세요.',
+      startLabel: '출발 시각',
+      durationLabel: '이동 시간',
+      storyLines: (startText: string, durationText: string) => [
+        `서아는 ${startText}에 학원 차를 탔습니다.`,
+        `체육관까지 ${durationText} 동안 이동했습니다.`,
+        '체육관에 도착한 시각은 언제인가요?',
+      ],
+    },
+  ];
+  const scenario = sample(scenarios);
+
+  while (true) {
+    const start = {
+      hours: randomInt(1, 9),
+      minutes: randomInt(15, 50),
+      seconds: sample([10, 20, 30, 40, 50]),
+    };
+    const duration = {
+      hours: sample([0, 1]),
+      minutes: randomInt(15, 42),
+      seconds: sample([15, 25, 35, 45]),
+    };
+    const result = splitClockSeconds(toTotalTimeSeconds(start) + toTotalTimeSeconds(duration));
+    const hasSecondCarry = start.seconds + duration.seconds >= 60;
+    const hasMinuteCarry = start.minutes + duration.minutes + (hasSecondCarry ? 1 : 0) >= 60;
+
+    if (result.hours > 12 || (!hasSecondCarry && !hasMinuteCarry)) {
+      continue;
+    }
+
+    const startText = formatClockTime(start.hours, start.minutes, start.seconds);
+    const durationText = formatDuration(duration.hours, duration.minutes, duration.seconds);
+
+    return createStoryTimeAdditionProblem({
+      title: scenario.title,
+      instruction: scenario.instruction,
+      operation: '+',
+      left: start,
+      right: duration,
+      result,
+      editableParts: ['hours', 'minutes', 'seconds'],
+      storyHighlights: [
+        { label: scenario.startLabel, value: startText },
+        { label: scenario.durationLabel, value: durationText },
+      ],
+      storyLines: scenario.storyLines(startText, durationText),
+    });
+  }
+}
+
+function createLevel12DailyPracticeTotalProblem(): Problem {
+  const scenarios = [
+    {
+      title: '하루 동안 연습한 시간을 구해 보세요.',
+      instruction: '두 번의 연습 시간을 합해서 하루 동안 연습한 시간을 써 보세요.',
+      leftLabel: '오전 연습',
+      rightLabel: '오후 연습',
+      storyLines: (leftText: string, rightText: string) => [
+        `유나는 오전에 ${leftText} 동안 피아노를 연습하고,`,
+        `오후에 ${rightText} 동안 발표 연습을 했습니다.`,
+        '하루 동안 연습한 시간은 모두 얼마인가요?',
+      ],
+    },
+    {
+      title: '하루 동안 공부한 시간을 구해 보세요.',
+      instruction: '두 번의 공부 시간을 합해서 하루 동안 공부한 시간을 써 보세요.',
+      leftLabel: '오전 공부',
+      rightLabel: '오후 공부',
+      storyLines: (leftText: string, rightText: string) => [
+        `도윤이는 오전에 ${leftText} 동안 책을 읽고,`,
+        `오후에 ${rightText} 동안 문제를 풀었습니다.`,
+        '하루 동안 공부한 시간은 모두 얼마인가요?',
+      ],
+    },
+    {
+      title: '하루 동안 활동한 시간을 구해 보세요.',
+      instruction: '두 번의 활동 시간을 합해서 하루 동안 활동한 시간을 써 보세요.',
+      leftLabel: '첫 번째 활동',
+      rightLabel: '두 번째 활동',
+      storyLines: (leftText: string, rightText: string) => [
+        `하람이는 오전에 ${leftText} 동안 로봇을 만들고,`,
+        `오후에 ${rightText} 동안 작품을 꾸몄습니다.`,
+        '하루 동안 활동한 시간은 모두 얼마인가요?',
+      ],
+    },
+    {
+      title: '하루 동안 준비한 시간을 구해 보세요.',
+      instruction: '두 번의 준비 시간을 합해서 하루 동안 준비한 시간을 써 보세요.',
+      leftLabel: '1차 준비',
+      rightLabel: '2차 준비',
+      storyLines: (leftText: string, rightText: string) => [
+        `세아는 오전에 ${leftText} 동안 발표 자료를 만들고,`,
+        `오후에 ${rightText} 동안 발표를 연습했습니다.`,
+        '하루 동안 준비한 시간은 모두 얼마인가요?',
+      ],
+    },
+  ];
+  const scenario = sample(scenarios);
+
+  while (true) {
+    const left = {
+      hours: 0,
+      minutes: randomInt(26, 38),
+      seconds: sample([10, 20, 30, 40, 50]),
+    };
+    const right = {
+      hours: 0,
+      minutes: randomInt(24, 36),
+      seconds: sample([15, 25, 35, 45, 50]),
+    };
+    const result = splitClockSeconds(toTotalTimeSeconds(left) + toTotalTimeSeconds(right));
+    const hasSecondCarry = left.seconds + right.seconds >= 60;
+    const hasMinuteCarry = left.minutes + right.minutes + (hasSecondCarry ? 1 : 0) >= 60;
+
+    if (result.hours !== 1 || (!hasSecondCarry && !hasMinuteCarry)) {
+      continue;
+    }
+
+    const leftText = formatDuration(left.hours, left.minutes, left.seconds);
+    const rightText = formatDuration(right.hours, right.minutes, right.seconds);
+
+    return createStoryTimeAdditionProblem({
+      title: scenario.title,
+      instruction: scenario.instruction,
+      operation: '+',
+      left,
+      right,
+      result,
+      editableParts: ['hours', 'minutes', 'seconds'],
+      storyHighlights: [
+        { label: scenario.leftLabel, value: leftText },
+        { label: scenario.rightLabel, value: rightText },
+      ],
+      storyLines: scenario.storyLines(leftText, rightText),
+    });
+  }
+}
+
+function createLevel12ElapsedTimeProblem(): Problem {
+  const scenarios = [
+    {
+      title: '활동한 시간을 구해 보세요.',
+      instruction: '시작 시각과 끝난 시각을 보고 걸린 시간을 구해 보세요.',
+      startLabel: '시작 시각',
+      endLabel: '끝난 시각',
+      storyLines: (startText: string, endText: string) => [
+        `하린이는 ${startText}에 독서 활동을 시작했습니다.`,
+        `${endText}에 활동을 마쳤습니다.`,
+        '독서 활동에 걸린 시간은 모두 얼마인가요?',
+      ],
+    },
+    {
+      title: '연습한 시간을 구해 보세요.',
+      instruction: '시작 시각과 끝난 시각을 보고 걸린 시간을 구해 보세요.',
+      startLabel: '시작 시각',
+      endLabel: '끝난 시각',
+      storyLines: (startText: string, endText: string) => [
+        `지후는 ${startText}에 리코더 연습을 시작했습니다.`,
+        `${endText}에 연습을 마쳤습니다.`,
+        '리코더 연습에 걸린 시간은 모두 얼마인가요?',
+      ],
+    },
+    {
+      title: '관찰한 시간을 구해 보세요.',
+      instruction: '시작 시각과 끝난 시각을 보고 걸린 시간을 구해 보세요.',
+      startLabel: '시작 시각',
+      endLabel: '끝난 시각',
+      storyLines: (startText: string, endText: string) => [
+        `도윤이는 ${startText}부터 곤충을 관찰했습니다.`,
+        `${endText}에 관찰을 마쳤습니다.`,
+        '곤충을 관찰한 시간은 모두 얼마인가요?',
+      ],
+    },
+    {
+      title: '운동한 시간을 구해 보세요.',
+      instruction: '시작 시각과 끝난 시각을 보고 걸린 시간을 구해 보세요.',
+      startLabel: '시작 시각',
+      endLabel: '끝난 시각',
+      storyLines: (startText: string, endText: string) => [
+        `서준이는 ${startText}에 줄넘기를 시작했습니다.`,
+        `${endText}에 운동을 마쳤습니다.`,
+        '줄넘기한 시간은 모두 얼마인가요?',
+      ],
+    },
+  ];
+  const scenario = sample(scenarios);
+
+  while (true) {
+    const start = {
+      hours: randomInt(1, 9),
+      minutes: randomInt(5, 50),
+      seconds: sample([10, 20, 30, 40, 50]),
+    };
+    const duration = {
+      hours: sample([0, 1]),
+      minutes: randomInt(18, 42),
+      seconds: sample([10, 20, 30, 40, 45]),
+    };
+    const end = splitClockSeconds(toTotalTimeSeconds(start) + toTotalTimeSeconds(duration));
+    const hasSecondBorrow = end.seconds < start.seconds;
+    const hasMinuteBorrow = end.minutes - (hasSecondBorrow ? 1 : 0) < start.minutes;
+    const editableParts: ClockInputPart[] =
+      duration.hours > 0 ? ['hours', 'minutes', 'seconds'] : ['minutes', 'seconds'];
+
+    if (end.hours > 12 || (!hasSecondBorrow && !hasMinuteBorrow)) {
+      continue;
+    }
+
+    const startText = formatClockTime(start.hours, start.minutes, start.seconds);
+    const endText = formatClockTime(end.hours, end.minutes, end.seconds);
+
+    return createStoryTimeAdditionProblem({
+      title: scenario.title,
+      instruction: scenario.instruction,
+      operation: '-',
+      left: end,
+      right: start,
+      result: duration,
+      editableParts,
+      storyHighlights: [
+        { label: scenario.startLabel, value: startText },
+        { label: scenario.endLabel, value: endText },
+      ],
+      storyLines: scenario.storyLines(startText, endText),
+    });
+  }
+}
+
+function createLevel12StartTimeProblem(): Problem {
+  const scenarios = [
+    {
+      title: '산책을 시작한 시각을 구해 보세요.',
+      instruction: '걸린 시간과 도착한 시각을 보고 시작한 시각을 구해 보세요.',
+      durationLabel: '산책 시간',
+      arrivalLabel: '도착 시각',
+      storyLines: (durationText: string, arrivalText: string) => [
+        `재민이는 가족들과 ${durationText} 동안 산책을 했습니다.`,
+        `산책을 하고 집에 돌아온 시각은 ${arrivalText}입니다.`,
+        '재민이가 산책을 시작한 시각은 언제인가요?',
+      ],
+    },
+    {
+      title: '수영 연습을 시작한 시각을 구해 보세요.',
+      instruction: '걸린 시간과 끝난 시각을 보고 시작한 시각을 구해 보세요.',
+      durationLabel: '연습 시간',
+      arrivalLabel: '끝난 시각',
+      storyLines: (durationText: string, arrivalText: string) => [
+        `민서는 ${durationText} 동안 수영 연습을 했습니다.`,
+        `연습이 끝난 시각은 ${arrivalText}입니다.`,
+        '민서가 수영 연습을 시작한 시각은 언제인가요?',
+      ],
+    },
+    {
+      title: '체험관 관람을 시작한 시각을 구해 보세요.',
+      instruction: '걸린 시간과 끝난 시각을 보고 시작한 시각을 구해 보세요.',
+      durationLabel: '관람 시간',
+      arrivalLabel: '끝난 시각',
+      storyLines: (durationText: string, arrivalText: string) => [
+        `도윤이는 ${durationText} 동안 체험관을 둘러보았습니다.`,
+        `관람을 마친 시각은 ${arrivalText}입니다.`,
+        '도윤이가 체험관 관람을 시작한 시각은 언제인가요?',
+      ],
+    },
+    {
+      title: '자전거 타기를 시작한 시각을 구해 보세요.',
+      instruction: '걸린 시간과 돌아온 시각을 보고 시작한 시각을 구해 보세요.',
+      durationLabel: '탄 시간',
+      arrivalLabel: '돌아온 시각',
+      storyLines: (durationText: string, arrivalText: string) => [
+        `서윤이는 ${durationText} 동안 자전거를 탔습니다.`,
+        `집에 돌아온 시각은 ${arrivalText}입니다.`,
+        '서윤이가 자전거 타기를 시작한 시각은 언제인가요?',
+      ],
+    },
+  ];
+  const scenario = sample(scenarios);
+
+  while (true) {
+    const start = {
+      hours: randomInt(2, 9),
+      minutes: randomInt(5, 50),
+      seconds: randomInt(10, 50),
+    };
+    const duration = {
+      hours: sample([0, 1]),
+      minutes: randomInt(18, 45),
+      seconds: randomInt(10, 45),
+    };
+    const arrival = splitClockSeconds(toTotalTimeSeconds(start) + toTotalTimeSeconds(duration));
+    const hasSecondBorrow = arrival.seconds < duration.seconds;
+    const hasMinuteBorrow = arrival.minutes - (hasSecondBorrow ? 1 : 0) < duration.minutes;
+
+    if (arrival.hours > 12 || (!hasSecondBorrow && !hasMinuteBorrow)) {
+      continue;
+    }
+
+    const durationText = formatDuration(duration.hours, duration.minutes, duration.seconds);
+    const arrivalText = formatClockTime(arrival.hours, arrival.minutes, arrival.seconds);
+
+    return createStoryTimeAdditionProblem({
+      title: scenario.title,
+      instruction: scenario.instruction,
+      operation: '-',
+      left: arrival,
+      right: duration,
+      result: start,
+      editableParts: ['hours', 'minutes', 'seconds'],
+      storyHighlights: [
+        { label: scenario.durationLabel, value: durationText },
+        { label: scenario.arrivalLabel, value: arrivalText },
+      ],
+      storyLines: scenario.storyLines(durationText, arrivalText),
+    });
+  }
+}
+
+function createLevel12RemainingUntilEventProblem(): Problem {
+  const scenarios = [
+    {
+      title: '남은 시간을 구해 보세요.',
+      instruction: '현재 시각과 예정된 시각을 보고 남은 시간을 구해 보세요.',
+      currentLabel: '현재 시각',
+      scheduledLabel: '예정된 시각',
+      storyLines: (currentText: string, scheduledText: string) => [
+        `지금 시각은 ${currentText}입니다.`,
+        `도서관 수업은 ${scheduledText}에 시작합니다.`,
+        '수업이 시작할 때까지 남은 시간은 얼마인가요?',
+      ],
+    },
+    {
+      title: '공연까지 남은 시간을 구해 보세요.',
+      instruction: '현재 시각과 예정된 시각을 보고 남은 시간을 구해 보세요.',
+      currentLabel: '현재 시각',
+      scheduledLabel: '공연 시작 시각',
+      storyLines: (currentText: string, scheduledText: string) => [
+        `지금 시각은 ${currentText}입니다.`,
+        `공연은 ${scheduledText}에 시작합니다.`,
+        '공연이 시작할 때까지 남은 시간은 얼마인가요?',
+      ],
+    },
+    {
+      title: '버스 출발까지 남은 시간을 구해 보세요.',
+      instruction: '현재 시각과 예정된 시각을 보고 남은 시간을 구해 보세요.',
+      currentLabel: '현재 시각',
+      scheduledLabel: '출발 시각',
+      storyLines: (currentText: string, scheduledText: string) => [
+        `지금 시각은 ${currentText}입니다.`,
+        `체험학습 버스는 ${scheduledText}에 출발합니다.`,
+        '버스가 출발할 때까지 남은 시간은 얼마인가요?',
+      ],
+    },
+    {
+      title: '수업 시작까지 남은 시간을 구해 보세요.',
+      instruction: '현재 시각과 예정된 시각을 보고 남은 시간을 구해 보세요.',
+      currentLabel: '현재 시각',
+      scheduledLabel: '수업 시작 시각',
+      storyLines: (currentText: string, scheduledText: string) => [
+        `지금 시각은 ${currentText}입니다.`,
+        `체육 수업은 ${scheduledText}에 시작합니다.`,
+        '체육 수업이 시작할 때까지 남은 시간은 얼마인가요?',
+      ],
+    },
+  ];
+  const scenario = sample(scenarios);
+
+  while (true) {
+    const current = {
+      hours: randomInt(7, 10),
+      minutes: sample([25, 30, 35, 40, 45, 50, 55]),
+      seconds: 0,
+    };
+    const remaining = {
+      hours: sample([0, 0, 1]),
+      minutes: sample([10, 15, 20, 25, 30, 35, 40]),
+      seconds: 0,
+    };
+    const scheduled = splitClockSeconds(toTotalTimeSeconds(current) + toTotalTimeSeconds(remaining));
+    const editableParts: ClockInputPart[] = remaining.hours > 0 ? ['hours', 'minutes'] : ['minutes'];
+
+    if (scheduled.hours > 12 || scheduled.hours === current.hours) {
+      continue;
+    }
+
+    const currentText = formatClockTime(current.hours, current.minutes);
+    const scheduledText = formatClockTime(scheduled.hours, scheduled.minutes);
+
+    return createStoryTimeAdditionProblem({
+      title: scenario.title,
+      instruction: scenario.instruction,
+      operation: '-',
+      left: scheduled,
+      right: current,
+      result: remaining,
+      editableParts,
+      storyHighlights: [
+        { label: scenario.currentLabel, value: currentText },
+        { label: scenario.scheduledLabel, value: scheduledText },
+      ],
+      storyLines: scenario.storyLines(currentText, scheduledText),
+    });
+  }
+}
+
+function createLevel12RemainingAfterUseProblem(): Problem {
+  const scenarios = [
+    {
+      title: '남은 연습 시간을 구해 보세요.',
+      instruction: '전체 시간과 사용한 시간을 보고 남은 시간을 구해 보세요.',
+      totalLabel: '전체 연습 시간',
+      usedLabel: '사용한 시간',
+      storyLines: (totalText: string, usedText: string) => [
+        `서윤이는 오늘 ${totalText} 동안 연습하기로 했습니다.`,
+        `그중 ${usedText} 동안 이미 연습했습니다.`,
+        '남은 연습 시간은 얼마인가요?',
+      ],
+    },
+    {
+      title: '남은 준비 시간을 구해 보세요.',
+      instruction: '전체 시간과 사용한 시간을 보고 남은 시간을 구해 보세요.',
+      totalLabel: '전체 준비 시간',
+      usedLabel: '사용한 시간',
+      storyLines: (totalText: string, usedText: string) => [
+        `민서는 발표 준비를 ${totalText} 동안 하기로 했습니다.`,
+        `그중 ${usedText} 동안 자료를 만들었습니다.`,
+        '남은 준비 시간은 얼마인가요?',
+      ],
+    },
+    {
+      title: '남은 놀이 시간을 구해 보세요.',
+      instruction: '전체 시간과 사용한 시간을 보고 남은 시간을 구해 보세요.',
+      totalLabel: '전체 놀이 시간',
+      usedLabel: '사용한 시간',
+      storyLines: (totalText: string, usedText: string) => [
+        `지후는 놀이터에서 ${totalText} 동안 놀기로 했습니다.`,
+        `그중 ${usedText} 동안 미끄럼틀을 탔습니다.`,
+        '남은 놀이 시간은 얼마인가요?',
+      ],
+    },
+    {
+      title: '남은 읽기 시간을 구해 보세요.',
+      instruction: '전체 시간과 사용한 시간을 보고 남은 시간을 구해 보세요.',
+      totalLabel: '전체 읽기 시간',
+      usedLabel: '사용한 시간',
+      storyLines: (totalText: string, usedText: string) => [
+        `하린이는 책을 ${totalText} 동안 읽기로 했습니다.`,
+        `그중 ${usedText} 동안 이미 책을 읽었습니다.`,
+        '남은 읽기 시간은 얼마인가요?',
+      ],
+    },
+  ];
+  const scenario = sample(scenarios);
+
+  while (true) {
+    const total = {
+      hours: 1,
+      minutes: randomInt(10, 28),
+      seconds: sample([10, 20, 30, 40, 50]),
+    };
+    const used = {
+      hours: 0,
+      minutes: randomInt(25, 48),
+      seconds: sample([15, 25, 35, 45]),
+    };
+    const remainingSeconds = toTotalTimeSeconds(total) - toTotalTimeSeconds(used);
+
+    if (remainingSeconds <= 0) {
+      continue;
+    }
+
+    const remaining = splitClockSeconds(remainingSeconds);
+    const hasSecondBorrow = total.seconds < used.seconds;
+    const hasMinuteBorrow = total.minutes - (hasSecondBorrow ? 1 : 0) < used.minutes;
+    const editableParts: ClockInputPart[] =
+      remaining.hours > 0 ? ['hours', 'minutes', 'seconds'] : ['minutes', 'seconds'];
+
+    if (!hasSecondBorrow && !hasMinuteBorrow) {
+      continue;
+    }
+
+    const totalText = formatDuration(total.hours, total.minutes, total.seconds);
+    const usedText = formatDuration(used.hours, used.minutes, used.seconds);
+
+    return createStoryTimeAdditionProblem({
+      title: scenario.title,
+      instruction: scenario.instruction,
+      operation: '-',
+      left: total,
+      right: used,
+      result: remaining,
+      editableParts,
+      storyHighlights: [
+        { label: scenario.totalLabel, value: totalText },
+        { label: scenario.usedLabel, value: usedText },
+      ],
+      storyLines: scenario.storyLines(totalText, usedText),
+    });
+  }
+}
+
+function createLevel12ProblemFromTemplate(templateId: Level12TemplateId): Problem {
+  if (templateId === 'eventStartTime') {
+    return createLevel12MovieStartTimeProblem();
+  }
+
+  if (templateId === 'activityDuration') {
+    return createLevel12DrawingDurationProblem();
+  }
+
+  if (templateId === 'tripArrivalTime') {
+    return createLevel12TripArrivalTimeProblem();
+  }
+
+  if (templateId === 'dailyPracticeTotal') {
+    return createLevel12DailyPracticeTotalProblem();
+  }
+
+  if (templateId === 'activityStartTime') {
+    return createLevel12StartTimeProblem();
+  }
+
+  if (templateId === 'elapsedTime') {
+    return createLevel12ElapsedTimeProblem();
+  }
+
+  if (templateId === 'remainingUntilEvent') {
+    return createLevel12RemainingUntilEventProblem();
+  }
+
+  return createLevel12RemainingAfterUseProblem();
+}
+
+function createLevel12TimeMixedProblem(
+  problemSequence = 1,
+  _opponentHP = 100,
+  templateOrder: Level12TemplateId[] = LEVEL12_DEFAULT_TEMPLATE_ORDER,
+): Problem {
+  const resolvedSequence = Math.min(Math.max(problemSequence, 1), UNIT3_FIXED_TIME_PROBLEM_COUNT);
+  const templateId = templateOrder[resolvedSequence - 1] ?? LEVEL12_DEFAULT_TEMPLATE_ORDER[resolvedSequence - 1];
+  return createLevel12ProblemFromTemplate(templateId);
+}
+
+function isUnit3FixedTimeSequenceLevel(unitId: LearningUnitId, level: number) {
+  return unitId === 'unit3' && (level === 10 || level === 11 || level === 12);
+}
+
+function getUnit3FixedTimeOpponentHPAfterCorrect(problemSequence: number) {
+  const resolvedSequence = Math.min(Math.max(problemSequence, 1), UNIT3_FIXED_TIME_PROBLEM_COUNT);
+  return Math.max(0, 100 - resolvedSequence * (100 / UNIT3_FIXED_TIME_PROBLEM_COUNT));
 }
 
 function createMillimeterNeedIntroProblem(): Problem {
@@ -2091,13 +3327,21 @@ function createStoryProblem(level: number, a: number, b: number, op: '+' | '-', 
   return { text, prompt, answer, kind: 'story' };
 }
 
-function createPromptProblem(prompt: string, answer: number, answerUnit?: string): Problem {
+function createPromptProblem(
+  prompt: string,
+  answer: number,
+  answerUnit?: string,
+  options?: {
+    storyTable?: StoryPromptTableData;
+  },
+): Problem {
   return {
     text: '',
     prompt,
     answer,
     kind: 'story',
     answerUnit,
+    storyTable: options?.storyTable,
   };
 }
 
@@ -2158,6 +3402,18 @@ function createDistanceWorksheetProblem(distanceWorksheet: DistanceWorksheetProb
 
 function normalizeAnswerUnit(unit: string) {
   return unit.trim().replace(/\s+/g, '').toLowerCase();
+}
+
+function normalizeSecretCode(value: string) {
+  return value.replace(/\s+/g, '');
+}
+
+function requiresSecretCodeForLevelTransition(unitId: LearningUnitId, currentLevel: number, nextLevel: number) {
+  return (
+    unitId === UNIT3_SECRET_CODE_GATE.unitId &&
+    currentLevel === UNIT3_SECRET_CODE_GATE.fromLevel &&
+    nextLevel === UNIT3_SECRET_CODE_GATE.nextLevel
+  );
 }
 
 function normalizeDistanceWorksheetAnswer(value: string, kind: DistanceWorksheetInputKind) {
@@ -3091,57 +4347,9 @@ const UNIT3_PROBLEM_FACTORIES: Record<number, Array<() => Problem>> = {
   ],
   9: [createClockReadingVisualProblem],
   10: [
-    () => {
-      const firstMinutes = randomInt(1, 6);
-      const firstSeconds = randomInt(15, 55);
-      const secondMinutes = randomInt(1, 5);
-      const secondSeconds = randomInt(10, 55);
-      const totalSeconds = firstMinutes * 60 + firstSeconds + secondMinutes * 60 + secondSeconds;
-      return createPromptProblem(
-        `${firstMinutes}분 ${firstSeconds}초 + ${secondMinutes}분 ${secondSeconds}초 = ${Math.floor(totalSeconds / 60)}분 □초입니다.\n□에 들어갈 수는?`,
-        totalSeconds % 60,
-      );
-    },
-    () => {
-      const minutes = randomInt(3, 8);
-      const seconds = randomInt(35, 55);
-      const addSeconds = randomInt(10, 30);
-      const totalSeconds = minutes * 60 + seconds + addSeconds;
-      return createPromptProblem(
-        `${minutes}분 ${seconds}초에 ${addSeconds}초를 더하면 ${Math.floor(totalSeconds / 60)}분 □초입니다.\n□에 들어갈 수는?`,
-        totalSeconds % 60,
-      );
-    },
-    () => {
-      const startHour = randomInt(1, 10);
-      const startMinute = randomInt(35, 55);
-      const addMinutes = randomInt(10, 35);
-      const result = splitClockSeconds(startHour * 3600 + startMinute * 60 + addMinutes * 60);
-      return createPromptProblem(
-        `${startHour}시 ${startMinute}분에 영화가 시작합니다.\n${addMinutes}분 뒤는 ${result.hours}시 □분입니다.\n□에 들어갈 수는?`,
-        result.minutes,
-      );
-    },
-    () => {
-      while (true) {
-        const startHour = randomInt(1, 10);
-        const startMinute = randomInt(8, 45);
-        const startSecond = randomInt(10, 45);
-        const addHours = randomInt(0, 1);
-        const addMinutes = randomInt(12, 34);
-        const addSeconds = randomInt(12, 45);
-        const result = splitClockSeconds(
-          startHour * 3600 + startMinute * 60 + startSecond + addHours * 3600 + addMinutes * 60 + addSeconds,
-        );
-
-        if (result.hours <= 12) {
-          return createPromptProblem(
-            `${formatClockTime(startHour, startMinute, startSecond)}에 ${formatDuration(addHours, addMinutes, addSeconds)}을 더하면 ${result.hours}시 ${result.minutes}분 □초입니다.\n□에 들어갈 수는?`,
-            result.seconds,
-          );
-        }
-      }
-    },
+    () => createClockTimeAdditionProblem(1),
+    () => createBarModelTimeAdditionProblem(1),
+    () => createVerticalTimeAdditionProblem(1),
   ],
   11: [
     () => {
@@ -3252,6 +4460,18 @@ function generateUnit3Problem(level: number, opponentHP: number, problemSequence
 
   if (level === 9) {
     return createClockReadingVisualProblem(getClockReadingDifficulty(problemSequence, opponentHP));
+  }
+
+  if (level === 10) {
+    return createLevel10TimeAdditionProblem(problemSequence, opponentHP);
+  }
+
+  if (level === 11) {
+    return createLevel11TimeSubtractionProblem(problemSequence, opponentHP);
+  }
+
+  if (level === 12) {
+    return createLevel12TimeMixedProblem(problemSequence, opponentHP);
   }
 
   const factories = UNIT3_PROBLEM_FACTORIES[level] ?? UNIT3_PROBLEM_FACTORIES[11];
@@ -4868,12 +6088,28 @@ function getClockFacePoint(cx: number, cy: number, radius: number, degrees: numb
   };
 }
 
-function AnalogClockFigure({ hour, minute, second }: { hour: number; minute: number; second: number }) {
+function AnalogClockFigure({
+  hour,
+  minute,
+  second,
+  palette = 'default',
+  activeHand = null,
+  displayMode = 'real',
+  ariaLabel,
+}: {
+  hour: number;
+  minute: number;
+  second: number;
+  palette?: 'default' | 'result';
+  activeHand?: 'minutes' | 'seconds' | null;
+  displayMode?: 'real' | 'teaching';
+  ariaLabel?: string;
+}) {
   const cx = 180;
   const cy = 180;
   const radius = 128;
-  const minuteProgress = minute + second / 60;
-  const hourProgress = (hour % 12) + minuteProgress / 60;
+  const minuteProgress = displayMode === 'real' ? minute + second / 60 : minute;
+  const hourProgress = displayMode === 'real' ? (hour % 12) + minuteProgress / 60 : (hour % 12) + minute / 60;
   const hourDegrees = hourProgress * 30;
   const minuteDegrees = minuteProgress * 6;
   const secondDegrees = second * 6;
@@ -4881,11 +6117,31 @@ function AnalogClockFigure({ hour, minute, second }: { hour: number; minute: num
   const minutePoint = getClockFacePoint(cx, cy, radius * 0.72, minuteDegrees);
   const secondPoint = getClockFacePoint(cx, cy, radius * 0.82, secondDegrees);
   const secondTailPoint = getClockFacePoint(cx, cy, radius * 0.18, secondDegrees + 180);
+  const roundedHour = hour === 0 ? 12 : Math.floor(hour);
+  const roundedMinute = Math.floor(minute);
+  const roundedSecond = Math.floor(second);
+  const isResultPalette = palette === 'result';
+  const outerFill = isResultPalette ? '#dbeafe' : '#c8e19a';
+  const innerStroke = isResultPalette ? '#bfdbfe' : '#dbe6f3';
+  const majorTickColor = isResultPalette ? '#60a5fa' : '#111827';
+  const minorTickColor = isResultPalette ? '#93c5fd' : '#4b5563';
+  const numberColor = isResultPalette ? '#1e3a8a' : '#111827';
+  const hourOpacity = activeHand === 'seconds' ? 0.78 : 1;
+  const minuteOpacity = activeHand === 'seconds' ? 0.72 : 1;
+  const secondOpacity = activeHand === 'minutes' ? 0.65 : 1;
+  const minuteWidth = activeHand === 'minutes' ? 8.5 : 7;
+  const secondWidth = activeHand === 'seconds' ? 3.2 : 2.4;
+  const handHighlightColor = activeHand === 'minutes' ? '#fecaca' : activeHand === 'seconds' ? '#cbd5e1' : '#dbeafe';
 
   return (
-    <svg viewBox="0 0 360 360" className="block w-full" role="img" aria-label={`${hour}시 ${minute}분 ${second}초를 가리키는 시계`}>
-      <circle cx={cx} cy={cy} r="144" fill="#c8e19a" />
-      <circle cx={cx} cy={cy} r="130" fill="#ffffff" stroke="#dbe6f3" strokeWidth="2" />
+    <svg
+      viewBox="0 0 360 360"
+      className="block w-full"
+      role="img"
+      aria-label={ariaLabel ?? `${roundedHour}시 ${roundedMinute}분 ${roundedSecond}초를 가리키는 시계`}
+    >
+      <circle cx={cx} cy={cy} r="144" fill={outerFill} />
+      <circle cx={cx} cy={cy} r="130" fill="#ffffff" stroke={innerStroke} strokeWidth="2" />
       {Array.from({ length: 60 }, (_, tickIndex) => {
         const isHourTick = tickIndex % 5 === 0;
         const outer = getClockFacePoint(cx, cy, radius - 4, tickIndex * 6);
@@ -4898,7 +6154,7 @@ function AnalogClockFigure({ hour, minute, second }: { hour: number; minute: num
             y1={outer.y}
             x2={inner.x}
             y2={inner.y}
-            stroke={isHourTick ? '#111827' : '#4b5563'}
+            stroke={isHourTick ? majorTickColor : minorTickColor}
             strokeWidth={isHourTick ? 3.4 : 1.5}
             strokeLinecap="round"
           />
@@ -4915,15 +6171,45 @@ function AnalogClockFigure({ hour, minute, second }: { hour: number; minute: num
             textAnchor="middle"
             fontSize="31"
             fontWeight="900"
-            fill="#111827"
+            fill={numberColor}
           >
             {value}
           </text>
         );
       })}
-      <line x1={cx} y1={cy} x2={hourPoint.x} y2={hourPoint.y} stroke="#23a34a" strokeWidth="10" strokeLinecap="round" />
-      <line x1={cx} y1={cy} x2={minutePoint.x} y2={minutePoint.y} stroke="#ef4444" strokeWidth="7" strokeLinecap="round" />
-      <line x1={secondTailPoint.x} y1={secondTailPoint.y} x2={secondPoint.x} y2={secondPoint.y} stroke="#1f2937" strokeWidth="2.4" strokeLinecap="round" />
+      {activeHand ? (
+        <circle cx={cx} cy={cy} r="142" fill="none" stroke={handHighlightColor} strokeWidth="7" opacity="0.75" />
+      ) : null}
+      <line
+        x1={cx}
+        y1={cy}
+        x2={hourPoint.x}
+        y2={hourPoint.y}
+        stroke="#23a34a"
+        strokeWidth="10"
+        strokeLinecap="round"
+        opacity={hourOpacity}
+      />
+      <line
+        x1={cx}
+        y1={cy}
+        x2={minutePoint.x}
+        y2={minutePoint.y}
+        stroke="#ef4444"
+        strokeWidth={minuteWidth}
+        strokeLinecap="round"
+        opacity={minuteOpacity}
+      />
+      <line
+        x1={secondTailPoint.x}
+        y1={secondTailPoint.y}
+        x2={secondPoint.x}
+        y2={secondPoint.y}
+        stroke="#1f2937"
+        strokeWidth={secondWidth}
+        strokeLinecap="round"
+        opacity={secondOpacity}
+      />
       <circle cx={cx} cy={cy} r="8.5" fill="#ffd166" stroke="#f59e0b" strokeWidth="2.2" />
       <circle cx={cx} cy={cy} r="2.8" fill="#f8fafc" />
     </svg>
@@ -5025,6 +6311,1632 @@ function ClockReadingProblemCard({
             })()
           ))}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function ClockResultPlaceholderFigure() {
+  const cx = 180;
+  const cy = 180;
+  const radius = 128;
+
+  return (
+    <svg viewBox="0 0 360 360" className="block w-full" role="img" aria-label="결과 시각을 생각해 보는 시계">
+      <circle cx={cx} cy={cy} r="144" fill="#dbeafe" />
+      <circle cx={cx} cy={cy} r="130" fill="#ffffff" stroke="#bfdbfe" strokeWidth="3" />
+      {Array.from({ length: 60 }, (_, tickIndex) => {
+        const isHourTick = tickIndex % 5 === 0;
+        const outer = getClockFacePoint(cx, cy, radius - 4, tickIndex * 6);
+        const inner = getClockFacePoint(cx, cy, isHourTick ? radius - 18 : radius - 11, tickIndex * 6);
+
+        return (
+          <line
+            key={`placeholder-tick-${tickIndex}`}
+            x1={outer.x}
+            y1={outer.y}
+            x2={inner.x}
+            y2={inner.y}
+            stroke={isHourTick ? '#60a5fa' : '#93c5fd'}
+            strokeWidth={isHourTick ? 3.2 : 1.5}
+            strokeLinecap="round"
+          />
+        );
+      })}
+      <circle cx={cx} cy={cy} r="12" fill="#e0f2fe" stroke="#60a5fa" strokeWidth="3" />
+      <text x={cx} y={cy + 24} textAnchor="middle" fontSize="88" fontWeight="900" fill="#60a5fa">?</text>
+    </svg>
+  );
+}
+
+function ClockTimeAdditionFigure({
+  start,
+  add,
+  result,
+  operation,
+  playAnimationSound,
+}: {
+  start: TimeValue;
+  add: TimeValue;
+  result: TimeValue;
+  operation: TimeArithmeticOperation;
+  playAnimationSound?: AnimationSoundPlayer;
+}) {
+  const problemSignature = `${operation}-${start.hours}:${start.minutes}:${start.seconds}-${add.hours}:${add.minutes}:${add.seconds}-${result.hours}:${result.minutes}:${result.seconds}`;
+  const startTotalSeconds = toTotalTimeSeconds(start);
+  const minuteDeltaSeconds = add.hours * 3600 + add.minutes * 60;
+  const minuteStepTargetSeconds = startTotalSeconds + (operation === '+' ? minuteDeltaSeconds : -minuteDeltaSeconds);
+  const finalTargetSeconds = toTotalTimeSeconds(result);
+  const animationFrameRef = useRef<number | null>(null);
+  const queuedSoundTimeoutIdsRef = useRef<number[]>([]);
+  const [displayClockSeconds, setDisplayClockSeconds] = useState(startTotalSeconds);
+  const [animationStep, setAnimationStep] = useState<'idle' | 'minutesDone' | 'secondsDone'>('idle');
+  const [activeHand, setActiveHand] = useState<'minutes' | 'seconds' | null>(null);
+  const [isResultClockVisible, setIsResultClockVisible] = useState(false);
+
+  const clearQueuedAnimationSounds = () => {
+    queuedSoundTimeoutIdsRef.current.forEach((timeoutId) => window.clearTimeout(timeoutId));
+    queuedSoundTimeoutIdsRef.current = [];
+  };
+
+  const stopClockAnimation = () => {
+    clearQueuedAnimationSounds();
+    if (animationFrameRef.current !== null) {
+      window.cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+  };
+
+  const resetClockAnimation = () => {
+    stopClockAnimation();
+    setDisplayClockSeconds(startTotalSeconds);
+    setAnimationStep('idle');
+    setActiveHand(null);
+    setIsResultClockVisible(false);
+  };
+
+  useEffect(() => {
+    resetClockAnimation();
+
+    return () => {
+      stopClockAnimation();
+    };
+  }, [problemSignature]);
+
+  useEffect(() => clearQueuedAnimationSounds, []);
+
+  const animateClockHands = (
+    targetSeconds: number,
+    hand: 'minutes' | 'seconds',
+    nextStep: 'minutesDone' | 'secondsDone',
+  ) => {
+    stopClockAnimation();
+    setIsResultClockVisible(true);
+    setActiveHand(hand);
+
+    const initialSeconds = displayClockSeconds;
+    const duration = hand === 'minutes' ? 1200 : 900;
+    let animationStartTime: number | null = null;
+    const tickSchedule =
+      hand === 'minutes'
+        ? [
+            { delay: 0, gainMultiplier: 0.9, detune: operation === '+' ? -120 : -180 },
+            { delay: 260, gainMultiplier: 0.82, detune: operation === '+' ? -80 : -140 },
+            { delay: 560, gainMultiplier: 0.76, detune: operation === '+' ? -40 : -90 },
+            { delay: 860, gainMultiplier: 0.72, detune: operation === '+' ? 0 : -40 },
+          ]
+        : [
+            { delay: 0, gainMultiplier: 0.82, detune: operation === '+' ? 60 : 10 },
+            { delay: 180, gainMultiplier: 0.78, detune: operation === '+' ? 100 : 50 },
+            { delay: 380, gainMultiplier: 0.74, detune: operation === '+' ? 140 : 90 },
+            { delay: 600, gainMultiplier: 0.7, detune: operation === '+' ? 180 : 130 },
+          ];
+
+    queuedSoundTimeoutIdsRef.current = tickSchedule.map((entry) =>
+      window.setTimeout(() => {
+        playAnimationSound?.('tick', {
+          gainMultiplier: entry.gainMultiplier,
+          detune: entry.detune,
+          noisePlaybackRateMultiplier: hand === 'minutes' ? 0.98 : 1.04,
+        });
+      }, entry.delay),
+    );
+
+    const stepAnimation = (timestamp: number) => {
+      if (animationStartTime === null) {
+        animationStartTime = timestamp;
+      }
+
+      const progress = clamp((timestamp - animationStartTime) / duration, 0, 1);
+      const easedProgress = 1 - Math.pow(1 - progress, 3);
+      const nextClockSeconds = initialSeconds + (targetSeconds - initialSeconds) * easedProgress;
+      setDisplayClockSeconds(nextClockSeconds);
+
+      if (progress < 1) {
+        animationFrameRef.current = window.requestAnimationFrame(stepAnimation);
+        return;
+      }
+
+      animationFrameRef.current = null;
+      setDisplayClockSeconds(targetSeconds);
+      setActiveHand(null);
+      setAnimationStep(nextStep);
+    };
+
+    animationFrameRef.current = window.requestAnimationFrame(stepAnimation);
+  };
+
+  const animatedClock = splitAnimatedClockSeconds(displayClockSeconds);
+  const isAnimating = activeHand !== null;
+  const canAnimateMinutes = !isAnimating && animationStep === 'idle';
+  const canAnimateSeconds = !isAnimating && animationStep === 'minutesDone';
+  const hasCompletedAllSteps = animationStep === 'secondsDone';
+  const totalAddText = formatDuration(add.hours, add.minutes, add.seconds);
+  const operationLabel = operation === '+' ? '더할 시간' : '뺄 시간';
+  return (
+    <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(16.5rem,18rem)_minmax(0,1fr)] xl:items-center">
+      <div className="rounded-[1.75rem] border border-sky-200 bg-white p-3 shadow-[inset_0_2px_14px_rgba(148,163,184,0.12)] sm:p-4">
+        <div className="mx-auto w-full max-w-[18rem]">
+          <AnalogClockFigure hour={start.hours} minute={start.minutes} second={start.seconds} displayMode="teaching" />
+        </div>
+        <div className="mt-3 px-2 text-center text-slate-900">
+          <div className="text-[0.78rem] font-black tracking-[0.08em] text-slate-500 sm:text-[0.84rem]">시작 시각</div>
+          <div className="mt-1 text-[clamp(1rem,1.4vw,1.18rem)] font-black leading-tight break-keep">
+            {formatClockTime(start.hours, start.minutes, start.seconds)}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col items-center gap-2.5">
+        <div className="w-full max-w-[17.5rem] rounded-[1.35rem] border-2 border-sky-300 bg-gradient-to-b from-sky-50 to-white px-4 py-2.5 text-center text-sky-900 shadow-[0_10px_24px_rgba(14,165,233,0.14)]">
+          <div className="text-[0.76rem] font-black tracking-[0.08em] text-sky-700 sm:text-[0.82rem]">
+            {operationLabel}
+          </div>
+          <div className="mt-1 text-[1.2rem] font-black leading-none sm:text-[1.4rem]">
+            {totalAddText}
+          </div>
+        </div>
+        <div className="grid w-full max-w-[16.5rem] grid-cols-2 gap-2">
+        <button
+          type="button"
+          disabled={!canAnimateMinutes}
+          onClick={() => animateClockHands(minuteStepTargetSeconds, 'minutes', 'minutesDone')}
+          className={`flex min-w-0 items-center justify-between gap-1.5 rounded-[1.15rem] border px-2.5 py-2 text-left shadow-sm transition ${
+            canAnimateMinutes
+              ? 'border-rose-300 bg-rose-50 text-rose-900 hover:-translate-y-0.5 hover:bg-rose-100'
+              : animationStep !== 'idle'
+                ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
+                : 'cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400'
+          }`}
+        >
+          <div className="flex min-w-0 items-center gap-1.5">
+            <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#ef4444]" />
+            <div className="min-w-0">
+              <div className="text-[0.74rem] font-black sm:text-[0.8rem]">분침</div>
+              <div className="mt-0.5 text-[1.05rem] font-black leading-none sm:text-[1.15rem]">{operation} {add.minutes}분</div>
+            </div>
+          </div>
+          {animationStep === 'idle' ? <Play className="h-3.5 w-3.5 shrink-0" /> : <Check className="h-3.5 w-3.5 shrink-0" />}
+        </button>
+
+        <button
+          type="button"
+          disabled={!canAnimateSeconds}
+          onClick={() => animateClockHands(finalTargetSeconds, 'seconds', 'secondsDone')}
+          className={`flex min-w-0 items-center justify-between gap-1.5 rounded-[1.15rem] border px-2.5 py-2 text-left shadow-sm transition ${
+            canAnimateSeconds
+              ? 'border-slate-400 bg-slate-100 text-slate-900 hover:-translate-y-0.5 hover:bg-slate-200'
+              : hasCompletedAllSteps
+                ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
+                : 'cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400'
+          }`}
+        >
+          <div className="flex min-w-0 items-center gap-1.5">
+            <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#1f2937]" />
+            <div className="min-w-0">
+              <div className="text-[0.74rem] font-black sm:text-[0.8rem]">초침</div>
+              <div className="mt-0.5 text-[1.05rem] font-black leading-none sm:text-[1.15rem]">{operation} {add.seconds}초</div>
+            </div>
+          </div>
+          {hasCompletedAllSteps ? <Check className="h-3.5 w-3.5 shrink-0" /> : <Play className="h-3.5 w-3.5 shrink-0" />}
+        </button>
+
+        </div>
+
+        <button
+          type="button"
+          onClick={resetClockAnimation}
+          disabled={!isResultClockVisible && !isAnimating}
+          className={`inline-flex w-full max-w-[16.5rem] items-center justify-center gap-2 rounded-full border px-3 py-2 text-sm font-black shadow-sm transition ${
+            !isResultClockVisible && !isAnimating
+              ? 'cursor-not-allowed border-slate-200 bg-white text-slate-300'
+              : 'border-sky-300 bg-sky-50 text-sky-800 hover:-translate-y-0.5 hover:bg-sky-100'
+          }`}
+        >
+          <RotateCcw className="h-4 w-4" />
+          다시 보기
+        </button>
+
+      </div>
+
+      <div className="rounded-[1.75rem] border border-dashed border-sky-300 bg-sky-50/60 p-3 shadow-[inset_0_2px_14px_rgba(125,211,252,0.1)] sm:p-4">
+        <div className="mx-auto w-full max-w-[18rem]">
+          <div className="relative">
+            <AnalogClockFigure
+              hour={animatedClock.hours}
+              minute={animatedClock.minutes}
+              second={animatedClock.seconds}
+              palette="result"
+              activeHand={activeHand}
+              displayMode="teaching"
+              ariaLabel="버튼을 눌러 결과 시각을 확인하는 시계"
+            />
+            <AnimatePresence>
+              {!isResultClockVisible ? (
+                <motion.div
+                  initial={{ opacity: 1 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.22, ease: 'easeOut' }}
+                  className="absolute inset-0"
+                >
+                  <ClockResultPlaceholderFigure />
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
+          </div>
+        </div>
+        <p className="mt-3 text-center text-base font-black text-sky-800 sm:text-lg">결과 시각을 써 보세요.</p>
+      </div>
+    </div>
+  );
+}
+
+function TimeAdditionBarModelFigure({
+  left,
+  right,
+  result,
+  playAnimationSound,
+}: {
+  left: TimeValue;
+  right: TimeValue;
+  result: TimeValue;
+  playAnimationSound?: AnimationSoundPlayer;
+}) {
+  const blockSeconds = 10;
+  const leftBlocks = Math.floor(toTotalTimeSeconds(left) / blockSeconds);
+  const rightBlocks = Math.floor(toTotalTimeSeconds(right) / blockSeconds);
+  const totalBlocks = Math.floor(toTotalTimeSeconds(result) / blockSeconds);
+  const maxBlocks = Math.max(Math.ceil((totalBlocks + 3) / 6) * 6, 24);
+  const blockWidth = maxBlocks > 48 ? 9 : maxBlocks > 36 ? 11 : 13;
+  const blockGap = 2;
+  const blockHeight = 28;
+  const metaX = 8;
+  const metaWidth = 126;
+  const metaGap = 18;
+  const leftPadding = metaX + metaWidth + metaGap;
+  const topScaleY = 26;
+  const rowStartY = 50;
+  const rowGap = 72;
+  const totalRowY = rowStartY + rowGap * 2;
+  const blockStep = blockWidth + blockGap;
+  const chartWidth = maxBlocks * blockWidth + (maxBlocks - 1) * blockGap;
+  const width = leftPadding + chartWidth + 18;
+  const height = 236;
+  const scaleMinutes = maxBlocks / 6;
+  const problemSignature = `${left.hours}:${left.minutes}:${left.seconds}-${right.hours}:${right.minutes}:${right.seconds}-${result.hours}:${result.minutes}:${result.seconds}`;
+  const [mergeState, setMergeState] = useState<'idle' | 'merging' | 'merged'>('idle');
+  const queuedSoundTimeoutIdsRef = useRef<number[]>([]);
+  const rows = [
+    {
+      key: 'left',
+      label: '처음 시간',
+      valueText: formatDuration(0, left.minutes, left.seconds),
+      blocks: leftBlocks,
+      y: rowStartY,
+      fill: '#f4e2ff',
+      stroke: '#9b5cf6',
+      text: '#6d28d9',
+      glow: 'rgba(192, 132, 252, 0.35)',
+      accent: '#fcfaff',
+    },
+    {
+      key: 'right',
+      label: '더할 시간',
+      valueText: formatDuration(0, right.minutes, right.seconds),
+      blocks: rightBlocks,
+      y: rowStartY + rowGap,
+      fill: '#fee9b8',
+      stroke: '#f59e0b',
+      text: '#9a3412',
+      glow: 'rgba(251, 191, 36, 0.32)',
+      accent: '#fffaf0',
+    },
+    {
+      key: 'total',
+      label: '합한 시간',
+      valueText: formatDuration(0, result.minutes, result.seconds),
+      blocks: totalBlocks,
+      y: rowStartY + rowGap * 2,
+      fill: '#d8ecff',
+      stroke: '#0ea5e9',
+      text: '#0f766e',
+      glow: 'rgba(14, 165, 233, 0.32)',
+      accent: '#f7fbff',
+    },
+  ] as const;
+
+  const clearQueuedAnimationSounds = () => {
+    queuedSoundTimeoutIdsRef.current.forEach((timeoutId) => window.clearTimeout(timeoutId));
+    queuedSoundTimeoutIdsRef.current = [];
+  };
+
+  useEffect(() => {
+    clearQueuedAnimationSounds();
+    setMergeState('idle');
+  }, [problemSignature]);
+
+  useEffect(() => clearQueuedAnimationSounds, []);
+
+  useEffect(() => {
+    if (mergeState !== 'merging') {
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setMergeState('merged');
+    }, 1200);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [mergeState, problemSignature]);
+
+  const getBlockX = (blockIndex: number) => leftPadding + blockIndex * blockStep;
+  const getMinuteBoundaryX = (minuteIndex: number) =>
+    minuteIndex === 0 ? leftPadding : leftPadding + minuteIndex * 6 * blockStep - blockGap;
+  const getSegmentWidth = (blocks: number) =>
+    blocks > 0 ? blocks * blockWidth + Math.max(0, blocks - 1) * blockGap : 0;
+  const getSegmentEndX = (blocks: number) => (blocks > 0 ? leftPadding + blocks * blockStep - blockGap : leftPadding);
+  const leftSegmentWidth = getSegmentWidth(leftBlocks);
+  const rightSegmentWidth = getSegmentWidth(rightBlocks);
+  const totalSegmentWidth = getSegmentWidth(totalBlocks);
+  const totalEndX = getSegmentEndX(totalBlocks);
+  const totalMarkerX = totalEndX + blockGap / 2;
+  const leftFadeOpacity = mergeState === 'idle' ? 1 : mergeState === 'merging' ? 0.28 : 0.16;
+  const rightFadeOpacity = mergeState === 'idle' ? 1 : mergeState === 'merging' ? 0.28 : 0.16;
+  const totalTrackEmphasis = mergeState === 'idle' ? 0.7 : 1;
+  const connectorLeft = `M ${leftPadding + leftSegmentWidth * 0.5} ${rowStartY + blockHeight * 0.5} C ${leftPadding + leftSegmentWidth * 0.56} ${rowStartY + 28}, ${leftPadding + leftSegmentWidth * 0.5} ${totalRowY - 26}, ${leftPadding + leftSegmentWidth * 0.5} ${totalRowY + blockHeight * 0.5}`;
+  const connectorRight = `M ${leftPadding + rightSegmentWidth * 0.5} ${rowStartY + rowGap + blockHeight * 0.5} C ${leftPadding + rightSegmentWidth * 0.6} ${rowStartY + rowGap + 26}, ${getBlockX(leftBlocks) + rightSegmentWidth * 0.56} ${totalRowY - 24}, ${getBlockX(leftBlocks) + rightSegmentWidth * 0.5} ${totalRowY + blockHeight * 0.5}`;
+
+  const renderFilledCells = (row: (typeof rows)[number], opacity: number) =>
+    Array.from({ length: maxBlocks }, (_, blockIndex) => {
+      let fill = '#ffffff';
+      let stroke = '#d7e3f0';
+      let strokeWidth = 1;
+
+      if (row.key === 'left' && blockIndex < leftBlocks) {
+        fill = rows[0].fill;
+        stroke = rows[0].stroke;
+        strokeWidth = 1.3;
+      }
+
+      if (row.key === 'right' && blockIndex < rightBlocks) {
+        fill = rows[1].fill;
+        stroke = rows[1].stroke;
+        strokeWidth = 1.3;
+      }
+
+      if (row.key === 'total' && mergeState === 'merged' && blockIndex < totalBlocks) {
+        const sourceRow = blockIndex < leftBlocks ? rows[0] : rows[1];
+        fill = sourceRow.fill;
+        stroke = sourceRow.stroke;
+        strokeWidth = 1.3;
+      }
+
+      const isFilled = fill !== '#ffffff';
+
+      return (
+        <rect
+          key={`${row.key}-${blockIndex}`}
+          x={getBlockX(blockIndex)}
+          y={row.y}
+          width={blockWidth}
+          height={blockHeight}
+          rx="5"
+          fill={isFilled ? fill : '#fbfdff'}
+          fillOpacity={isFilled ? opacity : 0.98}
+          stroke={stroke}
+          strokeWidth={strokeWidth}
+        />
+      );
+    });
+
+  const renderMovingSegmentCells = (blocks: number, fill: string, stroke: string) =>
+    Array.from({ length: blocks }, (_, blockIndex) => (
+      <rect
+        key={`moving-segment-${fill}-${blockIndex}`}
+        x={blockIndex * blockStep}
+        y={0}
+        width={blockWidth}
+        height={blockHeight}
+        rx="8"
+        fill={fill}
+        stroke={stroke}
+        strokeWidth="1.2"
+      />
+    ));
+
+  return (
+    <div className="rounded-[1.8rem] border border-slate-200 bg-white p-4 shadow-[0_14px_36px_rgba(148,163,184,0.14)] sm:p-5">
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            if (mergeState === 'idle') {
+              clearQueuedAnimationSounds();
+              playAnimationSound?.('hintStep', { gainMultiplier: 0.88, detune: 10 });
+              queuedSoundTimeoutIdsRef.current = [
+                window.setTimeout(() => {
+                  playAnimationSound?.('hintCarry', { gainMultiplier: 0.96, detune: 26 });
+                }, 180),
+                window.setTimeout(() => {
+                  playAnimationSound?.('hintResolve', { gainMultiplier: 1.02, detune: 42 });
+                }, 820),
+              ];
+              setMergeState('merging');
+            }
+          }}
+          disabled={mergeState !== 'idle'}
+          className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-black shadow-sm transition sm:text-base ${
+            mergeState === 'idle'
+              ? 'border border-sky-500 bg-sky-500 text-white hover:-translate-y-0.5 hover:bg-sky-600'
+              : 'cursor-default border border-slate-200 bg-slate-100 text-slate-400'
+          }`}
+        >
+          <Play className="h-4 w-4" />
+          합쳐 보기
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            clearQueuedAnimationSounds();
+            setMergeState('idle');
+          }}
+          disabled={mergeState === 'idle'}
+          className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-black shadow-sm transition sm:text-base ${
+            mergeState === 'idle'
+              ? 'cursor-default border-slate-200 bg-white text-slate-300'
+              : 'border-emerald-300 bg-emerald-50 text-emerald-800 hover:-translate-y-0.5 hover:bg-emerald-100'
+          }`}
+        >
+          <RotateCcw className="h-4 w-4" />
+          다시 보기
+        </button>
+      </div>
+
+      <div className="mt-4 overflow-x-auto pb-2">
+        <div style={{ minWidth: `${Math.max(width, 620)}px` }}>
+          <svg viewBox={`0 0 ${width} ${height}`} className="block w-full" role="img" aria-label="띠모형으로 표현한 시간 덧셈">
+            <defs>
+              <filter id="time-bar-glow" x="-30%" y="-30%" width="160%" height="160%">
+                <feDropShadow dx="0" dy="8" stdDeviation="6" floodColor="#38bdf8" floodOpacity="0.18" />
+              </filter>
+              <linearGradient id="merge-destination-glow" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="rgba(14,165,233,0.04)" />
+                <stop offset="50%" stopColor="rgba(14,165,233,0.18)" />
+                <stop offset="100%" stopColor="rgba(14,165,233,0.04)" />
+              </linearGradient>
+            </defs>
+
+            <line
+              x1={leftPadding}
+              y1={topScaleY + 4}
+              x2={leftPadding + chartWidth - blockGap}
+              y2={topScaleY + 4}
+              stroke="#e2e8f0"
+              strokeWidth="1.2"
+            />
+
+            {Array.from({ length: scaleMinutes + 1 }, (_, minuteIndex) => {
+              const x = getMinuteBoundaryX(minuteIndex);
+              return (
+                <g key={`bar-scale-${minuteIndex}`}>
+                  <text x={x} y={topScaleY} textAnchor="middle" fontSize="14" fontWeight="900" fill="#475569">
+                    {minuteIndex}
+                  </text>
+                  <line
+                    x1={x}
+                    y1={rowStartY - 8}
+                    x2={x}
+                    y2={rowStartY + rowGap * 2 + blockHeight + 6}
+                    stroke="#94a3b8"
+                    strokeWidth="1.15"
+                    strokeDasharray="4 7"
+                    opacity="0.72"
+                  />
+                </g>
+              );
+            })}
+            <text
+              x={leftPadding + chartWidth - blockGap + 18}
+              y={topScaleY}
+              textAnchor="start"
+              fontSize="14"
+              fontWeight="900"
+              fill="#64748b"
+            >
+              분
+            </text>
+
+            {rows.map((row) => {
+              const isTotalRow = row.key === 'total';
+              const labelOpacity = !isTotalRow
+                ? row.key === 'left'
+                  ? leftFadeOpacity
+                  : rightFadeOpacity
+                : 1;
+              const totalGlow = isTotalRow && mergeState !== 'idle';
+              const showValueText = row.key !== 'total';
+              const visibleBlocks = isTotalRow ? (mergeState === 'merged' ? totalBlocks : 0) : row.blocks;
+              const segmentWidth = getSegmentWidth(visibleBlocks);
+              const segmentTint =
+                row.key === 'left'
+                  ? 'rgba(168,85,247,0.12)'
+                  : row.key === 'right'
+                    ? 'rgba(245,158,11,0.12)'
+                    : 'rgba(14,165,233,0.14)';
+
+              return (
+                <motion.g
+                  key={row.key}
+                  animate={{
+                    opacity: labelOpacity,
+                    scale: totalGlow && mergeState === 'merged' ? 1.01 : 1,
+                  }}
+                  transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <circle cx={metaX + 8} cy={showValueText ? row.y + 2 : row.y + 14} r="5" fill={row.stroke} />
+                  <text
+                    x={metaX + 20}
+                    y={showValueText ? row.y + 7 : row.y + 19}
+                    textAnchor="start"
+                    fontSize="15"
+                    fontWeight="900"
+                    fill={row.text}
+                  >
+                    {row.label}
+                  </text>
+
+                  {showValueText ? (
+                    <>
+                      <rect
+                        x={metaX + 18}
+                        y={row.y + 16}
+                        width={metaWidth - 18}
+                        height={28}
+                        rx="14"
+                        fill="#ffffff"
+                        stroke={row.stroke}
+                        strokeOpacity="0.28"
+                        strokeWidth="1.4"
+                      />
+                      <text
+                        x={metaX + 18 + (metaWidth - 18) / 2}
+                        y={row.y + 35}
+                        textAnchor="middle"
+                        fontSize="14"
+                        fontWeight="900"
+                        fill={row.text}
+                      >
+                        {row.valueText}
+                      </text>
+                    </>
+                  ) : null}
+
+                  <rect
+                    x={leftPadding - 8}
+                    y={row.y - 6}
+                    width={chartWidth + 16}
+                    height={blockHeight + 12}
+                    rx="18"
+                    fill={row.accent}
+                    stroke={isTotalRow && mergeState !== 'idle' ? row.stroke : '#dbe6f2'}
+                    strokeWidth={isTotalRow && mergeState !== 'idle' ? 2 : 1.2}
+                    opacity={isTotalRow ? totalTrackEmphasis : 0.96}
+                  />
+                  {segmentWidth > 0 ? (
+                    <rect
+                      x={leftPadding - 2}
+                      y={row.y - 2}
+                      width={segmentWidth + 4}
+                      height={blockHeight + 4}
+                      rx="14"
+                      fill={segmentTint}
+                      opacity={isTotalRow ? (mergeState === 'merged' ? 0.58 : 0) : 0.62}
+                    />
+                  ) : null}
+                  {isTotalRow && mergeState === 'merging' ? (
+                    <motion.rect
+                      x={leftPadding - 2}
+                      y={row.y - 2}
+                      width={Math.max(totalSegmentWidth + 4, 0)}
+                      height={blockHeight + 4}
+                      rx="16"
+                      fill="url(#merge-destination-glow)"
+                      initial={{ opacity: 0.18, scaleX: 0.75, transformOrigin: `${leftPadding}px ${row.y}px` }}
+                      animate={{ opacity: 0.46, scaleX: 1 }}
+                      transition={{ duration: 0.9, ease: 'easeOut' }}
+                    />
+                  ) : null}
+                  {renderFilledCells(
+                    row,
+                    row.key === 'left' ? leftFadeOpacity : row.key === 'right' ? rightFadeOpacity : 1,
+                  )}
+                </motion.g>
+              );
+            })}
+
+            <AnimatePresence>
+              {mergeState === 'merged' && totalBlocks > 0 ? (
+                <motion.g
+                  initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.28, ease: 'easeOut' }}
+                >
+                  <rect
+                    x={totalEndX - 0.5}
+                    y={totalRowY - 4}
+                    width={blockGap + 1}
+                    height={blockHeight + 8}
+                    rx="2"
+                    fill="#ffffff"
+                    stroke={rows[2].stroke}
+                    strokeWidth="1"
+                  />
+                  <line
+                    x1={totalMarkerX}
+                    y1={totalRowY - 10}
+                    x2={totalMarkerX}
+                    y2={totalRowY + blockHeight + 8}
+                    stroke={rows[2].stroke}
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                  <circle
+                    cx={totalMarkerX}
+                    cy={totalRowY - 14}
+                    r="5"
+                    fill="#ffffff"
+                    stroke={rows[2].stroke}
+                    strokeWidth="1.6"
+                  />
+                  <circle cx={totalMarkerX} cy={totalRowY - 14} r="2" fill={rows[2].stroke} />
+                </motion.g>
+              ) : null}
+            </AnimatePresence>
+
+            <AnimatePresence>
+              {mergeState === 'merging' && (
+                <g key={`merge-run-${problemSignature}`}>
+                  <motion.path
+                    d={connectorLeft}
+                    fill="none"
+                    stroke={rows[0].stroke}
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeDasharray="8 10"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: 0.35 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.46, ease: 'easeOut' }}
+                  />
+                  <motion.path
+                    d={connectorRight}
+                    fill="none"
+                    stroke={rows[1].stroke}
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeDasharray="8 10"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: 0.35 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.46, delay: 0.16, ease: 'easeOut' }}
+                  />
+                  <motion.g
+                    initial={{ x: 0, y: 0, opacity: 0.95 }}
+                    animate={{ x: 0, y: totalRowY - rowStartY, opacity: 0.98 }}
+                    exit={{ opacity: 0 }}
+                    style={{ filter: `drop-shadow(0 8px 14px ${rows[0].glow})` }}
+                    transition={{ duration: 0.68, ease: [0.22, 1, 0.36, 1] }}
+                  >
+                    <g transform={`translate(${leftPadding} ${rowStartY})`}>
+                      {renderMovingSegmentCells(leftBlocks, rows[0].fill, rows[0].stroke)}
+                    </g>
+                  </motion.g>
+                  <motion.g
+                    initial={{ x: 0, y: 0, opacity: 0.95 }}
+                    animate={{
+                      x: getBlockX(leftBlocks) - leftPadding,
+                      y: totalRowY - (rowStartY + rowGap),
+                      opacity: 0.98,
+                    }}
+                    exit={{ opacity: 0 }}
+                    style={{ filter: `drop-shadow(0 8px 14px ${rows[1].glow})` }}
+                    transition={{ duration: 0.72, delay: 0.16, ease: [0.22, 1, 0.36, 1] }}
+                  >
+                    <g transform={`translate(${leftPadding} ${rowStartY + rowGap})`}>
+                      {renderMovingSegmentCells(rightBlocks, rows[1].fill, rows[1].stroke)}
+                    </g>
+                  </motion.g>
+                </g>
+              )}
+            </AnimatePresence>
+          </svg>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TimeSubtractionBarModelFigure({
+  left,
+  right,
+  result,
+  playAnimationSound,
+}: {
+  left: TimeValue;
+  right: TimeValue;
+  result: TimeValue;
+  playAnimationSound?: AnimationSoundPlayer;
+}) {
+  const blockSeconds = 10;
+  const leftBlocks = Math.floor(toTotalTimeSeconds(left) / blockSeconds);
+  const rightBlocks = Math.floor(toTotalTimeSeconds(right) / blockSeconds);
+  const resultBlocks = Math.floor(toTotalTimeSeconds(result) / blockSeconds);
+  const maxBlocks = Math.max(Math.ceil((leftBlocks + 3) / 6) * 6, 24);
+  const blockWidth = maxBlocks > 48 ? 9 : maxBlocks > 36 ? 11 : 13;
+  const blockGap = 2;
+  const blockHeight = 28;
+  const metaX = 8;
+  const metaWidth = 126;
+  const metaGap = 18;
+  const leftPadding = metaX + metaWidth + metaGap;
+  const topScaleY = 26;
+  const rowStartY = 50;
+  const rowGap = 72;
+  const resultRowY = rowStartY + rowGap * 2;
+  const blockStep = blockWidth + blockGap;
+  const chartWidth = maxBlocks * blockWidth + (maxBlocks - 1) * blockGap;
+  const width = leftPadding + chartWidth + 18;
+  const height = 236;
+  const scaleMinutes = maxBlocks / 6;
+  const problemSignature = `${left.hours}:${left.minutes}:${left.seconds}-${right.hours}:${right.minutes}:${right.seconds}-${result.hours}:${result.minutes}:${result.seconds}`;
+  const hatchPatternId = `time-subtraction-hatch-${problemSignature.replace(/[^a-zA-Z0-9]+/g, '-')}`;
+  const [subtractionState, setSubtractionState] = useState<'idle' | 'subtracting' | 'subtracted'>('idle');
+  const queuedSoundTimeoutIdsRef = useRef<number[]>([]);
+
+  const clearQueuedAnimationSounds = () => {
+    queuedSoundTimeoutIdsRef.current.forEach((timeoutId) => window.clearTimeout(timeoutId));
+    queuedSoundTimeoutIdsRef.current = [];
+  };
+
+  useEffect(() => {
+    clearQueuedAnimationSounds();
+    setSubtractionState('idle');
+  }, [problemSignature]);
+
+  useEffect(() => clearQueuedAnimationSounds, []);
+
+  useEffect(() => {
+    if (subtractionState !== 'subtracting') {
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setSubtractionState('subtracted');
+    }, 1800);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [subtractionState, problemSignature]);
+
+  const rows = [
+    {
+      key: 'left',
+      label: '처음 시간',
+      valueText: formatDuration(0, left.minutes, left.seconds),
+      blocks: leftBlocks,
+      fill: '#f4e2ff',
+      stroke: '#9b5cf6',
+      text: '#6d28d9',
+      accent: '#fcfaff',
+      y: rowStartY,
+    },
+    {
+      key: 'right',
+      label: '뺄 시간',
+      valueText: formatDuration(0, right.minutes, right.seconds),
+      blocks: rightBlocks,
+      fill: '#fee9b8',
+      stroke: '#f59e0b',
+      text: '#8b5c14',
+      accent: '#fffaf0',
+      y: rowStartY + rowGap,
+    },
+    {
+      key: 'result',
+      label: '남은 시간',
+      valueText: '',
+      blocks: resultBlocks,
+      fill: '#d8ecff',
+      stroke: '#0ea5e9',
+      text: '#0f766e',
+      accent: '#f7fbff',
+      y: resultRowY,
+    },
+  ] as const;
+
+  const getBlockX = (blockIndex: number) => leftPadding + blockIndex * blockStep;
+  const getMinuteBoundaryX = (minuteIndex: number) =>
+    minuteIndex === 0 ? leftPadding : leftPadding + minuteIndex * 6 * blockStep - blockGap;
+  const getSegmentWidth = (blocks: number) =>
+    blocks > 0 ? blocks * blockWidth + Math.max(0, blocks - 1) * blockGap : 0;
+  const resultBoundaryX = resultBlocks > 0 ? getBlockX(resultBlocks) - blockGap / 2 : leftPadding;
+  const removalSegmentStartX = getBlockX(resultBlocks);
+  const removalSegmentWidth = getSegmentWidth(rightBlocks);
+  const removalSegmentEndX = removalSegmentStartX + removalSegmentWidth;
+  const bracketY = rowStartY + blockHeight + 12;
+  const bracketLabelWidth = Math.min(104, Math.max(72, removalSegmentWidth * 0.48));
+  const bracketLabelHalf = bracketLabelWidth / 2;
+  const bracketLabelX = Math.min(
+    leftPadding + chartWidth - blockGap - bracketLabelHalf,
+    Math.max(leftPadding + bracketLabelHalf, removalSegmentStartX + removalSegmentWidth / 2),
+  );
+  const movingRemovalSegmentOffsetX = removalSegmentStartX - leftPadding;
+  const movingRemovalSegmentOffsetY = rowStartY - (rowStartY + rowGap);
+  const movingResultSegmentOffsetY = resultRowY - rowStartY;
+  const smoothEase: [number, number, number, number] = [0.2, 0.78, 0.24, 1];
+
+  const renderFilledCells = (row: (typeof rows)[number]) =>
+    Array.from({ length: maxBlocks }, (_, blockIndex) => {
+      let fill = '#fbfdff';
+      let stroke = '#d7e3f0';
+      let strokeWidth = 1;
+      let fillOpacity = 1;
+      const shouldFill =
+        row.key === 'left'
+          ? blockIndex < leftBlocks
+          : row.key === 'right'
+            ? blockIndex < rightBlocks
+            : subtractionState === 'subtracted' && blockIndex < resultBlocks;
+
+      if (shouldFill) {
+        fill = row.fill;
+        stroke = row.stroke;
+        strokeWidth = 1.3;
+
+        if (row.key === 'right' && subtractionState === 'subtracting') {
+          fillOpacity = 0.26;
+        }
+      }
+
+      return (
+        <rect
+          key={`${row.key}-${blockIndex}`}
+          x={getBlockX(blockIndex)}
+          y={row.y}
+          width={blockWidth}
+          height={blockHeight}
+          rx="5"
+          fill={fill}
+          fillOpacity={fillOpacity}
+          stroke={stroke}
+          strokeWidth={strokeWidth}
+        />
+      );
+    });
+
+  const renderMovingSegmentCells = (blocks: number, fill: string, stroke: string) =>
+    Array.from({ length: blocks }, (_, blockIndex) => (
+      <rect
+        key={`moving-segment-${fill}-${blockIndex}`}
+        x={blockIndex * blockStep}
+        y={0}
+        width={blockWidth}
+        height={blockHeight}
+        rx="8"
+        fill={fill}
+        stroke={stroke}
+        strokeWidth="1.2"
+      />
+    ));
+
+  return (
+    <div className="rounded-[1.8rem] border border-slate-200 bg-white p-4 shadow-[0_14px_36px_rgba(148,163,184,0.14)] sm:p-5">
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            if (subtractionState === 'idle') {
+              clearQueuedAnimationSounds();
+              playAnimationSound?.('hintBorrow', { gainMultiplier: 0.94, detune: -18 });
+              queuedSoundTimeoutIdsRef.current = [
+                window.setTimeout(() => {
+                  playAnimationSound?.('hintStep', { gainMultiplier: 0.82, detune: -42 });
+                }, 680),
+                window.setTimeout(() => {
+                  playAnimationSound?.('hintResolve', { gainMultiplier: 0.96, detune: -10 });
+                }, 1480),
+              ];
+              setSubtractionState('subtracting');
+            }
+          }}
+          disabled={subtractionState !== 'idle'}
+          className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-black shadow-sm transition sm:text-base ${
+            subtractionState !== 'idle'
+              ? 'cursor-default border border-slate-200 bg-slate-100 text-slate-400'
+              : 'border border-sky-500 bg-sky-500 text-white hover:-translate-y-0.5 hover:bg-sky-600'
+          }`}
+        >
+          <Play className="h-4 w-4" />
+          남은 시간 보기
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            clearQueuedAnimationSounds();
+            setSubtractionState('idle');
+          }}
+          disabled={subtractionState === 'idle'}
+          className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-black shadow-sm transition sm:text-base ${
+            subtractionState === 'idle'
+              ? 'cursor-default border-slate-200 bg-white text-slate-300'
+              : 'border-emerald-300 bg-emerald-50 text-emerald-800 hover:-translate-y-0.5 hover:bg-emerald-100'
+          }`}
+        >
+          <RotateCcw className="h-4 w-4" />
+          다시 보기
+        </button>
+      </div>
+
+      <div className="mt-4 overflow-x-auto pb-2">
+        <div style={{ minWidth: `${Math.max(width, 620)}px` }}>
+          <svg viewBox={`0 0 ${width} ${height}`} className="block w-full" role="img" aria-label="띠모형으로 표현한 시간 뺄셈">
+            <defs>
+              <pattern id={hatchPatternId} width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(28)">
+                <rect width="12" height="12" fill="#ffeaf2" />
+                <line x1="0" y1="0" x2="0" y2="12" stroke="#ff5a95" strokeWidth="3" />
+                <line x1="6" y1="0" x2="6" y2="12" stroke="#ff7aa9" strokeWidth="2" opacity="0.92" />
+              </pattern>
+            </defs>
+            <line
+              x1={leftPadding}
+              y1={topScaleY + 4}
+              x2={leftPadding + chartWidth - blockGap}
+              y2={topScaleY + 4}
+              stroke="#e2e8f0"
+              strokeWidth="1.2"
+            />
+
+            {Array.from({ length: scaleMinutes + 1 }, (_, minuteIndex) => {
+              const x = getMinuteBoundaryX(minuteIndex);
+              return (
+                <g key={`time-subtraction-bar-scale-${minuteIndex}`}>
+                  <text x={x} y={topScaleY} textAnchor="middle" fontSize="14" fontWeight="900" fill="#475569">
+                    {minuteIndex}
+                  </text>
+                  <line
+                    x1={x}
+                    y1={rowStartY - 8}
+                    x2={x}
+                    y2={resultRowY + blockHeight + 6}
+                    stroke="#94a3b8"
+                    strokeWidth="1.15"
+                    strokeDasharray="4 7"
+                    opacity="0.72"
+                  />
+                </g>
+              );
+            })}
+            <text
+              x={leftPadding + chartWidth - blockGap + 18}
+              y={topScaleY}
+              textAnchor="start"
+              fontSize="14"
+              fontWeight="900"
+              fill="#64748b"
+            >
+              분
+            </text>
+
+            {rows.map((row) => (
+              <g key={row.key}>
+                <rect
+                  x={metaX}
+                  y={row.y - 10}
+                  width={metaWidth}
+                  height={blockHeight + 20}
+                  rx="18"
+                  fill={row.accent}
+                  stroke={row.stroke}
+                  strokeWidth="1.4"
+                />
+                {row.valueText ? (
+                  <>
+                    <text x={metaX + 16} y={row.y + 10} textAnchor="start" fontSize="18" fontWeight="900" fill={row.text}>
+                      {row.label}
+                    </text>
+                    <text x={metaX + 16} y={row.y + 29} textAnchor="start" fontSize="15" fontWeight="800" fill={row.text}>
+                      {row.valueText}
+                    </text>
+                  </>
+                ) : (
+                  <text
+                    x={metaX + 16}
+                    y={row.y + 14}
+                    textAnchor="start"
+                    dominantBaseline="middle"
+                    fontSize="18"
+                    fontWeight="900"
+                    fill={row.text}
+                  >
+                    {row.label}
+                  </text>
+                )}
+                <rect
+                  x={leftPadding - 8}
+                  y={row.y - 6}
+                  width={chartWidth + 16}
+                  height={blockHeight + 12}
+                  rx="18"
+                  fill={row.accent}
+                  stroke="#dbe6f2"
+                  strokeWidth="1.2"
+                />
+                {renderFilledCells(row)}
+              </g>
+            ))}
+
+            <AnimatePresence>
+              {subtractionState === 'subtracting' && rightBlocks > 0 ? (
+                <motion.g key={`subtracting-group-${problemSignature}`} exit={{ opacity: 0 }} transition={{ duration: 0.24 }}>
+                  <motion.g
+                    initial={{ x: 0, y: 0, opacity: 0.96 }}
+                    animate={{ x: movingRemovalSegmentOffsetX, y: movingRemovalSegmentOffsetY, opacity: 1 }}
+                    transition={{ duration: 0.58, ease: smoothEase }}
+                    style={{ filter: 'drop-shadow(0 8px 14px rgba(245, 158, 11, 0.22))' }}
+                  >
+                    <g transform={`translate(${leftPadding} ${rowStartY + rowGap})`}>
+                      {renderMovingSegmentCells(rightBlocks, rows[1].fill, rows[1].stroke)}
+                    </g>
+                  </motion.g>
+                  <motion.rect
+                    x={removalSegmentStartX}
+                    y={rowStartY}
+                    width={removalSegmentWidth}
+                    height={blockHeight}
+                    rx="9"
+                    fill="#ffeaf2"
+                    stroke="#ff5a95"
+                    strokeWidth="1.2"
+                    initial={{ opacity: 0, scaleX: 0.2, transformOrigin: `${removalSegmentStartX}px ${rowStartY}px` }}
+                    animate={{ opacity: 1, scaleX: 1 }}
+                    transition={{ duration: 0.46, delay: 0.52, ease: smoothEase }}
+                  />
+                  <motion.rect
+                    x={removalSegmentStartX}
+                    y={rowStartY}
+                    width={removalSegmentWidth}
+                    height={blockHeight}
+                    rx="9"
+                    fill={`url(#${hatchPatternId})`}
+                    stroke="#ff5a95"
+                    strokeWidth="1.25"
+                    initial={{ opacity: 0, scaleX: 0.2, transformOrigin: `${removalSegmentStartX}px ${rowStartY}px` }}
+                    animate={{ opacity: 1, scaleX: 1 }}
+                    transition={{ duration: 0.58, delay: 0.58, ease: smoothEase }}
+                  />
+                  <motion.path
+                    d={`M ${removalSegmentStartX} ${bracketY - 8} V ${bracketY} H ${removalSegmentEndX} V ${bracketY - 8}`}
+                    fill="none"
+                    stroke="#a16207"
+                    strokeWidth="1.7"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: 1 }}
+                    transition={{ duration: 0.42, delay: 0.82, ease: smoothEase }}
+                  />
+                  <motion.g
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.34, delay: 0.94, ease: smoothEase }}
+                  >
+                    <rect
+                      x={bracketLabelX - bracketLabelHalf}
+                      y={bracketY + 4}
+                      width={bracketLabelWidth}
+                      height={18}
+                      rx="9"
+                      fill="#eff7c8"
+                      stroke="#b7cd6c"
+                      strokeWidth="1.2"
+                    />
+                    <text
+                      x={bracketLabelX}
+                      y={bracketY + 17}
+                      textAnchor="middle"
+                      fontSize="12"
+                      fontWeight="900"
+                      fill="#6b7b1f"
+                    >
+                      빼는 부분
+                    </text>
+                  </motion.g>
+                  <motion.g
+                    initial={{ x: 0, y: 0, opacity: 0 }}
+                    animate={{ x: 0, y: movingResultSegmentOffsetY, opacity: [0, 0.98, 0.16] }}
+                    transition={{ duration: 0.62, delay: 1.18, ease: smoothEase }}
+                    style={{ filter: 'drop-shadow(0 8px 14px rgba(14, 165, 233, 0.2))' }}
+                  >
+                    <g transform={`translate(${leftPadding} ${rowStartY})`}>
+                      {renderMovingSegmentCells(resultBlocks, rows[2].fill, rows[2].stroke)}
+                    </g>
+                  </motion.g>
+                </motion.g>
+              ) : null}
+            </AnimatePresence>
+
+            <AnimatePresence>
+              {subtractionState === 'subtracted' ? (
+                <motion.g
+                  initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.34, delay: 0.1, ease: smoothEase }}
+                >
+                  <line
+                    x1={resultBoundaryX}
+                    y1={resultRowY - 10}
+                    x2={resultBoundaryX}
+                    y2={resultRowY + blockHeight + 8}
+                    stroke={rows[2].stroke}
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                  <circle
+                    cx={resultBoundaryX}
+                    cy={resultRowY - 14}
+                    r="5"
+                    fill="#ffffff"
+                    stroke={rows[2].stroke}
+                    strokeWidth="1.6"
+                  />
+                  <circle cx={resultBoundaryX} cy={resultRowY - 14} r="2" fill={rows[2].stroke} />
+                </motion.g>
+              ) : null}
+            </AnimatePresence>
+          </svg>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TimeStoryProblemFigure({
+  timeAddition,
+  condensed = false,
+}: {
+  timeAddition: TimeAdditionProblemData;
+  condensed?: boolean;
+}) {
+  const storyLines = timeAddition.storyLines ?? [];
+  const infoLines = storyLines.length > 1 ? storyLines.slice(0, -1) : [];
+  const questionLine = storyLines.length > 1 ? storyLines[storyLines.length - 1] : storyLines[0] ?? '';
+  const infoTextClass = condensed
+    ? 'text-[1rem] font-bold leading-[1.58] text-slate-700 sm:text-[1.15rem] lg:text-[1.45rem]'
+    : 'text-[1.1rem] font-bold leading-[1.72] text-slate-700 sm:text-[1.45rem] md:text-[2rem]';
+  const questionTextClass = condensed
+    ? 'text-[1.2rem] font-black leading-[1.45] text-slate-900 sm:text-[1.5rem] lg:text-[1.9rem]'
+    : 'text-[1.3rem] font-black leading-[1.55] text-slate-900 sm:text-[1.75rem] md:text-[2.45rem]';
+  const cardPaddingClass = condensed ? 'px-4 py-3 sm:px-5 sm:py-4' : 'px-4 py-4 sm:px-6 sm:py-5 md:px-8 md:py-7';
+
+  return (
+    <div className={`mx-auto flex w-full max-w-[52rem] flex-col text-left text-slate-900 ${
+      condensed ? 'gap-3' : 'gap-4 sm:gap-6'
+    }`}>
+      {infoLines.length > 0 ? (
+        <div className={`rounded-[2rem] border border-slate-200 bg-slate-50/85 shadow-sm ${cardPaddingClass}`}>
+          <div className={`flex flex-col ${condensed ? 'gap-4' : 'gap-5 md:gap-6'}`}>
+            {infoLines.map((line, index) => (
+              <p key={`${line}-${index}`} className={`break-keep tracking-[-0.01em] ${infoTextClass}`}>
+                {renderPromptWithHighlight(line)}
+              </p>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {questionLine ? (
+        <div className={`rounded-[2rem] border border-amber-200 bg-amber-50/80 shadow-sm ${cardPaddingClass}`}>
+          <p className={`break-keep tracking-[-0.01em] ${questionTextClass}`}>{renderPromptWithHighlight(questionLine)}</p>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function TimeAdditionVerticalFigure({
+  left,
+  right,
+  operation,
+  answerValue,
+  onAnswerChange,
+  onSubmit,
+}: {
+  left: TimeValue;
+  right: TimeValue;
+  operation: TimeArithmeticOperation;
+  answerValue: ClockReadingAnswerInput;
+  onAnswerChange: (part: ClockInputPart, value: string) => void;
+  onSubmit: () => void;
+}) {
+  const columns: Array<{ key: ClockInputPart; label: string }> = [
+    { key: 'hours', label: '시간' },
+    { key: 'minutes', label: '분' },
+    { key: 'seconds', label: '초' },
+  ];
+  const renderValueText = (value: number, tone: 'slate' | 'amber' = 'slate') => (
+    <div
+      className={`min-w-[4rem] text-center text-[2rem] font-black leading-none sm:min-w-[4.8rem] sm:text-[2.75rem] ${
+        tone === 'amber' ? 'text-amber-900' : 'text-slate-900'
+      }`}
+    >
+      {value}
+    </div>
+  );
+
+  return (
+    <div className="rounded-[1.85rem] border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+      <div className="mx-auto max-w-[34rem]">
+        <div className="grid grid-cols-[2.4rem_repeat(3,minmax(0,1fr)_auto)] items-end gap-x-2 gap-y-3 sm:grid-cols-[3rem_repeat(3,minmax(0,1fr)_auto)] sm:gap-x-3">
+          <div />
+          {columns.map((column) => (
+            <React.Fragment key={`top-${column.key}`}>
+              {renderValueText(getTimeValuePartValue(left, column.key))}
+              <div className="pb-1 text-[2rem] font-black leading-none text-slate-900 sm:text-[2.75rem]">
+                {column.label}
+              </div>
+            </React.Fragment>
+          ))}
+
+          <div className="pb-1 text-[2.3rem] font-black leading-none text-slate-900 sm:text-[3.2rem]">{operation}</div>
+          {columns.map((column) => (
+            <React.Fragment key={`bottom-${column.key}`}>
+              {renderValueText(getTimeValuePartValue(right, column.key), 'amber')}
+              <div className="pb-1 text-[2rem] font-black leading-none text-slate-900 sm:text-[2.75rem]">
+                {column.label}
+              </div>
+            </React.Fragment>
+          ))}
+
+          <div className="col-span-7 mt-1 h-[2px] rounded-full bg-slate-900" />
+
+          <div />
+          {columns.map((column) => (
+            <React.Fragment key={`answer-${column.key}`}>
+              <label className="block">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  maxLength={2}
+                  value={answerValue[column.key]}
+                  onChange={(event) => onAnswerChange(column.key, event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' && !event.ctrlKey && !event.altKey) {
+                      event.preventDefault();
+                      onSubmit();
+                    }
+                  }}
+                  className="h-[4.2rem] w-full min-w-0 rounded-[0.9rem] border border-slate-400 bg-slate-50 px-2 text-center text-[2rem] font-black text-sky-500 outline-none transition focus:border-sky-400 focus:bg-white sm:h-[4.8rem] sm:text-[2.75rem]"
+                  placeholder=""
+                  aria-label={column.label}
+                />
+              </label>
+              <div className="pb-1 text-[2rem] font-black leading-none text-slate-900 sm:text-[2.75rem]">
+                {column.label}
+              </div>
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StoryPromptTableCard({
+  table,
+  condensed = false,
+  dense = false,
+}: {
+  table: StoryPromptTableData;
+  condensed?: boolean;
+  dense?: boolean;
+}) {
+  return (
+    <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm">
+      <table className="w-full table-fixed border-collapse">
+        <thead>
+          <tr className="bg-emerald-50/90">
+            {table.headers.map((header) => (
+              <th
+                key={header}
+                className={`border-b border-slate-200 text-center font-black text-slate-900 ${
+                  dense
+                    ? 'px-3 py-2 text-[0.95rem] sm:text-[1rem]'
+                    : condensed
+                      ? 'px-4 py-3 text-[1rem] sm:text-[1.15rem]'
+                      : 'px-4 py-3 text-[1.1rem] sm:text-[1.35rem] md:text-[1.6rem]'
+                }`}
+              >
+                {header}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {table.rows.map((row, rowIndex) => (
+            <tr key={`${row.cells.join('-')}-${rowIndex}`} className={rowIndex % 2 === 0 ? 'bg-white' : 'bg-slate-50/80'}>
+              {row.cells.map((cell, cellIndex) => (
+                <td
+                  key={`${cell}-${cellIndex}`}
+                  className={`text-center font-bold text-slate-800 ${
+                    dense
+                      ? 'px-3 py-2 text-[0.92rem] leading-[1.32] sm:text-[1rem]'
+                      : condensed
+                        ? 'px-4 py-3 text-[1rem] leading-[1.45] sm:text-[1.1rem]'
+                        : 'px-4 py-3 text-[1.08rem] leading-[1.5] sm:text-[1.3rem] md:text-[1.6rem]'
+                  } ${rowIndex > 0 ? 'border-t border-slate-200' : ''} ${cellIndex > 0 ? 'border-l border-slate-200' : ''}`}
+                >
+                  {renderPromptWithHighlight(cell)}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function BattleStructuredTimeInput({
+  parts,
+  answerValue,
+  onAnswerChange,
+  onSubmit,
+  canSubmit,
+  condensed = false,
+}: {
+  parts: ClockInputPart[];
+  answerValue: ClockReadingAnswerInput;
+  onAnswerChange: (part: ClockInputPart, value: string) => void;
+  onSubmit: () => void;
+  canSubmit: boolean;
+  condensed?: boolean;
+}) {
+  const labels: Record<ClockInputPart, string> = { hours: '시', minutes: '분', seconds: '초' };
+  const textSizeClass = condensed ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-3xl';
+
+  return (
+    <div className={`grid grid-cols-[minmax(0,1fr)_auto] items-stretch ${condensed ? 'gap-2' : 'gap-3'}`}>
+      <div
+        className={`flex min-w-0 items-center rounded-2xl border-4 border-slate-500 bg-slate-700 px-2 focus-within:border-emerald-500 ${
+          condensed ? 'py-1.5' : 'py-2'
+        }`}
+      >
+        <div
+          className="grid min-w-0 flex-1"
+          style={{ gridTemplateColumns: `repeat(${parts.length}, minmax(0, 1fr))` }}
+        >
+          {parts.map((part, index) => (
+            <label
+              key={part}
+              className={`flex min-w-0 items-center justify-center gap-2 px-3 ${
+                condensed ? 'py-1.5 sm:px-3' : 'py-2 sm:px-4'
+              } ${index > 0 ? 'border-l-2 border-slate-500/80' : ''}`}
+            >
+              <input
+                type="text"
+                inputMode="numeric"
+                autoComplete="off"
+                maxLength={2}
+                value={answerValue[part]}
+                onChange={(event) => onAnswerChange(part, event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' && !event.ctrlKey && !event.altKey) {
+                    event.preventDefault();
+                    onSubmit();
+                  }
+                }}
+                className={`min-w-0 flex-1 bg-transparent text-center font-black text-slate-100 outline-none placeholder:text-slate-400 ${textSizeClass}`}
+                placeholder=""
+                aria-label={labels[part]}
+              />
+              <span className={`shrink-0 font-black text-slate-100 ${textSizeClass}`}>{labels[part]}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <button
+        type="button"
+        disabled={!canSubmit}
+        onClick={onSubmit}
+        className={`flex w-full min-w-0 items-center justify-center gap-2 rounded-2xl px-5 py-3 text-lg font-black text-white shadow-lg sm:min-w-[170px] sm:w-auto sm:px-6 sm:text-xl ${
+          canSubmit
+            ? 'bg-emerald-600 hover:bg-emerald-500'
+            : 'cursor-not-allowed bg-slate-500 opacity-60'
+        }`}
+      >
+        <Sword size={22} /> 공격!
+      </button>
+    </div>
+  );
+}
+
+function TimeAdditionProblemCard({
+  timeAddition,
+  answerValue,
+  onAnswerChange,
+  onSubmit,
+  playAnimationSound,
+  condensed = false,
+  showAnswerFields = true,
+}: {
+  timeAddition: TimeAdditionProblemData;
+  answerValue: ClockReadingAnswerInput;
+  onAnswerChange: (part: ClockInputPart, value: string) => void;
+  onSubmit: () => void;
+  playAnimationSound?: AnimationSoundPlayer;
+  condensed?: boolean;
+  showAnswerFields?: boolean;
+}) {
+  const fields: Array<{ key: ClockInputPart; label: string; placeholder: string }> = [
+    { key: 'hours', label: '시', placeholder: '시' },
+    { key: 'minutes', label: '분', placeholder: '분' },
+    { key: 'seconds', label: '초', placeholder: '초' },
+  ].filter((field) => timeAddition.editableParts.includes(field.key));
+  const isVerticalMode = timeAddition.mode === 'vertical';
+  const isStoryMode = timeAddition.mode === 'story';
+  const shouldCenterCard = isVerticalMode || timeAddition.mode === 'clock';
+
+  if (isStoryMode) {
+    return (
+      <div className="mx-auto flex w-full max-w-[58rem] flex-col gap-4 text-left text-slate-900 sm:gap-5">
+        <TimeStoryProblemFigure timeAddition={timeAddition} condensed={condensed} />
+
+        {showAnswerFields ? (
+          <div
+            className="grid gap-3 sm:gap-4"
+            style={{ gridTemplateColumns: `repeat(${fields.length}, minmax(0, 1fr))` }}
+          >
+            {fields.map((field) => (
+              <label
+                key={field.key}
+                className="flex items-center justify-center gap-2 rounded-[1.5rem] border border-slate-200 bg-white px-3 py-3 shadow-sm sm:gap-3 sm:px-4 sm:py-4"
+              >
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  maxLength={2}
+                  value={answerValue[field.key]}
+                  onChange={(event) => onAnswerChange(field.key, event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' && !event.ctrlKey && !event.altKey) {
+                      event.preventDefault();
+                      onSubmit();
+                    }
+                  }}
+                  className="w-full min-w-0 rounded-2xl border-2 border-slate-200 bg-slate-50 px-3 py-3 text-center text-xl font-black text-slate-900 outline-none transition focus:border-sky-400 focus:bg-white sm:text-2xl"
+                  placeholder={field.placeholder}
+                  aria-label={field.label}
+                />
+                <span className="shrink-0 text-2xl font-black text-slate-900 sm:text-3xl">{field.label}</span>
+              </label>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`mx-auto flex w-full flex-col gap-4 text-left text-slate-900 sm:gap-5 ${
+        shouldCenterCard ? 'my-auto' : ''
+      } ${
+        isVerticalMode ? 'max-w-[62rem]' : timeAddition.mode === 'clock' ? 'max-w-[60rem]' : 'max-w-[58rem]'
+      }`}
+    >
+      <div className="rounded-[2rem] border border-slate-200 bg-slate-50/85 px-4 py-4 shadow-sm sm:px-6 sm:py-5 md:px-8 md:py-7">
+        <div>
+          {timeAddition.mode === 'clock' ? (
+            <ClockTimeAdditionFigure
+              start={timeAddition.left}
+              add={timeAddition.right}
+              result={timeAddition.result}
+              operation={timeAddition.operation}
+              playAnimationSound={playAnimationSound}
+            />
+          ) : timeAddition.mode === 'bar' ? (
+            <div className="overflow-hidden rounded-[1.75rem] border border-sky-200 bg-white p-3 shadow-[inset_0_2px_14px_rgba(148,163,184,0.12)] sm:p-4">
+              {timeAddition.operation === '+' ? (
+                <TimeAdditionBarModelFigure
+                  left={timeAddition.left}
+                  right={timeAddition.right}
+                  result={timeAddition.result}
+                  playAnimationSound={playAnimationSound}
+                />
+              ) : (
+                <TimeSubtractionBarModelFigure
+                  left={timeAddition.left}
+                  right={timeAddition.right}
+                  result={timeAddition.result}
+                  playAnimationSound={playAnimationSound}
+                />
+              )}
+            </div>
+          ) : (
+            <TimeAdditionVerticalFigure
+              left={timeAddition.left}
+              right={timeAddition.right}
+              operation={timeAddition.operation}
+              answerValue={answerValue}
+              onAnswerChange={onAnswerChange}
+              onSubmit={onSubmit}
+            />
+          )}
+        </div>
+
+        {!isVerticalMode && showAnswerFields ? (
+          <>
+            <div
+              className="mt-4 grid gap-3 sm:gap-4"
+              style={{ gridTemplateColumns: `repeat(${fields.length}, minmax(0, 1fr))` }}
+            >
+              {fields.map((field) => (
+                <label
+                  key={field.key}
+                  className="flex items-center justify-center gap-2 rounded-[1.5rem] border border-slate-200 bg-white px-3 py-3 shadow-sm sm:gap-3 sm:px-4 sm:py-4"
+                >
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    maxLength={2}
+                    value={answerValue[field.key]}
+                    onChange={(event) => onAnswerChange(field.key, event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' && !event.ctrlKey && !event.altKey) {
+                        event.preventDefault();
+                        onSubmit();
+                      }
+                    }}
+                    className="w-full min-w-0 rounded-2xl border-2 border-slate-200 bg-slate-50 px-3 py-3 text-center text-xl font-black text-slate-900 outline-none transition focus:border-sky-400 focus:bg-white sm:text-2xl"
+                    placeholder={field.placeholder}
+                    aria-label={field.label}
+                  />
+                  <span className="shrink-0 text-2xl font-black text-slate-900 sm:text-3xl">{field.label}</span>
+                </label>
+              ))}
+            </div>
+          </>
+        ) : null}
       </div>
     </div>
   );
@@ -6622,6 +9534,8 @@ export default function App() {
   const zeroTensBorrowCoachmarkLevelsRef = useRef(new Set<number>());
   const unitSelectionChallengeLevelsRef = useRef(new Set<number>());
   const unit3ProblemSequenceRef = useRef<Record<number, number>>({});
+  const unit3Level12RoundTemplateOrderRef = useRef<Level12TemplateId[] | null>(null);
+  const unit3Level12PreviousTemplateOrderRef = useRef<Level12TemplateId[]>([]);
   const developerProblemHistoryRef = useRef<DeveloperProblemSnapshot[]>([]);
   const developerProblemHistoryIndexRef = useRef(-1);
   const isDeveloperShortcutEnabled = import.meta.env.DEV;
@@ -6652,6 +9566,13 @@ export default function App() {
   const [unitSelectionChallenge, setUnitSelectionChallenge] = useState<UnitSelectionChallenge | null>(null);
   const [isSpecialChallengeResolving, setIsSpecialChallengeResolving] = useState(false);
   const [timeLeft, setTimeLeft] = useState(ESTIMATION_TIME_LIMIT_SECONDS);
+  const [isSecretCodePromptOpen, setIsSecretCodePromptOpen] = useState(false);
+  const [secretCodeInput, setSecretCodeInput] = useState('');
+  const [secretCodeError, setSecretCodeError] = useState('');
+  const [pendingLevelTransition, setPendingLevelTransition] = useState<{
+    nextLevel: number;
+    shouldQueueEstimation: boolean;
+  } | null>(null);
 
   const updateMessage = (msg: string) => {
     setMessage(msg);
@@ -6777,6 +9698,21 @@ export default function App() {
         : (unit3ProblemSequenceRef.current[targetLevel] ?? 1) + 1;
 
     unit3ProblemSequenceRef.current[targetLevel] = nextProblemSequence;
+
+    if (targetLevel === 12) {
+      if (nextProblemSequence === 1 || !unit3Level12RoundTemplateOrderRef.current) {
+        const nextTemplateOrder = buildLevel12RoundTemplateOrder(unit3Level12PreviousTemplateOrderRef.current);
+        unit3Level12RoundTemplateOrderRef.current = nextTemplateOrder;
+        unit3Level12PreviousTemplateOrderRef.current = nextTemplateOrder;
+      }
+
+      return createLevel12TimeMixedProblem(
+        nextProblemSequence,
+        targetOpponentHP,
+        unit3Level12RoundTemplateOrderRef.current ?? LEVEL12_DEFAULT_TEMPLATE_ORDER,
+      );
+    }
+
     return getProblemForTurn(targetUnitId, targetLevel, targetOpponentHP, nextProblemSequence);
   };
 
@@ -6848,6 +9784,34 @@ export default function App() {
         problemCoachmark: null,
       });
     }
+  };
+
+  const syncCurrentProblemSnapshot = (nextOpponentHP: number) => {
+    const currentIndex = developerProblemHistoryIndexRef.current;
+    const currentHistory = developerProblemHistoryRef.current;
+    const currentSnapshot = currentHistory[currentIndex];
+
+    if (
+      currentSnapshot &&
+      currentSnapshot.level === level &&
+      currentSnapshot.problem === problem &&
+      currentSnapshot.problemCoachmark === problemCoachmark
+    ) {
+      const nextHistory = currentHistory.slice();
+      nextHistory[currentIndex] = {
+        ...currentSnapshot,
+        opponentHP: nextOpponentHP,
+      };
+      developerProblemHistoryRef.current = nextHistory;
+      return;
+    }
+
+    pushDeveloperProblemSnapshot({
+      level,
+      opponentHP: nextOpponentHP,
+      problem,
+      problemCoachmark,
+    });
   };
 
   const playVisualControlSound = (sound: VisualControlSound) => {
@@ -6940,7 +9904,14 @@ export default function App() {
       ? Object.fromEntries(problem.builder.slots.map((slot) => [slot.id, slot])) as Record<string, BuildSlotConfig>
       : {};
   const builderEvaluation = evaluateBuilderProblem(problem, builderSlotValues);
-  
+
+  const resetSecretCodePrompt = () => {
+    setIsSecretCodePromptOpen(false);
+    setSecretCodeInput('');
+    setSecretCodeError('');
+    setPendingLevelTransition(null);
+  };
+
   const resetDeveloperBattleState = () => {
     setIsAttacking(false);
     setIsOpponentAttacking(false);
@@ -6956,6 +9927,7 @@ export default function App() {
     setUnitInputValue('');
     setClockAnswerInput({ hours: '', minutes: '', seconds: '' });
     setIsUnitMenuOpen(false);
+    resetSecretCodePrompt();
   };
 
   const restoreDeveloperProblemSnapshot = useEffectEvent((historyIndex: number) => {
@@ -7028,6 +10000,24 @@ export default function App() {
     updateMessage('다음 문제로 이동!');
   });
 
+  const attackAndMoveToNextDeveloperProblem = useEffectEvent(() => {
+    if (isSpecialChallengeResolving || isAttacking || isOpponentAttacking || isOpponentHit || isPlayerHit) {
+      return;
+    }
+
+    if (isEstimation) {
+      resolveEstimationResult(true);
+      return;
+    }
+
+    if (isUnitSelectionChallenge) {
+      resolveUnitSelectionResult(true);
+      return;
+    }
+
+    resolveProblemResult(true, { skipSpecialChallenges: true });
+  });
+
   const hintProblemText =
     problem.kind === 'builder'
       ? builderEvaluation?.status === 'ready'
@@ -7036,16 +10026,32 @@ export default function App() {
       : problem.text;
   const normalizedInputValue = inputValue.trim();
   const normalizedUnitInputValue = normalizeAnswerUnit(unitInputValue);
+  const normalizedSecretCodeInput = normalizeSecretCode(secretCodeInput);
   const parsedInputAnswer = Number.parseInt(normalizedInputValue, 10);
   const isClockReadingProblem = problem.kind === 'clockReading' && problem.clockReading !== undefined;
+  const isTimeAdditionProblem = problem.kind === 'timeAddition' && problem.timeAddition !== undefined;
   const parsedClockAnswer = {
     hours: Number.parseInt(clockAnswerInput.hours.trim(), 10),
     minutes: Number.parseInt(clockAnswerInput.minutes.trim(), 10),
     seconds: Number.parseInt(clockAnswerInput.seconds.trim(), 10),
   };
-  const editableClockParts = problem.kind === 'clockReading' && problem.clockReading
-    ? problem.clockReading.editableParts
-    : [];
+  const editableClockParts =
+    problem.kind === 'clockReading' && problem.clockReading
+      ? problem.clockReading.editableParts
+      : problem.kind === 'timeAddition' && problem.timeAddition
+        ? problem.timeAddition.editableParts
+        : [];
+  const isStructuredTimeAnswerProblem = isClockReadingProblem || isTimeAdditionProblem;
+  const hasValidStructuredTimeInput =
+    isStructuredTimeAnswerProblem &&
+    editableClockParts.every((part) => {
+      const value = clockAnswerInput[part].trim();
+      return value.length > 0 && !Number.isNaN(Number.parseInt(value, 10));
+    });
+  const currentTimeAddition = problem.kind === 'timeAddition' ? problem.timeAddition ?? null : null;
+  const isVerticalTimeAdditionProblem = currentTimeAddition?.mode === 'vertical';
+  const isStoryTimeAdditionProblem = currentTimeAddition?.mode === 'story';
+  const usesBattleStructuredTimeInput = activeLearningUnitId === 'unit3' && level === 12 && isStoryTimeAdditionProblem;
   const currentDistanceWorksheetPrompt =
     problem.kind === 'distanceWorksheet' ? problem.distanceWorksheet?.prompt ?? null : null;
   const normalizedDistanceWorksheetInput = currentDistanceWorksheetPrompt
@@ -7060,16 +10066,11 @@ export default function App() {
     currentDistanceWorksheetPrompt !== null &&
     normalizedDistanceWorksheetInput.length > 0 &&
     hasValidUnitInput;
-  const hasValidClockReadingInput =
-    isClockReadingProblem &&
-    editableClockParts.every((part) => {
-      const value = clockAnswerInput[part].trim();
-      return value.length > 0 && !Number.isNaN(Number.parseInt(value, 10));
-    });
+  const hasSecretCodeInput = normalizedSecretCodeInput.length > 0;
   const usesTextAnswerInput = currentDistanceWorksheetPrompt?.kind === 'place';
   const canAttemptAttack =
-    isClockReadingProblem
-      ? hasValidClockReadingInput
+    isStructuredTimeAnswerProblem
+      ? hasValidStructuredTimeInput
       : problem.kind === 'distanceWorksheet'
       ? Boolean(hasValidDistanceWorksheetInput)
       : problem.kind === 'builder'
@@ -7077,9 +10078,64 @@ export default function App() {
       : hasValidAnswerInput;
   const storyPromptSections = problem.kind === 'story' ? splitStoryPromptSections(problem.prompt) : null;
   const hasNumberedStoryOptions = Boolean(storyPromptSections && storyPromptSections.optionLines.length >= 2);
+  const storyTableLineSet = problem.storyTable
+    ? new Set(
+        problem.storyTable.rows
+          .filter((row) => row.cells.length >= 2)
+          .map((row) => `${row.cells[0]}: ${row.cells[1]}`),
+      )
+    : null;
+  const filteredNumberedStoryIntroLines = storyPromptSections
+    ? storyPromptSections.introLines.filter((line) => !storyTableLineSet?.has(line))
+    : [];
+  const numberedStoryInfoLines =
+    problem.storyTable && filteredNumberedStoryIntroLines.length > 1
+      ? filteredNumberedStoryIntroLines.slice(0, -1)
+      : [];
+  const numberedStoryQuestionLine = problem.storyTable
+    ? filteredNumberedStoryIntroLines[filteredNumberedStoryIntroLines.length - 1] ?? ''
+    : '';
   const shouldHighlightPromptNumbers = !(activeLearningUnitId === 'unit3' && level === 8);
+  const shouldUseCompactUnit3Viewport = activeLearningUnitId === 'unit3' && level >= 8 && !isStoryTimeAdditionProblem;
   const isCompactBattleViewport =
-    isShortViewport || (activeLearningUnitId === 'unit3' && level >= 8) || hasNumberedStoryOptions;
+    isShortViewport || shouldUseCompactUnit3Viewport || hasNumberedStoryOptions;
+  const numberedStoryOptionCount = storyPromptSections?.optionLines.length ?? 0;
+  const isDenseNumberedStoryLayout = Boolean(
+    isCompactBattleViewport && problem.kind === 'story' && problem.storyTable && numberedStoryOptionCount >= 4,
+  );
+  const numberedStoryShellGapClass = isDenseNumberedStoryLayout
+    ? 'gap-2 sm:gap-2.5'
+    : isCompactBattleViewport
+      ? 'gap-3'
+      : 'gap-4 sm:gap-5';
+  const numberedStoryCardPaddingClass = isDenseNumberedStoryLayout
+    ? 'px-3 py-2.5 sm:px-4 sm:py-3'
+    : isCompactBattleViewport
+      ? 'px-4 py-3 sm:px-5 sm:py-4'
+      : 'px-5 py-4 sm:px-6 sm:py-5';
+  const numberedStoryInfoTextClass = isDenseNumberedStoryLayout
+    ? 'text-[0.92rem] font-bold leading-[1.48] text-slate-700 sm:text-[1rem] lg:text-[1.08rem]'
+    : isCompactBattleViewport
+      ? 'text-[1rem] font-bold leading-[1.62] text-slate-700 sm:text-[1.2rem] lg:text-[1.45rem]'
+      : 'text-[1.1rem] font-bold leading-[1.72] text-slate-700 sm:text-[1.35rem] lg:text-[1.75rem]';
+  const numberedStoryQuestionTextClass = isDenseNumberedStoryLayout
+    ? 'text-[1.05rem] font-black leading-[1.38] text-slate-900 sm:text-[1.18rem] lg:text-[1.35rem]'
+    : isCompactBattleViewport
+      ? 'text-[1.2rem] font-black leading-[1.45] text-slate-900 sm:text-[1.55rem] lg:text-[1.9rem]'
+      : 'text-[1.35rem] font-black leading-[1.52] text-slate-900 sm:text-[1.75rem] lg:text-[2.2rem]';
+  const numberedStoryOptionCardPaddingClass = isDenseNumberedStoryLayout
+    ? 'px-3 py-2.5 sm:px-4 sm:py-3'
+    : isCompactBattleViewport
+      ? 'px-4 py-3 sm:px-5'
+      : 'px-5 py-4 sm:px-6';
+  const numberedStoryOptionTextClass = isDenseNumberedStoryLayout
+    ? 'text-[0.98rem] font-black leading-[1.34] text-slate-900 sm:text-[1.08rem] lg:text-[1.2rem]'
+    : isCompactBattleViewport
+      ? 'text-[1.2rem] font-black leading-[1.42] text-slate-900 sm:text-[1.5rem] lg:text-[1.85rem]'
+      : 'text-[1.35rem] font-black leading-[1.48] text-slate-900 sm:text-[1.7rem] lg:text-[2.15rem]';
+  const numberedStoryOptionGridClass = isDenseNumberedStoryLayout
+    ? 'grid min-h-0 flex-1 auto-rows-fr gap-2 sm:grid-cols-2 sm:gap-3'
+    : `grid min-h-0 flex-1 ${isCompactBattleViewport ? 'gap-3' : 'gap-4'}`;
   const battleShellWidthClass = isCompactBattleViewport ? 'max-w-7xl' : 'max-w-[78rem]';
   const battleShellResponsiveClass = isCompactBattleViewport
     ? 'lg:h-[48rem] lg:max-h-[calc(100svh-3rem)] lg:gap-2 lg:p-3'
@@ -7089,8 +10145,11 @@ export default function App() {
     : 'lg:w-[29.5%] lg:p-4';
   const battleSectionResponsiveClass = isCompactBattleViewport ? 'p-2.5 sm:p-3' : 'p-3 sm:p-4';
   const battleStageResponsiveClass = isCompactBattleViewport
-    ? 'lg:h-[clamp(11rem,23vh,15rem)]'
-    : 'lg:h-[clamp(17rem,31vh,21.5rem)]';
+    ? 'lg:h-[clamp(12rem,25vh,16rem)]'
+    : 'lg:h-[clamp(18.5rem,33vh,23rem)]';
+  const battleStageImageResponsiveClass = isCompactBattleViewport
+    ? 'h-auto max-h-full'
+    : 'h-auto max-h-full';
   const battleRightPanelResponsiveClass = isCompactBattleViewport ? 'gap-2' : 'gap-3';
   const battleTopGroupResponsiveClass = isCompactBattleViewport ? 'gap-2' : 'gap-3';
   const battleInputResponsiveClass = isCompactBattleViewport ? 'gap-2' : 'gap-3';
@@ -7181,6 +10240,58 @@ export default function App() {
     setBattleDifficulty(nextDifficulty);
   };
 
+  const completeLevelTransition = (nextLevel: number, shouldQueueEstimation = false) => {
+    setIsOpponentHit(false);
+    setIsOpponentAttacking(false);
+    setLevel(nextLevel);
+    setOpponentHP(100);
+    setProblemWithCoachmark(getNextProblemForTurn(activeLearningUnitId, nextLevel, 100), nextLevel, { opponentHP: 100 });
+    queueSound('levelUp', 180, {
+      gainMultiplier: 1 + nextLevel * 0.025,
+      detune: Math.min(nextLevel * 10, 90),
+    });
+    updateMessage(getOpponentEntranceMessage(activeLearningUnitId, nextLevel, specialOpponentSelections));
+    if (shouldQueueEstimation) {
+      queueEstimationChallenge();
+    }
+  };
+
+  const requestSecretCodeForNextLevel = (nextLevel: number, shouldQueueEstimation = false) => {
+    setIsOpponentHit(false);
+    setIsOpponentAttacking(false);
+    setSecretCodeInput('');
+    setSecretCodeError('');
+    setPendingLevelTransition({ nextLevel, shouldQueueEstimation });
+    setIsSecretCodePromptOpen(true);
+    playSound('alert', { gainMultiplier: 0.94, detune: 12 });
+    updateMessage('3단원 8단계로 가려면 비밀암호를 입력해야 해!');
+  };
+
+  const submitSecretCode = () => {
+    if (!pendingLevelTransition) {
+      return;
+    }
+
+    if (!hasSecretCodeInput) {
+      setSecretCodeError('비밀암호를 입력해 주세요.');
+      playSound('ui');
+      updateMessage('비밀암호를 입력해야 8단계로 갈 수 있어!');
+      return;
+    }
+
+    if (normalizedSecretCodeInput !== normalizeSecretCode(UNIT3_SECRET_CODE_GATE.answer)) {
+      setSecretCodeError('비밀암호가 맞지 않아요. 다시 입력해 보세요.');
+      playSound('wrong', { gainMultiplier: 0.9, detune: -18 });
+      updateMessage('비밀암호가 틀렸어. 다시 확인해 보자!');
+      return;
+    }
+
+    const { nextLevel, shouldQueueEstimation } = pendingLevelTransition;
+    resetSecretCodePrompt();
+    playSound('submit', { gainMultiplier: 0.82, detune: 18 });
+    completeLevelTransition(nextLevel, shouldQueueEstimation);
+  };
+
   const handleBuilderSlotChange = (slotId: string, nextValue: string) => {
     if (problem.kind !== 'builder' || !problem.builder) return;
 
@@ -7233,20 +10344,16 @@ export default function App() {
   };
 
   const scheduleNextLevelTransition = (nextLevel: number, shouldQueueEstimation = false) => {
+    const currentLevel = level;
+    const currentUnitId = activeLearningUnitId;
+
     window.setTimeout(() => {
-      setIsOpponentHit(false);
-      setIsOpponentAttacking(false);
-      setLevel(nextLevel);
-      setOpponentHP(100);
-      setProblemWithCoachmark(getNextProblemForTurn(activeLearningUnitId, nextLevel, 100), nextLevel, { opponentHP: 100 });
-      queueSound('levelUp', 180, {
-        gainMultiplier: 1 + nextLevel * 0.025,
-        detune: Math.min(nextLevel * 10, 90),
-      });
-      updateMessage(getOpponentEntranceMessage(activeLearningUnitId, nextLevel, specialOpponentSelections));
-      if (shouldQueueEstimation) {
-        queueEstimationChallenge();
+      if (requiresSecretCodeForLevelTransition(currentUnitId, currentLevel, nextLevel)) {
+        requestSecretCodeForNextLevel(nextLevel, shouldQueueEstimation);
+        return;
       }
+
+      completeLevelTransition(nextLevel, shouldQueueEstimation);
     }, HIT_POSE_DURATION_MS);
   };
 
@@ -7305,7 +10412,7 @@ export default function App() {
             triggerBattleVictory(20);
           }
         } else {
-          setProblemWithCoachmark(getNextProblemForTurn(activeLearningUnitId, level, newOpponentHP), level, { opponentHP: newOpponentHP });
+          syncCurrentProblemSnapshot(newOpponentHP);
         }
 
         setIsEstimation(false);
@@ -7381,7 +10488,7 @@ export default function App() {
             triggerBattleVictory(22);
           }
         } else {
-          setProblemWithCoachmark(getNextProblemForTurn(activeLearningUnitId, level, newOpponentHP), level, { opponentHP: newOpponentHP });
+          syncCurrentProblemSnapshot(newOpponentHP);
         }
 
         setIsUnitSelectionChallenge(false);
@@ -7421,7 +10528,14 @@ export default function App() {
     }, ATTACK_POSE_DURATION_MS);
   };
 
-  const resolveProblemResult = (isCorrect: boolean) => {
+  const resolveProblemResult = (
+    isCorrect: boolean,
+    options: {
+      skipSpecialChallenges?: boolean;
+    } = {},
+  ) => {
+    const skipSpecialChallenges = options.skipSpecialChallenges === true;
+
     if (isCorrect) {
       playSound('correct', {
         gainMultiplier: 1 + level * 0.018,
@@ -7438,22 +10552,37 @@ export default function App() {
         });
         setTimeout(() => setIsOpponentHit(false), HIT_POSE_DURATION_MS);
         
-        const newOpponentHP = Math.max(0, opponentHP - regularAttackDamage);
+        const currentUnit3ProblemSequence = unit3ProblemSequenceRef.current[level] ?? 1;
+        const newOpponentHP = isUnit3FixedTimeSequenceLevel(activeLearningUnitId, level)
+          ? getUnit3FixedTimeOpponentHPAfterCorrect(currentUnit3ProblemSequence)
+          : Math.max(0, opponentHP - regularAttackDamage);
         setOpponentHP(newOpponentHP);
         updateMessage('공격 성공! 데미지를 입혔다!');
         
         if (newOpponentHP === 0) {
           if (level < totalLevels) {
-            scheduleNextLevelTransition(level + 1, activeLearningUnitId === 'unit2' && canOfferEstimation(activeLearningUnitId, 100) && Math.random() < 0.15);
+            scheduleNextLevelTransition(
+              level + 1,
+              !skipSpecialChallenges &&
+                activeLearningUnitId === 'unit2' &&
+                canOfferEstimation(activeLearningUnitId, 100) &&
+                Math.random() < 0.15,
+            );
           } else {
             triggerBattleVictory(18);
           }
         } else {
           setProblemWithCoachmark(getNextProblemForTurn(activeLearningUnitId, level, newOpponentHP), level, { opponentHP: newOpponentHP });
-          if (activeLearningUnitId === 'unit2' && canOfferEstimation(activeLearningUnitId, newOpponentHP) && Math.random() < 0.15) {
+          if (
+            !skipSpecialChallenges &&
+            activeLearningUnitId === 'unit2' &&
+            canOfferEstimation(activeLearningUnitId, newOpponentHP) &&
+            Math.random() < 0.15
+          ) {
             queueEstimationChallenge();
           }
           if (
+            !skipSpecialChallenges &&
             activeLearningUnitId === 'unit3' &&
             UNIT_SELECTION_CHALLENGE_LEVELS.has(level) &&
             !unitSelectionChallengeLevelsRef.current.has(level)
@@ -7495,7 +10624,7 @@ export default function App() {
 
   const checkAnswer = () => {
     if (problem.kind === 'clockReading' && problem.clockReading) {
-      if (!hasValidClockReadingInput) {
+      if (!hasValidStructuredTimeInput) {
         playSound('ui');
         updateMessage('빈칸을 모두 채워야 공격할 수 있어!');
         return;
@@ -7503,6 +10632,27 @@ export default function App() {
 
       const isCorrect = problem.clockReading.editableParts.every((part) => {
         const expectedValue = getClockReadingPartValue(problem.clockReading!, part);
+        const answerValue = parsedClockAnswer[part];
+        return answerValue === expectedValue;
+      });
+
+      playSound('submit', {
+        gainMultiplier: 0.9,
+        detune: 10,
+      });
+      resolveProblemResult(isCorrect);
+      return;
+    }
+
+    if (problem.kind === 'timeAddition' && problem.timeAddition) {
+      if (!hasValidStructuredTimeInput) {
+        playSound('ui');
+        updateMessage('빈칸을 모두 채워야 공격할 수 있어!');
+        return;
+      }
+
+      const isCorrect = problem.timeAddition.editableParts.every((part) => {
+        const expectedValue = getTimeValuePartValue(problem.timeAddition!.result, part);
         const answerValue = parsedClockAnswer[part];
         return answerValue === expectedValue;
       });
@@ -7627,7 +10777,7 @@ export default function App() {
 
       if (!event.ctrlKey && !event.altKey && !event.metaKey && event.key === 'ArrowRight') {
         event.preventDefault();
-        moveToNextDeveloperProblem();
+        attackAndMoveToNextDeveloperProblem();
         return;
       }
 
@@ -7659,12 +10809,14 @@ export default function App() {
     zeroTensBorrowCoachmarkLevelsRef.current.clear();
     unitSelectionChallengeLevelsRef.current.clear();
     unit3ProblemSequenceRef.current = {};
+    unit3Level12RoundTemplateOrderRef.current = null;
     setIsEstimation(false);
     setEstimationProblem(null);
     setIsUnitSelectionChallenge(false);
     setUnitSelectionChallenge(null);
     setIsSpecialChallengeResolving(false);
     setTimeLeft(ESTIMATION_TIME_LIMIT_SECONDS);
+    resetSecretCodePrompt();
     setProblemWithCoachmark(getNextProblemForTurn(activeLearningUnitId, 1, 100), 1, { opponentHP: 100 });
     setInputValue('');
     setUnitInputValue('');
@@ -7684,12 +10836,14 @@ export default function App() {
     zeroTensBorrowCoachmarkLevelsRef.current.clear();
     unitSelectionChallengeLevelsRef.current.clear();
     unit3ProblemSequenceRef.current = {};
+    unit3Level12RoundTemplateOrderRef.current = null;
     setIsEstimation(false);
     setEstimationProblem(null);
     setIsUnitSelectionChallenge(false);
     setUnitSelectionChallenge(null);
     setIsSpecialChallengeResolving(false);
     setTimeLeft(ESTIMATION_TIME_LIMIT_SECONDS);
+    resetSecretCodePrompt();
     setInputValue('');
     setUnitInputValue('');
     setClockAnswerInput({ hours: '', minutes: '', seconds: '' });
@@ -8001,7 +11155,7 @@ export default function App() {
                 />
               </div>
 
-              <div className={`relative mt-3 flex h-[clamp(10rem,28vh,15rem)] min-h-0 items-center justify-center overflow-hidden rounded-[1.5rem] border border-red-400/10 bg-[radial-gradient(circle_at_top,rgba(248,113,113,0.14),transparent_52%),linear-gradient(180deg,rgba(15,23,42,0.98),rgba(15,23,42,0.78))] px-2 py-2 sm:h-[clamp(13rem,30vh,18rem)] sm:px-3 sm:py-3 ${battleStageResponsiveClass}`}>
+              <div className={`relative mt-3 flex h-[clamp(10.75rem,30vh,16rem)] min-h-0 items-center justify-center overflow-hidden rounded-[1.5rem] border border-red-400/10 bg-[radial-gradient(circle_at_top,rgba(248,113,113,0.14),transparent_52%),linear-gradient(180deg,rgba(15,23,42,0.98),rgba(15,23,42,0.78))] px-2 py-1.5 sm:h-[clamp(13.75rem,32vh,19rem)] sm:px-3 sm:py-2.5 ${battleStageResponsiveClass}`}>
                 <p className="pointer-events-none absolute left-4 top-3 z-10 text-sm font-bold text-red-200/85">
                   {currentOpponentName}
                 </p>
@@ -8019,7 +11173,7 @@ export default function App() {
                     <img
                       src={processedOpponentCharacterImage ?? opponentCharacterImage}
                       alt={`${currentOpponentName} 캐릭터`}
-                      className={`h-full max-h-full w-auto max-w-full translate-y-2 object-contain select-none drop-shadow-[0_18px_24px_rgba(15,23,42,0.35)] ${opponentImageClassName}`}
+                      className={`${battleStageImageResponsiveClass} w-auto max-w-full translate-y-2 object-contain select-none drop-shadow-[0_18px_24px_rgba(15,23,42,0.35)] ${opponentImageClassName}`}
                       draggable={false}
                     />
                   ) : (
@@ -8059,7 +11213,7 @@ export default function App() {
             </div>
 
             <section className={`flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.75rem] border border-slate-700/80 bg-slate-950/70 shadow-[inset_0_1px_0_rgba(148,163,184,0.08)] ${battleSectionResponsiveClass}`}>
-              <div className={`relative flex h-[clamp(10rem,28vh,15rem)] min-h-0 items-center justify-center overflow-hidden rounded-[1.5rem] border border-emerald-400/10 bg-[radial-gradient(circle_at_bottom,rgba(16,185,129,0.14),transparent_54%),linear-gradient(180deg,rgba(15,23,42,0.78),rgba(15,23,42,0.98))] px-2 py-2 sm:h-[clamp(13rem,30vh,18rem)] sm:px-3 sm:py-3 ${battleStageResponsiveClass}`}>
+              <div className={`relative flex h-[clamp(10.75rem,30vh,16rem)] min-h-0 items-center justify-center overflow-hidden rounded-[1.5rem] border border-emerald-400/10 bg-[radial-gradient(circle_at_bottom,rgba(16,185,129,0.14),transparent_54%),linear-gradient(180deg,rgba(15,23,42,0.78),rgba(15,23,42,0.98))] px-2 py-1.5 sm:h-[clamp(13.75rem,32vh,19rem)] sm:px-3 sm:py-2.5 ${battleStageResponsiveClass}`}>
                 <p
                   className="pointer-events-none absolute left-4 top-3 z-10 max-w-[65%] truncate text-xs font-bold text-emerald-200/85 sm:max-w-[55%] sm:text-sm"
                   title={displayPlayerName}
@@ -8079,7 +11233,7 @@ export default function App() {
                   <img
                     src={playerCharacterImage}
                     alt="플레이어 캐릭터"
-                    className="h-full max-h-full w-auto max-w-full translate-y-2 object-contain select-none drop-shadow-[0_18px_24px_rgba(15,23,42,0.35)]"
+                    className={`${battleStageImageResponsiveClass} w-auto max-w-full translate-y-2 object-contain select-none drop-shadow-[0_18px_24px_rgba(15,23,42,0.35)]`}
                     draggable={false}
                   />
                   {isAttacking && (
@@ -8268,16 +11422,20 @@ export default function App() {
                 initial={{ opacity: 0, scale: 0.9, y: 10 }} 
                 animate={{ opacity: 1, scale: 1, y: 0 }} 
                 transition={{ duration: 0.4, ease: "easeOut" }} 
-                className={`flex min-h-0 flex-1 rounded-3xl border-8 border-slate-200 bg-white shadow-inner ${
+                className={`flex min-h-0 flex-1 rounded-3xl ${isDenseNumberedStoryLayout ? 'border-4' : 'border-8'} border-slate-200 bg-white shadow-inner ${
                   problem.kind === 'distanceMap' || problem.kind === 'distanceWorksheet'
                     ? 'flex flex-col overflow-hidden p-2 sm:p-3 lg:p-3'
-                    : problem.kind === 'clockReading'
+                    : problem.kind === 'timeAddition' && isStoryTimeAdditionProblem
+                      ? `flex flex-col justify-center ${isCompactBattleViewport ? 'overflow-hidden p-3 sm:p-4 lg:p-5' : 'overflow-y-auto p-4 sm:p-6 lg:p-8'}`
+                    : problem.kind === 'timeAddition' && isVerticalTimeAdditionProblem
+                      ? 'flex flex-col items-center justify-center overflow-y-auto p-3 sm:p-4 lg:p-5'
+                    : problem.kind === 'clockReading' || problem.kind === 'timeAddition'
                       ? 'flex flex-col overflow-y-auto p-2 sm:p-3 lg:p-3'
                     : hasNumberedStoryOptions
-                      ? 'flex flex-col overflow-hidden p-3 sm:p-4 lg:p-5'
+                      ? `flex flex-col overflow-hidden ${isDenseNumberedStoryLayout ? 'p-2 sm:p-3 lg:p-4' : 'p-3 sm:p-4 lg:p-5'}`
                     : problem.kind !== 'equation'
                       ? `flex flex-col justify-center ${isCompactBattleViewport ? 'overflow-hidden p-3 sm:p-4 lg:p-5' : 'overflow-y-auto p-4 sm:p-6 lg:p-8'}`
-                    : shouldRenderHorizontalEquation
+                      : shouldRenderHorizontalEquation
                       ? 'items-center justify-center overflow-y-auto p-4 text-center text-[clamp(3.6rem,12vw,6.8rem)] leading-tight font-black font-mono text-slate-900 sm:p-6 lg:p-8'
                       : 'flex flex-col items-center justify-center p-4 text-[clamp(3.5rem,18vw,8rem)] leading-none font-black font-mono text-slate-900 sm:p-6 lg:p-8'
                 }`}
@@ -8302,69 +11460,135 @@ export default function App() {
                     onAnswerChange={handleClockAnswerChange}
                     onSubmit={checkAnswer}
                   />
+                ) : problem.kind === 'timeAddition' && currentTimeAddition ? (
+                  <TimeAdditionProblemCard
+                    timeAddition={currentTimeAddition}
+                    answerValue={clockAnswerInput}
+                    onAnswerChange={handleClockAnswerChange}
+                    onSubmit={checkAnswer}
+                    playAnimationSound={playSound}
+                    condensed={isCompactBattleViewport}
+                    showAnswerFields={!usesBattleStructuredTimeInput}
+                  />
                 ) : problem.kind === 'story' ? (
                   hasNumberedStoryOptions && storyPromptSections ? (
-                    <div className={`mx-auto flex h-full w-full max-w-[54rem] flex-col text-left text-slate-900 ${isCompactBattleViewport ? 'gap-3' : 'gap-4 sm:gap-5'}`}>
-                      <div className={`flex shrink-0 flex-col ${isCompactBattleViewport ? 'gap-3' : 'gap-4 sm:gap-5'}`}>
-                        {storyPromptSections.introLines.map((line, index) => {
-                          const isQuestionLine = index === storyPromptSections.introLines.length - 1;
-
-                          return (
+                    problem.storyTable ? (
+                      <div className={`mx-auto flex h-full w-full max-w-[56rem] flex-col text-left text-slate-900 ${numberedStoryShellGapClass}`}>
+                        <div className={`flex shrink-0 flex-col ${numberedStoryShellGapClass}`}>
+                          {numberedStoryInfoLines.length > 0 ? (
+                            <div
+                              className={`rounded-[1.75rem] border border-slate-200 bg-slate-50/85 shadow-sm ${numberedStoryCardPaddingClass}`}
+                            >
+                              <div className={`flex flex-col ${isDenseNumberedStoryLayout ? 'gap-2' : isCompactBattleViewport ? 'gap-3' : 'gap-4'}`}>
+                                {numberedStoryInfoLines.map((line, index) => (
+                                  <p
+                                    key={`${line}-${index}`}
+                                    className={`break-keep tracking-[-0.01em] ${numberedStoryInfoTextClass}`}
+                                  >
+                                    {renderPromptWithHighlight(line, shouldHighlightPromptNumbers)}
+                                  </p>
+                                ))}
+                              </div>
+                            </div>
+                          ) : null}
+                          <StoryPromptTableCard
+                            table={problem.storyTable}
+                            condensed={isCompactBattleViewport}
+                            dense={isDenseNumberedStoryLayout}
+                          />
+                          {numberedStoryQuestionLine ? (
+                            <div
+                              className={`rounded-[1.75rem] border border-amber-200 bg-amber-50/85 shadow-sm ${numberedStoryCardPaddingClass}`}
+                            >
+                              <p className={`break-keep tracking-[-0.01em] ${numberedStoryQuestionTextClass}`}>
+                                {renderPromptWithHighlight(numberedStoryQuestionLine, shouldHighlightPromptNumbers)}
+                              </p>
+                            </div>
+                          ) : null}
+                        </div>
+                        <div
+                          className={numberedStoryOptionGridClass}
+                          style={
+                            isDenseNumberedStoryLayout
+                              ? undefined
+                              : { gridTemplateRows: `repeat(${storyPromptSections.optionLines.length}, minmax(0, 1fr))` }
+                          }
+                        >
+                          {storyPromptSections.optionLines.map((line, index) => (
                             <div
                               key={`${line}-${index}`}
-                              className={`rounded-[1.75rem] border shadow-sm ${
+                              className={`flex min-h-0 items-center rounded-[1.75rem] border border-slate-200 bg-slate-50/90 shadow-sm ${numberedStoryOptionCardPaddingClass}`}
+                            >
+                              <p className={`break-keep tracking-[-0.01em] ${numberedStoryOptionTextClass}`}>
+                                {renderPromptWithHighlight(line, shouldHighlightPromptNumbers)}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className={`mx-auto flex h-full w-full max-w-[54rem] flex-col text-left text-slate-900 ${isCompactBattleViewport ? 'gap-3' : 'gap-4 sm:gap-5'}`}>
+                        <div className={`flex shrink-0 flex-col ${isCompactBattleViewport ? 'gap-3' : 'gap-4 sm:gap-5'}`}>
+                          {storyPromptSections.introLines.map((line, index) => {
+                            const isQuestionLine = index === storyPromptSections.introLines.length - 1;
+
+                            return (
+                              <div
+                                key={`${line}-${index}`}
+                                className={`rounded-[1.75rem] border shadow-sm ${
+                                  isCompactBattleViewport
+                                    ? 'px-4 py-3 sm:px-5 sm:py-4'
+                                    : 'px-5 py-4 sm:px-6 sm:py-5'
+                                } ${
+                                  isQuestionLine
+                                    ? 'border-amber-200 bg-amber-50/85'
+                                    : 'border-slate-200 bg-slate-50/85'
+                                }`}
+                              >
+                                <p
+                                  className={`break-keep tracking-[-0.01em] ${
+                                    isQuestionLine
+                                      ? isCompactBattleViewport
+                                        ? 'text-[1.2rem] font-black leading-[1.45] text-slate-900 sm:text-[1.55rem] lg:text-[1.9rem]'
+                                        : 'text-[1.35rem] font-black leading-[1.52] text-slate-900 sm:text-[1.75rem] lg:text-[2.2rem]'
+                                      : isCompactBattleViewport
+                                        ? 'text-[1rem] font-bold leading-[1.62] text-slate-700 sm:text-[1.2rem] lg:text-[1.45rem]'
+                                        : 'text-[1.1rem] font-bold leading-[1.72] text-slate-700 sm:text-[1.35rem] lg:text-[1.75rem]'
+                                  }`}
+                                >
+                                  {renderPromptWithHighlight(line, shouldHighlightPromptNumbers)}
+                                </p>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <div
+                          className={`grid min-h-0 flex-1 ${isCompactBattleViewport ? 'gap-3' : 'gap-4'}`}
+                          style={{ gridTemplateRows: `repeat(${storyPromptSections.optionLines.length}, minmax(0, 1fr))` }}
+                        >
+                          {storyPromptSections.optionLines.map((line, index) => (
+                            <div
+                              key={`${line}-${index}`}
+                              className={`flex min-h-0 items-center rounded-[1.75rem] border border-slate-200 bg-slate-50/90 shadow-sm ${
                                 isCompactBattleViewport
-                                  ? 'px-4 py-3 sm:px-5 sm:py-4'
-                                  : 'px-5 py-4 sm:px-6 sm:py-5'
-                              } ${
-                                isQuestionLine
-                                  ? 'border-amber-200 bg-amber-50/85'
-                                  : 'border-slate-200 bg-slate-50/85'
+                                  ? 'px-4 py-3 sm:px-5'
+                                  : 'px-5 py-4 sm:px-6'
                               }`}
                             >
                               <p
-                                className={`break-keep tracking-[-0.01em] ${
-                                  isQuestionLine
-                                    ? isCompactBattleViewport
-                                      ? 'text-[1.2rem] font-black leading-[1.45] text-slate-900 sm:text-[1.55rem] lg:text-[1.9rem]'
-                                      : 'text-[1.35rem] font-black leading-[1.52] text-slate-900 sm:text-[1.75rem] lg:text-[2.2rem]'
-                                    : isCompactBattleViewport
-                                      ? 'text-[1rem] font-bold leading-[1.62] text-slate-700 sm:text-[1.2rem] lg:text-[1.45rem]'
-                                      : 'text-[1.1rem] font-bold leading-[1.72] text-slate-700 sm:text-[1.35rem] lg:text-[1.75rem]'
+                                className={`break-keep tracking-[-0.01em] text-slate-900 ${
+                                  isCompactBattleViewport
+                                    ? 'text-[1.2rem] font-black leading-[1.42] sm:text-[1.5rem] lg:text-[1.85rem]'
+                                    : 'text-[1.35rem] font-black leading-[1.48] sm:text-[1.7rem] lg:text-[2.15rem]'
                                 }`}
                               >
                                 {renderPromptWithHighlight(line, shouldHighlightPromptNumbers)}
                               </p>
                             </div>
-                          );
-                        })}
+                          ))}
+                        </div>
                       </div>
-                      <div
-                        className={`grid min-h-0 flex-1 ${isCompactBattleViewport ? 'gap-3' : 'gap-4'}`}
-                        style={{ gridTemplateRows: `repeat(${storyPromptSections.optionLines.length}, minmax(0, 1fr))` }}
-                      >
-                        {storyPromptSections.optionLines.map((line, index) => (
-                          <div
-                            key={`${line}-${index}`}
-                            className={`flex min-h-0 items-center rounded-[1.75rem] border border-slate-200 bg-slate-50/90 shadow-sm ${
-                              isCompactBattleViewport
-                                ? 'px-4 py-3 sm:px-5'
-                                : 'px-5 py-4 sm:px-6'
-                            }`}
-                          >
-                            <p
-                              className={`break-keep tracking-[-0.01em] text-slate-900 ${
-                                isCompactBattleViewport
-                                  ? 'text-[1.2rem] font-black leading-[1.42] sm:text-[1.5rem] lg:text-[1.85rem]'
-                                  : 'text-[1.35rem] font-black leading-[1.48] sm:text-[1.7rem] lg:text-[2.15rem]'
-                              }`}
-                            >
-                              {renderPromptWithHighlight(line, shouldHighlightPromptNumbers)}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                    )
                   ) : (
                     <div className={`mx-auto flex w-full max-w-[52rem] flex-col text-left text-slate-900 ${
                       isCompactBattleViewport ? 'gap-3' : 'gap-4 sm:gap-6'
@@ -8471,7 +11695,16 @@ export default function App() {
 
             {!isSpecialChallengeActive && (
               <div className={`shrink-0 flex flex-col ${battleInputResponsiveClass}`}>
-                {isClockReadingProblem ? (
+                {usesBattleStructuredTimeInput ? (
+                  <BattleStructuredTimeInput
+                    parts={editableClockParts}
+                    answerValue={clockAnswerInput}
+                    onAnswerChange={handleClockAnswerChange}
+                    onSubmit={checkAnswer}
+                    canSubmit={canAttemptAttack}
+                    condensed={isCompactBattleViewport}
+                  />
+                ) : isStructuredTimeAnswerProblem ? (
                   <button
                     type="button"
                     disabled={!canAttemptAttack}
@@ -8485,9 +11718,13 @@ export default function App() {
                     <Sword size={22} /> 공격!
                   </button>
                 ) : (
-                  <div className={`grid grid-cols-[minmax(0,1fr)_auto] items-stretch ${battleInputResponsiveClass}`}>
+                  <div className={`grid grid-cols-[minmax(0,1fr)_auto] items-stretch ${isDenseNumberedStoryLayout ? 'gap-2' : battleInputResponsiveClass}`}>
                     <div className={`flex min-w-0 items-center rounded-2xl border-4 border-slate-500 bg-slate-700 px-4 focus-within:border-emerald-500 ${
-                      isCompactBattleViewport ? 'gap-2 py-1.5' : 'gap-3 py-2'
+                      isDenseNumberedStoryLayout
+                        ? 'gap-2 py-1'
+                        : isCompactBattleViewport
+                          ? 'gap-2 py-1.5'
+                          : 'gap-3 py-2'
                     }`}>
                       <input
                         type={usesTextAnswerInput ? 'text' : 'number'}
@@ -8501,7 +11738,11 @@ export default function App() {
                           }
                         }}
                         className={`min-w-0 flex-1 bg-transparent text-center font-black text-slate-100 outline-none placeholder:text-slate-400 ${
-                          isCompactBattleViewport ? 'py-1.5 text-xl sm:text-2xl' : 'py-2 text-2xl sm:text-3xl'
+                          isDenseNumberedStoryLayout
+                            ? 'py-1 text-lg sm:text-xl'
+                            : isCompactBattleViewport
+                              ? 'py-1.5 text-xl sm:text-2xl'
+                              : 'py-2 text-2xl sm:text-3xl'
                         }`}
                         placeholder={
                           problem.kind === 'builder'
@@ -8576,7 +11817,11 @@ export default function App() {
                       type="button"
                       disabled={!canAttemptAttack}
                       onClick={checkAnswer}
-                      className={`flex w-full min-w-0 items-center justify-center gap-2 rounded-2xl px-5 py-3 text-lg font-black text-white shadow-lg sm:min-w-[170px] sm:w-auto sm:px-6 sm:text-xl ${
+                      className={`flex w-full min-w-0 items-center justify-center gap-2 rounded-2xl font-black text-white shadow-lg ${
+                        isDenseNumberedStoryLayout
+                          ? 'px-4 py-2 text-base sm:min-w-[150px] sm:w-auto sm:px-5 sm:text-lg'
+                          : 'px-5 py-3 text-lg sm:min-w-[170px] sm:w-auto sm:px-6 sm:text-xl'
+                      } ${
                         canAttemptAttack
                           ? 'bg-emerald-600 hover:bg-emerald-500'
                           : 'cursor-not-allowed bg-slate-500 opacity-60'
@@ -8591,6 +11836,88 @@ export default function App() {
           </div>
         </div>
       )}
+
+      <AnimatePresence>
+        {gameState === 'playing' && isSecretCodePromptOpen && pendingLevelTransition && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/82 p-4 backdrop-blur-sm sm:p-6"
+          >
+            <motion.form
+              initial={{ opacity: 0, scale: 0.94, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.94, y: 12 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              onSubmit={(event) => {
+                event.preventDefault();
+                submitSecretCode();
+              }}
+              className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-amber-300/30 bg-[linear-gradient(180deg,rgba(15,23,42,0.98),rgba(30,41,59,0.96))] p-5 text-left shadow-[0_24px_80px_rgba(15,23,42,0.48)] sm:p-7"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="secret-code-title"
+            >
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(250,204,21,0.18),transparent_42%),radial-gradient(circle_at_bottom_right,rgba(34,211,238,0.14),transparent_30%)]" />
+
+              <div className="relative">
+                <div className="inline-flex rounded-full border border-amber-200/30 bg-amber-300/10 px-3 py-1 text-xs font-black tracking-[0.18em] text-amber-200">
+                  SECRET CODE
+                </div>
+                <h2 id="secret-code-title" className="mt-4 text-3xl font-black text-white sm:text-[2rem]">
+                  3단원 8단계 입장
+                </h2>
+                <p className="mt-3 break-keep text-base font-bold leading-7 text-slate-200 sm:text-lg">
+                  다음 단계로 가려면 비밀암호를 입력하세요.
+                </p>
+                <p className="mt-2 text-sm font-semibold text-slate-400">띄어쓰기는 달라도 괜찮아요.</p>
+
+                <input
+                  autoFocus
+                  type="text"
+                  value={secretCodeInput}
+                  onChange={(event) => {
+                    setSecretCodeInput(event.target.value);
+                    if (secretCodeError) {
+                      setSecretCodeError('');
+                    }
+                  }}
+                  placeholder="비밀암호 입력"
+                  className={`mt-5 w-full rounded-2xl border-2 bg-slate-950 px-4 py-3 text-xl font-black text-white outline-none transition sm:px-5 sm:py-4 sm:text-2xl ${
+                    secretCodeError ? 'border-rose-400' : 'border-slate-600 focus:border-amber-400'
+                  }`}
+                />
+
+                <AnimatePresence initial={false}>
+                  {secretCodeError && (
+                    <motion.p
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 6 }}
+                      className="mt-3 text-sm font-black text-rose-300 sm:text-base"
+                    >
+                      {secretCodeError}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+
+                <button
+                  type="submit"
+                  onPointerDown={warmAudio}
+                  className={`mt-5 flex w-full items-center justify-center rounded-2xl px-6 py-3 text-base font-black transition sm:py-4 sm:text-lg ${
+                    hasSecretCodeInput
+                      ? 'bg-amber-400 text-slate-950 hover:bg-amber-300'
+                      : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                  }`}
+                >
+                  확인하고 다음 단계로
+                </button>
+              </div>
+            </motion.form>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {isResultScreen && (
         <motion.div 
