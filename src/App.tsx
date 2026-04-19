@@ -1729,6 +1729,28 @@ function createClockReadingChoiceProblem(): Problem {
   );
 }
 
+function createMillimeterNeedIntroProblem(): Problem {
+  const options = ['m', 'mm', 'km'];
+  return createPromptProblem(
+    buildNumberedOptionsPrompt(
+      '사과씨의 길이를 자로 재었더니 1cm보다 짧았습니다.\n그런데 0cm라고 하기는 어렵고, 1cm라고 하기도 어렵습니다.\n더 [[정확하게]] 나타내기 위해 필요한 단위는 무엇일까요?',
+      options,
+    ),
+    options.indexOf('mm') + 1,
+  );
+}
+
+function createKilometerNeedIntroProblem(): Problem {
+  const options = ['cm', 'km', 'mm'];
+  return createPromptProblem(
+    buildNumberedOptionsPrompt(
+      '서울에서 부산까지의 거리를 m로 나타내면 아주 큰 수가 됩니다.\n더 [[편하게]] 나타내기 위해 필요한 단위는 무엇일까요?',
+      options,
+    ),
+    options.indexOf('km') + 1,
+  );
+}
+
 function createEquationProblem(a: number, b: number, op: '+' | '-', answer: number): Problem {
   const text = `${a} ${op} ${b}`;
   return { text, prompt: text, answer, kind: 'equation' };
@@ -2899,6 +2921,16 @@ function createUnitSelectionChallenge(level: number): UnitSelectionChallenge {
 }
 
 function generateUnit3Problem(level: number, opponentHP: number): Problem {
+  if (opponentHP === 100) {
+    if (level === 1) {
+      return createMillimeterNeedIntroProblem();
+    }
+
+    if (level === 5) {
+      return createKilometerNeedIntroProblem();
+    }
+  }
+
   const factories = UNIT3_PROBLEM_FACTORIES[level] ?? UNIT3_PROBLEM_FACTORIES[12];
 
   if ((level === 1 || level === 3) && opponentHP >= 50) {
@@ -3662,20 +3694,40 @@ function isEstimationBoundaryValue(value: number) {
   return lastTwoDigits >= ESTIMATION_BOUNDARY_RANGE_MIN && lastTwoDigits <= ESTIMATION_BOUNDARY_RANGE_MAX;
 }
 
-function renderPromptWithHighlight(text: string, shouldHighlight = true) {
-  if (!shouldHighlight) {
-    return text;
-  }
+const PROMPT_EMPHASIS_CLASS_MAP: Record<string, string> = {
+  정확하게: 'font-black text-rose-600',
+  편하게: 'font-black text-emerald-600',
+};
 
-  return text.split(/(\d+)/).map((part, index) =>
-    /^\d+$/.test(part) ? (
-      <span key={`${part}-${index}`} className="font-black text-sky-600">
-        {part}
-      </span>
-    ) : (
-      <React.Fragment key={`${part}-${index}`}>{part}</React.Fragment>
-    ),
-  );
+function renderPromptWithHighlight(text: string, shouldHighlight = true) {
+  return text
+    .split(/(\[\[[^\]]+\]\]|\d+)/)
+    .filter((part) => part.length > 0)
+    .map((part, index) => {
+      const emphasisMatch = part.match(/^\[\[([^\]]+)\]\]$/);
+
+      if (emphasisMatch) {
+        const emphasisText = emphasisMatch[1];
+        return (
+          <span
+            key={`${emphasisText}-${index}`}
+            className={PROMPT_EMPHASIS_CLASS_MAP[emphasisText] ?? 'font-black text-violet-600'}
+          >
+            {emphasisText}
+          </span>
+        );
+      }
+
+      if (shouldHighlight && /^\d+$/.test(part)) {
+        return (
+          <span key={`${part}-${index}`} className="font-black text-sky-600">
+            {part}
+          </span>
+        );
+      }
+
+      return <React.Fragment key={`${part}-${index}`}>{part}</React.Fragment>;
+    });
 }
 
 function getStoryPromptLines(prompt: string) {
