@@ -4253,9 +4253,11 @@ const DISTANCE_WORKSHEET_PROBLEM_SETS: DistanceWorksheetProblemSetData[] = [
       { id: 'school-a', label: '학교', dotIndex: 6, row: 'top', accent: '#bfdbfe', icon: 'school' },
     ],
     prompts: [
-      { id: 'a-distance', prefix: '분수대에서 은행까지의 거리는 약 ', suffix: '입니다.', answer: '2', kind: 'number', answerUnit: 'km' },
-      { id: 'a-place', prefix: '기차역에서 ', suffix: '까지의 거리는 약 3 km입니다.', answer: '공원', kind: 'place' },
-      { id: 'a-condition', prefix: '서점에서 거리가 약 5 km 떨어진 곳은 ', suffix: '입니다.', answer: '은행', kind: 'place' },
+      { id: 'a-distance-1', prefix: '분수대에서 은행까지의 거리는 약 ', suffix: '입니다.', answer: '2', kind: 'number', answerUnit: 'km' },
+      { id: 'a-distance-2', prefix: '서점에서 공원까지의 거리는 약 ', suffix: '입니다.', answer: '4', kind: 'number', answerUnit: 'km' },
+      { id: 'a-distance-3', prefix: '기차역에서 학교까지의 거리는 약 ', suffix: '입니다.', answer: '5', kind: 'number', answerUnit: 'km' },
+      { id: 'a-distance-4', prefix: '시장에서 학교까지의 거리는 약 ', suffix: '입니다.', answer: '4', kind: 'number', answerUnit: 'km' },
+      { id: 'a-distance-5', prefix: '서점에서 시장까지의 거리는 약 ', suffix: '입니다.', answer: '2', kind: 'number', answerUnit: 'km' },
     ],
   },
   {
@@ -4274,9 +4276,11 @@ const DISTANCE_WORKSHEET_PROBLEM_SETS: DistanceWorksheetProblemSetData[] = [
       { id: 'school-b', label: '학교', dotIndex: 6, row: 'top', accent: '#bfdbfe', icon: 'school' },
     ],
     prompts: [
-      { id: 'b-distance', prefix: '병원에서 은행까지의 거리는 약 ', suffix: '입니다.', answer: '3', kind: 'number', answerUnit: 'km' },
-      { id: 'b-place', prefix: '버스터미널에서 ', suffix: '까지의 거리는 약 4 km입니다.', answer: '은행', kind: 'place' },
-      { id: 'b-condition', prefix: '도서관에서 거리가 약 6 km 떨어진 곳은 ', suffix: '입니다.', answer: '학교', kind: 'place' },
+      { id: 'b-distance-1', prefix: '병원에서 은행까지의 거리는 약 ', suffix: '입니다.', answer: '3', kind: 'number', answerUnit: 'km' },
+      { id: 'b-distance-2', prefix: '도서관에서 병원까지의 거리는 약 ', suffix: '입니다.', answer: '2', kind: 'number', answerUnit: 'km' },
+      { id: 'b-distance-3', prefix: '버스터미널에서 마트까지의 거리는 약 ', suffix: '입니다.', answer: '3', kind: 'number', answerUnit: 'km' },
+      { id: 'b-distance-4', prefix: '공원에서 학교까지의 거리는 약 ', suffix: '입니다.', answer: '3', kind: 'number', answerUnit: 'km' },
+      { id: 'b-distance-5', prefix: '마트에서 학교까지의 거리는 약 ', suffix: '입니다.', answer: '2', kind: 'number', answerUnit: 'km' },
     ],
   },
   {
@@ -4296,9 +4300,11 @@ const DISTANCE_WORKSHEET_PROBLEM_SETS: DistanceWorksheetProblemSetData[] = [
       { id: 'school-c', label: '학교', dotIndex: 7, row: 'top', accent: '#bfdbfe', icon: 'school' },
     ],
     prompts: [
-      { id: 'c-distance', prefix: '도서관에서 학교까지의 거리는 약 ', suffix: '입니다.', answer: '4', kind: 'number', answerUnit: 'km' },
-      { id: 'c-place', prefix: '버스터미널에서 ', suffix: '까지의 거리는 약 4 km입니다.', answer: '은행', kind: 'place' },
-      { id: 'c-condition', prefix: '공원에서 거리가 약 7 km 떨어진 곳은 ', suffix: '입니다.', answer: '학교', kind: 'place' },
+      { id: 'c-distance-1', prefix: '도서관에서 학교까지의 거리는 약 ', suffix: '입니다.', answer: '4', kind: 'number', answerUnit: 'km' },
+      { id: 'c-distance-2', prefix: '공원에서 도서관까지의 거리는 약 ', suffix: '입니다.', answer: '3', kind: 'number', answerUnit: 'km' },
+      { id: 'c-distance-3', prefix: '시장에서 병원까지의 거리는 약 ', suffix: '입니다.', answer: '4', kind: 'number', answerUnit: 'km' },
+      { id: 'c-distance-4', prefix: '버스터미널에서 학교까지의 거리는 약 ', suffix: '입니다.', answer: '5', kind: 'number', answerUnit: 'km' },
+      { id: 'c-distance-5', prefix: '분수대에서 학교까지의 거리는 약 ', suffix: '입니다.', answer: '3', kind: 'number', answerUnit: 'km' },
     ],
   },
   {
@@ -4316,9 +4322,11 @@ const DISTANCE_WORKSHEET_PROBLEM_SETS: DistanceWorksheetProblemSetData[] = [
       { id: 'school-d', label: '학교', dotIndex: 5, row: 'top', accent: '#bfdbfe', icon: 'school' },
     ],
     prompts: [
-      { id: 'd-distance', prefix: '은행에서 학교까지의 거리는 약 ', suffix: '입니다.', answer: '3', kind: 'number', answerUnit: 'km' },
-      { id: 'd-place', prefix: '공원에서 ', suffix: '까지의 거리는 약 4 km입니다.', answer: '학교', kind: 'place' },
-      { id: 'd-condition', prefix: '서점에서 거리가 약 4 km 떨어진 곳은 ', suffix: '입니다.', answer: '분수대', kind: 'place' },
+      { id: 'd-distance-1', prefix: '은행에서 학교까지의 거리는 약 ', suffix: '입니다.', answer: '3', kind: 'number', answerUnit: 'km' },
+      { id: 'd-distance-2', prefix: '서점에서 은행까지의 거리는 약 ', suffix: '입니다.', answer: '2', kind: 'number', answerUnit: 'km' },
+      { id: 'd-distance-3', prefix: '공원에서 병원까지의 거리는 약 ', suffix: '입니다.', answer: '2', kind: 'number', answerUnit: 'km' },
+      { id: 'd-distance-4', prefix: '병원에서 학교까지의 거리는 약 ', suffix: '입니다.', answer: '2', kind: 'number', answerUnit: 'km' },
+      { id: 'd-distance-5', prefix: '서점에서 학교까지의 거리는 약 ', suffix: '입니다.', answer: '5', kind: 'number', answerUnit: 'km' },
     ],
   },
   {
@@ -4338,9 +4346,11 @@ const DISTANCE_WORKSHEET_PROBLEM_SETS: DistanceWorksheetProblemSetData[] = [
       { id: 'school-e', label: '학교', dotIndex: 7, row: 'top', accent: '#bfdbfe', icon: 'school' },
     ],
     prompts: [
-      { id: 'e-distance', prefix: '버스터미널에서 학교까지의 거리는 약 ', suffix: '입니다.', answer: '4', kind: 'number', answerUnit: 'km' },
-      { id: 'e-place', prefix: '도서관에서 ', suffix: '까지의 거리는 약 5 km입니다.', answer: '시장', kind: 'place' },
-      { id: 'e-condition', prefix: '마트에서 거리가 약 6 km 떨어진 곳은 ', suffix: '입니다.', answer: '학교', kind: 'place' },
+      { id: 'e-distance-1', prefix: '버스터미널에서 학교까지의 거리는 약 ', suffix: '입니다.', answer: '4', kind: 'number', answerUnit: 'km' },
+      { id: 'e-distance-2', prefix: '도서관에서 공원까지의 거리는 약 ', suffix: '입니다.', answer: '2', kind: 'number', answerUnit: 'km' },
+      { id: 'e-distance-3', prefix: '마트에서 병원까지의 거리는 약 ', suffix: '입니다.', answer: '3', kind: 'number', answerUnit: 'km' },
+      { id: 'e-distance-4', prefix: '공원에서 은행까지의 거리는 약 ', suffix: '입니다.', answer: '4', kind: 'number', answerUnit: 'km' },
+      { id: 'e-distance-5', prefix: '시장에서 학교까지의 거리는 약 ', suffix: '입니다.', answer: '2', kind: 'number', answerUnit: 'km' },
     ],
   },
   {
@@ -4359,9 +4369,11 @@ const DISTANCE_WORKSHEET_PROBLEM_SETS: DistanceWorksheetProblemSetData[] = [
       { id: 'school-f', label: '학교', dotIndex: 6, row: 'top', accent: '#bfdbfe', icon: 'school' },
     ],
     prompts: [
-      { id: 'f-distance', prefix: '버스터미널에서 학교까지의 거리는 약 ', suffix: '입니다.', answer: '4', kind: 'number', answerUnit: 'km' },
-      { id: 'f-place', prefix: '도서관에서 ', suffix: '까지의 거리는 약 6 km입니다.', answer: '학교', kind: 'place' },
-      { id: 'f-condition', prefix: '시장에서 거리가 약 2 km 떨어진 곳은 ', suffix: '입니다.', answer: '은행', kind: 'place' },
+      { id: 'f-distance-1', prefix: '버스터미널에서 학교까지의 거리는 약 ', suffix: '입니다.', answer: '4', kind: 'number', answerUnit: 'km' },
+      { id: 'f-distance-2', prefix: '도서관에서 시장까지의 거리는 약 ', suffix: '입니다.', answer: '3', kind: 'number', answerUnit: 'km' },
+      { id: 'f-distance-3', prefix: '공원에서 병원까지의 거리는 약 ', suffix: '입니다.', answer: '3', kind: 'number', answerUnit: 'km' },
+      { id: 'f-distance-4', prefix: '버스터미널에서 은행까지의 거리는 약 ', suffix: '입니다.', answer: '3', kind: 'number', answerUnit: 'km' },
+      { id: 'f-distance-5', prefix: '병원에서 학교까지의 거리는 약 ', suffix: '입니다.', answer: '2', kind: 'number', answerUnit: 'km' },
     ],
   },
   {
@@ -4381,9 +4393,11 @@ const DISTANCE_WORKSHEET_PROBLEM_SETS: DistanceWorksheetProblemSetData[] = [
       { id: 'station-g', label: '버스터미널', dotIndex: 7, row: 'bottom', accent: '#38bdf8', icon: 'station' },
     ],
     prompts: [
-      { id: 'g-distance', prefix: '공원에서 버스터미널까지의 거리는 약 ', suffix: '입니다.', answer: '4', kind: 'number', answerUnit: 'km' },
-      { id: 'g-place', prefix: '서점에서 ', suffix: '까지의 거리는 약 6 km입니다.', answer: '마트', kind: 'place' },
-      { id: 'g-condition', prefix: '분수대에서 거리가 약 4 km 떨어진 곳은 ', suffix: '입니다.', answer: '은행', kind: 'place' },
+      { id: 'g-distance-1', prefix: '공원에서 버스터미널까지의 거리는 약 ', suffix: '입니다.', answer: '4', kind: 'number', answerUnit: 'km' },
+      { id: 'g-distance-2', prefix: '서점에서 학교까지의 거리는 약 ', suffix: '입니다.', answer: '2', kind: 'number', answerUnit: 'km' },
+      { id: 'g-distance-3', prefix: '분수대에서 병원까지의 거리는 약 ', suffix: '입니다.', answer: '3', kind: 'number', answerUnit: 'km' },
+      { id: 'g-distance-4', prefix: '학교에서 은행까지의 거리는 약 ', suffix: '입니다.', answer: '3', kind: 'number', answerUnit: 'km' },
+      { id: 'g-distance-5', prefix: '병원에서 버스터미널까지의 거리는 약 ', suffix: '입니다.', answer: '3', kind: 'number', answerUnit: 'km' },
     ],
   },
 ];
@@ -4626,9 +4640,10 @@ const UNIT3_PROBLEM_FACTORIES: Record<number, Array<() => Problem>> = {
     },
   ],
   7: [
-    ...DISTANCE_STAGE7_SCENARIOS.map((config) => () => createDistanceMapScenario(config)),
     ...DISTANCE_WORKSHEET_PROBLEM_SETS.flatMap(({ prompts, ...worksheetBase }) => (
-      prompts.map((prompt) => () => createDistanceWorksheetProblem({ ...worksheetBase, prompt }))
+      prompts
+        .filter((prompt) => prompt.kind === 'number')
+        .map((prompt) => () => createDistanceWorksheetProblem({ ...worksheetBase, prompt }))
     )),
   ],
   8: [
@@ -9406,27 +9421,39 @@ function renderDistanceWorksheetMapBackdrop(variant: DistanceWorksheetMapVariant
 
 function DistanceWorksheetProblemCard({
   distanceWorksheet,
+  condensed = false,
 }: {
   distanceWorksheet: DistanceWorksheetProblemData;
+  condensed?: boolean;
 }) {
   const viewBoxWidth = 760;
   const viewBoxHeight = 360;
   const leftX = 90;
   const rightX = 670;
   const roadY = 205;
+  const labelBoxHeight = condensed ? 26 : 28;
+  const labelFontSize = condensed ? 16 : 18;
+  const labelWidthMultiplier = condensed ? 18 : 20;
+  const referenceFontSize = condensed ? 22 : 26;
   const dotXs = Array.from({ length: distanceWorksheet.dotCount }, (_, index) => (
     leftX + ((rightX - leftX) * index) / Math.max(distanceWorksheet.dotCount - 1, 1)
   ));
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-[58rem] flex-col overflow-hidden rounded-[2rem] border-4 border-slate-200 bg-white shadow-sm">
-      <div className="border-b border-slate-200 bg-slate-50/90 px-4 py-3 sm:px-6">
-        <p className="break-keep text-base font-black text-slate-900 sm:text-[1.15rem]">
+    <div className={`mx-auto flex w-full flex-col overflow-visible rounded-[2rem] border-4 border-slate-200 bg-white shadow-sm ${
+      condensed ? 'max-w-[52rem]' : 'max-w-[58rem]'
+    }`}>
+      <div className={`border-b border-slate-200 bg-slate-50/90 ${
+        condensed ? 'px-3 py-2.5 sm:px-4 sm:py-3' : 'px-4 py-3 sm:px-6'
+      }`}>
+        <p className={`break-keep font-black text-slate-900 ${
+          condensed ? 'text-[0.95rem] sm:text-[1.02rem]' : 'text-base sm:text-[1.15rem]'
+        }`}>
           {distanceWorksheet.instruction}
         </p>
       </div>
 
-      <div className="px-3 pt-3 sm:px-5 sm:pt-5">
+      <div className={condensed ? 'px-2.5 pt-2.5 sm:px-4 sm:pt-3.5' : 'px-3 pt-3 sm:px-5 sm:pt-5'}>
         <svg viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`} className="block w-full" role="img" aria-label="거리 어림 학습지 그림">
           {renderDistanceWorksheetMapBackdrop(distanceWorksheet.mapVariant, roadY)}
 
@@ -9435,20 +9462,20 @@ function DistanceWorksheetProblemCard({
             const iconY = landmark.row === 'top' ? 126 : 248;
             const labelY = landmark.row === 'top' ? 50 : 286;
             const textY = landmark.row === 'top' ? 70 : 306;
-            const labelWidth = Math.min(134, Math.max(76, landmark.label.length * 20));
+            const labelWidth = Math.min(condensed ? 126 : 134, Math.max(72, landmark.label.length * labelWidthMultiplier));
             return (
               <g key={landmark.id}>
                 <rect
                   x={x - labelWidth / 2}
                   y={labelY}
                   width={labelWidth}
-                  height="28"
+                  height={labelBoxHeight}
                   rx="11"
                   fill="#e0f2fe"
                   stroke="#7dd3fc"
                   strokeWidth="2"
                 />
-                <text x={x} y={textY} textAnchor="middle" fontSize="18" fontWeight="900" fill="#1e3a8a">
+                <text x={x} y={textY} textAnchor="middle" fontSize={labelFontSize} fontWeight="900" fill="#1e3a8a">
                   {landmark.label}
                 </text>
                 {renderDistanceWorksheetLandmarkIcon(landmark, x, iconY)}
@@ -9468,7 +9495,7 @@ function DistanceWorksheetProblemCard({
                 <line x1={fromX} y1={182} x2={toX} y2={182} stroke="#ef4444" strokeWidth="4" strokeLinecap="round" />
                 <line x1={fromX} y1={182} x2={fromX} y2={roadY} stroke="#ef4444" strokeWidth="3" />
                 <line x1={toX} y1={182} x2={toX} y2={roadY} stroke="#ef4444" strokeWidth="3" />
-                <text x={(fromX + toX) / 2} y={172} textAnchor="middle" fontSize="26" fontWeight="900" fill="#ca8a04">
+                <text x={(fromX + toX) / 2} y={172} textAnchor="middle" fontSize={referenceFontSize} fontWeight="900" fill="#ca8a04">
                   {distanceWorksheet.reference.label}
                 </text>
               </g>
@@ -9477,13 +9504,23 @@ function DistanceWorksheetProblemCard({
         </svg>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-hidden px-4 py-4 sm:px-6 sm:py-5">
+      <div className={`shrink-0 ${
+        condensed ? 'px-3 py-3 sm:px-4 sm:py-4' : 'px-4 py-4 sm:px-6 sm:py-5'
+      }`}>
         <div className="flex items-start gap-3">
           <span className="mt-[0.55rem] h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-500" aria-hidden="true" />
-          <p className="min-w-0 break-keep text-[1rem] font-black leading-[1.75] text-slate-900 sm:text-[1.2rem]">
+          <p className={`min-w-0 break-keep font-black text-slate-900 ${
+            condensed ? 'text-[0.94rem] leading-[1.68] sm:text-[1.08rem]' : 'text-[1rem] leading-[1.75] sm:text-[1.2rem]'
+          }`}>
             <span>{distanceWorksheet.prompt.prefix}</span>
-            <span className={`mx-2 inline-flex h-11 rounded-2xl border-2 border-slate-300 bg-white align-middle shadow-sm ${
-              distanceWorksheet.prompt.kind === 'number' ? 'w-20 sm:w-24' : 'w-28 sm:w-36'
+            <span className={`mx-2 inline-flex rounded-2xl border-2 border-slate-300 bg-white align-middle shadow-sm ${
+              condensed
+                ? distanceWorksheet.prompt.kind === 'number'
+                  ? 'h-10 w-[4.5rem] sm:w-20'
+                  : 'h-10 w-24 sm:w-32'
+                : distanceWorksheet.prompt.kind === 'number'
+                  ? 'h-11 w-20 sm:w-24'
+                  : 'h-11 w-28 sm:w-36'
             }`} aria-hidden="true" />
             <span>{distanceWorksheet.prompt.suffix}</span>
           </p>
@@ -10823,9 +10860,11 @@ export default function App() {
     ? 'grid min-h-0 flex-1 auto-rows-fr gap-2 sm:grid-cols-2 sm:gap-3'
     : `grid min-h-0 flex-1 ${isCompactBattleViewport ? 'gap-3' : 'gap-4'}`;
   const battleShellWidthClass = isCompactBattleViewport ? 'max-w-7xl' : 'max-w-[78rem]';
-  const battleShellResponsiveClass = isCompactBattleViewport
-    ? 'lg:h-[48rem] lg:max-h-[calc(100svh-3rem)] lg:gap-2 lg:p-3'
-    : 'lg:h-[47.5rem] lg:max-h-[calc(100svh-2.5rem)] lg:gap-4 lg:p-6';
+  const battleShellResponsiveClass = isShortViewport
+    ? 'lg:h-auto lg:max-h-none lg:gap-2 lg:p-3'
+    : isCompactBattleViewport
+      ? 'lg:h-[48rem] lg:max-h-[calc(100svh-3rem)] lg:gap-2 lg:p-3'
+      : 'lg:h-[47.5rem] lg:max-h-[calc(100svh-2.5rem)] lg:gap-4 lg:p-6';
   const battleSidebarResponsiveClass = isCompactBattleViewport
     ? 'lg:w-[27%] lg:p-2.5'
     : 'lg:w-[29.5%] lg:p-4';
@@ -10850,7 +10889,9 @@ export default function App() {
     }
 
     const syncViewportDensity = () => {
-      setIsShortViewport(window.innerWidth >= 1024 && window.innerHeight <= 820);
+      const viewportWidth = window.visualViewport?.width ?? window.innerWidth;
+      const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+      setIsShortViewport(viewportWidth >= 1024 && viewportHeight <= 820);
     };
 
     syncViewportDensity();
@@ -11580,7 +11621,9 @@ export default function App() {
     <div className={`flex min-h-[100svh] flex-col items-center overflow-x-hidden bg-slate-950 font-sans text-white ${
       isResultScreen
         ? 'justify-center overflow-y-hidden p-2 sm:p-3'
-        : 'justify-start overflow-y-auto p-3 sm:p-4 lg:justify-center lg:p-6'
+        : isShortViewport
+          ? 'justify-start overflow-y-auto p-3 sm:p-4 lg:p-4'
+          : 'justify-start overflow-y-auto p-3 sm:p-4 lg:justify-center lg:p-6'
     }`}>
       {gameState === 'start' && (
         <motion.div
@@ -12143,7 +12186,7 @@ export default function App() {
                 transition={{ duration: 0.4, ease: "easeOut" }} 
                 className={`flex min-h-0 flex-1 rounded-3xl ${isDenseNumberedStoryLayout ? 'border-4' : 'border-8'} border-slate-200 bg-white shadow-inner ${
                   problem.kind === 'distanceMap' || problem.kind === 'distanceWorksheet'
-                    ? 'flex flex-col overflow-hidden p-2 sm:p-3 lg:p-3'
+                    ? 'flex flex-col overflow-y-auto p-2 sm:p-3 lg:p-3'
                     : problem.kind === 'timeAddition' && isStoryTimeAdditionProblem
                       ? `flex flex-col justify-center ${isCompactBattleViewport ? 'overflow-hidden p-3 sm:p-4 lg:p-5' : 'overflow-y-auto p-4 sm:p-6 lg:p-8'}`
                     : problem.kind === 'timeAddition' && isVerticalTimeAdditionProblem
@@ -12162,6 +12205,7 @@ export default function App() {
                 {problem.kind === 'distanceWorksheet' && problem.distanceWorksheet ? (
                     <DistanceWorksheetProblemCard
                       distanceWorksheet={problem.distanceWorksheet}
+                      condensed={isCompactBattleViewport}
                     />
                 ) : problem.kind === 'distanceMap' && problem.distanceMap ? (
                     <DistanceMapProblemCard
