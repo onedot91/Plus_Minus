@@ -10261,7 +10261,7 @@ export default function App() {
   const unit3Level12PreviousTemplateOrderRef = useRef<Level12TemplateId[]>([]);
   const developerProblemHistoryRef = useRef<DeveloperProblemSnapshot[]>([]);
   const developerProblemHistoryIndexRef = useRef(-1);
-  const isDeveloperShortcutEnabled = import.meta.env.DEV;
+  const isDeveloperShortcutEnabled = true;
   const [isDeveloperMode, setIsDeveloperMode] = useState(false);
   const [gameState, setGameState] = useState<GameState>('start');
   const [playerName, setPlayerName] = useState(DEFAULT_PLAYER_NAME);
