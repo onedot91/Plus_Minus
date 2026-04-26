@@ -23,6 +23,15 @@ import stage9DefeatSceneImage from './assets/stage9-defeat-scene-cutout.png';
 import playerAttackImage from './assets/player-attack.png';
 import playerDefaultImage from './assets/player-default.png';
 import playerHitImage from './assets/player-hit.png';
+import playerChampionAttackImage from './assets/player-champion-attack.png';
+import playerChampionDefaultImage from './assets/player-champion-default.png';
+import playerChampionHitImage from './assets/player-champion-hit.png';
+import playerWizardAttackImage from './assets/player-wizard-attack.png';
+import playerWizardDefaultImage from './assets/player-wizard-default.png';
+import playerWizardHitImage from './assets/player-wizard-hit.png';
+import playerCapeAttackImage from './assets/player-cape-attack.png';
+import playerCapeDefaultImage from './assets/player-cape-default.png';
+import playerCapeHitImage from './assets/player-cape-hit.png';
 import opponentLevel1AttackImage from './assets/opponent-level1-attack.png';
 import opponentLevel1ChurusigiAttackImage from './assets/opponent-level1-churusigi-attack-cutout.png';
 import opponentLevel1DefaultImage from './assets/opponent-level1-default.png';
@@ -377,6 +386,16 @@ interface CharacterSpriteSet {
   attack: string;
   default: string;
   hit: string;
+}
+
+type PlayerSkinId = 'default' | 'champion' | 'wizard' | 'cape';
+
+interface PlayerSkinConfig {
+  id: PlayerSkinId;
+  label: string;
+  badge: string;
+  spriteSet: CharacterSpriteSet;
+  isReward?: boolean;
 }
 
 type Level1OpponentId = 'jeongichu' | 'churusigi';
@@ -1518,6 +1537,126 @@ const VICTORY_SPARKLES = [
   { left: '10%', top: '44%', size: 24, delay: 0.55, duration: 2.9, className: 'text-rose-200/75' },
   { left: '86%', top: '42%', size: 30, delay: 1.1, duration: 3.1, className: 'text-cyan-200/75' },
 ] as const;
+const CHAMPION_GOMA_UNLOCK_STORAGE_KEY = 'plusMinusChampionGomaUnlocked';
+const PLAYER_SKIN_SELECTION_STORAGE_KEY = 'plusMinusSelectedGomaSkin';
+const DEFAULT_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerAttackImage,
+  default: playerDefaultImage,
+  hit: playerHitImage,
+};
+const CHAMPION_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerChampionAttackImage,
+  default: playerChampionDefaultImage,
+  hit: playerChampionHitImage,
+};
+const WIZARD_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerWizardAttackImage,
+  default: playerWizardDefaultImage,
+  hit: playerWizardHitImage,
+};
+const CAPE_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerCapeAttackImage,
+  default: playerCapeDefaultImage,
+  hit: playerCapeHitImage,
+};
+const PLAYER_SKINS: PlayerSkinConfig[] = [
+  {
+    id: 'default',
+    label: '기본 고마',
+    badge: '기본',
+    spriteSet: DEFAULT_PLAYER_SPRITES,
+  },
+  {
+    id: 'champion',
+    label: '별 왕관 고마',
+    badge: '클리어 보상',
+    spriteSet: CHAMPION_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'wizard',
+    label: '달빛 마법사',
+    badge: '클리어 보상',
+    spriteSet: WIZARD_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'cape',
+    label: '용감한 망토',
+    badge: '클리어 보상',
+    spriteSet: CAPE_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+];
+const PLAYER_SKIN_IDS = new Set<PlayerSkinId>(PLAYER_SKINS.map((skin) => skin.id));
+function isPlayerSkinUnlocked(skin: PlayerSkinConfig, hasChampionGoma: boolean) {
+  return !skin.isReward || hasChampionGoma;
+}
+
+function normalizeSelectedPlayerSkinId(skinId: string | null, hasChampionGoma: boolean): PlayerSkinId {
+  if (!skinId) {
+    return hasChampionGoma ? 'champion' : 'default';
+  }
+
+  if (skinId && PLAYER_SKIN_IDS.has(skinId as PlayerSkinId)) {
+    const playerSkinId = skinId as PlayerSkinId;
+    const matchingSkin = PLAYER_SKINS.find((skin) => skin.id === playerSkinId);
+    if (matchingSkin && isPlayerSkinUnlocked(matchingSkin, hasChampionGoma)) {
+      return playerSkinId;
+    }
+  }
+
+  return 'default';
+}
+
+function readChampionGomaUnlock() {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  try {
+    return window.localStorage.getItem(CHAMPION_GOMA_UNLOCK_STORAGE_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+function readSelectedPlayerSkinId(hasChampionGoma: boolean): PlayerSkinId {
+  if (typeof window === 'undefined') {
+    return 'default';
+  }
+
+  try {
+    return normalizeSelectedPlayerSkinId(window.localStorage.getItem(PLAYER_SKIN_SELECTION_STORAGE_KEY), hasChampionGoma);
+  } catch {
+    return 'default';
+  }
+}
+
+function saveChampionGomaUnlock() {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(CHAMPION_GOMA_UNLOCK_STORAGE_KEY, 'true');
+  } catch {
+    // The in-memory unlock still applies for the current play session.
+  }
+}
+
+function saveSelectedPlayerSkinId(skinId: PlayerSkinId) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(PLAYER_SKIN_SELECTION_STORAGE_KEY, skinId);
+  } catch {
+    // The in-memory selection still applies for the current play session.
+  }
+}
+
 const DEFAULT_PLAYER_NAME = '나';
 const BATTLE_DIFFICULTY_ORDER: BattleDifficulty[] = ['easy', 'normal', 'hard'];
 const BATTLE_DIFFICULTY_CONFIG: Record<BattleDifficulty, BattleDifficultyConfig> = {
@@ -10281,6 +10420,8 @@ export default function App() {
   const [showMsg, setShowMsg] = useState(true);
   const [problemCoachmark, setProblemCoachmark] = useState<string | null>(null);
   const [battleDifficulty, setBattleDifficulty] = useState<BattleDifficulty>('normal');
+  const [hasChampionGoma, setHasChampionGoma] = useState(readChampionGomaUnlock);
+  const [selectedPlayerSkinId, setSelectedPlayerSkinId] = useState<PlayerSkinId>(() => readSelectedPlayerSkinId(hasChampionGoma));
   const [selectedLearningUnitId, setSelectedLearningUnitId] = useState<LearningUnitId | null>(null);
   const activeLearningUnitId = selectedLearningUnitId ?? DEFAULT_LEARNING_UNIT_ID;
   const [isEstimation, setIsEstimation] = useState(false);
@@ -10330,6 +10471,14 @@ export default function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const normalizedSkinId = normalizeSelectedPlayerSkinId(selectedPlayerSkinId, hasChampionGoma);
+    if (normalizedSkinId !== selectedPlayerSkinId) {
+      setSelectedPlayerSkinId(normalizedSkinId);
+      saveSelectedPlayerSkinId(normalizedSkinId);
+    }
+  }, [hasChampionGoma, selectedPlayerSkinId]);
+
   const ensureAudioEngine = () => {
     if (
       !audioEngineRef.current ||
@@ -10370,7 +10519,28 @@ export default function App() {
     window.setTimeout(() => playSound(effectName, options), delayMs);
   };
 
+  const selectPlayerSkin = (skinId: PlayerSkinId) => {
+    const nextSkin = PLAYER_SKINS.find((skin) => skin.id === skinId);
+    if (!nextSkin || !isPlayerSkinUnlocked(nextSkin, hasChampionGoma)) {
+      return;
+    }
+
+    setSelectedPlayerSkinId(skinId);
+    saveSelectedPlayerSkinId(skinId);
+  };
+
+  const unlockChampionGoma = () => {
+    if (!hasChampionGoma) {
+      setSelectedPlayerSkinId('champion');
+      saveSelectedPlayerSkinId('champion');
+    }
+
+    setHasChampionGoma(true);
+    saveChampionGomaUnlock();
+  };
+
   const triggerBattleVictory = (detune: number) => {
+    unlockChampionGoma();
     setGameState('win');
     playSound('win', { gainMultiplier: 1.14, detune });
     queueSound('levelUp', 240, {
@@ -10571,11 +10741,14 @@ export default function App() {
   const [isOpponentHit, setIsOpponentHit] = useState(false);
   const [isPlayerHit, setIsPlayerHit] = useState(false);
   const unitMenuRef = useRef<HTMLDivElement | null>(null);
+  const selectedPlayerSkin = PLAYER_SKINS.find((skin) => skin.id === selectedPlayerSkinId) ?? PLAYER_SKINS[0];
+  const playerSpriteSet = selectedPlayerSkin.spriteSet;
+  const availablePlayerSkins = PLAYER_SKINS.filter((skin) => isPlayerSkinUnlocked(skin, hasChampionGoma));
   const playerCharacterImage = isPlayerHit
-    ? playerHitImage
+    ? playerSpriteSet.hit
     : isAttacking
-      ? playerAttackImage
-      : playerDefaultImage;
+      ? playerSpriteSet.attack
+      : playerSpriteSet.default;
   const opponentSpriteSet = getOpponentSpriteSetForLevel(activeLearningUnitId, level, specialOpponentSelections);
   const opponentCharacterImage = opponentSpriteSet
     ? isOpponentHit
@@ -11878,6 +12051,58 @@ export default function App() {
                           </button>
                         );
                       })}
+                    </div>
+
+                    <div className="mt-5">
+                      <div className="mb-3 flex items-center justify-between gap-3">
+                        <p className="text-sm font-black tracking-[0.18em] text-emerald-200">고마 스킨</p>
+                        <span className="shrink-0 rounded-full border border-slate-500/70 bg-slate-950/35 px-3 py-1 text-xs font-black text-slate-200">
+                          {hasChampionGoma ? `${availablePlayerSkins.length}개 해금` : '클리어 후 해금'}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                        {PLAYER_SKINS.map((skin) => {
+                          const isSkinUnlocked = isPlayerSkinUnlocked(skin, hasChampionGoma);
+                          const isSelectedSkin = selectedPlayerSkinId === skin.id;
+
+                          return (
+                            <button
+                              key={skin.id}
+                              type="button"
+                              disabled={!isSkinUnlocked}
+                              onPointerDown={isSkinUnlocked ? warmAudio : undefined}
+                              onClick={() => selectPlayerSkin(skin.id)}
+                              className={`relative flex min-h-[9.5rem] flex-col items-center justify-between overflow-hidden rounded-[1.15rem] border px-3 py-3 text-center transition duration-300 ${
+                                isSelectedSkin
+                                  ? 'border-emerald-200/70 bg-emerald-400/18 text-white shadow-[0_16px_34px_rgba(16,185,129,0.2),inset_0_1px_0_rgba(255,255,255,0.12)]'
+                                  : isSkinUnlocked
+                                    ? 'border-slate-600/90 bg-slate-950/42 text-slate-200 hover:-translate-y-0.5 hover:border-cyan-200/55 hover:bg-slate-900/78'
+                                    : 'cursor-not-allowed border-slate-700/80 bg-slate-950/26 text-slate-500 opacity-70'
+                              }`}
+                            >
+                              <span className="flex h-20 w-full items-center justify-center">
+                                <img
+                                  src={skin.spriteSet.default}
+                                  alt={`${skin.label} 스킨`}
+                                  className={`h-full w-auto object-contain drop-shadow-[0_12px_18px_rgba(2,8,23,0.38)] ${isSkinUnlocked ? '' : 'grayscale'}`}
+                                  draggable={false}
+                                />
+                              </span>
+                              <span className="mt-2 w-full truncate text-sm font-black">{skin.label}</span>
+                              <span className={`mt-1 rounded-full px-2 py-0.5 text-[10px] font-black ${
+                                isSkinUnlocked ? 'bg-slate-800/90 text-emerald-100' : 'bg-slate-800/60 text-slate-500'
+                              }`}>
+                                {isSkinUnlocked ? skin.badge : '잠김'}
+                              </span>
+                              {isSelectedSkin && (
+                                <span className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-emerald-300 text-slate-950 shadow-[0_8px_18px_rgba(16,185,129,0.24)]">
+                                  <Check className="h-4 w-4" />
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
 
                     <button
