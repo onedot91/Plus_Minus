@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useEffectEvent } from 'react';
-import { Sword, Heart, RotateCcw, Play, Sparkles, Star, ChevronDown, Check, History } from 'lucide-react';
+import { Sword, Heart, RotateCcw, Play, Sparkles, Star, ChevronDown, Check, History, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { VisualCalculator, type VisualControlSound } from './components/VisualCalculator';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -32,6 +32,39 @@ import playerWizardHitImage from './assets/player-wizard-hit.png';
 import playerCapeAttackImage from './assets/player-cape-attack.png';
 import playerCapeDefaultImage from './assets/player-cape-default.png';
 import playerCapeHitImage from './assets/player-cape-hit.png';
+import playerCatpajamaAttackImage from './assets/player-catpajama-attack.png';
+import playerCatpajamaDefaultImage from './assets/player-catpajama-default.png';
+import playerCatpajamaHitImage from './assets/player-catpajama-hit.png';
+import playerChefAttackImage from './assets/player-chef-attack.png';
+import playerChefDefaultImage from './assets/player-chef-default.png';
+import playerChefHitImage from './assets/player-chef-hit.png';
+import playerDetectiveAttackImage from './assets/player-detective-attack.png';
+import playerDetectiveDefaultImage from './assets/player-detective-default.png';
+import playerDetectiveHitImage from './assets/player-detective-hit.png';
+import playerFairyAttackImage from './assets/player-fairy-attack.png';
+import playerFairyDefaultImage from './assets/player-fairy-default.png';
+import playerFairyHitImage from './assets/player-fairy-hit.png';
+import playerFirefighterAttackImage from './assets/player-firefighter-attack.png';
+import playerFirefighterDefaultImage from './assets/player-firefighter-default.png';
+import playerFirefighterHitImage from './assets/player-firefighter-hit.png';
+import playerHeartwizardAttackImage from './assets/player-heartwizard-attack.png';
+import playerHeartwizardDefaultImage from './assets/player-heartwizard-default.png';
+import playerHeartwizardHitImage from './assets/player-heartwizard-hit.png';
+import playerKnightAttackImage from './assets/player-knight-attack.png';
+import playerKnightDefaultImage from './assets/player-knight-default.png';
+import playerKnightHitImage from './assets/player-knight-hit.png';
+import playerPatissierAttackImage from './assets/player-patissier-attack.png';
+import playerPatissierDefaultImage from './assets/player-patissier-default.png';
+import playerPatissierHitImage from './assets/player-patissier-hit.png';
+import playerPirateAttackImage from './assets/player-pirate-attack.png';
+import playerPirateDefaultImage from './assets/player-pirate-default.png';
+import playerPirateHitImage from './assets/player-pirate-hit.png';
+import playerRainbowartistAttackImage from './assets/player-rainbowartist-attack.png';
+import playerRainbowartistDefaultImage from './assets/player-rainbowartist-default.png';
+import playerRainbowartistHitImage from './assets/player-rainbowartist-hit.png';
+import playerSpaceAttackImage from './assets/player-space-attack.png';
+import playerSpaceDefaultImage from './assets/player-space-default.png';
+import playerSpaceHitImage from './assets/player-space-hit.png';
 import opponentLevel1AttackImage from './assets/opponent-level1-attack.png';
 import opponentLevel1ChurusigiAttackImage from './assets/opponent-level1-churusigi-attack-cutout.png';
 import opponentLevel1DefaultImage from './assets/opponent-level1-default.png';
@@ -408,7 +441,7 @@ interface CharacterSpriteSet {
   hit: string;
 }
 
-type PlayerSkinId = 'default' | 'champion' | 'wizard' | 'cape';
+type PlayerSkinId = 'default' | 'champion' | 'wizard' | 'cape' | 'detective' | 'knight' | 'space' | 'chef' | 'pirate' | 'firefighter' | 'fairy' | 'patissier' | 'catpajama' | 'rainbowartist' | 'heartwizard';
 
 interface PlayerSkinConfig {
   id: PlayerSkinId;
@@ -632,6 +665,9 @@ type SoundEffectName =
   | 'correct'
   | 'wrong'
   | 'win'
+  | 'rouletteStart'
+  | 'rouletteTick'
+  | 'rouletteWin'
   | 'lose'
   | 'start'
   | 'alert'
@@ -694,6 +730,8 @@ interface SoundPlaybackOptions {
 }
 
 type AnimationSoundPlayer = (effectName: SoundEffectName, options?: SoundPlaybackOptions) => void;
+
+type RewardRoulettePhase = 'spinning' | 'revealed';
 
 interface AudioEngine {
   version: number;
@@ -871,6 +909,33 @@ const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
       { kind: 'oscillator', wave: 'sine', startAt: 0.33, frequency: 2093, duration: 0.16, gain: 0.009, attack: 0.0015, release: 0.1, delaySend: 0.03, reverbSend: 0.18, pan: 0.2 },
       { kind: 'oscillator', wave: 'triangle', startAt: 0.52, frequency: 1318.5, glideTo: 1567.98, duration: 0.22, gain: 0.024, attack: 0.0025, release: 0.14, delaySend: 0.07, reverbSend: 0.16, pan: 0.05 },
       { kind: 'oscillator', wave: 'sine', startAt: 0.56, frequency: 2637.02, duration: 0.18, gain: 0.007, attack: 0.001, release: 0.12, reverbSend: 0.2, pan: 0.22 },
+    ],
+  },
+  rouletteStart: {
+    output: 0.72,
+    layers: [
+      { kind: 'noise', duration: 0.28, gain: 0.006, attack: 0.002, release: 0.18, filter: { type: 'highpass', frequency: 2400, sweepTo: 7800, q: 0.8 }, reverbSend: 0.1, delaySend: 0.04 },
+      { kind: 'oscillator', wave: 'sawtooth', frequency: 196, glideTo: 523.25, duration: 0.42, gain: 0.016, attack: 0.004, release: 0.24, filter: { type: 'lowpass', frequency: 2200, sweepTo: 3600, q: 0.7 }, pan: -0.08, delaySend: 0.05 },
+      { kind: 'oscillator', wave: 'triangle', startAt: 0.08, frequency: 392, glideTo: 783.99, duration: 0.34, gain: 0.013, attack: 0.003, release: 0.2, reverbSend: 0.08, pan: 0.1 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.2, frequency: 1046.5, duration: 0.1, gain: 0.006, attack: 0.002, release: 0.07, reverbSend: 0.12, pan: 0.18 },
+    ],
+  },
+  rouletteTick: {
+    output: 0.5,
+    layers: [
+      { kind: 'noise', duration: 0.018, gain: 0.0024, attack: 0.001, release: 0.012, filter: { type: 'highpass', frequency: 3600, sweepTo: 8400, q: 0.8 }, reverbSend: 0.02 },
+      { kind: 'oscillator', wave: 'square', frequency: 1180, glideTo: 840, duration: 0.034, gain: 0.006, attack: 0.001, release: 0.022, filter: { type: 'lowpass', frequency: 2800, sweepTo: 1600, q: 0.8 }, panJitter: 0.08 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.006, frequency: 1760, duration: 0.035, gain: 0.0035, attack: 0.001, release: 0.024, reverbSend: 0.03 },
+    ],
+  },
+  rouletteWin: {
+    output: 0.9,
+    layers: [
+      { kind: 'noise', duration: 0.36, gain: 0.008, attack: 0.002, release: 0.24, filter: { type: 'highpass', frequency: 3200, sweepTo: 9200, q: 0.8 }, reverbSend: 0.16, delaySend: 0.06 },
+      { kind: 'oscillator', wave: 'triangle', frequency: 523.25, duration: 0.12, gain: 0.024, attack: 0.002, release: 0.08, reverbSend: 0.1, pan: -0.12 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.1, frequency: 783.99, duration: 0.14, gain: 0.026, attack: 0.002, release: 0.09, delaySend: 0.04, reverbSend: 0.12, pan: 0.1 },
+      { kind: 'oscillator', wave: 'triangle', startAt: 0.22, frequency: 1046.5, duration: 0.2, gain: 0.028, attack: 0.002, release: 0.13, delaySend: 0.06, reverbSend: 0.15 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.3, frequency: 2093, duration: 0.16, gain: 0.008, attack: 0.001, release: 0.1, reverbSend: 0.18, pan: 0.18 },
     ],
   },
 };
@@ -1577,6 +1642,7 @@ const VICTORY_SPARKLES = [
 ] as const;
 const CHAMPION_GOMA_UNLOCK_STORAGE_KEY = 'plusMinusChampionGomaUnlocked';
 const PLAYER_SKIN_SELECTION_STORAGE_KEY = 'plusMinusSelectedGomaSkin';
+const PLAYER_SKIN_UNLOCKS_STORAGE_KEY = 'plusMinusUnlockedGomaSkins';
 const DEFAULT_PLAYER_SPRITES: CharacterSpriteSet = {
   attack: playerAttackImage,
   default: playerDefaultImage,
@@ -1597,6 +1663,61 @@ const CAPE_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
   default: playerCapeDefaultImage,
   hit: playerCapeHitImage,
 };
+const CATPAJAMA_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerCatpajamaAttackImage,
+  default: playerCatpajamaDefaultImage,
+  hit: playerCatpajamaHitImage,
+};
+const CHEF_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerChefAttackImage,
+  default: playerChefDefaultImage,
+  hit: playerChefHitImage,
+};
+const DETECTIVE_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerDetectiveAttackImage,
+  default: playerDetectiveDefaultImage,
+  hit: playerDetectiveHitImage,
+};
+const FAIRY_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerFairyAttackImage,
+  default: playerFairyDefaultImage,
+  hit: playerFairyHitImage,
+};
+const FIREFIGHTER_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerFirefighterAttackImage,
+  default: playerFirefighterDefaultImage,
+  hit: playerFirefighterHitImage,
+};
+const HEARTWIZARD_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerHeartwizardAttackImage,
+  default: playerHeartwizardDefaultImage,
+  hit: playerHeartwizardHitImage,
+};
+const KNIGHT_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerKnightAttackImage,
+  default: playerKnightDefaultImage,
+  hit: playerKnightHitImage,
+};
+const PATISSIER_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerPatissierAttackImage,
+  default: playerPatissierDefaultImage,
+  hit: playerPatissierHitImage,
+};
+const PIRATE_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerPirateAttackImage,
+  default: playerPirateDefaultImage,
+  hit: playerPirateHitImage,
+};
+const RAINBOWARTIST_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerRainbowartistAttackImage,
+  default: playerRainbowartistDefaultImage,
+  hit: playerRainbowartistHitImage,
+};
+const SPACE_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerSpaceAttackImage,
+  default: playerSpaceDefaultImage,
+  hit: playerSpaceHitImage,
+};
 const PLAYER_SKINS: PlayerSkinConfig[] = [
   {
     id: 'default',
@@ -1607,39 +1728,117 @@ const PLAYER_SKINS: PlayerSkinConfig[] = [
   {
     id: 'champion',
     label: '별 왕관 고마',
-    badge: '클리어 보상',
+    badge: '랜덤 보상',
     spriteSet: CHAMPION_GOMA_PLAYER_SPRITES,
     isReward: true,
   },
   {
     id: 'wizard',
-    label: '달빛 마법사',
-    badge: '클리어 보상',
+    label: '달빛 마법사 고마',
+    badge: '랜덤 보상',
     spriteSet: WIZARD_GOMA_PLAYER_SPRITES,
     isReward: true,
   },
   {
     id: 'cape',
-    label: '용감한 망토',
-    badge: '클리어 보상',
+    label: '용감한 망토 고마',
+    badge: '랜덤 보상',
     spriteSet: CAPE_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'detective',
+    label: '탐정 고마',
+    badge: '랜덤 보상',
+    spriteSet: DETECTIVE_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'knight',
+    label: '기사 고마',
+    badge: '랜덤 보상',
+    spriteSet: KNIGHT_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'space',
+    label: '우주 고마',
+    badge: '랜덤 보상',
+    spriteSet: SPACE_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'chef',
+    label: '요리사 고마',
+    badge: '랜덤 보상',
+    spriteSet: CHEF_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'pirate',
+    label: '해적 고마',
+    badge: '랜덤 보상',
+    spriteSet: PIRATE_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'firefighter',
+    label: '소방관 고마',
+    badge: '랜덤 보상',
+    spriteSet: FIREFIGHTER_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'fairy',
+    label: '요정 고마',
+    badge: '랜덤 보상',
+    spriteSet: FAIRY_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'patissier',
+    label: '파티시에 고마',
+    badge: '랜덤 보상',
+    spriteSet: PATISSIER_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'catpajama',
+    label: '고양이 잠옷 고마',
+    badge: '랜덤 보상',
+    spriteSet: CATPAJAMA_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'rainbowartist',
+    label: '무지개 화가 고마',
+    badge: '랜덤 보상',
+    spriteSet: RAINBOWARTIST_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'heartwizard',
+    label: '하트 마법사 고마',
+    badge: '랜덤 보상',
+    spriteSet: HEARTWIZARD_GOMA_PLAYER_SPRITES,
     isReward: true,
   },
 ];
 const PLAYER_SKIN_IDS = new Set<PlayerSkinId>(PLAYER_SKINS.map((skin) => skin.id));
-function isPlayerSkinUnlocked(skin: PlayerSkinConfig, hasChampionGoma: boolean) {
-  return !skin.isReward || hasChampionGoma;
+const REWARD_PLAYER_SKINS = PLAYER_SKINS.filter((skin) => skin.isReward);
+function isPlayerSkinUnlocked(skin: PlayerSkinConfig, unlockedSkinIds: PlayerSkinId[]) {
+  return !skin.isReward || unlockedSkinIds.includes(skin.id);
 }
 
-function normalizeSelectedPlayerSkinId(skinId: string | null, hasChampionGoma: boolean): PlayerSkinId {
+function normalizeSelectedPlayerSkinId(skinId: string | null, unlockedSkinIds: PlayerSkinId[]): PlayerSkinId {
   if (!skinId) {
-    return hasChampionGoma ? 'champion' : 'default';
+    return unlockedSkinIds.includes('champion') ? 'champion' : 'default';
   }
 
   if (skinId && PLAYER_SKIN_IDS.has(skinId as PlayerSkinId)) {
     const playerSkinId = skinId as PlayerSkinId;
     const matchingSkin = PLAYER_SKINS.find((skin) => skin.id === playerSkinId);
-    if (matchingSkin && isPlayerSkinUnlocked(matchingSkin, hasChampionGoma)) {
+    if (matchingSkin && isPlayerSkinUnlocked(matchingSkin, unlockedSkinIds)) {
       return playerSkinId;
     }
   }
@@ -1659,13 +1858,68 @@ function readChampionGomaUnlock() {
   }
 }
 
-function readSelectedPlayerSkinId(hasChampionGoma: boolean): PlayerSkinId {
+function normalizeUnlockedPlayerSkinIds(skinIds: unknown, hasChampionGoma: boolean): PlayerSkinId[] {
+  const unlocks = new Set<PlayerSkinId>(['default']);
+  if (hasChampionGoma) {
+    unlocks.add('champion');
+  }
+
+  if (Array.isArray(skinIds)) {
+    skinIds.forEach((skinId) => {
+      if (typeof skinId === 'string' && PLAYER_SKIN_IDS.has(skinId as PlayerSkinId)) {
+        const playerSkinId = skinId as PlayerSkinId;
+        const skin = PLAYER_SKINS.find((item) => item.id === playerSkinId);
+        if (!skin?.isReward || REWARD_PLAYER_SKINS.some((rewardSkin) => rewardSkin.id === playerSkinId)) {
+          unlocks.add(playerSkinId);
+        }
+      }
+    });
+  }
+
+  return PLAYER_SKINS.filter((skin) => unlocks.has(skin.id)).map((skin) => skin.id);
+}
+
+function readUnlockedPlayerSkinIds(hasChampionGoma = readChampionGomaUnlock()): PlayerSkinId[] {
+  if (typeof window === 'undefined') {
+    return ['default'];
+  }
+
+  try {
+    const rawUnlocks = window.localStorage.getItem(PLAYER_SKIN_UNLOCKS_STORAGE_KEY);
+    return normalizeUnlockedPlayerSkinIds(rawUnlocks ? JSON.parse(rawUnlocks) : [], hasChampionGoma);
+  } catch {
+    return normalizeUnlockedPlayerSkinIds([], hasChampionGoma);
+  }
+}
+
+function saveUnlockedPlayerSkinIds(skinIds: PlayerSkinId[]) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(PLAYER_SKIN_UNLOCKS_STORAGE_KEY, JSON.stringify(skinIds));
+  } catch {
+    // The in-memory unlock still applies for the current play session.
+  }
+}
+
+function pickRandomLockedRewardSkin(unlockedSkinIds: PlayerSkinId[]) {
+  const lockedRewardSkins = REWARD_PLAYER_SKINS.filter((skin) => !unlockedSkinIds.includes(skin.id));
+  if (lockedRewardSkins.length === 0) {
+    return null;
+  }
+
+  return lockedRewardSkins[Math.floor(Math.random() * lockedRewardSkins.length)];
+}
+
+function readSelectedPlayerSkinId(unlockedSkinIds: PlayerSkinId[]): PlayerSkinId {
   if (typeof window === 'undefined') {
     return 'default';
   }
 
   try {
-    return normalizeSelectedPlayerSkinId(window.localStorage.getItem(PLAYER_SKIN_SELECTION_STORAGE_KEY), hasChampionGoma);
+    return normalizeSelectedPlayerSkinId(window.localStorage.getItem(PLAYER_SKIN_SELECTION_STORAGE_KEY), unlockedSkinIds);
   } catch {
     return 'default';
   }
@@ -10522,8 +10776,13 @@ export default function App() {
   const [showMsg, setShowMsg] = useState(true);
   const [problemCoachmark, setProblemCoachmark] = useState<string | null>(null);
   const [battleDifficulty, setBattleDifficulty] = useState<BattleDifficulty>('normal');
-  const [hasChampionGoma, setHasChampionGoma] = useState(readChampionGomaUnlock);
-  const [selectedPlayerSkinId, setSelectedPlayerSkinId] = useState<PlayerSkinId>(() => readSelectedPlayerSkinId(hasChampionGoma));
+  const [hasLegacyChampionGoma] = useState(readChampionGomaUnlock);
+  const [unlockedPlayerSkinIds, setUnlockedPlayerSkinIds] = useState<PlayerSkinId[]>(() => readUnlockedPlayerSkinIds(hasLegacyChampionGoma));
+  const [selectedPlayerSkinId, setSelectedPlayerSkinId] = useState<PlayerSkinId>(() => readSelectedPlayerSkinId(readUnlockedPlayerSkinIds(readChampionGomaUnlock())));
+  const [isSkinPickerOpen, setIsSkinPickerOpen] = useState(false);
+  const [pendingRewardSkin, setPendingRewardSkin] = useState<PlayerSkinConfig | null>(null);
+  const [rewardRoulettePhase, setRewardRoulettePhase] = useState<RewardRoulettePhase>('spinning');
+  const [rewardRouletteSpinKey, setRewardRouletteSpinKey] = useState(0);
   const [storedPlayRecords, setStoredPlayRecords] = useState<StoredPlayRecord[]>(readStoredPlayRecords);
   const [selectedLearningUnitId, setSelectedLearningUnitId] = useState<LearningUnitId | null>(null);
   const activeLearningUnitId = selectedLearningUnitId ?? DEFAULT_LEARNING_UNIT_ID;
@@ -10572,6 +10831,9 @@ export default function App() {
     setStoredPlayRecords((previousRecords) => {
       const nextRecords = [record, ...previousRecords].slice(0, MAX_STORED_PLAY_RECORDS);
       saveStoredPlayRecords(nextRecords);
+      if (result === 'win') {
+        prepareRandomSkinRewardForClear();
+      }
       return nextRecords;
     });
   };
@@ -10604,12 +10866,12 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const normalizedSkinId = normalizeSelectedPlayerSkinId(selectedPlayerSkinId, hasChampionGoma);
+    const normalizedSkinId = normalizeSelectedPlayerSkinId(selectedPlayerSkinId, unlockedPlayerSkinIds);
     if (normalizedSkinId !== selectedPlayerSkinId) {
       setSelectedPlayerSkinId(normalizedSkinId);
       saveSelectedPlayerSkinId(normalizedSkinId);
     }
-  }, [hasChampionGoma, selectedPlayerSkinId]);
+  }, [selectedPlayerSkinId, unlockedPlayerSkinIds]);
 
   useEffect(() => cancelRecordClearHold, []);
 
@@ -10655,7 +10917,7 @@ export default function App() {
 
   const selectPlayerSkin = (skinId: PlayerSkinId) => {
     const nextSkin = PLAYER_SKINS.find((skin) => skin.id === skinId);
-    if (!nextSkin || !isPlayerSkinUnlocked(nextSkin, hasChampionGoma)) {
+    if (!nextSkin || !isPlayerSkinUnlocked(nextSkin, unlockedPlayerSkinIds)) {
       return;
     }
 
@@ -10663,18 +10925,66 @@ export default function App() {
     saveSelectedPlayerSkinId(skinId);
   };
 
-  const unlockChampionGoma = () => {
-    if (!hasChampionGoma) {
-      setSelectedPlayerSkinId('champion');
-      saveSelectedPlayerSkinId('champion');
+  const prepareRandomSkinRewardForClear = () => {
+    const rewardSkin = pickRandomLockedRewardSkin(unlockedPlayerSkinIds);
+    if (!rewardSkin) {
+      setPendingRewardSkin(null);
+      return;
     }
 
-    setHasChampionGoma(true);
-    saveChampionGomaUnlock();
+    setPendingRewardSkin(rewardSkin);
+    setRewardRoulettePhase('spinning');
+    setRewardRouletteSpinKey((spinKey) => spinKey + 1);
   };
 
+  const unlockRouletteRewardSkin = (rewardSkin: PlayerSkinConfig) => {
+    setUnlockedPlayerSkinIds((previousUnlockedSkinIds) => {
+      if (previousUnlockedSkinIds.includes(rewardSkin.id)) {
+        return previousUnlockedSkinIds;
+      }
+
+      const nextUnlockedSkinIds = normalizeUnlockedPlayerSkinIds(
+        [...previousUnlockedSkinIds, rewardSkin.id],
+        hasLegacyChampionGoma,
+      );
+      saveUnlockedPlayerSkinIds(nextUnlockedSkinIds);
+      setSelectedPlayerSkinId(rewardSkin.id);
+      saveSelectedPlayerSkinId(rewardSkin.id);
+      return nextUnlockedSkinIds;
+    });
+  };
+
+  useEffect(() => {
+    if (gameState !== 'win' || !pendingRewardSkin || rewardRoulettePhase !== 'spinning') {
+      return;
+    }
+
+    playSound('rouletteStart', { gainMultiplier: 0.9, detune: 8 });
+
+    const tickDelays = [120, 250, 370, 480, 590, 710, 850, 1010, 1190, 1390, 1620, 1880, 2180, 2520, 2890];
+    const tickTimeoutIds = tickDelays.map((delay, index) =>
+      window.setTimeout(() => {
+        playSound('rouletteTick', {
+          gainMultiplier: Math.max(0.38, 0.86 - index * 0.025),
+          detune: index * 9,
+        });
+      }, delay),
+    );
+
+    const revealTimeoutId = window.setTimeout(() => {
+      unlockRouletteRewardSkin(pendingRewardSkin);
+      setRewardRoulettePhase('revealed');
+      playSound('rouletteWin', { gainMultiplier: 1.04, detune: 18 });
+      queueSound('levelUp', 180, { gainMultiplier: 0.7, detune: 68 });
+    }, 3400);
+
+    return () => {
+      tickTimeoutIds.forEach((timeoutId) => window.clearTimeout(timeoutId));
+      window.clearTimeout(revealTimeoutId);
+    };
+  }, [gameState, pendingRewardSkin, rewardRoulettePhase, rewardRouletteSpinKey]);
+
   const triggerBattleVictory = (detune: number) => {
-    unlockChampionGoma();
     recordBattleResult('win', level);
     setGameState('win');
     playSound('win', { gainMultiplier: 1.14, detune });
@@ -10878,7 +11188,7 @@ export default function App() {
   const unitMenuRef = useRef<HTMLDivElement | null>(null);
   const selectedPlayerSkin = PLAYER_SKINS.find((skin) => skin.id === selectedPlayerSkinId) ?? PLAYER_SKINS[0];
   const playerSpriteSet = selectedPlayerSkin.spriteSet;
-  const availablePlayerSkins = PLAYER_SKINS.filter((skin) => isPlayerSkinUnlocked(skin, hasChampionGoma));
+  const availablePlayerSkins = PLAYER_SKINS.filter((skin) => isPlayerSkinUnlocked(skin, unlockedPlayerSkinIds));
   const playerCharacterImage = isPlayerHit
     ? playerSpriteSet.hit
     : isAttacking
@@ -10930,6 +11240,11 @@ export default function App() {
   const currentLevelDescription = levelDescriptions[level] ?? `${level}단계`;
   const finalRecordLabel = gameState === 'win' ? `${level}단계 클리어` : `${level}단계 도달`;
   const finalRecordTopic = currentLevelDescription.replace(/^\d+단계:\s*/, '');
+  const rewardRouletteSkins = REWARD_PLAYER_SKINS;
+  const rewardSlotMachineItems = pendingRewardSkin
+    ? [...rewardRouletteSkins, ...rewardRouletteSkins, ...rewardRouletteSkins, pendingRewardSkin]
+    : rewardRouletteSkins;
+  const rewardSlotMachineStopY = -Math.max(0, rewardSlotMachineItems.length - 1) * 128;
   const visibleStoredPlayRecords = storedPlayRecords.slice(0, 30);
   const hasStoredPlayRecords = visibleStoredPlayRecords.length > 0;
   const builderSlotsById =
@@ -11183,8 +11498,8 @@ export default function App() {
     ? 'lg:h-[clamp(12rem,25vh,16rem)]'
     : 'lg:h-[clamp(18.5rem,33vh,23rem)]';
   const battleStageImageResponsiveClass = isCompactBattleViewport
-    ? 'h-auto max-h-full'
-    : 'h-auto max-h-full';
+    ? 'h-auto max-h-[calc(100%-1rem)]'
+    : 'h-auto max-h-[calc(100%-1rem)]';
   const battleRightPanelResponsiveClass = isCompactBattleViewport ? 'gap-2' : 'gap-3';
   const battleTopGroupResponsiveClass = isCompactBattleViewport ? 'gap-2' : 'gap-3';
   const battleInputResponsiveClass = isCompactBattleViewport ? 'gap-2' : 'gap-3';
@@ -11839,6 +12154,8 @@ export default function App() {
     warmAudio();
     playSound('start', { gainMultiplier: 0.8, detune: 12 });
     setGameState('playing');
+    setPendingRewardSkin(null);
+    setRewardRoulettePhase('spinning');
     setIsAttacking(false);
     setIsOpponentAttacking(false);
     setIsOpponentHit(false);
@@ -11871,6 +12188,8 @@ export default function App() {
     warmAudio();
     playSound('ui');
     setGameState('start');
+    setPendingRewardSkin(null);
+    setRewardRoulettePhase('spinning');
     setIsNamePromptOpen(false);
     setIsRecordModalOpen(false);
     setBattleDifficulty('normal');
@@ -12214,12 +12533,12 @@ export default function App() {
           initial={{ opacity: 0, scale: 0.97, y: 16 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.28, ease: 'easeOut' }}
-          className="relative w-full max-w-6xl overflow-hidden rounded-[2.25rem] border border-cyan-100/15 bg-[linear-gradient(180deg,rgba(5,10,22,0.98),rgba(15,23,42,0.97)_38%,rgba(17,24,39,0.96))] shadow-[0_34px_120px_rgba(2,8,23,0.72),inset_0_1px_0_rgba(255,255,255,0.04)]"
+          className="relative w-full max-w-5xl overflow-hidden rounded-[1.5rem] border border-cyan-100/15 bg-[linear-gradient(180deg,rgba(5,10,22,0.98),rgba(15,23,42,0.97)_38%,rgba(17,24,39,0.96))] shadow-[0_24px_80px_rgba(2,8,23,0.62),inset_0_1px_0_rgba(255,255,255,0.04)]"
         >
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(250,204,21,0.14),transparent_24%),radial-gradient(circle_at_top_right,rgba(34,211,238,0.1),transparent_20%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.18),transparent_28%),linear-gradient(180deg,rgba(255,255,255,0.02),transparent_26%)]" />
           <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
 
-          <div className="relative flex flex-col gap-5 p-4 sm:gap-6 sm:p-6 lg:gap-7 lg:p-8">
+          <div className="relative flex flex-col gap-4 p-4 sm:p-5">
             <div className="flex justify-end">
               <button
                 type="button"
@@ -12230,14 +12549,14 @@ export default function App() {
               </button>
             </div>
 
-            <div className="grid gap-4 lg:gap-5 lg:grid-cols-2">
+            <div className="grid gap-2 sm:grid-cols-2">
               {LEARNING_UNITS.map((unit) => (
                 <motion.div
                   key={unit.id}
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.24, ease: 'easeOut' }}
-                  className={`group relative flex h-full min-h-[16rem] flex-col overflow-hidden rounded-[1.9rem] border p-5 transition duration-300 sm:min-h-[17.25rem] sm:p-6 ${
+                  className={`group relative flex h-full min-h-[8.5rem] flex-col overflow-hidden rounded-[1.15rem] border p-4 transition duration-300 sm:min-h-[9rem] ${
                     selectedLearningUnitId === unit.id
                       ? 'border-emerald-300/55 bg-[linear-gradient(180deg,rgba(8,15,28,0.98),rgba(10,30,35,0.96)_48%,rgba(9,53,61,0.92))] shadow-[0_28px_72px_rgba(6,182,212,0.12),0_22px_56px_rgba(16,185,129,0.22),inset_0_1px_0_rgba(255,255,255,0.08)] ring-1 ring-emerald-300/20'
                       : unit.isAvailable
@@ -12257,7 +12576,7 @@ export default function App() {
                   <div className="relative flex h-full flex-col">
                     <div className="flex items-start justify-between gap-4">
                       <div className="max-w-[85%]">
-                        <p className={`text-[0.95rem] font-black tracking-[0.22em] ${
+                        <p className={`text-xs font-black tracking-[0.18em] ${
                           selectedLearningUnitId === unit.id
                             ? 'text-emerald-200'
                             : unit.isAvailable
@@ -12266,11 +12585,11 @@ export default function App() {
                         }`}>
                           {unit.chapterLabel}
                         </p>
-                        <h3 className="mt-3 text-[clamp(2rem,5vw,3.15rem)] font-black leading-[0.98] tracking-[-0.03em] text-white">
+                        <h3 className="mt-1.5 text-xl font-black leading-tight text-white">
                           {unit.title}
                         </h3>
                       </div>
-                      <div className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.1rem] border shadow-[0_16px_34px_rgba(15,23,42,0.28)] ${
+                      <div className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[0.8rem] border shadow-[0_10px_22px_rgba(15,23,42,0.24)] ${
                         selectedLearningUnitId === unit.id
                           ? 'border-yellow-200/35 bg-[linear-gradient(135deg,rgba(250,204,21,1),rgba(245,158,11,0.94))] text-slate-950 shadow-[0_16px_36px_rgba(250,204,21,0.34)]'
                           : unit.isAvailable
@@ -12281,13 +12600,13 @@ export default function App() {
                       </div>
                     </div>
 
-                    <div className="mt-7 flex flex-1 items-end">
+                    <div className="mt-3 flex flex-1 items-end">
                       <button
                         type="button"
                         disabled={!unit.isAvailable}
                         onPointerDown={warmAudio}
                         onClick={() => selectLearningUnit(unit.id)}
-                        className={`flex min-h-[4.75rem] w-full items-center justify-center rounded-[1.4rem] border px-6 py-4 text-base font-black tracking-[0.01em] transition duration-300 sm:text-lg ${
+                        className={`flex min-h-[2.85rem] w-full items-center justify-center rounded-[0.9rem] border px-4 py-2.5 text-sm font-black tracking-[0.01em] transition duration-300 ${
                           !unit.isAvailable
                             ? 'cursor-not-allowed border-slate-600 bg-slate-700/80 text-slate-300'
                             : selectedLearningUnitId === unit.id
@@ -12310,7 +12629,7 @@ export default function App() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 14 }}
                   transition={{ duration: 0.22, ease: 'easeOut' }}
-                  className="relative overflow-hidden rounded-[1.9rem] border border-cyan-200/12 bg-[linear-gradient(180deg,rgba(7,13,25,0.94),rgba(9,15,29,0.88)_55%,rgba(10,23,36,0.92))] p-5 shadow-[0_28px_68px_rgba(2,8,23,0.48),inset_0_1px_0_rgba(255,255,255,0.06)] sm:p-6"
+                  className="relative overflow-hidden rounded-[1.15rem] border border-cyan-200/12 bg-[linear-gradient(180deg,rgba(7,13,25,0.94),rgba(9,15,29,0.88)_55%,rgba(10,23,36,0.92))] p-4 shadow-[0_18px_44px_rgba(2,8,23,0.42),inset_0_1px_0_rgba(255,255,255,0.06)]"
                 >
                   <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.16),transparent_34%),radial-gradient(circle_at_top_left,rgba(34,211,238,0.08),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.03),transparent_22%)]" />
                   <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
@@ -12323,7 +12642,7 @@ export default function App() {
                       </span>
                     </div>
 
-                    <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    <div className="mt-3 grid grid-cols-3 gap-2 rounded-[0.95rem] bg-slate-950/38 p-1.5">
                       {BATTLE_DIFFICULTY_ORDER.map((difficultyOption) => {
                         const difficultyOptionConfig = BATTLE_DIFFICULTY_CONFIG[difficultyOption];
                         const isSelectedDifficulty = battleDifficulty === difficultyOption;
@@ -12340,10 +12659,10 @@ export default function App() {
                             type="button"
                             onPointerDown={warmAudio}
                             onClick={() => changeBattleDifficulty(difficultyOption)}
-                            className={`min-h-[5rem] rounded-[1.35rem] border px-4 py-4 text-left text-base font-black transition duration-300 sm:px-5 sm:py-5 ${
+                            className={`min-h-[3rem] rounded-[0.8rem] border px-3 py-2 text-center text-sm font-black transition duration-300 ${
                               isSelectedDifficulty
                                 ? selectedDifficultyClass
-                                : 'border-slate-600/90 bg-slate-950/50 text-slate-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:-translate-y-0.5 hover:border-slate-400/80 hover:bg-slate-900/80 hover:text-white'
+                                : 'border-transparent bg-transparent text-slate-300 shadow-none hover:bg-slate-800/80 hover:text-white'
                             }`}
                           >
                             {difficultyOptionConfig.label}
@@ -12352,63 +12671,105 @@ export default function App() {
                       })}
                     </div>
 
-                    <div className="mt-5">
-                      <div className="mb-3 flex items-center justify-between gap-3">
-                        <p className="text-sm font-black tracking-[0.18em] text-emerald-200">고마 스킨</p>
-                        <span className="shrink-0 rounded-full border border-slate-500/70 bg-slate-950/35 px-3 py-1 text-xs font-black text-slate-200">
-                          {hasChampionGoma ? `${availablePlayerSkins.length}개 해금` : '클리어 후 해금'}
+                    <div className="mt-4">
+                      <button
+                        type="button"
+                        onPointerDown={warmAudio}
+                        onClick={() => setIsSkinPickerOpen((isOpen) => !isOpen)}
+                        aria-expanded={isSkinPickerOpen}
+                        className="flex w-full items-center justify-between gap-3 rounded-[0.95rem] border border-slate-600/80 bg-slate-950/42 px-3 py-2.5 text-left text-slate-100 transition hover:border-cyan-200/55 hover:bg-slate-900/78"
+                      >
+                        <span className="flex min-w-0 items-center gap-3">
+                          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[0.75rem] bg-slate-950/65">
+                            <img
+                              src={selectedPlayerSkin.spriteSet.default}
+                              alt={`${selectedPlayerSkin.label} 스킨`}
+                              className="h-9 w-auto object-contain drop-shadow-[0_8px_14px_rgba(2,8,23,0.35)]"
+                              draggable={false}
+                            />
+                          </span>
+                          <span className="min-w-0">
+                            <span className="block text-xs font-black tracking-[0.16em] text-emerald-200">고마 스킨</span>
+                            <span className="block truncate text-sm font-black text-white">{selectedPlayerSkin.label}</span>
+                          </span>
                         </span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-                        {PLAYER_SKINS.map((skin) => {
-                          const isSkinUnlocked = isPlayerSkinUnlocked(skin, hasChampionGoma);
-                          const isSelectedSkin = selectedPlayerSkinId === skin.id;
+                        <span className="flex shrink-0 items-center gap-2">
+                          <span className="rounded-full border border-slate-600 bg-slate-950/50 px-2.5 py-1 text-xs font-black text-slate-200">
+                            {availablePlayerSkins.length}개
+                          </span>
+                          <ChevronDown className={`h-4 w-4 text-slate-300 transition-transform ${isSkinPickerOpen ? 'rotate-180' : ''}`} />
+                        </span>
+                      </button>
 
-                          return (
-                            <button
-                              key={skin.id}
-                              type="button"
-                              disabled={!isSkinUnlocked}
-                              onPointerDown={isSkinUnlocked ? warmAudio : undefined}
-                              onClick={() => selectPlayerSkin(skin.id)}
-                              className={`relative flex min-h-[9.5rem] flex-col items-center justify-between overflow-hidden rounded-[1.15rem] border px-3 py-3 text-center transition duration-300 ${
-                                isSelectedSkin
-                                  ? 'border-emerald-200/70 bg-emerald-400/18 text-white shadow-[0_16px_34px_rgba(16,185,129,0.2),inset_0_1px_0_rgba(255,255,255,0.12)]'
-                                  : isSkinUnlocked
-                                    ? 'border-slate-600/90 bg-slate-950/42 text-slate-200 hover:-translate-y-0.5 hover:border-cyan-200/55 hover:bg-slate-900/78'
-                                    : 'cursor-not-allowed border-slate-700/80 bg-slate-950/26 text-slate-500 opacity-70'
-                              }`}
-                            >
-                              <span className="flex h-20 w-full items-center justify-center">
-                                <img
-                                  src={skin.spriteSet.default}
-                                  alt={`${skin.label} 스킨`}
-                                  className={`h-full w-auto object-contain drop-shadow-[0_12px_18px_rgba(2,8,23,0.38)] ${isSkinUnlocked ? '' : 'grayscale'}`}
-                                  draggable={false}
-                                />
-                              </span>
-                              <span className="mt-2 w-full truncate text-sm font-black">{skin.label}</span>
-                              <span className={`mt-1 rounded-full px-2 py-0.5 text-[10px] font-black ${
-                                isSkinUnlocked ? 'bg-slate-800/90 text-emerald-100' : 'bg-slate-800/60 text-slate-500'
-                              }`}>
-                                {isSkinUnlocked ? skin.badge : '잠김'}
-                              </span>
-                              {isSelectedSkin && (
-                                <span className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-emerald-300 text-slate-950 shadow-[0_8px_18px_rgba(16,185,129,0.24)]">
-                                  <Check className="h-4 w-4" />
-                                </span>
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
+                      <AnimatePresence initial={false}>
+                        {isSkinPickerOpen && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2, ease: 'easeOut' }}
+                            className="overflow-hidden"
+                          >
+                            <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-5 lg:grid-cols-8">
+                              {PLAYER_SKINS.map((skin) => {
+                                const isSkinUnlocked = isPlayerSkinUnlocked(skin, unlockedPlayerSkinIds);
+                                const isSelectedSkin = selectedPlayerSkinId === skin.id;
+                                const displaySkinLabel = isSkinUnlocked ? skin.label : '비공개';
+
+                                return (
+                                  <button
+                                    key={skin.id}
+                                    type="button"
+                                    disabled={!isSkinUnlocked}
+                                    onPointerDown={isSkinUnlocked ? warmAudio : undefined}
+                                    onClick={() => selectPlayerSkin(skin.id)}
+                                    className={`relative flex min-h-[6.4rem] flex-col items-center justify-center gap-1 overflow-hidden rounded-[0.9rem] border px-2 py-2 text-center transition duration-300 ${
+                                      isSelectedSkin
+                                        ? 'border-emerald-200/70 bg-emerald-400/18 text-white shadow-[0_10px_24px_rgba(16,185,129,0.16),inset_0_1px_0_rgba(255,255,255,0.12)]'
+                                        : isSkinUnlocked
+                                          ? 'border-slate-600/90 bg-slate-950/42 text-slate-200 hover:-translate-y-0.5 hover:border-cyan-200/55 hover:bg-slate-900/78'
+                                          : 'cursor-not-allowed border-slate-700/80 bg-slate-950/26 text-slate-500 opacity-70'
+                                    }`}
+                                  >
+                                    <span className="flex h-12 w-full items-center justify-center">
+                                      {isSkinUnlocked ? (
+                                        <img
+                                          src={skin.spriteSet.default}
+                                          alt={`${skin.label} 스킨`}
+                                          className="h-full w-auto object-contain drop-shadow-[0_12px_18px_rgba(2,8,23,0.38)]"
+                                          draggable={false}
+                                        />
+                                      ) : (
+                                        <span className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-600/80 bg-slate-950/70 text-slate-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+                                          <Lock className="h-5 w-5" />
+                                        </span>
+                                      )}
+                                    </span>
+                                    <span className="w-full truncate text-[11px] font-black leading-tight">{displaySkinLabel}</span>
+                                    {!isSkinUnlocked && (
+                                      <span className="absolute right-1.5 top-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-900/90 text-slate-300 ring-1 ring-slate-600">
+                                        <Lock className="h-3 w-3" />
+                                      </span>
+                                    )}
+                                    {isSelectedSkin && (
+                                      <span className="absolute right-1.5 top-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-300 text-slate-950 shadow-[0_8px_18px_rgba(16,185,129,0.24)]">
+                                        <Check className="h-3 w-3" />
+                                      </span>
+                                    )}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
 
                     <button
                       type="button"
                       onPointerDown={warmAudio}
                       onClick={startSelectedUnit}
-                      className="mt-5 flex min-h-[5rem] w-full items-center justify-center rounded-[1.5rem] border border-emerald-100/20 bg-[linear-gradient(135deg,rgba(45,212,191,1),rgba(16,185,129,0.94))] px-6 py-4 text-lg font-black text-slate-950 shadow-[0_28px_56px_rgba(16,185,129,0.38),inset_0_1px_0_rgba(255,255,255,0.24)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_34px_68px_rgba(16,185,129,0.44),inset_0_1px_0_rgba(255,255,255,0.26)] sm:text-xl"
+                      className="mt-4 flex min-h-[4rem] w-full items-center justify-center rounded-[1rem] border border-emerald-100/20 bg-[linear-gradient(135deg,rgba(45,212,191,1),rgba(16,185,129,0.94))] px-6 py-3 text-lg font-black text-slate-950 shadow-[0_18px_40px_rgba(16,185,129,0.28),inset_0_1px_0_rgba(255,255,255,0.24)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_52px_rgba(16,185,129,0.36),inset_0_1px_0_rgba(255,255,255,0.26)]"
                     >
                       시작
                     </button>
@@ -13210,7 +13571,7 @@ export default function App() {
         <motion.div 
           initial={{ opacity: 0, scale: 0.5 }} 
           animate={{ opacity: 1, scale: 1 }} 
-          className={`relative flex w-full max-w-xl max-h-[calc(100svh-1rem)] flex-col justify-center ${isShortViewport ? 'overflow-x-hidden overflow-y-auto' : 'overflow-hidden'} rounded-[2.5rem] border-4 p-4 text-center shadow-2xl sm:max-w-2xl sm:p-6 lg:p-8 ${
+          className={`relative flex w-full max-w-xl max-h-[calc(100svh-1rem)] flex-col justify-center overflow-x-hidden overflow-y-auto rounded-[2.5rem] border-4 p-4 text-center shadow-2xl sm:max-w-2xl sm:p-6 lg:p-8 ${
             isWinResult
               ? 'border-yellow-200/35 bg-[radial-gradient(circle_at_top,rgba(250,204,21,0.18),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(34,211,238,0.08),transparent_30%),linear-gradient(180deg,rgba(49,46,129,0.92),rgba(30,41,59,0.98))] shadow-[0_40px_120px_rgba(245,158,11,0.3)]'
               : 'border-slate-600 bg-slate-800'
@@ -13258,8 +13619,8 @@ export default function App() {
           )}
 
           {gameState === 'win' ? (
-            <div className="relative mb-4 sm:mb-5">
-              <div className="relative mx-auto mb-6 flex h-40 w-40 items-center justify-center sm:h-48 sm:w-48 lg:mb-8 lg:h-56 lg:w-56">
+            <div className="relative mb-3 sm:mb-4">
+              <div className="relative mx-auto mb-3 flex h-28 w-28 items-center justify-center sm:h-36 sm:w-36 lg:h-40 lg:w-40">
                 <motion.div
                   className="absolute inset-0 rounded-full bg-yellow-300/25 blur-3xl"
                   animate={{ scale: [1, 1.18, 1], opacity: [0.55, 0.95, 0.55] }}
@@ -13274,18 +13635,18 @@ export default function App() {
                   animate={{ rotate: [0, -10, 12, -8, 0], scale: [1, 1.12, 1] }}
                   transition={{ repeat: Infinity, duration: 3.2, ease: 'easeInOut' }}
                 >
-                  <Star className="h-28 w-28 fill-current text-yellow-300 drop-shadow-[0_0_35px_rgba(253,224,71,0.75)] sm:h-36 sm:w-36 lg:h-44 lg:w-44" />
+                  <Star className="h-20 w-20 fill-current text-yellow-300 drop-shadow-[0_0_35px_rgba(253,224,71,0.75)] sm:h-24 sm:w-24 lg:h-28 lg:w-28" />
                 </motion.div>
               </div>
               <motion.p
-                className="mb-2 text-sm font-black tracking-[0.55em] text-yellow-100/80 sm:text-base"
+                className="mb-1 text-xs font-black tracking-[0.55em] text-yellow-100/80 sm:text-sm"
                 animate={{ letterSpacing: ['0.45em', '0.6em', '0.45em'], opacity: [0.75, 1, 0.75] }}
                 transition={{ repeat: Infinity, duration: 2.6, ease: 'easeInOut' }}
               >
                 CHAMPION
               </motion.p>
               <motion.h1
-                className="text-[clamp(4.2rem,15vw,7.2rem)] font-black leading-none tracking-[-0.08em] text-transparent bg-[linear-gradient(180deg,#fef9c3_0%,#facc15_36%,#fb7185_100%)] bg-clip-text"
+                className="text-[clamp(3.5rem,12vw,5.8rem)] font-black leading-none tracking-[-0.08em] text-transparent bg-[linear-gradient(180deg,#fef9c3_0%,#facc15_36%,#fb7185_100%)] bg-clip-text"
                 style={{ textShadow: '0 18px 40px rgba(251,191,36,0.22)' }}
                 animate={{ scale: [1, 1.04, 1], y: [0, -4, 0] }}
                 transition={{ repeat: Infinity, duration: 2.7, ease: 'easeInOut' }}
@@ -13325,19 +13686,98 @@ export default function App() {
               <h1 className="mb-8 text-6xl font-black text-slate-300 sm:text-7xl lg:text-8xl">도전 종료</h1>
             </motion.div>
           )}
-          <div className={`mb-4 rounded-[1.75rem] px-4 py-4 shadow-inner sm:px-6 sm:py-5 ${
-            isWinResult
-              ? 'border border-yellow-100/25 bg-[linear-gradient(180deg,rgba(15,23,42,0.54),rgba(30,41,59,0.74))] shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_0_45px_rgba(250,204,21,0.1)]'
-              : 'border border-slate-500/70 bg-slate-900/80'
-          }`}>
-            <p className={`text-3xl font-black sm:text-4xl ${isWinResult ? 'text-yellow-50' : 'text-white'}`}>{finalRecordLabel}</p>
-            <p className={`mt-2 break-keep text-sm font-bold leading-6 sm:text-lg ${isWinResult ? 'text-yellow-100/80' : 'text-slate-300'}`}>
-              {finalRecordTopic}
-            </p>
-            <p className={`mt-2 text-xs font-black sm:text-sm ${isWinResult ? 'text-emerald-100/85' : 'text-emerald-300'}`}>
-              이 크롬북에 기록이 저장되었어요.
-            </p>
-          </div>
+          <AnimatePresence>
+            {isWinResult && pendingRewardSkin && (
+              <motion.div
+                key={pendingRewardSkin.id}
+                initial={{ opacity: 0, y: 18, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.98 }}
+                transition={{ duration: 0.28, ease: 'easeOut' }}
+                className="relative mb-4 overflow-hidden rounded-[1.75rem] border border-yellow-100/35 bg-[radial-gradient(circle_at_50%_0%,rgba(253,224,71,0.26),transparent_30%),radial-gradient(circle_at_16%_72%,rgba(45,212,191,0.15),transparent_26%),linear-gradient(180deg,rgba(15,23,42,0.9),rgba(8,13,26,0.96))] px-4 py-5 shadow-[0_24px_80px_rgba(250,204,21,0.18),inset_0_1px_0_rgba(255,255,255,0.16)] sm:px-6"
+              >
+                <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-yellow-100/60 to-transparent" />
+                <div className="pointer-events-none absolute -left-16 top-1/2 h-28 w-28 -translate-y-1/2 rounded-full bg-emerald-300/10 blur-2xl" />
+                <div className="pointer-events-none absolute -right-16 top-1/2 h-28 w-28 -translate-y-1/2 rounded-full bg-rose-300/10 blur-2xl" />
+                <div className="relative mx-auto flex max-w-[34rem] flex-col items-center">
+                  <p className="rounded-full border border-yellow-100/25 bg-yellow-100/10 px-4 py-1.5 text-xs font-black tracking-[0.22em] text-yellow-100 sm:text-sm">
+                    스킨 슬롯머신
+                  </p>
+                  <div className="relative mt-4 w-full">
+                    <div className="pointer-events-none absolute left-1/2 top-[-0.2rem] z-30 h-0 w-0 -translate-x-1/2 border-x-[0.85rem] border-t-[1.35rem] border-x-transparent border-t-yellow-200 drop-shadow-[0_0_18px_rgba(253,224,71,0.9)]" />
+                    <div className="relative overflow-hidden rounded-[1.45rem] border border-yellow-100/35 bg-[linear-gradient(180deg,rgba(2,6,23,0.98),rgba(15,23,42,0.94))] p-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08),0_20px_54px_rgba(2,8,23,0.42)]">
+                      <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-14 bg-gradient-to-b from-slate-950 via-slate-950/70 to-transparent" />
+                      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-14 bg-gradient-to-t from-slate-950 via-slate-950/70 to-transparent" />
+                      <div className="pointer-events-none absolute inset-x-3 top-1/2 z-20 h-[8rem] -translate-y-1/2 rounded-[1.1rem] border border-yellow-100/45 bg-yellow-100/8 shadow-[0_0_40px_rgba(250,204,21,0.22),inset_0_1px_0_rgba(255,255,255,0.18)]" />
+                      <div className="relative mx-auto h-[8rem] max-w-[28rem] overflow-hidden">
+                        <motion.div
+                          key={rewardRouletteSpinKey}
+                          className="flex flex-col items-stretch"
+                          initial={{ y: 0 }}
+                          animate={{ y: rewardSlotMachineStopY }}
+                          transition={{ duration: 3.35, ease: [0.12, 0.78, 0.18, 1] }}
+                        >
+                          {rewardSlotMachineItems.map((skin, slotIndex) => (
+                            <div
+                              key={`${skin.id}-${slotIndex}`}
+                              className="flex h-[8rem] items-center justify-center gap-5 px-3"
+                            >
+                              <span className="flex h-24 w-24 shrink-0 items-center justify-center rounded-[1.1rem] border border-white/18 bg-slate-950/72 shadow-[0_10px_24px_rgba(2,8,23,0.32),inset_0_1px_0_rgba(255,255,255,0.08)]">
+                                <img
+                                  src={skin.spriteSet.default}
+                                  alt={`${skin.label} 슬롯 후보`}
+                                  className="h-20 w-auto object-contain drop-shadow-[0_8px_12px_rgba(2,8,23,0.42)]"
+                                  draggable={false}
+                                />
+                              </span>
+                              <span className="min-w-0 text-left">
+                                <span className="block text-xs font-black tracking-[0.22em] text-emerald-200/85">보상 스킨</span>
+                                <span className="mt-1 block truncate text-2xl font-black leading-tight text-white sm:text-3xl">
+                                  {skin.label}
+                                </span>
+                              </span>
+                            </div>
+                          ))}
+                        </motion.div>
+                      </div>
+                    </div>
+                    <div className="mt-3 flex items-center justify-center gap-2">
+                      {[0, 1, 2].map((dotIndex) => (
+                        <motion.span
+                          key={dotIndex}
+                          className="h-2.5 w-2.5 rounded-full bg-yellow-200 shadow-[0_0_12px_rgba(253,224,71,0.65)]"
+                          animate={rewardRoulettePhase === 'spinning' ? { opacity: [0.35, 1, 0.35], scale: [0.82, 1.15, 0.82] } : { opacity: 1, scale: 1 }}
+                          transition={{ repeat: rewardRoulettePhase === 'spinning' ? Infinity : 0, duration: 0.72, delay: dotIndex * 0.12, ease: 'easeInOut' }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <motion.div
+                    className="mt-3 min-h-[1.75rem] text-center"
+                    animate={rewardRoulettePhase === 'revealed' ? { y: [6, 0], opacity: [0, 1] } : { opacity: 1 }}
+                    transition={{ duration: 0.34, ease: 'easeOut' }}
+                  >
+                    <p className={`text-sm font-black tracking-[0.2em] sm:text-base ${
+                      rewardRoulettePhase === 'spinning' ? 'text-yellow-50' : 'text-emerald-200'
+                    }`}>
+                      {rewardRoulettePhase === 'spinning' ? '새 스킨 추첨 중' : '해금 완료'}
+                    </p>
+                  </motion.div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          {!isWinResult && (
+            <div className="mb-4 rounded-[1.75rem] border border-slate-500/70 bg-slate-900/80 px-4 py-4 shadow-inner sm:px-6 sm:py-5">
+              <p className="text-3xl font-black text-white sm:text-4xl">{finalRecordLabel}</p>
+              <p className="mt-2 break-keep text-sm font-bold leading-6 text-slate-300 sm:text-lg">
+                {finalRecordTopic}
+              </p>
+              <p className="mt-2 text-xs font-black text-emerald-300 sm:text-sm">
+                이 크롬북에 기록이 저장되었어요.
+              </p>
+            </div>
+          )}
           <div className="mx-auto flex w-full flex-col gap-2 sm:w-auto sm:min-w-[18rem]">
             <button onPointerDown={warmAudio} onClick={openRecordModal} className={`flex w-full items-center justify-center gap-3 rounded-full px-6 py-3 text-lg font-black transition-all sm:text-xl lg:gap-4 lg:px-10 lg:py-4 lg:text-2xl ${
               isWinResult
