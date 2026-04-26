@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useEffectEvent } from 'react';
-import { Sword, Heart, RotateCcw, Play, Sparkles, Star, ChevronDown, Check } from 'lucide-react';
+import { Sword, Heart, RotateCcw, Play, Sparkles, Star, ChevronDown, Check, History } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { VisualCalculator, type VisualControlSound } from './components/VisualCalculator';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -256,6 +256,26 @@ interface DeveloperProblemSnapshot {
   opponentHP: number;
   problem: Problem;
   problemCoachmark: string | null;
+}
+
+interface StoredPlayRecord {
+  id: string;
+  playerName: string;
+  unitId: LearningUnitId;
+  unitTitle: string;
+  result: 'win' | 'lose';
+  level: number;
+  totalLevels: number;
+  topic: string;
+  playedAt: string;
+}
+
+interface StoredPlayRecordUnitTheme {
+  cardClassName: string;
+  accentClassName: string;
+  progressClassName: string;
+  dotClassName: string;
+  labelClassName: string;
 }
 
 interface MeasurementProblemData {
@@ -1522,7 +1542,25 @@ const DEFEAT_SCENE_IMAGES: Partial<Record<number, string>> = {
   8: stage8DefeatSceneImage,
   9: stage9DefeatSceneImage,
 };
-const RECORD_BOARD_URL = 'https://padlet.com/hyong4115edu/padlet-khqcsms45f1diiig';
+const PLAY_RECORDS_STORAGE_KEY = 'plusMinusChromebookPlayRecords';
+const MAX_STORED_PLAY_RECORDS = 30;
+const RECORD_CLEAR_HOLD_DURATION_MS = 5000;
+const STORED_PLAY_RECORD_UNIT_THEMES: Record<LearningUnitId, StoredPlayRecordUnitTheme> = {
+  unit2: {
+    cardClassName: 'border-cyan-100/16 bg-[linear-gradient(180deg,rgba(15,23,42,0.98),rgba(8,13,26,0.98))]',
+    accentClassName: 'bg-cyan-300',
+    progressClassName: 'bg-cyan-300',
+    dotClassName: 'bg-cyan-300',
+    labelClassName: 'text-cyan-100',
+  },
+  unit3: {
+    cardClassName: 'border-violet-200/20 bg-[linear-gradient(180deg,rgba(31,25,58,0.96),rgba(12,18,34,0.98))]',
+    accentClassName: 'bg-violet-300',
+    progressClassName: 'bg-violet-300',
+    dotClassName: 'bg-violet-300',
+    labelClassName: 'text-violet-100',
+  },
+};
 const VICTORY_CONFETTI = [
   { left: '6%', top: '12%', className: 'h-3 w-14 rounded-full bg-yellow-300/90', duration: 3.6, delay: 0.15, drift: 10 },
   { left: '17%', top: '27%', className: 'h-4 w-4 rounded-full bg-amber-100/95', duration: 4.1, delay: 0.75, drift: -8 },
@@ -1655,6 +1693,65 @@ function saveSelectedPlayerSkinId(skinId: PlayerSkinId) {
   } catch {
     // The in-memory selection still applies for the current play session.
   }
+}
+
+function readStoredPlayRecords(): StoredPlayRecord[] {
+  if (typeof window === 'undefined') {
+    return [];
+  }
+
+  try {
+    const rawRecords = window.localStorage.getItem(PLAY_RECORDS_STORAGE_KEY);
+    if (!rawRecords) {
+      return [];
+    }
+
+    const parsedRecords = JSON.parse(rawRecords);
+    if (!Array.isArray(parsedRecords)) {
+      return [];
+    }
+
+    return parsedRecords.filter((record): record is StoredPlayRecord => (
+      record &&
+      typeof record.id === 'string' &&
+      typeof record.playerName === 'string' &&
+      (record.unitId === 'unit2' || record.unitId === 'unit3') &&
+      typeof record.unitTitle === 'string' &&
+      (record.result === 'win' || record.result === 'lose') &&
+      typeof record.level === 'number' &&
+      typeof record.totalLevels === 'number' &&
+      typeof record.topic === 'string' &&
+      typeof record.playedAt === 'string'
+    ));
+  } catch {
+    return [];
+  }
+}
+
+function saveStoredPlayRecords(records: StoredPlayRecord[]) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(PLAY_RECORDS_STORAGE_KEY, JSON.stringify(records.slice(0, MAX_STORED_PLAY_RECORDS)));
+  } catch {
+    // The on-screen history still updates for the current browser session.
+  }
+}
+
+function formatStoredPlayRecordDate(playedAt: string) {
+  const playedDate = new Date(playedAt);
+  if (Number.isNaN(playedDate.getTime())) {
+    return '';
+  }
+
+  return new Intl.DateTimeFormat('ko-KR', {
+    month: 'numeric',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(playedDate);
 }
 
 const DEFAULT_PLAYER_NAME = '나';
@@ -10400,12 +10497,17 @@ export default function App() {
   const unit3Level12PreviousTemplateOrderRef = useRef<Level12TemplateId[]>([]);
   const developerProblemHistoryRef = useRef<DeveloperProblemSnapshot[]>([]);
   const developerProblemHistoryIndexRef = useRef(-1);
+  const currentPlayRunIdRef = useRef(0);
+  const recordedPlayRunIdRef = useRef<number | null>(null);
+  const recordClearHoldTimeoutRef = useRef<number | null>(null);
+  const didClearRecordsByHoldRef = useRef(false);
   const isDeveloperShortcutEnabled = true;
   const [isDeveloperMode, setIsDeveloperMode] = useState(false);
   const [gameState, setGameState] = useState<GameState>('start');
   const [playerName, setPlayerName] = useState(DEFAULT_PLAYER_NAME);
   const [pendingPlayerName, setPendingPlayerName] = useState('');
   const [isNamePromptOpen, setIsNamePromptOpen] = useState(false);
+  const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
   const [specialOpponentSelections, setSpecialOpponentSelections] = useState<SpecialOpponentSelections>(DEFAULT_SPECIAL_OPPONENT_SELECTIONS);
   const [level, setLevel] = useState(1);
   const [problem, setProblem] = useState<Problem>(() => getProblemForTurn(DEFAULT_LEARNING_UNIT_ID, 1, 100));
@@ -10422,6 +10524,7 @@ export default function App() {
   const [battleDifficulty, setBattleDifficulty] = useState<BattleDifficulty>('normal');
   const [hasChampionGoma, setHasChampionGoma] = useState(readChampionGomaUnlock);
   const [selectedPlayerSkinId, setSelectedPlayerSkinId] = useState<PlayerSkinId>(() => readSelectedPlayerSkinId(hasChampionGoma));
+  const [storedPlayRecords, setStoredPlayRecords] = useState<StoredPlayRecord[]>(readStoredPlayRecords);
   const [selectedLearningUnitId, setSelectedLearningUnitId] = useState<LearningUnitId | null>(null);
   const activeLearningUnitId = selectedLearningUnitId ?? DEFAULT_LEARNING_UNIT_ID;
   const [isEstimation, setIsEstimation] = useState(false);
@@ -10442,6 +10545,35 @@ export default function App() {
     setMessage(msg);
     setShowMsg(true);
     setTimeout(() => setShowMsg(false), 2000);
+  };
+
+  const recordBattleResult = (result: 'win' | 'lose', reachedLevel: number) => {
+    if (recordedPlayRunIdRef.current === currentPlayRunIdRef.current) {
+      return;
+    }
+
+    recordedPlayRunIdRef.current = currentPlayRunIdRef.current;
+    const unit = LEARNING_UNITS.find((learningUnit) => learningUnit.id === activeLearningUnitId);
+    const levelDescription = getLevelDescriptionsForUnit(activeLearningUnitId)[reachedLevel] ?? `${reachedLevel}단계`;
+    const topic = levelDescription.replace(/^\d+단계:\s*/, '');
+    const playedAt = new Date().toISOString();
+    const record: StoredPlayRecord = {
+      id: `${playedAt}-${currentPlayRunIdRef.current}`,
+      playerName: playerName.trim() || DEFAULT_PLAYER_NAME,
+      unitId: activeLearningUnitId,
+      unitTitle: unit?.title ?? activeLearningUnitId,
+      result,
+      level: reachedLevel,
+      totalLevels: getTotalLevelsForUnit(activeLearningUnitId),
+      topic,
+      playedAt,
+    };
+
+    setStoredPlayRecords((previousRecords) => {
+      const nextRecords = [record, ...previousRecords].slice(0, MAX_STORED_PLAY_RECORDS);
+      saveStoredPlayRecords(nextRecords);
+      return nextRecords;
+    });
   };
 
   useEffect(() => {
@@ -10478,6 +10610,8 @@ export default function App() {
       saveSelectedPlayerSkinId(normalizedSkinId);
     }
   }, [hasChampionGoma, selectedPlayerSkinId]);
+
+  useEffect(() => cancelRecordClearHold, []);
 
   const ensureAudioEngine = () => {
     if (
@@ -10541,6 +10675,7 @@ export default function App() {
 
   const triggerBattleVictory = (detune: number) => {
     unlockChampionGoma();
+    recordBattleResult('win', level);
     setGameState('win');
     playSound('win', { gainMultiplier: 1.14, detune });
     queueSound('levelUp', 240, {
@@ -10795,6 +10930,8 @@ export default function App() {
   const currentLevelDescription = levelDescriptions[level] ?? `${level}단계`;
   const finalRecordLabel = gameState === 'win' ? `${level}단계 클리어` : `${level}단계 도달`;
   const finalRecordTopic = currentLevelDescription.replace(/^\d+단계:\s*/, '');
+  const visibleStoredPlayRecords = storedPlayRecords.slice(0, 30);
+  const hasStoredPlayRecords = visibleStoredPlayRecords.length > 0;
   const builderSlotsById =
     problem.kind === 'builder' && problem.builder
       ? Object.fromEntries(problem.builder.slots.map((slot) => [slot.id, slot])) as Record<string, BuildSlotConfig>
@@ -11340,6 +11477,7 @@ export default function App() {
         updateMessage('어림잡기 실패! 반격당했다!');
 
         if (newPlayerHP === 0) {
+          recordBattleResult('lose', level);
           setGameState('lose');
           playSound('lose', { gainMultiplier: 1.06, detune: -20 });
         }
@@ -11418,6 +11556,7 @@ export default function App() {
       updateMessage('단위 선택 실패! 상대의 반격!');
 
       if (newPlayerHP === 0) {
+        recordBattleResult('lose', level);
         setGameState('lose');
         playSound('lose', { gainMultiplier: 1.06, detune: -20 });
       }
@@ -11512,6 +11651,7 @@ export default function App() {
         setPlayerHP(newPlayerHP);
         updateMessage('앗! 공격이 빗나갔다! 상대의 반격!');
         if (newPlayerHP === 0) {
+          recordBattleResult('lose', level);
           setGameState('lose');
           playSound('lose', { gainMultiplier: 1.06, detune: -18 });
         }
@@ -11694,6 +11834,8 @@ export default function App() {
   const startGame = () => {
     const nextSpecialOpponentSelections = pickSpecialOpponentSelections();
 
+    currentPlayRunIdRef.current += 1;
+    recordedPlayRunIdRef.current = null;
     warmAudio();
     playSound('start', { gainMultiplier: 0.8, detune: 12 });
     setGameState('playing');
@@ -11730,6 +11872,7 @@ export default function App() {
     playSound('ui');
     setGameState('start');
     setIsNamePromptOpen(false);
+    setIsRecordModalOpen(false);
     setBattleDifficulty('normal');
     setSelectedLearningUnitId(null);
     resetDeveloperProblemHistory();
@@ -11758,6 +11901,48 @@ export default function App() {
 
   const closeNamePrompt = () => {
     setIsNamePromptOpen(false);
+  };
+
+  const openRecordModal = () => {
+    warmAudio();
+    playSound('ui');
+    setIsRecordModalOpen(true);
+  };
+
+  const closeRecordModal = () => {
+    warmAudio();
+    playSound('ui');
+    setIsRecordModalOpen(false);
+  };
+
+  function cancelRecordClearHold() {
+    if (recordClearHoldTimeoutRef.current !== null) {
+      window.clearTimeout(recordClearHoldTimeoutRef.current);
+      recordClearHoldTimeoutRef.current = null;
+    }
+  }
+
+  const startRecordClearHold = () => {
+    cancelRecordClearHold();
+    didClearRecordsByHoldRef.current = false;
+    recordClearHoldTimeoutRef.current = window.setTimeout(() => {
+      recordClearHoldTimeoutRef.current = null;
+      didClearRecordsByHoldRef.current = true;
+      setStoredPlayRecords([]);
+      saveStoredPlayRecords([]);
+      playSound('ui', { gainMultiplier: 0.85, detune: -18 });
+      updateMessage('기록을 모두 지웠어요.');
+    }, RECORD_CLEAR_HOLD_DURATION_MS);
+  };
+
+  const finishRecordClosePress = () => {
+    cancelRecordClearHold();
+    if (didClearRecordsByHoldRef.current) {
+      didClearRecordsByHoldRef.current = false;
+      return;
+    }
+
+    closeRecordModal();
   };
 
   const confirmPlayerNameAndContinue = () => {
@@ -11828,16 +12013,130 @@ export default function App() {
               transition={{ delay: 0.12, duration: 0.28, ease: 'easeOut' }}
               className="flex flex-col items-center px-2 pb-2 pt-1 text-center"
             >
-              <button
-                onPointerDown={warmAudio}
-                onClick={openNamePrompt}
-                className="flex w-full items-center justify-center gap-3 rounded-full bg-yellow-400 px-8 py-4 text-xl font-black text-slate-950 transition hover:scale-[1.01] hover:bg-yellow-300 sm:w-auto sm:min-w-[17rem] sm:px-10 sm:py-5 sm:text-2xl"
-              >
-                <Play className="h-6 w-6" />
-                배틀 시작!
-              </button>
+              <div className="flex w-full flex-col items-center justify-center gap-3 sm:w-auto sm:flex-row">
+                <button
+                  onPointerDown={warmAudio}
+                  onClick={openNamePrompt}
+                  className="flex w-full items-center justify-center gap-3 rounded-full bg-yellow-400 px-8 py-4 text-xl font-black text-slate-950 transition hover:scale-[1.01] hover:bg-yellow-300 sm:w-auto sm:min-w-[17rem] sm:px-10 sm:py-5 sm:text-2xl"
+                >
+                  <Play className="h-6 w-6" />
+                  배틀 시작!
+                </button>
+                <button
+                  type="button"
+                  onPointerDown={warmAudio}
+                  onClick={openRecordModal}
+                  className="flex w-full items-center justify-center gap-2 rounded-full border-2 border-emerald-200/55 bg-slate-950/45 px-7 py-4 text-xl font-black text-emerald-50 transition hover:scale-[1.01] hover:border-emerald-200 hover:bg-emerald-400/15 sm:w-auto sm:min-w-[12rem] sm:px-8 sm:py-5 sm:text-2xl"
+                >
+                  <History className="h-6 w-6" />
+                  나의 기록
+                </button>
+              </div>
             </motion.div>
           </div>
+
+          <AnimatePresence>
+            {isRecordModalOpen && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 z-20 flex items-center justify-center bg-slate-950/82 p-4 backdrop-blur-md sm:p-6"
+              >
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.94, y: 12 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.94, y: 12 }}
+                  transition={{ duration: 0.2, ease: 'easeOut' }}
+                  className="relative flex max-h-[calc(100svh-2rem)] w-full max-w-5xl flex-col overflow-hidden rounded-[2.25rem] border border-cyan-100/16 bg-slate-950/92 p-5 text-left shadow-[0_28px_90px_rgba(2,8,23,0.62)] sm:p-8"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="my-records-title"
+                >
+                  <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-100/35 to-transparent" />
+
+                  <div className="relative flex min-h-0 flex-col">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h2 id="my-records-title" className="text-3xl font-black text-white sm:text-4xl">나의 기록</h2>
+                      </div>
+                      <button
+                        type="button"
+                        aria-label="닫기"
+                        onPointerDown={startRecordClearHold}
+                        onPointerUp={finishRecordClosePress}
+                        onPointerLeave={cancelRecordClearHold}
+                        onPointerCancel={cancelRecordClearHold}
+                        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-slate-600 text-3xl font-black leading-none text-slate-200 transition hover:bg-slate-800 sm:h-14 sm:w-14"
+                      >
+                        ×
+                      </button>
+                    </div>
+
+                    <div className="mt-6 min-h-0 overflow-y-auto pr-1">
+                      {hasStoredPlayRecords ? (
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                          {visibleStoredPlayRecords.map((record, recordIndex) => {
+                            const reachedRatio = Math.max(0, Math.min(1, record.level / record.totalLevels));
+                            const progressPercent = `${Math.round(reachedRatio * 100)}%`;
+                            const isLatestRecord = recordIndex === 0;
+                            const recordUnitTheme = STORED_PLAY_RECORD_UNIT_THEMES[record.unitId];
+
+                            return (
+                              <div
+                                key={record.id}
+                                className={`relative min-w-0 overflow-hidden rounded-[1.75rem] border p-4 shadow-[0_18px_40px_rgba(2,8,23,0.28)] ${
+                                  isLatestRecord ? 'min-h-[13rem] sm:col-span-2 lg:col-span-1 ring-2 ring-white/60 shadow-[0_18px_40px_rgba(2,8,23,0.28),0_0_32px_rgba(255,255,255,0.12)]' : 'min-h-[11.5rem]'
+                                } ${recordUnitTheme.cardClassName}`}
+                              >
+                                <div className={`absolute inset-x-0 top-0 h-1 ${recordUnitTheme.accentClassName}`} />
+                                <div className="flex h-full flex-col">
+                                  <div className="flex items-start justify-between gap-3">
+                                    <div className="flex min-w-0 items-center gap-2">
+                                      <p className="truncate text-sm font-black text-slate-300">{formatStoredPlayRecordDate(record.playedAt)}</p>
+                                      {isLatestRecord && (
+                                        <span className="shrink-0 rounded-full bg-white/15 px-2 py-0.5 text-[0.68rem] font-black text-white ring-1 ring-white/35">가장 최근</span>
+                                      )}
+                                    </div>
+                                    <div className={`h-2.5 w-2.5 shrink-0 rounded-full ${recordUnitTheme.dotClassName}`} />
+                                  </div>
+
+                                  <div className="mt-auto flex items-end gap-4 pt-5">
+                                    <div className="shrink-0">
+                                      <p className={`${isLatestRecord ? 'text-[5rem]' : 'text-[4.25rem]'} font-black leading-[0.82] text-white`}>{record.level}</p>
+                                      <p className="mt-2 text-sm font-black text-slate-300">/{record.totalLevels} 단계</p>
+                                    </div>
+                                    <div className="min-w-0 flex-1 pb-4">
+                                      <div className="h-2.5 overflow-hidden rounded-full bg-slate-700/65">
+                                        <div
+                                          className={`h-full rounded-full ${recordUnitTheme.progressClassName}`}
+                                          style={{ width: progressPercent }}
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="mt-4 min-w-0 border-t border-white/8 pt-3">
+                                    <p className={`truncate text-sm font-black ${recordUnitTheme.labelClassName}`}>{record.unitTitle}</p>
+                                    <p className="mt-1 truncate text-xs font-bold text-slate-400">{record.topic}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="rounded-2xl border border-dashed border-slate-500/70 bg-slate-950/35 px-5 py-8 text-center">
+                          <p className="text-lg font-black text-white">아직 저장된 기록이 없어요.</p>
+                          <p className="mt-2 text-sm font-semibold text-slate-300">배틀을 한 번 마치면 여기에 기록이 남습니다.</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <AnimatePresence>
             {isNamePromptOpen && (
@@ -13035,20 +13334,16 @@ export default function App() {
             <p className={`mt-2 break-keep text-sm font-bold leading-6 sm:text-lg ${isWinResult ? 'text-yellow-100/80' : 'text-slate-300'}`}>
               {finalRecordTopic}
             </p>
+            <p className={`mt-2 text-xs font-black sm:text-sm ${isWinResult ? 'text-emerald-100/85' : 'text-emerald-300'}`}>
+              이 크롬북에 기록이 저장되었어요.
+            </p>
           </div>
           <div className="mx-auto flex w-full flex-col gap-2 sm:w-auto sm:min-w-[18rem]">
-            <a
-              href={RECORD_BOARD_URL}
-              target="_blank"
-              rel="noreferrer"
-              className={`flex w-full items-center justify-center rounded-full px-6 py-3 text-lg font-black transition-all sm:text-xl lg:px-10 lg:py-4 ${
-                isWinResult
-                  ? 'bg-[linear-gradient(90deg,#facc15_0%,#34d399_100%)] text-slate-950 shadow-[0_18px_40px_rgba(250,204,21,0.28)] hover:scale-[1.01] hover:brightness-105'
-                  : 'bg-emerald-500 text-slate-950 hover:bg-emerald-400'
-              }`}
-            >
-              Padlet에 기록 남기기
-            </a>
+            <button onPointerDown={warmAudio} onClick={openRecordModal} className={`flex w-full items-center justify-center gap-3 rounded-full px-6 py-3 text-lg font-black transition-all sm:text-xl lg:gap-4 lg:px-10 lg:py-4 lg:text-2xl ${
+              isWinResult
+                ? 'bg-[linear-gradient(90deg,#facc15_0%,#34d399_100%)] text-slate-950 shadow-[0_18px_40px_rgba(250,204,21,0.28)] hover:scale-[1.01] hover:brightness-105'
+                : 'bg-emerald-500 text-slate-950 hover:bg-emerald-400'
+            }`}><History size={28} /> 기록 보기</button>
             <button onPointerDown={warmAudio} onClick={returnToStartScreen} className={`flex w-full items-center justify-center gap-3 rounded-full px-6 py-3 text-lg font-black text-white transition-all sm:text-xl lg:gap-4 lg:px-10 lg:py-4 lg:text-2xl ${
               isWinResult
                 ? 'border border-white/15 bg-white/14 backdrop-blur-sm hover:bg-white/20'
@@ -13057,6 +13352,107 @@ export default function App() {
           </div>
         </motion.div>
       )}
+
+      <AnimatePresence>
+        {isResultScreen && isRecordModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/82 p-4 backdrop-blur-md sm:p-6"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.94, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.94, y: 12 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className="relative flex max-h-[calc(100svh-2rem)] w-full max-w-5xl flex-col overflow-hidden rounded-[2.25rem] border border-cyan-100/16 bg-slate-950/92 p-5 text-left shadow-[0_28px_90px_rgba(2,8,23,0.62)] sm:p-8"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="result-records-title"
+            >
+              <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-100/35 to-transparent" />
+
+              <div className="relative flex min-h-0 flex-col">
+                <div className="flex items-start justify-between gap-4">
+                  <h2 id="result-records-title" className="text-3xl font-black text-white sm:text-4xl">나의 기록</h2>
+                  <button
+                    type="button"
+                    aria-label="닫기"
+                    onPointerDown={startRecordClearHold}
+                    onPointerUp={finishRecordClosePress}
+                    onPointerLeave={cancelRecordClearHold}
+                    onPointerCancel={cancelRecordClearHold}
+                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-slate-600 text-3xl font-black leading-none text-slate-200 transition hover:bg-slate-800 sm:h-14 sm:w-14"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <div className="mt-6 min-h-0 overflow-y-auto pr-1">
+                  {hasStoredPlayRecords ? (
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                      {visibleStoredPlayRecords.map((record, recordIndex) => {
+                        const reachedRatio = Math.max(0, Math.min(1, record.level / record.totalLevels));
+                        const progressPercent = `${Math.round(reachedRatio * 100)}%`;
+                        const isLatestRecord = recordIndex === 0;
+                        const recordUnitTheme = STORED_PLAY_RECORD_UNIT_THEMES[record.unitId];
+
+                        return (
+                          <div
+                            key={record.id}
+                            className={`relative min-w-0 overflow-hidden rounded-[1.75rem] border p-4 shadow-[0_18px_40px_rgba(2,8,23,0.28)] ${
+                              isLatestRecord ? 'min-h-[13rem] sm:col-span-2 lg:col-span-1 ring-2 ring-white/60 shadow-[0_18px_40px_rgba(2,8,23,0.28),0_0_32px_rgba(255,255,255,0.12)]' : 'min-h-[11.5rem]'
+                            } ${recordUnitTheme.cardClassName}`}
+                          >
+                            <div className={`absolute inset-x-0 top-0 h-1 ${recordUnitTheme.accentClassName}`} />
+                            <div className="flex h-full flex-col">
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="flex min-w-0 items-center gap-2">
+                                  <p className="truncate text-sm font-black text-slate-300">{formatStoredPlayRecordDate(record.playedAt)}</p>
+                                  {isLatestRecord && (
+                                    <span className="shrink-0 rounded-full bg-white/15 px-2 py-0.5 text-[0.68rem] font-black text-white ring-1 ring-white/35">가장 최근</span>
+                                  )}
+                                </div>
+                                <div className={`h-2.5 w-2.5 shrink-0 rounded-full ${recordUnitTheme.dotClassName}`} />
+                              </div>
+
+                              <div className="mt-auto flex items-end gap-4 pt-5">
+                                <div className="shrink-0">
+                                  <p className={`${isLatestRecord ? 'text-[5rem]' : 'text-[4.25rem]'} font-black leading-[0.82] text-white`}>{record.level}</p>
+                                  <p className="mt-2 text-sm font-black text-slate-300">/{record.totalLevels} 단계</p>
+                                </div>
+                                <div className="min-w-0 flex-1 pb-4">
+                                  <div className="h-2.5 overflow-hidden rounded-full bg-slate-700/65">
+                                    <div
+                                      className={`h-full rounded-full ${recordUnitTheme.progressClassName}`}
+                                      style={{ width: progressPercent }}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="mt-4 min-w-0 border-t border-white/8 pt-3">
+                                <p className={`truncate text-sm font-black ${recordUnitTheme.labelClassName}`}>{record.unitTitle}</p>
+                                <p className="mt-1 truncate text-xs font-bold text-slate-400">{record.topic}</p>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="rounded-2xl border border-dashed border-slate-500/70 bg-slate-950/35 px-5 py-8 text-center">
+                      <p className="text-lg font-black text-white">아직 저장된 기록이 없어요.</p>
+                      <p className="mt-2 text-sm font-semibold text-slate-300">배틀을 한 번 마치면 여기에 기록이 남습니다.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
