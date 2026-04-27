@@ -146,6 +146,21 @@ import playerWingHitImage from './assets/player-wing-hit.png';
 import playerScientistAttackImage from './assets/player-scientist-attack.png';
 import playerScientistDefaultImage from './assets/player-scientist-default.png';
 import playerScientistHitImage from './assets/player-scientist-hit.png';
+import playerRainbowDyeAttackImage from './assets/player-rainbow-dye-attack.png';
+import playerRainbowDyeDefaultImage from './assets/player-rainbow-dye-default.png';
+import playerRainbowDyeHitImage from './assets/player-rainbow-dye-hit.png';
+import playerTaegeukgiAttackImage from './assets/player-taegeukgi-attack.png';
+import playerTaegeukgiDefaultImage from './assets/player-taegeukgi-default.png';
+import playerTaegeukgiHitImage from './assets/player-taegeukgi-hit.png';
+import playerTireAttackImage from './assets/player-tire-attack.png';
+import playerTireDefaultImage from './assets/player-tire-default.png';
+import playerTireHitImage from './assets/player-tire-hit.png';
+import playerBaldAttackImage from './assets/player-bald-attack.png';
+import playerBaldDefaultImage from './assets/player-bald-default.png';
+import playerBaldHitImage from './assets/player-bald-hit.png';
+import playerMohawkAttackImage from './assets/player-mohawk-attack.png';
+import playerMohawkDefaultImage from './assets/player-mohawk-default.png';
+import playerMohawkHitImage from './assets/player-mohawk-hit.png';
 import playerTigerAttackImage from './assets/player-tiger-attack.png';
 import playerTigerDefaultImage from './assets/player-tiger-default.png';
 import playerTigerHitImage from './assets/player-tiger-hit.png';
@@ -531,7 +546,7 @@ interface CharacterSpriteSet {
   hit: string;
 }
 
-type PlayerSkinId = 'default' | 'champion' | 'wizard' | 'cape' | 'detective' | 'knight' | 'space' | 'chef' | 'pirate' | 'firefighter' | 'fairy' | 'patissier' | 'catpajama' | 'rainbowartist' | 'heartwizard' | 'eraser' | 'safety' | 'duck' | 'wolf' | 'fox' | 'ribbon' | 'babo' | 'student' | 'fish' | 'hamster' | 'pizza' | 'ghost' | 'police' | 'spain' | 'goguma' | 'baby-potato' | 'tornadopotato' | 'smart' | 'honey' | 'tiger' | 'gumiho' | 'cat' | 'princess' | 'teacher' | 'clock' | 'mom' | 'thief' | 'diver' | 'wing' | 'scientist';
+type PlayerSkinId = 'default' | 'champion' | 'wizard' | 'cape' | 'detective' | 'knight' | 'space' | 'chef' | 'pirate' | 'firefighter' | 'fairy' | 'patissier' | 'catpajama' | 'rainbowartist' | 'heartwizard' | 'eraser' | 'safety' | 'duck' | 'wolf' | 'fox' | 'ribbon' | 'babo' | 'student' | 'fish' | 'hamster' | 'pizza' | 'ghost' | 'police' | 'spain' | 'goguma' | 'baby-potato' | 'tornadopotato' | 'smart' | 'honey' | 'tiger' | 'gumiho' | 'cat' | 'princess' | 'teacher' | 'clock' | 'mom' | 'thief' | 'diver' | 'wing' | 'scientist' | 'rainbow-dye' | 'taegeukgi' | 'tire' | 'bald' | 'mohawk';
 
 interface PlayerSkinConfig {
   id: PlayerSkinId;
@@ -1948,6 +1963,31 @@ const SCIENTIST_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
   default: playerScientistDefaultImage,
   hit: playerScientistHitImage,
 };
+const RAINBOW_DYE_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerRainbowDyeAttackImage,
+  default: playerRainbowDyeDefaultImage,
+  hit: playerRainbowDyeHitImage,
+};
+const TAEGEUKGI_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerTaegeukgiAttackImage,
+  default: playerTaegeukgiDefaultImage,
+  hit: playerTaegeukgiHitImage,
+};
+const TIRE_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerTireAttackImage,
+  default: playerTireDefaultImage,
+  hit: playerTireHitImage,
+};
+const BALD_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerBaldAttackImage,
+  default: playerBaldDefaultImage,
+  hit: playerBaldHitImage,
+};
+const MOHAWK_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerMohawkAttackImage,
+  default: playerMohawkDefaultImage,
+  hit: playerMohawkHitImage,
+};
 const TIGER_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
   attack: playerTigerAttackImage,
   default: playerTigerDefaultImage,
@@ -2271,6 +2311,41 @@ const PLAYER_SKINS: PlayerSkinConfig[] = [
     label: '과학자 고마',
     badge: '랜덤 보상',
     spriteSet: SCIENTIST_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'rainbow-dye',
+    label: '무지개 염색 고마',
+    badge: '랜덤 보상',
+    spriteSet: RAINBOW_DYE_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'taegeukgi',
+    label: '태극기 고마',
+    badge: '랜덤 보상',
+    spriteSet: TAEGEUKGI_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'tire',
+    label: '타이어 고마',
+    badge: '랜덤 보상',
+    spriteSet: TIRE_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'bald',
+    label: '탈모 고마',
+    badge: '랜덤 보상',
+    spriteSet: BALD_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'mohawk',
+    label: '모히칸 고마',
+    badge: '랜덤 보상',
+    spriteSet: MOHAWK_GOMA_PLAYER_SPRITES,
     isReward: true,
   },
 ];
