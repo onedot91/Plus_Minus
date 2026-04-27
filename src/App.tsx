@@ -21,6 +21,9 @@ import stage7ArnyaDefeatSceneImage from './assets/stage7-arnya-defeat-scene-cuto
 import stage8DefeatSceneImage from './assets/stage8-defeat-scene-cutout.png';
 import stage9DefeatSceneImage from './assets/stage9-defeat-scene-cutout.png';
 import playerAttackImage from './assets/player-attack.png';
+import playerBabyPotatoAttackImage from './assets/player-baby-potato-attack.png';
+import playerBabyPotatoDefaultImage from './assets/player-baby-potato-default.png';
+import playerBabyPotatoHitImage from './assets/player-baby-potato-hit.png';
 import playerDefaultImage from './assets/player-default.png';
 import playerHitImage from './assets/player-hit.png';
 import playerChampionAttackImage from './assets/player-champion-attack.png';
@@ -35,36 +38,123 @@ import playerCapeHitImage from './assets/player-cape-hit.png';
 import playerCatpajamaAttackImage from './assets/player-catpajama-attack.png';
 import playerCatpajamaDefaultImage from './assets/player-catpajama-default.png';
 import playerCatpajamaHitImage from './assets/player-catpajama-hit.png';
+import playerCatAttackImage from './assets/player-cat-attack.png';
+import playerCatDefaultImage from './assets/player-cat-default.png';
+import playerCatHitImage from './assets/player-cat-hit.png';
 import playerChefAttackImage from './assets/player-chef-attack.png';
 import playerChefDefaultImage from './assets/player-chef-default.png';
 import playerChefHitImage from './assets/player-chef-hit.png';
 import playerDetectiveAttackImage from './assets/player-detective-attack.png';
 import playerDetectiveDefaultImage from './assets/player-detective-default.png';
 import playerDetectiveHitImage from './assets/player-detective-hit.png';
+import playerDuckAttackImage from './assets/player-duck-attack.png';
+import playerDuckDefaultImage from './assets/player-duck-default.png';
+import playerDuckHitImage from './assets/player-duck-hit.png';
+import playerEraserAttackImage from './assets/player-eraser-attack.png';
+import playerEraserDefaultImage from './assets/player-eraser-default.png';
+import playerEraserHitImage from './assets/player-eraser-hit.png';
 import playerFairyAttackImage from './assets/player-fairy-attack.png';
 import playerFairyDefaultImage from './assets/player-fairy-default.png';
 import playerFairyHitImage from './assets/player-fairy-hit.png';
+import playerFoxAttackImage from './assets/player-fox-attack.png';
+import playerFoxDefaultImage from './assets/player-fox-default.png';
+import playerFoxHitImage from './assets/player-fox-hit.png';
 import playerFirefighterAttackImage from './assets/player-firefighter-attack.png';
 import playerFirefighterDefaultImage from './assets/player-firefighter-default.png';
 import playerFirefighterHitImage from './assets/player-firefighter-hit.png';
+import playerFishAttackImage from './assets/player-fish-attack.png';
+import playerFishDefaultImage from './assets/player-fish-default.png';
+import playerFishHitImage from './assets/player-fish-hit.png';
+import playerGhostAttackImage from './assets/player-ghost-attack.png';
+import playerGhostDefaultImage from './assets/player-ghost-default.png';
+import playerGhostHitImage from './assets/player-ghost-hit.png';
+import playerGogumaAttackImage from './assets/player-goguma-attack.png';
+import playerGogumaDefaultImage from './assets/player-goguma-default.png';
+import playerGogumaHitImage from './assets/player-goguma-hit.png';
+import playerGumihoAttackImage from './assets/player-gumiho-attack.png';
+import playerGumihoDefaultImage from './assets/player-gumiho-default.png';
+import playerGumihoHitImage from './assets/player-gumiho-hit.png';
 import playerHeartwizardAttackImage from './assets/player-heartwizard-attack.png';
 import playerHeartwizardDefaultImage from './assets/player-heartwizard-default.png';
 import playerHeartwizardHitImage from './assets/player-heartwizard-hit.png';
+import playerHoneyAttackImage from './assets/player-honey-attack.png';
+import playerHoneyDefaultImage from './assets/player-honey-default.png';
+import playerHoneyHitImage from './assets/player-honey-hit.png';
+import playerHamsterAttackImage from './assets/player-hamster-attack.png';
+import playerHamsterDefaultImage from './assets/player-hamster-default.png';
+import playerHamsterHitImage from './assets/player-hamster-hit.png';
 import playerKnightAttackImage from './assets/player-knight-attack.png';
 import playerKnightDefaultImage from './assets/player-knight-default.png';
 import playerKnightHitImage from './assets/player-knight-hit.png';
 import playerPatissierAttackImage from './assets/player-patissier-attack.png';
 import playerPatissierDefaultImage from './assets/player-patissier-default.png';
 import playerPatissierHitImage from './assets/player-patissier-hit.png';
+import playerPrincessAttackImage from './assets/player-princess-attack.png';
+import playerPrincessDefaultImage from './assets/player-princess-default.png';
+import playerPrincessHitImage from './assets/player-princess-hit.png';
+import playerPizzaAttackImage from './assets/player-pizza-attack.png';
+import playerPizzaDefaultImage from './assets/player-pizza-default.png';
+import playerPizzaHitImage from './assets/player-pizza-hit.png';
 import playerPirateAttackImage from './assets/player-pirate-attack.png';
 import playerPirateDefaultImage from './assets/player-pirate-default.png';
 import playerPirateHitImage from './assets/player-pirate-hit.png';
+import playerPoliceAttackImage from './assets/player-police-attack.png';
+import playerPoliceDefaultImage from './assets/player-police-default.png';
+import playerPoliceHitImage from './assets/player-police-hit.png';
 import playerRainbowartistAttackImage from './assets/player-rainbowartist-attack.png';
 import playerRainbowartistDefaultImage from './assets/player-rainbowartist-default.png';
 import playerRainbowartistHitImage from './assets/player-rainbowartist-hit.png';
+import playerRibbonAttackImage from './assets/player-ribbon-attack.png';
+import playerRibbonDefaultImage from './assets/player-ribbon-default.png';
+import playerRibbonHitImage from './assets/player-ribbon-hit.png';
 import playerSpaceAttackImage from './assets/player-space-attack.png';
 import playerSpaceDefaultImage from './assets/player-space-default.png';
 import playerSpaceHitImage from './assets/player-space-hit.png';
+import playerSpainAttackImage from './assets/player-spain-attack.png';
+import playerSpainDefaultImage from './assets/player-spain-default.png';
+import playerSpainHitImage from './assets/player-spain-hit.png';
+import playerSafetyAttackImage from './assets/player-safety-attack.png';
+import playerSafetyDefaultImage from './assets/player-safety-default.png';
+import playerSafetyHitImage from './assets/player-safety-hit.png';
+import playerSillyAttackImage from './assets/player-silly-attack.png';
+import playerSillyDefaultImage from './assets/player-silly-default.png';
+import playerSillyHitImage from './assets/player-silly-hit.png';
+import playerSmartAttackImage from './assets/player-smart-attack.png';
+import playerSmartDefaultImage from './assets/player-smart-default.png';
+import playerSmartHitImage from './assets/player-smart-hit.png';
+import playerStudentAttackImage from './assets/player-student-attack.png';
+import playerStudentDefaultImage from './assets/player-student-default.png';
+import playerStudentHitImage from './assets/player-student-hit.png';
+import playerTeacherAttackImage from './assets/player-teacher-attack.png';
+import playerTeacherDefaultImage from './assets/player-teacher-default.png';
+import playerTeacherHitImage from './assets/player-teacher-hit.png';
+import playerClockAttackImage from './assets/player-clock-attack.png';
+import playerClockDefaultImage from './assets/player-clock-default.png';
+import playerClockHitImage from './assets/player-clock-hit.png';
+import playerMomAttackImage from './assets/player-mom-attack.png';
+import playerMomDefaultImage from './assets/player-mom-default.png';
+import playerMomHitImage from './assets/player-mom-hit.png';
+import playerThiefAttackImage from './assets/player-thief-attack.png';
+import playerThiefDefaultImage from './assets/player-thief-default.png';
+import playerThiefHitImage from './assets/player-thief-hit.png';
+import playerDiverAttackImage from './assets/player-diver-attack.png';
+import playerDiverDefaultImage from './assets/player-diver-default.png';
+import playerDiverHitImage from './assets/player-diver-hit.png';
+import playerWingAttackImage from './assets/player-wing-attack.png';
+import playerWingDefaultImage from './assets/player-wing-default.png';
+import playerWingHitImage from './assets/player-wing-hit.png';
+import playerScientistAttackImage from './assets/player-scientist-attack.png';
+import playerScientistDefaultImage from './assets/player-scientist-default.png';
+import playerScientistHitImage from './assets/player-scientist-hit.png';
+import playerTigerAttackImage from './assets/player-tiger-attack.png';
+import playerTigerDefaultImage from './assets/player-tiger-default.png';
+import playerTigerHitImage from './assets/player-tiger-hit.png';
+import playerTornadopotatoAttackImage from './assets/player-tornadopotato-attack.png';
+import playerTornadopotatoDefaultImage from './assets/player-tornadopotato-default.png';
+import playerTornadopotatoHitImage from './assets/player-tornadopotato-hit.png';
+import playerWolfAttackImage from './assets/player-wolf-attack.png';
+import playerWolfDefaultImage from './assets/player-wolf-default.png';
+import playerWolfHitImage from './assets/player-wolf-hit.png';
 import opponentLevel1AttackImage from './assets/opponent-level1-attack.png';
 import opponentLevel1ChurusigiAttackImage from './assets/opponent-level1-churusigi-attack-cutout.png';
 import opponentLevel1DefaultImage from './assets/opponent-level1-default.png';
@@ -441,7 +531,7 @@ interface CharacterSpriteSet {
   hit: string;
 }
 
-type PlayerSkinId = 'default' | 'champion' | 'wizard' | 'cape' | 'detective' | 'knight' | 'space' | 'chef' | 'pirate' | 'firefighter' | 'fairy' | 'patissier' | 'catpajama' | 'rainbowartist' | 'heartwizard';
+type PlayerSkinId = 'default' | 'champion' | 'wizard' | 'cape' | 'detective' | 'knight' | 'space' | 'chef' | 'pirate' | 'firefighter' | 'fairy' | 'patissier' | 'catpajama' | 'rainbowartist' | 'heartwizard' | 'eraser' | 'safety' | 'duck' | 'wolf' | 'fox' | 'ribbon' | 'babo' | 'student' | 'fish' | 'hamster' | 'pizza' | 'ghost' | 'police' | 'spain' | 'goguma' | 'baby-potato' | 'tornadopotato' | 'smart' | 'honey' | 'tiger' | 'gumiho' | 'cat' | 'princess' | 'teacher' | 'clock' | 'mom' | 'thief' | 'diver' | 'wing' | 'scientist';
 
 interface PlayerSkinConfig {
   id: PlayerSkinId;
@@ -1648,6 +1738,11 @@ const DEFAULT_PLAYER_SPRITES: CharacterSpriteSet = {
   default: playerDefaultImage,
   hit: playerHitImage,
 };
+const BABY_POTATO_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerBabyPotatoAttackImage,
+  default: playerBabyPotatoDefaultImage,
+  hit: playerBabyPotatoHitImage,
+};
 const CHAMPION_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
   attack: playerChampionAttackImage,
   default: playerChampionDefaultImage,
@@ -1668,6 +1763,11 @@ const CATPAJAMA_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
   default: playerCatpajamaDefaultImage,
   hit: playerCatpajamaHitImage,
 };
+const CAT_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerCatAttackImage,
+  default: playerCatDefaultImage,
+  hit: playerCatHitImage,
+};
 const CHEF_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
   attack: playerChefAttackImage,
   default: playerChefDefaultImage,
@@ -1678,20 +1778,65 @@ const DETECTIVE_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
   default: playerDetectiveDefaultImage,
   hit: playerDetectiveHitImage,
 };
+const DUCK_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerDuckAttackImage,
+  default: playerDuckDefaultImage,
+  hit: playerDuckHitImage,
+};
+const ERASER_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerEraserAttackImage,
+  default: playerEraserDefaultImage,
+  hit: playerEraserHitImage,
+};
 const FAIRY_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
   attack: playerFairyAttackImage,
   default: playerFairyDefaultImage,
   hit: playerFairyHitImage,
+};
+const FOX_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerFoxAttackImage,
+  default: playerFoxDefaultImage,
+  hit: playerFoxHitImage,
 };
 const FIREFIGHTER_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
   attack: playerFirefighterAttackImage,
   default: playerFirefighterDefaultImage,
   hit: playerFirefighterHitImage,
 };
+const FISH_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerFishAttackImage,
+  default: playerFishDefaultImage,
+  hit: playerFishHitImage,
+};
+const GHOST_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerGhostAttackImage,
+  default: playerGhostDefaultImage,
+  hit: playerGhostHitImage,
+};
+const GOGUMA_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerGogumaAttackImage,
+  default: playerGogumaDefaultImage,
+  hit: playerGogumaHitImage,
+};
+const GUMIHO_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerGumihoAttackImage,
+  default: playerGumihoDefaultImage,
+  hit: playerGumihoHitImage,
+};
 const HEARTWIZARD_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
   attack: playerHeartwizardAttackImage,
   default: playerHeartwizardDefaultImage,
   hit: playerHeartwizardHitImage,
+};
+const HONEY_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerHoneyAttackImage,
+  default: playerHoneyDefaultImage,
+  hit: playerHoneyHitImage,
+};
+const HAMSTER_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerHamsterAttackImage,
+  default: playerHamsterDefaultImage,
+  hit: playerHamsterHitImage,
 };
 const KNIGHT_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
   attack: playerKnightAttackImage,
@@ -1703,20 +1848,115 @@ const PATISSIER_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
   default: playerPatissierDefaultImage,
   hit: playerPatissierHitImage,
 };
+const PRINCESS_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerPrincessAttackImage,
+  default: playerPrincessDefaultImage,
+  hit: playerPrincessHitImage,
+};
+const PIZZA_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerPizzaAttackImage,
+  default: playerPizzaDefaultImage,
+  hit: playerPizzaHitImage,
+};
 const PIRATE_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
   attack: playerPirateAttackImage,
   default: playerPirateDefaultImage,
   hit: playerPirateHitImage,
+};
+const POLICE_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerPoliceAttackImage,
+  default: playerPoliceDefaultImage,
+  hit: playerPoliceHitImage,
 };
 const RAINBOWARTIST_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
   attack: playerRainbowartistAttackImage,
   default: playerRainbowartistDefaultImage,
   hit: playerRainbowartistHitImage,
 };
+const RIBBON_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerRibbonAttackImage,
+  default: playerRibbonDefaultImage,
+  hit: playerRibbonHitImage,
+};
 const SPACE_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
   attack: playerSpaceAttackImage,
   default: playerSpaceDefaultImage,
   hit: playerSpaceHitImage,
+};
+const SPAIN_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerSpainAttackImage,
+  default: playerSpainDefaultImage,
+  hit: playerSpainHitImage,
+};
+const SAFETY_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerSafetyAttackImage,
+  default: playerSafetyDefaultImage,
+  hit: playerSafetyHitImage,
+};
+const WOLF_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerWolfAttackImage,
+  default: playerWolfDefaultImage,
+  hit: playerWolfHitImage,
+};
+const BABO_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerSillyAttackImage,
+  default: playerSillyDefaultImage,
+  hit: playerSillyHitImage,
+};
+const SMART_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerSmartAttackImage,
+  default: playerSmartDefaultImage,
+  hit: playerSmartHitImage,
+};
+const STUDENT_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerStudentAttackImage,
+  default: playerStudentDefaultImage,
+  hit: playerStudentHitImage,
+};
+const TEACHER_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerTeacherAttackImage,
+  default: playerTeacherDefaultImage,
+  hit: playerTeacherHitImage,
+};
+const CLOCK_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerClockAttackImage,
+  default: playerClockDefaultImage,
+  hit: playerClockHitImage,
+};
+const MOM_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerMomAttackImage,
+  default: playerMomDefaultImage,
+  hit: playerMomHitImage,
+};
+const THIEF_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerThiefAttackImage,
+  default: playerThiefDefaultImage,
+  hit: playerThiefHitImage,
+};
+const DIVER_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerDiverAttackImage,
+  default: playerDiverDefaultImage,
+  hit: playerDiverHitImage,
+};
+const WING_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerWingAttackImage,
+  default: playerWingDefaultImage,
+  hit: playerWingHitImage,
+};
+const SCIENTIST_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerScientistAttackImage,
+  default: playerScientistDefaultImage,
+  hit: playerScientistHitImage,
+};
+const TIGER_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerTigerAttackImage,
+  default: playerTigerDefaultImage,
+  hit: playerTigerHitImage,
+};
+const TORNADOPOTATO_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerTornadopotatoAttackImage,
+  default: playerTornadopotatoDefaultImage,
+  hit: playerTornadopotatoHitImage,
 };
 const PLAYER_SKINS: PlayerSkinConfig[] = [
   {
@@ -1821,6 +2061,216 @@ const PLAYER_SKINS: PlayerSkinConfig[] = [
     label: '하트 마법사 고마',
     badge: '랜덤 보상',
     spriteSet: HEARTWIZARD_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'eraser',
+    label: '지우개 고마',
+    badge: '랜덤 보상',
+    spriteSet: ERASER_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'safety',
+    label: '안전공사 고마',
+    badge: '랜덤 보상',
+    spriteSet: SAFETY_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'duck',
+    label: '오리 고마',
+    badge: '랜덤 보상',
+    spriteSet: DUCK_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'wolf',
+    label: '늑대 고마',
+    badge: '랜덤 보상',
+    spriteSet: WOLF_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'fox',
+    label: '여우 고마',
+    badge: '랜덤 보상',
+    spriteSet: FOX_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'ribbon',
+    label: '리본 고마',
+    badge: '랜덤 보상',
+    spriteSet: RIBBON_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'babo',
+    label: '바보 고마',
+    badge: '랜덤 보상',
+    spriteSet: BABO_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'student',
+    label: '학생 고마',
+    badge: '랜덤 보상',
+    spriteSet: STUDENT_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'fish',
+    label: '물고기 고마',
+    badge: '랜덤 보상',
+    spriteSet: FISH_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'hamster',
+    label: '햄스터 고마',
+    badge: '랜덤 보상',
+    spriteSet: HAMSTER_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'pizza',
+    label: '피자 고마',
+    badge: '랜덤 보상',
+    spriteSet: PIZZA_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'ghost',
+    label: '유령 고마',
+    badge: '랜덤 보상',
+    spriteSet: GHOST_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'police',
+    label: '경찰 고마',
+    badge: '랜덤 보상',
+    spriteSet: POLICE_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'spain',
+    label: '스페인 고마',
+    badge: '랜덤 보상',
+    spriteSet: SPAIN_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'goguma',
+    label: '고구마 고마',
+    badge: '랜덤 보상',
+    spriteSet: GOGUMA_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'baby-potato',
+    label: '알감자 고마',
+    badge: '랜덤 보상',
+    spriteSet: BABY_POTATO_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'tornadopotato',
+    label: '회오리감자 고마',
+    badge: '랜덤 보상',
+    spriteSet: TORNADOPOTATO_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'smart',
+    label: '똑똑이 고마',
+    badge: '랜덤 보상',
+    spriteSet: SMART_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'honey',
+    label: '꿀 고마',
+    badge: '랜덤 보상',
+    spriteSet: HONEY_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'tiger',
+    label: '호랑이 고마',
+    badge: '랜덤 보상',
+    spriteSet: TIGER_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'gumiho',
+    label: '구미호 고마',
+    badge: '랜덤 보상',
+    spriteSet: GUMIHO_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'cat',
+    label: '고양이 고마',
+    badge: '랜덤 보상',
+    spriteSet: CAT_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'princess',
+    label: '공주 고마',
+    badge: '랜덤 보상',
+    spriteSet: PRINCESS_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'teacher',
+    label: '선생님 고마',
+    badge: '랜덤 보상',
+    spriteSet: TEACHER_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'clock',
+    label: '시계 고마',
+    badge: '랜덤 보상',
+    spriteSet: CLOCK_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'mom',
+    label: '엄마 고마',
+    badge: '랜덤 보상',
+    spriteSet: MOM_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'thief',
+    label: '도둑 고마',
+    badge: '랜덤 보상',
+    spriteSet: THIEF_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'diver',
+    label: '잠수부 고마',
+    badge: '랜덤 보상',
+    spriteSet: DIVER_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'wing',
+    label: '날개 고마',
+    badge: '랜덤 보상',
+    spriteSet: WING_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'scientist',
+    label: '과학자 고마',
+    badge: '랜덤 보상',
+    spriteSet: SCIENTIST_GOMA_PLAYER_SPRITES,
     isReward: true,
   },
 ];
@@ -10866,12 +11316,14 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const normalizedSkinId = normalizeSelectedPlayerSkinId(selectedPlayerSkinId, unlockedPlayerSkinIds);
+    const normalizedSkinId = isDeveloperMode
+      ? selectedPlayerSkinId
+      : normalizeSelectedPlayerSkinId(selectedPlayerSkinId, unlockedPlayerSkinIds);
     if (normalizedSkinId !== selectedPlayerSkinId) {
       setSelectedPlayerSkinId(normalizedSkinId);
       saveSelectedPlayerSkinId(normalizedSkinId);
     }
-  }, [selectedPlayerSkinId, unlockedPlayerSkinIds]);
+  }, [isDeveloperMode, selectedPlayerSkinId, unlockedPlayerSkinIds]);
 
   useEffect(() => cancelRecordClearHold, []);
 
@@ -10917,7 +11369,7 @@ export default function App() {
 
   const selectPlayerSkin = (skinId: PlayerSkinId) => {
     const nextSkin = PLAYER_SKINS.find((skin) => skin.id === skinId);
-    if (!nextSkin || !isPlayerSkinUnlocked(nextSkin, unlockedPlayerSkinIds)) {
+    if (!nextSkin || (!isDeveloperMode && !isPlayerSkinUnlocked(nextSkin, unlockedPlayerSkinIds))) {
       return;
     }
 
@@ -11188,7 +11640,7 @@ export default function App() {
   const unitMenuRef = useRef<HTMLDivElement | null>(null);
   const selectedPlayerSkin = PLAYER_SKINS.find((skin) => skin.id === selectedPlayerSkinId) ?? PLAYER_SKINS[0];
   const playerSpriteSet = selectedPlayerSkin.spriteSet;
-  const availablePlayerSkins = PLAYER_SKINS.filter((skin) => isPlayerSkinUnlocked(skin, unlockedPlayerSkinIds));
+  const availablePlayerSkins = PLAYER_SKINS.filter((skin) => isDeveloperMode || isPlayerSkinUnlocked(skin, unlockedPlayerSkinIds));
   const playerCharacterImage = isPlayerHit
     ? playerSpriteSet.hit
     : isAttacking
@@ -12710,9 +13162,10 @@ export default function App() {
                             transition={{ duration: 0.2, ease: 'easeOut' }}
                             className="overflow-hidden"
                           >
-                            <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-5 lg:grid-cols-8">
+                            <div className="skin-scrollbar mt-2 overflow-x-auto overflow-y-hidden overscroll-x-contain pb-2 pr-1 [scrollbar-gutter:stable]">
+                              <div className="grid w-max auto-cols-[8.7rem] grid-flow-col grid-rows-2 gap-2 sm:auto-cols-[9.4rem] lg:auto-cols-[9.75rem]">
                               {PLAYER_SKINS.map((skin) => {
-                                const isSkinUnlocked = isPlayerSkinUnlocked(skin, unlockedPlayerSkinIds);
+                                const isSkinUnlocked = isDeveloperMode || isPlayerSkinUnlocked(skin, unlockedPlayerSkinIds);
                                 const isSelectedSkin = selectedPlayerSkinId === skin.id;
                                 const displaySkinLabel = isSkinUnlocked ? skin.label : '비공개';
 
@@ -12723,7 +13176,7 @@ export default function App() {
                                     disabled={!isSkinUnlocked}
                                     onPointerDown={isSkinUnlocked ? warmAudio : undefined}
                                     onClick={() => selectPlayerSkin(skin.id)}
-                                    className={`relative flex min-h-[6.4rem] flex-col items-center justify-center gap-1 overflow-hidden rounded-[0.9rem] border px-2 py-2 text-center transition duration-300 ${
+                                    className={`relative flex h-[6.4rem] w-full flex-col items-center justify-center gap-1 overflow-hidden rounded-[0.9rem] border px-2 py-2 text-center transition duration-300 ${
                                       isSelectedSkin
                                         ? 'border-emerald-200/70 bg-emerald-400/18 text-white shadow-[0_10px_24px_rgba(16,185,129,0.16),inset_0_1px_0_rgba(255,255,255,0.12)]'
                                         : isSkinUnlocked
@@ -12759,6 +13212,7 @@ export default function App() {
                                   </button>
                                 );
                               })}
+                              </div>
                             </div>
                           </motion.div>
                         )}
@@ -12872,7 +13326,7 @@ export default function App() {
                     x: isAttacking ? [0, -100, 300, 0] : isPlayerHit ? [0, -20, 20, -20, 0] : 0,
                     rotate: isAttacking ? [0, -30, 60, 0] : 0,
                     scale: isAttacking ? [1, 0.8, 2, 1] : isPlayerHit ? [1, 0.9, 1] : 1,
-                    filter: isAttacking ? 'brightness(3.8) drop-shadow(0 0 22px rgba(16, 185, 129, 0.78))' : isPlayerHit ? 'brightness(1.75) saturate(1.65)' : 'brightness(1)'
+                    filter: isAttacking ? 'brightness(1.65) drop-shadow(0 0 8px rgba(16, 185, 129, 0.28))' : isPlayerHit ? 'brightness(1.75) saturate(1.65)' : 'brightness(1)'
                   }}
                   transition={{ duration: isAttacking ? ATTACK_MOTION_DURATION_S : HIT_MOTION_DURATION_S, ease: "backOut" }}
                   className="relative flex h-full max-h-full w-full max-w-full items-center justify-center overflow-visible"
@@ -12883,13 +13337,6 @@ export default function App() {
                     className={`${battleStageImageResponsiveClass} w-auto max-w-full translate-y-2 object-contain select-none drop-shadow-[0_18px_24px_rgba(15,23,42,0.35)]`}
                     draggable={false}
                   />
-                  {isAttacking && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0, rotate: 0 }}
-                        animate={{ opacity: 0.82, scale: 1.75, rotate: 45 }}
-                        className="pointer-events-none absolute -top-10 -right-10 h-10 w-40 rounded-full bg-emerald-400 blur-xl"
-                    />
-                  )}
                 </motion.div>
               </div>
 
