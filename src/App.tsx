@@ -2844,7 +2844,7 @@ const STORY_TEMPLATE_POOLS: Record<number, StoryTemplatePool> = {
   },
 };
 
-function sample<T>(items: T[]): T {
+function sample<T>(items: readonly T[]): T {
   return items[Math.floor(Math.random() * items.length)];
 }
 
@@ -9476,9 +9476,9 @@ function TimeAdditionProblemCard({
   showAnswerFields?: boolean;
 }) {
   const fields: Array<{ key: ClockInputPart; label: string; placeholder: string }> = [
-    { key: 'hours', label: '시', placeholder: '시' },
-    { key: 'minutes', label: '분', placeholder: '분' },
-    { key: 'seconds', label: '초', placeholder: '초' },
+    { key: 'hours' as const, label: '시', placeholder: '시' },
+    { key: 'minutes' as const, label: '분', placeholder: '분' },
+    { key: 'seconds' as const, label: '초', placeholder: '초' },
   ].filter((field) => timeAddition.editableParts.includes(field.key));
   const isVerticalMode = timeAddition.mode === 'vertical';
   const isStoryMode = timeAddition.mode === 'story';
@@ -11278,6 +11278,8 @@ export default function App() {
   const developerProblemHistoryIndexRef = useRef(-1);
   const currentPlayRunIdRef = useRef(0);
   const recordedPlayRunIdRef = useRef<number | null>(null);
+  const gameStateRef = useRef<GameState>('start');
+  const battleTimeoutIdsRef = useRef<number[]>([]);
   const recordClearHoldTimeoutRef = useRef<number | null>(null);
   const didClearRecordsByHoldRef = useRef(false);
   const isDeveloperShortcutEnabled = true;
@@ -11330,6 +11332,42 @@ export default function App() {
     setShowMsg(true);
     setTimeout(() => setShowMsg(false), 2000);
   };
+
+  useEffect(() => {
+    gameStateRef.current = gameState;
+    if (gameState !== 'playing') {
+      clearBattleTimeouts();
+    }
+  }, [gameState]);
+
+  const isActivePlayRun = (runId: number) => (
+    currentPlayRunIdRef.current === runId && gameStateRef.current === 'playing'
+  );
+
+  const clearBattleTimeouts = () => {
+    battleTimeoutIdsRef.current.forEach((timeoutId) => window.clearTimeout(timeoutId));
+    battleTimeoutIdsRef.current = [];
+  };
+
+  const scheduleBattleTimeout = (
+    callback: () => void,
+    delayMs: number,
+    runId = currentPlayRunIdRef.current,
+  ) => {
+    const timeoutId = window.setTimeout(() => {
+      battleTimeoutIdsRef.current = battleTimeoutIdsRef.current.filter((id) => id !== timeoutId);
+      if (!isActivePlayRun(runId)) {
+        return;
+      }
+
+      callback();
+    }, delayMs);
+
+    battleTimeoutIdsRef.current.push(timeoutId);
+    return timeoutId;
+  };
+
+  useEffect(() => clearBattleTimeouts, []);
 
   const recordBattleResult = (result: 'win' | 'lose', reachedLevel: number) => {
     if (recordedPlayRunIdRef.current === currentPlayRunIdRef.current) {
@@ -11513,6 +11551,7 @@ export default function App() {
 
   const triggerBattleVictory = (detune: number) => {
     recordBattleResult('win', level);
+    gameStateRef.current = 'win';
     setGameState('win');
     playSound('win', { gainMultiplier: 1.14, detune });
     queueSound('levelUp', 240, {
@@ -12211,29 +12250,32 @@ export default function App() {
   };
 
   const queueEstimationChallenge = () => {
-    window.setTimeout(() => {
+    const runId = currentPlayRunIdRef.current;
+    scheduleBattleTimeout(() => {
       triggerEstimation();
-    }, 700);
+    }, 700, runId);
   };
 
   const queueUnitSelectionChallenge = (challengeLevel: number) => {
-    window.setTimeout(() => {
+    const runId = currentPlayRunIdRef.current;
+    scheduleBattleTimeout(() => {
       triggerUnitSelectionChallenge(challengeLevel);
-    }, 700);
+    }, 700, runId);
   };
 
   const scheduleNextLevelTransition = (nextLevel: number, shouldQueueEstimation = false) => {
     const currentLevel = level;
     const currentUnitId = activeLearningUnitId;
+    const runId = currentPlayRunIdRef.current;
 
-    window.setTimeout(() => {
+    scheduleBattleTimeout(() => {
       if (requiresSecretCodeForLevelTransition(currentUnitId, currentLevel, nextLevel)) {
         requestSecretCodeForNextLevel(nextLevel, shouldQueueEstimation);
         return;
       }
 
       completeLevelTransition(nextLevel, shouldQueueEstimation);
-    }, HIT_POSE_DURATION_MS);
+    }, HIT_POSE_DURATION_MS, runId);
   };
 
   const triggerEstimation = () => {
@@ -12263,6 +12305,7 @@ export default function App() {
       return;
     }
 
+    const runId = currentPlayRunIdRef.current;
     setIsSpecialChallengeResolving(true);
     if (isCorrectEstimation) {
       playSound('correct', {
@@ -12270,7 +12313,7 @@ export default function App() {
         detune: Math.min(level * 8, 60),
       });
       setIsAttacking(true);
-      setTimeout(() => {
+      scheduleBattleTimeout(() => {
         setIsAttacking(false);
         setIsOpponentHit(true);
         playSound('enemyHit', {
@@ -12278,7 +12321,7 @@ export default function App() {
           detune: Math.min(level * 10, 80),
           noisePlaybackRateMultiplier: 1 + level * 0.01,
         });
-        setTimeout(() => setIsOpponentHit(false), HIT_POSE_DURATION_MS);
+        scheduleBattleTimeout(() => setIsOpponentHit(false), HIT_POSE_DURATION_MS, runId);
 
         const newOpponentHP = Math.max(0, opponentHP - estimationAttackDamage);
         setOpponentHP(newOpponentHP);
@@ -12297,14 +12340,14 @@ export default function App() {
         setIsEstimation(false);
         setEstimationProblem(null);
         setIsSpecialChallengeResolving(false);
-      }, ATTACK_POSE_DURATION_MS);
+      }, ATTACK_POSE_DURATION_MS, runId);
     } else {
       playSound('wrong', {
         gainMultiplier: previewRemainingHP(playerHP, estimationHitDamage) <= 30 ? 1.08 : 1,
         detune: -30,
       });
       setIsOpponentAttacking(true);
-      setTimeout(() => {
+      scheduleBattleTimeout(() => {
         setIsOpponentAttacking(false);
         setIsPlayerHit(true);
         playSound('playerHit', {
@@ -12312,7 +12355,7 @@ export default function App() {
           detune: -Math.min(level * 10, 70),
           noisePlaybackRateMultiplier: 0.98,
         });
-        setTimeout(() => setIsPlayerHit(false), HIT_POSE_DURATION_MS);
+        scheduleBattleTimeout(() => setIsPlayerHit(false), HIT_POSE_DURATION_MS, runId);
 
         const newPlayerHP = Math.max(0, playerHP - estimationHitDamage);
         setPlayerHP(newPlayerHP);
@@ -12320,6 +12363,7 @@ export default function App() {
 
         if (newPlayerHP === 0) {
           recordBattleResult('lose', level);
+          gameStateRef.current = 'lose';
           setGameState('lose');
           playSound('lose', { gainMultiplier: 1.06, detune: -20 });
         }
@@ -12327,7 +12371,7 @@ export default function App() {
         setIsEstimation(false);
         setEstimationProblem(null);
         setIsSpecialChallengeResolving(false);
-      }, ATTACK_POSE_DURATION_MS);
+      }, ATTACK_POSE_DURATION_MS, runId);
     }
   };
 
@@ -12340,6 +12384,7 @@ export default function App() {
       return;
     }
 
+    const runId = currentPlayRunIdRef.current;
     setIsSpecialChallengeResolving(true);
     if (isCorrectSelection) {
       playSound('correct', {
@@ -12347,7 +12392,7 @@ export default function App() {
         detune: Math.min(level * 7, 55),
       });
       setIsAttacking(true);
-      setTimeout(() => {
+      scheduleBattleTimeout(() => {
         setIsAttacking(false);
         setIsOpponentHit(true);
         playSound('enemyHit', {
@@ -12355,7 +12400,7 @@ export default function App() {
           detune: Math.min(level * 10, 80),
           noisePlaybackRateMultiplier: 1 + level * 0.01,
         });
-        setTimeout(() => setIsOpponentHit(false), HIT_POSE_DURATION_MS);
+        scheduleBattleTimeout(() => setIsOpponentHit(false), HIT_POSE_DURATION_MS, runId);
 
         const newOpponentHP = Math.max(0, opponentHP - estimationAttackDamage);
         setOpponentHP(newOpponentHP);
@@ -12374,7 +12419,7 @@ export default function App() {
         setIsUnitSelectionChallenge(false);
         setUnitSelectionChallenge(null);
         setIsSpecialChallengeResolving(false);
-      }, ATTACK_POSE_DURATION_MS);
+      }, ATTACK_POSE_DURATION_MS, runId);
       return;
     }
 
@@ -12383,7 +12428,7 @@ export default function App() {
       detune: -24,
     });
     setIsOpponentAttacking(true);
-    setTimeout(() => {
+    scheduleBattleTimeout(() => {
       setIsOpponentAttacking(false);
       setIsPlayerHit(true);
       playSound('playerHit', {
@@ -12391,7 +12436,7 @@ export default function App() {
         detune: -Math.min(level * 10, 70),
         noisePlaybackRateMultiplier: 0.98,
       });
-      setTimeout(() => setIsPlayerHit(false), HIT_POSE_DURATION_MS);
+      scheduleBattleTimeout(() => setIsPlayerHit(false), HIT_POSE_DURATION_MS, runId);
 
       const newPlayerHP = Math.max(0, playerHP - estimationHitDamage);
       setPlayerHP(newPlayerHP);
@@ -12399,6 +12444,7 @@ export default function App() {
 
       if (newPlayerHP === 0) {
         recordBattleResult('lose', level);
+        gameStateRef.current = 'lose';
         setGameState('lose');
         playSound('lose', { gainMultiplier: 1.06, detune: -20 });
       }
@@ -12406,7 +12452,7 @@ export default function App() {
       setIsUnitSelectionChallenge(false);
       setUnitSelectionChallenge(null);
       setIsSpecialChallengeResolving(false);
-    }, ATTACK_POSE_DURATION_MS);
+    }, ATTACK_POSE_DURATION_MS, runId);
   };
 
   const resolveProblemResult = (
@@ -12416,6 +12462,7 @@ export default function App() {
     } = {},
   ) => {
     const skipSpecialChallenges = options.skipSpecialChallenges === true;
+    const runId = currentPlayRunIdRef.current;
 
     if (isCorrect) {
       playSound('correct', {
@@ -12423,7 +12470,7 @@ export default function App() {
         detune: Math.min(level * 7, 55),
       });
       setIsAttacking(true);
-      setTimeout(() => {
+      scheduleBattleTimeout(() => {
         setIsAttacking(false);
         setIsOpponentHit(true);
         playSound('enemyHit', {
@@ -12431,7 +12478,7 @@ export default function App() {
           detune: Math.min(level * 10, 80),
           noisePlaybackRateMultiplier: 1 + level * 0.01,
         });
-        setTimeout(() => setIsOpponentHit(false), HIT_POSE_DURATION_MS);
+        scheduleBattleTimeout(() => setIsOpponentHit(false), HIT_POSE_DURATION_MS, runId);
         
         const currentUnit3ProblemSequence = unit3ProblemSequenceRef.current[level] ?? 1;
         const newOpponentHP = isUnit3FixedTimeSequenceLevel(activeLearningUnitId, level)
@@ -12472,14 +12519,14 @@ export default function App() {
             queueUnitSelectionChallenge(level);
           }
         }
-      }, ATTACK_POSE_DURATION_MS);
+      }, ATTACK_POSE_DURATION_MS, runId);
     } else {
       playSound('wrong', {
         gainMultiplier: previewRemainingHP(playerHP, regularHitDamage) <= 30 ? 1.06 : 1,
         detune: -24,
       });
       setIsOpponentAttacking(true);
-      setTimeout(() => {
+      scheduleBattleTimeout(() => {
         setIsOpponentAttacking(false);
         setIsPlayerHit(true);
         playSound('playerHit', {
@@ -12487,17 +12534,18 @@ export default function App() {
           detune: -Math.min(level * 10, 70),
           noisePlaybackRateMultiplier: 0.98,
         });
-        setTimeout(() => setIsPlayerHit(false), HIT_POSE_DURATION_MS);
+        scheduleBattleTimeout(() => setIsPlayerHit(false), HIT_POSE_DURATION_MS, runId);
         
         const newPlayerHP = Math.max(0, playerHP - regularHitDamage);
         setPlayerHP(newPlayerHP);
         updateMessage('앗! 공격이 빗나갔다! 상대의 반격!');
         if (newPlayerHP === 0) {
           recordBattleResult('lose', level);
+          gameStateRef.current = 'lose';
           setGameState('lose');
           playSound('lose', { gainMultiplier: 1.06, detune: -18 });
         }
-      }, ATTACK_POSE_DURATION_MS);
+      }, ATTACK_POSE_DURATION_MS, runId);
     }
     setInputValue('');
     setUnitInputValue('');
@@ -12676,10 +12724,12 @@ export default function App() {
   const startGame = () => {
     const nextSpecialOpponentSelections = pickSpecialOpponentSelections();
 
+    clearBattleTimeouts();
     currentPlayRunIdRef.current += 1;
     recordedPlayRunIdRef.current = null;
     warmAudio();
     playSound('start', { gainMultiplier: 0.8, detune: 12 });
+    gameStateRef.current = 'playing';
     setGameState('playing');
     setPendingRewardSkin(null);
     setRewardRoulettePhase('spinning');
@@ -12712,8 +12762,11 @@ export default function App() {
   };
 
   const returnToStartScreen = () => {
+    clearBattleTimeouts();
+    currentPlayRunIdRef.current += 1;
     warmAudio();
     playSound('ui');
+    gameStateRef.current = 'start';
     setGameState('start');
     setPendingRewardSkin(null);
     setRewardRoulettePhase('spinning');
@@ -12799,6 +12852,7 @@ export default function App() {
     setPlayerName(trimmedPendingPlayerName);
     setIsNamePromptOpen(false);
     setSelectedLearningUnitId(null);
+    gameStateRef.current = 'unitSelect';
     setGameState('unitSelect');
   };
 
