@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useEffectEvent } from 'react';
-import { Sword, Heart, RotateCcw, Play, Sparkles, Star, ChevronDown, Check, History, Lock } from 'lucide-react';
+import { Sword, Heart, RotateCcw, Play, Sparkles, Star, ChevronDown, Check, History, Lock, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { VisualCalculator, type VisualControlSound } from './components/VisualCalculator';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -4949,9 +4949,9 @@ const LARGE_MEASUREMENT_FACTORY_CONFIGS: MeasurementFactoryConfig[] = [
   },
   {
     title: '그림을 보고 길이를 재어 보세요.',
-    question: '초콜릿 한 칸의 길이는 몇 mm인가요?',
+    question: '초콜릿 조각의 길이는 몇 mm인가요?',
     objectKind: 'chocolate',
-    objectLabel: '초콜릿 한 칸',
+    objectLabel: '초콜릿 조각',
     minLengthMm: 30,
     maxLengthMm: 38,
     shiftedStartMinMm: 1,
@@ -7171,32 +7171,15 @@ function MeasurementObjectIllustration({
   }
 
   if (kind === 'chocolate') {
-    const top = y + 12;
-    const height = 24;
-    const segmentCount = Math.max(2, Math.min(4, Math.floor(width / 22)));
+    const top = y + 7;
+    const height = 34;
 
     return (
       <g>
-        <ellipse cx={x + width / 2} cy={y + 41} rx={Math.max(10, width * 0.24)} ry={3.1} fill="#d7dde5" opacity="0.16" />
-        <rect x={x} y={top} width={width} height={height} rx="4" fill="#8d4f2e" stroke="#67351a" strokeWidth="2.3" vectorEffect="non-scaling-stroke" />
-        <path d={`M ${x + 4} ${top + 4} H ${x + width - 4}`} stroke="#b87752" strokeWidth="1.5" opacity="0.8" vectorEffect="non-scaling-stroke" />
-        {Array.from({ length: segmentCount - 1 }, (_, index) => {
-          const segmentX = x + ((index + 1) * width) / segmentCount;
-
-          return (
-            <line
-              key={`chocolate-segment-${index}`}
-              x1={segmentX}
-              y1={top + 2}
-              x2={segmentX}
-              y2={top + height - 2}
-              stroke="#6c391d"
-              strokeWidth="1.7"
-              opacity="0.9"
-              vectorEffect="non-scaling-stroke"
-            />
-          );
-        })}
+        <ellipse cx={x + width / 2} cy={y + 47} rx={Math.max(12, width * 0.26)} ry={4.2} fill="#d7dde5" opacity="0.16" />
+        <rect x={x} y={top} width={width} height={height} rx="8" fill="#8d4f2e" stroke="#67351a" strokeWidth="2.4" vectorEffect="non-scaling-stroke" />
+        <path d={`M ${x + 7} ${top + 6} H ${x + width - 7}`} stroke="#b87752" strokeWidth="2" opacity="0.78" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+        <path d={`M ${x + 6} ${top + height - 6} H ${x + width - 6}`} stroke="#653417" strokeWidth="1.7" opacity="0.45" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
       </g>
     );
   }
@@ -11813,6 +11796,24 @@ export default function App() {
   const rewardSlotMachineStopY = -Math.max(0, rewardSlotMachineItems.length - 1) * 128;
   const visibleStoredPlayRecords = storedPlayRecords.slice(0, 30);
   const hasStoredPlayRecords = visibleStoredPlayRecords.length > 0;
+  const visibleStoredPlayRecordSections = visibleStoredPlayRecords.reduce<Array<{
+    unitId: LearningUnitId;
+    unitTitle: string;
+    records: StoredPlayRecord[];
+  }>>((sections, record) => {
+    const existingSection = sections.find((section) => section.unitId === record.unitId);
+    if (existingSection) {
+      existingSection.records.push(record);
+    } else {
+      sections.push({
+        unitId: record.unitId,
+        unitTitle: record.unitTitle,
+        records: [record],
+      });
+    }
+
+    return sections;
+  }, []);
   const builderSlotsById =
     problem.kind === 'builder' && problem.builder
       ? Object.fromEntries(problem.builder.slots.map((slot) => [slot.id, slot])) as Record<string, BuildSlotConfig>
@@ -12876,7 +12877,7 @@ export default function App() {
   };
 
   return (
-    <div className={`flex min-h-[100svh] flex-col items-center overflow-x-hidden bg-slate-950 font-sans text-white ${
+    <div className={`spotify-app flex min-h-[100svh] flex-col items-center overflow-x-hidden bg-slate-950 font-sans text-white ${
       isResultScreen
         ? 'justify-center overflow-y-hidden p-2 sm:p-3'
         : isShortViewport
@@ -12941,87 +12942,75 @@ export default function App() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 z-20 flex items-center justify-center bg-slate-950/82 p-4 backdrop-blur-md sm:p-6"
+                className="absolute inset-0 z-20 flex items-stretch justify-center overflow-hidden bg-slate-950/82 p-3 backdrop-blur-md sm:p-4"
               >
                 <motion.div
                   initial={{ opacity: 0, scale: 0.94, y: 12 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.94, y: 12 }}
                   transition={{ duration: 0.2, ease: 'easeOut' }}
-                  className="relative flex max-h-[calc(100svh-2rem)] w-full max-w-5xl flex-col overflow-hidden rounded-[2.25rem] border border-cyan-100/16 bg-slate-950/92 p-5 text-left shadow-[0_28px_90px_rgba(2,8,23,0.62)] sm:p-8"
+                  className="relative my-auto flex h-full max-h-[calc(100svh-1.5rem)] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-cyan-100/16 bg-slate-950/92 p-4 text-left shadow-[0_28px_90px_rgba(2,8,23,0.62)] sm:max-h-[calc(100svh-2rem)] sm:p-5"
                   role="dialog"
                   aria-modal="true"
                   aria-labelledby="my-records-title"
                 >
                   <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-100/35 to-transparent" />
 
-                  <div className="relative flex min-h-0 flex-col">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <h2 id="my-records-title" className="text-3xl font-black text-white sm:text-4xl">나의 기록</h2>
+                  <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+                    <div className="flex items-start justify-between gap-4 pr-12">
+                      <div className="min-w-0">
+                        <h2 id="my-records-title" className="text-2xl font-black text-white sm:text-3xl">나의 기록</h2>
+                        <p className="mt-1 text-sm font-semibold text-slate-400">최근 {visibleStoredPlayRecords.length}번의 배틀 진행 상황</p>
                       </div>
                       <button
                         type="button"
-                        aria-label="닫기"
+                        aria-label="닫기 또는 길게 눌러 기록 모두 지우기"
+                        title="닫기 / 길게 누르면 기록 삭제"
                         onPointerDown={startRecordClearHold}
                         onPointerUp={finishRecordClosePress}
                         onPointerLeave={cancelRecordClearHold}
                         onPointerCancel={cancelRecordClearHold}
-                        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-slate-600 text-3xl font-black leading-none text-slate-200 transition hover:bg-slate-800 sm:h-14 sm:w-14"
+                        className="record-close-button absolute right-4 top-4 z-30 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/15 bg-slate-900/95 text-slate-100 shadow-[0_8px_24px_rgba(0,0,0,0.38)] transition hover:border-cyan-200/45 hover:bg-slate-800 sm:right-6 sm:top-6"
                       >
-                        ×
+                        <X className="h-5 w-5" aria-hidden="true" />
                       </button>
                     </div>
 
-                    <div className="mt-6 min-h-0 overflow-y-auto pr-1">
+                    <div className="skin-scrollbar mt-4 min-h-0 flex-1 overflow-y-auto overscroll-contain pb-4 pr-1">
                       {hasStoredPlayRecords ? (
-                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                          {visibleStoredPlayRecords.map((record, recordIndex) => {
-                            const reachedRatio = Math.max(0, Math.min(1, record.level / record.totalLevels));
-                            const progressPercent = `${Math.round(reachedRatio * 100)}%`;
-                            const isLatestRecord = recordIndex === 0;
-                            const recordUnitTheme = STORED_PLAY_RECORD_UNIT_THEMES[record.unitId];
+                        <div className="space-y-3">
+                          {visibleStoredPlayRecordSections.map((section) => {
+                            const recordUnitTheme = STORED_PLAY_RECORD_UNIT_THEMES[section.unitId];
 
                             return (
-                              <div
-                                key={record.id}
-                                className={`relative min-w-0 overflow-hidden rounded-[1.75rem] border p-4 shadow-[0_18px_40px_rgba(2,8,23,0.28)] ${
-                                  isLatestRecord ? 'min-h-[13rem] sm:col-span-2 lg:col-span-1 ring-2 ring-white/60 shadow-[0_18px_40px_rgba(2,8,23,0.28),0_0_32px_rgba(255,255,255,0.12)]' : 'min-h-[11.5rem]'
-                                } ${recordUnitTheme.cardClassName}`}
+                              <section
+                                key={section.unitId}
+                                className="rounded-lg border border-white/10 bg-white/[0.03] p-3 shadow-[0_12px_28px_rgba(2,8,23,0.22)]"
                               >
-                                <div className={`absolute inset-x-0 top-0 h-1 ${recordUnitTheme.accentClassName}`} />
-                                <div className="flex h-full flex-col">
-                                  <div className="flex items-start justify-between gap-3">
-                                    <div className="flex min-w-0 items-center gap-2">
-                                      <p className="truncate text-sm font-black text-slate-300">{formatStoredPlayRecordDate(record.playedAt)}</p>
-                                      {isLatestRecord && (
-                                        <span className="shrink-0 rounded-full bg-white/15 px-2 py-0.5 text-[0.68rem] font-black text-white ring-1 ring-white/35">가장 최근</span>
-                                      )}
-                                    </div>
-                                    <div className={`h-2.5 w-2.5 shrink-0 rounded-full ${recordUnitTheme.dotClassName}`} />
-                                  </div>
-
-                                  <div className="mt-auto flex items-end gap-4 pt-5">
-                                    <div className="shrink-0">
-                                      <p className={`${isLatestRecord ? 'text-[5rem]' : 'text-[4.25rem]'} font-black leading-[0.82] text-white`}>{record.level}</p>
-                                      <p className="mt-2 text-sm font-black text-slate-300">/{record.totalLevels} 단계</p>
-                                    </div>
-                                    <div className="min-w-0 flex-1 pb-4">
-                                      <div className="h-2.5 overflow-hidden rounded-full bg-slate-700/65">
-                                        <div
-                                          className={`h-full rounded-full ${recordUnitTheme.progressClassName}`}
-                                          style={{ width: progressPercent }}
-                                        />
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  <div className="mt-4 min-w-0 border-t border-white/8 pt-3">
-                                    <p className={`truncate text-sm font-black ${recordUnitTheme.labelClassName}`}>{record.unitTitle}</p>
-                                    <p className="mt-1 truncate text-xs font-bold text-slate-400">{record.topic}</p>
-                                  </div>
+                                <div className="flex items-center justify-between gap-3">
+                                  <h3 className={`truncate text-sm font-black ${recordUnitTheme.labelClassName}`}>{section.unitTitle}</h3>
+                                  <span className="shrink-0 text-xs font-black text-slate-400">{section.records.length}회</span>
                                 </div>
-                              </div>
+                                <div className="mt-2 grid grid-cols-[repeat(auto-fill,minmax(2.75rem,1fr))] gap-2">
+                                  {section.records.map((record) => {
+                                    const isLatestRecord = record.id === visibleStoredPlayRecords[0]?.id;
+
+                                    return (
+                                      <div
+                                        key={record.id}
+                                        aria-label={`${formatStoredPlayRecordDate(record.playedAt)} ${record.unitTitle} ${record.level}단계`}
+                                        title={`${formatStoredPlayRecordDate(record.playedAt)} · ${record.level}단계`}
+                                        className={`relative flex aspect-square min-h-11 items-center justify-center overflow-hidden rounded-lg border text-center shadow-[0_8px_18px_rgba(2,8,23,0.2)] ${
+                                          isLatestRecord ? 'ring-2 ring-cyan-200/70' : ''
+                                        } ${recordUnitTheme.cardClassName}`}
+                                      >
+                                        <div className={`absolute inset-x-0 top-0 h-1 ${recordUnitTheme.accentClassName}`} />
+                                        <p className="text-2xl font-black leading-none text-white">{record.level}</p>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </section>
                             );
                           })}
                         </div>
@@ -13114,17 +13103,18 @@ export default function App() {
           initial={{ opacity: 0, scale: 0.97, y: 16 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.28, ease: 'easeOut' }}
-          className="relative w-full max-w-5xl overflow-hidden rounded-[1.5rem] border border-cyan-100/15 bg-[linear-gradient(180deg,rgba(5,10,22,0.98),rgba(15,23,42,0.97)_38%,rgba(17,24,39,0.96))] shadow-[0_24px_80px_rgba(2,8,23,0.62),inset_0_1px_0_rgba(255,255,255,0.04)]"
+          className="relative w-full max-w-5xl overflow-hidden rounded-[1.5rem] border border-slate-700/80 bg-slate-950/95 shadow-[0_24px_70px_rgba(2,8,23,0.52)]"
         >
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(250,204,21,0.14),transparent_24%),radial-gradient(circle_at_top_right,rgba(34,211,238,0.1),transparent_20%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.18),transparent_28%),linear-gradient(180deg,rgba(255,255,255,0.02),transparent_26%)]" />
-          <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
-
           <div className="relative flex flex-col gap-4 p-4 sm:p-5">
-            <div className="flex justify-end">
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-sm font-black tracking-[0.16em] text-emerald-300">학습 시작</p>
+                <h2 className="mt-1 truncate text-2xl font-black text-white sm:text-3xl">단원 선택</h2>
+              </div>
               <button
                 type="button"
                 onClick={returnToStartScreen}
-                className="rounded-full border border-slate-500/70 bg-slate-950/30 px-5 py-2.5 text-sm font-black text-slate-100 shadow-[0_10px_30px_rgba(2,8,23,0.32)] backdrop-blur-sm transition duration-300 hover:border-cyan-300/45 hover:bg-slate-900/70 hover:text-white"
+                className="unit-select-action shrink-0 rounded-full border border-slate-600 bg-slate-900 px-5 py-2.5 text-sm font-black text-slate-100 shadow-none transition duration-200 hover:border-slate-400 hover:bg-slate-800"
               >
                 처음으로
               </button>
@@ -13132,37 +13122,30 @@ export default function App() {
 
             <div className="grid gap-2 sm:grid-cols-2">
               {LEARNING_UNITS.map((unit) => (
-                <motion.div
+                <motion.button
                   key={unit.id}
+                  type="button"
+                  disabled={!unit.isAvailable}
+                  onPointerDown={unit.isAvailable ? warmAudio : undefined}
+                  onClick={() => selectLearningUnit(unit.id)}
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.24, ease: 'easeOut' }}
-                  className={`group relative flex h-full min-h-[8.5rem] flex-col overflow-hidden rounded-[1.15rem] border p-4 transition duration-300 sm:min-h-[9rem] ${
+                  className={`unit-select-card group relative flex h-full min-h-[6.25rem] flex-col overflow-hidden rounded-[1.15rem] border p-4 text-left shadow-none transition duration-200 sm:min-h-[6.75rem] ${
                     selectedLearningUnitId === unit.id
-                      ? 'border-emerald-300/55 bg-[linear-gradient(180deg,rgba(8,15,28,0.98),rgba(10,30,35,0.96)_48%,rgba(9,53,61,0.92))] shadow-[0_28px_72px_rgba(6,182,212,0.12),0_22px_56px_rgba(16,185,129,0.22),inset_0_1px_0_rgba(255,255,255,0.08)] ring-1 ring-emerald-300/20'
+                      ? 'border-emerald-400 bg-emerald-400/10 ring-1 ring-emerald-300/35'
                       : unit.isAvailable
-                        ? 'border-yellow-300/22 bg-[linear-gradient(180deg,rgba(8,15,28,0.98),rgba(20,29,46,0.96)_48%,rgba(33,42,62,0.94))] shadow-[0_24px_56px_rgba(2,8,23,0.52),inset_0_1px_0_rgba(255,255,255,0.05)] hover:-translate-y-0.5 hover:border-yellow-300/38 hover:shadow-[0_32px_72px_rgba(2,8,23,0.62),0_20px_48px_rgba(250,204,21,0.12),inset_0_1px_0_rgba(255,255,255,0.06)]'
-                        : 'border-slate-700/90 bg-[linear-gradient(180deg,rgba(12,18,30,0.96),rgba(30,41,59,0.9))] opacity-80 saturate-75 shadow-[0_18px_42px_rgba(2,8,23,0.36)]'
+                        ? 'border-slate-700 bg-slate-900 hover:border-slate-500 hover:bg-slate-800/90'
+                        : 'cursor-not-allowed border-slate-800 bg-slate-900/65 opacity-70 saturate-75'
                   }`}
                 >
-                  <div className={`pointer-events-none absolute inset-0 ${
-                    selectedLearningUnitId === unit.id
-                      ? 'bg-[radial-gradient(circle_at_bottom_left,rgba(16,185,129,0.22),transparent_40%),radial-gradient(circle_at_top_right,rgba(45,212,191,0.16),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.03),transparent_24%)]'
-                      : unit.isAvailable
-                        ? 'bg-[radial-gradient(circle_at_bottom_right,rgba(250,204,21,0.18),transparent_36%),radial-gradient(circle_at_top_left,rgba(34,211,238,0.08),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.02),transparent_24%)]'
-                        : 'bg-[linear-gradient(180deg,rgba(255,255,255,0.02),transparent_24%)]'
-                  }`} />
-                  <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
-
                   <div className="relative flex h-full flex-col">
                     <div className="flex items-start justify-between gap-4">
                       <div className="max-w-[85%]">
                         <p className={`text-xs font-black tracking-[0.18em] ${
                           selectedLearningUnitId === unit.id
                             ? 'text-emerald-200'
-                            : unit.isAvailable
-                              ? 'text-yellow-200'
-                              : 'text-cyan-100/80'
+                            : 'text-slate-400'
                         }`}>
                           {unit.chapterLabel}
                         </p>
@@ -13170,36 +13153,16 @@ export default function App() {
                           {unit.title}
                         </h3>
                       </div>
-                      <div className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[0.8rem] border shadow-[0_10px_22px_rgba(15,23,42,0.24)] ${
+                      <div className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border ${
                         selectedLearningUnitId === unit.id
-                          ? 'border-yellow-200/35 bg-[linear-gradient(135deg,rgba(250,204,21,1),rgba(245,158,11,0.94))] text-slate-950 shadow-[0_16px_36px_rgba(250,204,21,0.34)]'
-                          : unit.isAvailable
-                            ? 'border-yellow-200/20 bg-[linear-gradient(135deg,rgba(250,204,21,0.98),rgba(234,179,8,0.92))] text-slate-950 shadow-[0_14px_34px_rgba(250,204,21,0.26)]'
-                            : 'border-cyan-200/20 bg-cyan-300/90 text-slate-950'
+                          ? 'border-emerald-300 bg-emerald-400 text-slate-950'
+                          : 'border-slate-600 bg-slate-950/40 text-slate-500'
                       }`}>
-                        {unit.isAvailable ? <Star className="h-5 w-5" /> : <Sparkles className="h-5 w-5" />}
+                        {selectedLearningUnitId === unit.id ? <Check className="h-4 w-4" /> : null}
                       </div>
                     </div>
-
-                    <div className="mt-3 flex flex-1 items-end">
-                      <button
-                        type="button"
-                        disabled={!unit.isAvailable}
-                        onPointerDown={warmAudio}
-                        onClick={() => selectLearningUnit(unit.id)}
-                        className={`flex min-h-[2.85rem] w-full items-center justify-center rounded-[0.9rem] border px-4 py-2.5 text-sm font-black tracking-[0.01em] transition duration-300 ${
-                          !unit.isAvailable
-                            ? 'cursor-not-allowed border-slate-600 bg-slate-700/80 text-slate-300'
-                            : selectedLearningUnitId === unit.id
-                              ? 'border-emerald-200/25 bg-[linear-gradient(135deg,rgba(45,212,191,1),rgba(16,185,129,0.94))] text-slate-950 shadow-[0_18px_38px_rgba(16,185,129,0.34),inset_0_1px_0_rgba(255,255,255,0.25)]'
-                              : 'border-yellow-200/18 bg-[linear-gradient(135deg,rgba(250,204,21,0.98),rgba(234,179,8,0.92))] text-slate-950 shadow-[0_14px_34px_rgba(250,204,21,0.28)] hover:-translate-y-0.5 hover:border-yellow-100/28 hover:shadow-[0_20px_42px_rgba(250,204,21,0.34)]'
-                        }`}
-                      >
-                        {!unit.isAvailable ? '준비 중' : selectedLearningUnitId === unit.id ? '선택됨' : '선택'}
-                      </button>
-                    </div>
                   </div>
-                </motion.div>
+                </motion.button>
               ))}
             </div>
 
@@ -13210,29 +13173,18 @@ export default function App() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 14 }}
                   transition={{ duration: 0.22, ease: 'easeOut' }}
-                  className="relative overflow-hidden rounded-[1.15rem] border border-cyan-200/12 bg-[linear-gradient(180deg,rgba(7,13,25,0.94),rgba(9,15,29,0.88)_55%,rgba(10,23,36,0.92))] p-4 shadow-[0_18px_44px_rgba(2,8,23,0.42),inset_0_1px_0_rgba(255,255,255,0.06)]"
+                  className="relative overflow-hidden rounded-[1.15rem] border border-slate-700 bg-slate-900/85 p-4 shadow-none"
                 >
-                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.16),transparent_34%),radial-gradient(circle_at_top_left,rgba(34,211,238,0.08),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.03),transparent_22%)]" />
-                  <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-
                   <div className="relative">
                     <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm font-black tracking-[0.24em] text-emerald-200">난이도</p>
-                      <span className="rounded-full border border-slate-500/70 bg-slate-950/35 px-3 py-1 text-xs font-black text-slate-200 shadow-[0_8px_20px_rgba(2,8,23,0.24)]">
-                        {selectedLearningUnit.chapterLabel}
-                      </span>
+                      <p className="text-sm font-black tracking-[0.18em] text-emerald-200">난이도</p>
                     </div>
 
                     <div className="mt-3 grid grid-cols-3 gap-2 rounded-[0.95rem] bg-slate-950/38 p-1.5">
                       {BATTLE_DIFFICULTY_ORDER.map((difficultyOption) => {
                         const difficultyOptionConfig = BATTLE_DIFFICULTY_CONFIG[difficultyOption];
                         const isSelectedDifficulty = battleDifficulty === difficultyOption;
-                        const selectedDifficultyClass =
-                          difficultyOption === 'easy'
-                            ? 'border-cyan-300/75 bg-[linear-gradient(135deg,rgba(34,211,238,0.34),rgba(8,47,73,0.96))] text-cyan-50 shadow-[0_18px_40px_rgba(34,211,238,0.2),inset_0_1px_0_rgba(255,255,255,0.14)]'
-                            : difficultyOption === 'normal'
-                              ? 'border-emerald-300/75 bg-[linear-gradient(135deg,rgba(45,212,191,0.36),rgba(5,150,105,0.96))] text-emerald-50 shadow-[0_18px_40px_rgba(16,185,129,0.24),inset_0_1px_0_rgba(255,255,255,0.14)]'
-                              : 'border-yellow-300/85 bg-[linear-gradient(135deg,rgba(250,204,21,0.44),rgba(180,83,9,0.98))] text-slate-950 shadow-[0_18px_40px_rgba(234,179,8,0.28),inset_0_1px_0_rgba(255,255,255,0.18)]';
+                        const selectedDifficultyClass = 'border-emerald-300 bg-emerald-500 text-slate-950 shadow-none';
 
                         return (
                           <button
@@ -13240,10 +13192,10 @@ export default function App() {
                             type="button"
                             onPointerDown={warmAudio}
                             onClick={() => changeBattleDifficulty(difficultyOption)}
-                            className={`min-h-[3rem] rounded-[0.8rem] border px-3 py-2 text-center text-sm font-black transition duration-300 ${
+                            className={`unit-select-action min-h-[3rem] rounded-[0.8rem] border px-3 py-2 text-center text-sm font-black transition duration-200 ${
                               isSelectedDifficulty
                                 ? selectedDifficultyClass
-                                : 'border-transparent bg-transparent text-slate-300 shadow-none hover:bg-slate-800/80 hover:text-white'
+                                : 'border-transparent bg-transparent text-slate-300 shadow-none hover:bg-slate-800 hover:text-white'
                             }`}
                           >
                             {difficultyOptionConfig.label}
@@ -13258,10 +13210,10 @@ export default function App() {
                         onPointerDown={warmAudio}
                         onClick={() => setIsSkinPickerOpen((isOpen) => !isOpen)}
                         aria-expanded={isSkinPickerOpen}
-                        className="flex w-full items-center justify-between gap-3 rounded-[0.95rem] border border-slate-600/80 bg-slate-950/42 px-3 py-2.5 text-left text-slate-100 transition hover:border-cyan-200/55 hover:bg-slate-900/78"
+                        className="unit-select-action flex w-full items-center justify-between gap-3 rounded-[0.95rem] border border-slate-700 bg-slate-950/55 px-3 py-2.5 text-left text-slate-100 shadow-none transition hover:border-slate-500 hover:bg-slate-900"
                       >
                         <span className="flex min-w-0 items-center gap-3">
-                          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[0.75rem] bg-slate-950/65">
+                          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[0.75rem] bg-slate-900">
                             <img
                               src={selectedPlayerSkin.spriteSet.default}
                               alt={`${selectedPlayerSkin.label} 스킨`}
@@ -13275,8 +13227,8 @@ export default function App() {
                           </span>
                         </span>
                         <span className="flex shrink-0 items-center gap-2">
-                          <span className="rounded-full border border-slate-600 bg-slate-950/50 px-2.5 py-1 text-xs font-black text-slate-200">
-                            {availablePlayerSkins.length}개
+                          <span className="rounded-full border border-slate-600 bg-slate-950/50 px-3 py-1 text-xs font-black text-slate-200">
+                            변경
                           </span>
                           <ChevronDown className={`h-4 w-4 text-slate-300 transition-transform ${isSkinPickerOpen ? 'rotate-180' : ''}`} />
                         </span>
@@ -13291,8 +13243,8 @@ export default function App() {
                             transition={{ duration: 0.2, ease: 'easeOut' }}
                             className="overflow-hidden"
                           >
-                            <div className="skin-scrollbar mt-2 overflow-x-auto overflow-y-hidden overscroll-x-contain pb-2 pr-1 [scrollbar-gutter:stable]">
-                              <div className="grid w-max auto-cols-[8.7rem] grid-flow-col grid-rows-2 gap-2 sm:auto-cols-[9.4rem] lg:auto-cols-[9.75rem]">
+                            <div className="skin-scrollbar mt-2 max-h-[18.5rem] overflow-y-auto overscroll-contain rounded-[0.95rem] border border-slate-700 bg-slate-950/35 p-2 pr-1 [scrollbar-gutter:stable]">
+                              <div className="grid grid-cols-[repeat(auto-fill,minmax(5.8rem,1fr))] gap-2 sm:grid-cols-[repeat(auto-fill,minmax(6.4rem,1fr))]">
                               {PLAYER_SKINS.map((skin) => {
                                 const isSkinUnlocked = isDeveloperMode || isPlayerSkinUnlocked(skin, unlockedPlayerSkinIds);
                                 const isSelectedSkin = selectedPlayerSkinId === skin.id;
@@ -13305,12 +13257,12 @@ export default function App() {
                                     disabled={!isSkinUnlocked}
                                     onPointerDown={isSkinUnlocked ? warmAudio : undefined}
                                     onClick={() => selectPlayerSkin(skin.id)}
-                                    className={`relative flex h-[6.4rem] w-full flex-col items-center justify-center gap-1 overflow-hidden rounded-[0.9rem] border px-2 py-2 text-center transition duration-300 ${
+                                    className={`unit-select-action relative flex h-[6.25rem] w-full flex-col items-center justify-center gap-1 overflow-hidden rounded-[0.85rem] border px-2 py-2 text-center transition duration-200 ${
                                       isSelectedSkin
-                                        ? 'border-emerald-200/70 bg-emerald-400/18 text-white shadow-[0_10px_24px_rgba(16,185,129,0.16),inset_0_1px_0_rgba(255,255,255,0.12)]'
+                                        ? 'border-emerald-300 bg-emerald-400/12 text-white ring-1 ring-emerald-300/35'
                                         : isSkinUnlocked
-                                          ? 'border-slate-600/90 bg-slate-950/42 text-slate-200 hover:-translate-y-0.5 hover:border-cyan-200/55 hover:bg-slate-900/78'
-                                          : 'cursor-not-allowed border-slate-700/80 bg-slate-950/26 text-slate-500 opacity-70'
+                                          ? 'border-slate-700 bg-slate-900/70 text-slate-200 hover:border-slate-500 hover:bg-slate-800'
+                                          : 'cursor-not-allowed border-slate-800 bg-slate-950/30 text-slate-500 opacity-70'
                                     }`}
                                   >
                                     <span className="flex h-12 w-full items-center justify-center">
@@ -13318,23 +13270,18 @@ export default function App() {
                                         <img
                                           src={skin.spriteSet.default}
                                           alt={`${skin.label} 스킨`}
-                                          className="h-full w-auto object-contain drop-shadow-[0_12px_18px_rgba(2,8,23,0.38)]"
+                                          className="h-full w-auto object-contain"
                                           draggable={false}
                                         />
                                       ) : (
-                                        <span className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-600/80 bg-slate-950/70 text-slate-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
-                                          <Lock className="h-5 w-5" />
+                                        <span className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-slate-900 text-slate-400">
+                                          <Lock className="h-4 w-4" />
                                         </span>
                                       )}
                                     </span>
                                     <span className="w-full truncate text-[11px] font-black leading-tight">{displaySkinLabel}</span>
-                                    {!isSkinUnlocked && (
-                                      <span className="absolute right-1.5 top-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-900/90 text-slate-300 ring-1 ring-slate-600">
-                                        <Lock className="h-3 w-3" />
-                                      </span>
-                                    )}
                                     {isSelectedSkin && (
-                                      <span className="absolute right-1.5 top-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-300 text-slate-950 shadow-[0_8px_18px_rgba(16,185,129,0.24)]">
+                                      <span className="absolute right-1.5 top-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-400 text-slate-950">
                                         <Check className="h-3 w-3" />
                                       </span>
                                     )}
@@ -13352,8 +13299,9 @@ export default function App() {
                       type="button"
                       onPointerDown={warmAudio}
                       onClick={startSelectedUnit}
-                      className="mt-4 flex min-h-[4rem] w-full items-center justify-center rounded-[1rem] border border-emerald-100/20 bg-[linear-gradient(135deg,rgba(45,212,191,1),rgba(16,185,129,0.94))] px-6 py-3 text-lg font-black text-slate-950 shadow-[0_18px_40px_rgba(16,185,129,0.28),inset_0_1px_0_rgba(255,255,255,0.24)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_52px_rgba(16,185,129,0.36),inset_0_1px_0_rgba(255,255,255,0.26)]"
+                      className="unit-select-action mt-4 flex min-h-[3.75rem] w-full items-center justify-center gap-2 rounded-[1rem] border border-emerald-100/20 bg-emerald-500 px-6 py-3 text-lg font-black text-slate-950 shadow-none transition duration-200 hover:bg-emerald-400"
                     >
+                      <Play className="h-5 w-5" />
                       시작
                     </button>
                   </div>
@@ -13753,38 +13701,38 @@ export default function App() {
                     ) : (
                       <div className={`mx-auto flex h-full w-full max-w-[54rem] flex-col text-left text-slate-900 ${isCompactBattleViewport ? 'gap-3' : 'gap-4 sm:gap-5'}`}>
                         <div className={`flex shrink-0 flex-col ${isCompactBattleViewport ? 'gap-3' : 'gap-4 sm:gap-5'}`}>
-                          {storyPromptSections.introLines.map((line, index) => {
-                            const isQuestionLine = index === storyPromptSections.introLines.length - 1;
+                          {storyPromptSections.introLines.length > 0 ? (
+                            <div
+                              className={`rounded-[1.75rem] border border-slate-200 bg-slate-50/85 shadow-sm ${
+                                isCompactBattleViewport
+                                  ? 'px-4 py-3 sm:px-5 sm:py-4'
+                                  : 'px-5 py-4 sm:px-6 sm:py-5'
+                              }`}
+                            >
+                              <div className={`flex flex-col ${isCompactBattleViewport ? 'gap-3' : 'gap-4 sm:gap-5'}`}>
+                                {storyPromptSections.introLines.map((line, index) => {
+                                  const isQuestionLine = index === storyPromptSections.introLines.length - 1;
 
-                            return (
-                              <div
-                                key={`${line}-${index}`}
-                                className={`rounded-[1.75rem] border shadow-sm ${
-                                  isCompactBattleViewport
-                                    ? 'px-4 py-3 sm:px-5 sm:py-4'
-                                    : 'px-5 py-4 sm:px-6 sm:py-5'
-                                } ${
-                                  isQuestionLine
-                                    ? 'border-amber-200 bg-amber-50/85'
-                                    : 'border-slate-200 bg-slate-50/85'
-                                }`}
-                              >
-                                <p
-                                  className={`break-keep tracking-[-0.01em] ${
-                                    isQuestionLine
-                                      ? isCompactBattleViewport
-                                        ? 'text-[1.2rem] font-black leading-[1.45] text-slate-900 sm:text-[1.55rem] lg:text-[1.9rem]'
-                                        : 'text-[1.35rem] font-black leading-[1.52] text-slate-900 sm:text-[1.75rem] lg:text-[2.2rem]'
-                                      : isCompactBattleViewport
-                                        ? 'text-[1rem] font-bold leading-[1.62] text-slate-700 sm:text-[1.2rem] lg:text-[1.45rem]'
-                                        : 'text-[1.1rem] font-bold leading-[1.72] text-slate-700 sm:text-[1.35rem] lg:text-[1.75rem]'
-                                  }`}
-                                >
-                                  {renderPromptWithHighlight(line, shouldHighlightPromptNumbers)}
-                                </p>
+                                  return (
+                                    <p
+                                      key={`${line}-${index}`}
+                                      className={`break-keep tracking-[-0.01em] ${
+                                        isQuestionLine
+                                          ? isCompactBattleViewport
+                                            ? 'text-[1.2rem] font-black leading-[1.45] text-slate-900 sm:text-[1.55rem] lg:text-[1.9rem]'
+                                            : 'text-[1.35rem] font-black leading-[1.52] text-slate-900 sm:text-[1.75rem] lg:text-[2.2rem]'
+                                          : isCompactBattleViewport
+                                            ? 'text-[1rem] font-bold leading-[1.62] text-slate-700 sm:text-[1.2rem] lg:text-[1.45rem]'
+                                            : 'text-[1.1rem] font-bold leading-[1.72] text-slate-700 sm:text-[1.35rem] lg:text-[1.75rem]'
+                                      }`}
+                                    >
+                                      {renderPromptWithHighlight(line, shouldHighlightPromptNumbers)}
+                                    </p>
+                                  );
+                                })}
                               </div>
-                            );
-                          })}
+                            </div>
+                          ) : null}
                         </div>
                         <div
                           className={`grid min-h-0 flex-1 ${isCompactBattleViewport ? 'gap-3' : 'gap-4'}`}
@@ -13817,38 +13765,42 @@ export default function App() {
                     <div className={`mx-auto flex w-full max-w-[52rem] flex-col text-left text-slate-900 ${
                       isCompactBattleViewport ? 'gap-3' : 'gap-4 sm:gap-6'
                     }`}>
-                      {getStoryPromptLines(problem.prompt).map((line, index, lines) => {
-                        const isQuestionLine = lines.length === 1 || index === lines.length - 1;
+                      {(() => {
+                        const storyLines = getStoryPromptLines(problem.prompt);
 
                         return (
                           <div
-                            key={`${line}-${index}`}
-                            className={`rounded-[2rem] border shadow-sm ${
+                            className={`rounded-[2rem] border border-slate-200 bg-slate-50/85 shadow-sm ${
                               isCompactBattleViewport
                                 ? 'px-4 py-3 sm:px-5 sm:py-4'
                                 : 'px-4 py-4 sm:px-6 sm:py-5 md:px-8 md:py-7'
-                            } ${
-                              isQuestionLine
-                                ? 'border-amber-200 bg-amber-50/80'
-                                : 'border-slate-200 bg-slate-50/85'
                             }`}
                           >
-                            <p
-                              className={`break-keep tracking-[-0.01em] ${
-                                isQuestionLine
-                                  ? isCompactBattleViewport
-                                    ? 'text-[1.2rem] font-black leading-[1.45] text-slate-900 sm:text-[1.5rem] lg:text-[1.9rem]'
-                                    : 'text-[1.3rem] font-black leading-[1.55] text-slate-900 sm:text-[1.75rem] md:text-[2.45rem]'
-                                  : isCompactBattleViewport
-                                    ? 'text-[1rem] font-bold leading-[1.58] text-slate-700 sm:text-[1.15rem] lg:text-[1.45rem]'
-                                    : 'text-[1.1rem] font-bold leading-[1.72] text-slate-700 sm:text-[1.45rem] md:text-[2rem]'
-                              }`}
-                            >
-                              {renderPromptWithHighlight(line, shouldHighlightPromptNumbers)}
-                            </p>
+                            <div className={`flex flex-col ${isCompactBattleViewport ? 'gap-3' : 'gap-4 sm:gap-5'}`}>
+                              {storyLines.map((line, index) => {
+                                const isQuestionLine = storyLines.length === 1 || index === storyLines.length - 1;
+
+                                return (
+                                  <p
+                                    key={`${line}-${index}`}
+                                    className={`break-keep tracking-[-0.01em] ${
+                                      isQuestionLine
+                                        ? isCompactBattleViewport
+                                          ? 'text-[1.2rem] font-black leading-[1.45] text-slate-900 sm:text-[1.5rem] lg:text-[1.9rem]'
+                                          : 'text-[1.3rem] font-black leading-[1.55] text-slate-900 sm:text-[1.75rem] md:text-[2.45rem]'
+                                        : isCompactBattleViewport
+                                          ? 'text-[1rem] font-bold leading-[1.58] text-slate-700 sm:text-[1.15rem] lg:text-[1.45rem]'
+                                          : 'text-[1.1rem] font-bold leading-[1.72] text-slate-700 sm:text-[1.45rem] md:text-[2rem]'
+                                    }`}
+                                  >
+                                    {renderPromptWithHighlight(line, shouldHighlightPromptNumbers)}
+                                  </p>
+                                );
+                              })}
+                            </div>
                           </div>
                         );
-                      })}
+                      })()}
                     </div>
                   )
                 ) : problem.kind === 'builder' && problem.builder ? (
@@ -14375,85 +14327,75 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/82 p-4 backdrop-blur-md sm:p-6"
+                className="fixed inset-0 z-50 flex items-stretch justify-center overflow-hidden bg-slate-950/82 p-3 backdrop-blur-md sm:p-4"
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.94, y: 12 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.94, y: 12 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="relative flex max-h-[calc(100svh-2rem)] w-full max-w-5xl flex-col overflow-hidden rounded-[2.25rem] border border-cyan-100/16 bg-slate-950/92 p-5 text-left shadow-[0_28px_90px_rgba(2,8,23,0.62)] sm:p-8"
+              className="relative my-auto flex h-full max-h-[calc(100svh-1.5rem)] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-cyan-100/16 bg-slate-950/92 p-4 text-left shadow-[0_28px_90px_rgba(2,8,23,0.62)] sm:max-h-[calc(100svh-2rem)] sm:p-5"
               role="dialog"
               aria-modal="true"
               aria-labelledby="result-records-title"
             >
               <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-100/35 to-transparent" />
 
-              <div className="relative flex min-h-0 flex-col">
-                <div className="flex items-start justify-between gap-4">
-                  <h2 id="result-records-title" className="text-3xl font-black text-white sm:text-4xl">나의 기록</h2>
+              <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+                <div className="flex items-start justify-between gap-4 pr-12">
+                  <div className="min-w-0">
+                    <h2 id="result-records-title" className="text-2xl font-black text-white sm:text-3xl">나의 기록</h2>
+                    <p className="mt-1 text-sm font-semibold text-slate-400">최근 {visibleStoredPlayRecords.length}번의 배틀 진행 상황</p>
+                  </div>
                   <button
                     type="button"
-                    aria-label="닫기"
+                    aria-label="닫기 또는 길게 눌러 기록 모두 지우기"
+                    title="닫기 / 길게 누르면 기록 삭제"
                     onPointerDown={startRecordClearHold}
                     onPointerUp={finishRecordClosePress}
                     onPointerLeave={cancelRecordClearHold}
                     onPointerCancel={cancelRecordClearHold}
-                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-slate-600 text-3xl font-black leading-none text-slate-200 transition hover:bg-slate-800 sm:h-14 sm:w-14"
+                    className="record-close-button absolute right-4 top-4 z-30 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/15 bg-slate-900/95 text-slate-100 shadow-[0_8px_24px_rgba(0,0,0,0.38)] transition hover:border-cyan-200/45 hover:bg-slate-800 sm:right-6 sm:top-6"
                   >
-                    ×
+                    <X className="h-5 w-5" aria-hidden="true" />
                   </button>
                 </div>
 
-                <div className="mt-6 min-h-0 overflow-y-auto pr-1">
+                <div className="skin-scrollbar mt-4 min-h-0 flex-1 overflow-y-auto overscroll-contain pb-4 pr-1">
                   {hasStoredPlayRecords ? (
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                      {visibleStoredPlayRecords.map((record, recordIndex) => {
-                        const reachedRatio = Math.max(0, Math.min(1, record.level / record.totalLevels));
-                        const progressPercent = `${Math.round(reachedRatio * 100)}%`;
-                        const isLatestRecord = recordIndex === 0;
-                        const recordUnitTheme = STORED_PLAY_RECORD_UNIT_THEMES[record.unitId];
+                    <div className="space-y-3">
+                      {visibleStoredPlayRecordSections.map((section) => {
+                        const recordUnitTheme = STORED_PLAY_RECORD_UNIT_THEMES[section.unitId];
 
                         return (
-                          <div
-                            key={record.id}
-                            className={`relative min-w-0 overflow-hidden rounded-[1.75rem] border p-4 shadow-[0_18px_40px_rgba(2,8,23,0.28)] ${
-                              isLatestRecord ? 'min-h-[13rem] sm:col-span-2 lg:col-span-1 ring-2 ring-white/60 shadow-[0_18px_40px_rgba(2,8,23,0.28),0_0_32px_rgba(255,255,255,0.12)]' : 'min-h-[11.5rem]'
-                            } ${recordUnitTheme.cardClassName}`}
+                          <section
+                            key={section.unitId}
+                            className="rounded-lg border border-white/10 bg-white/[0.03] p-3 shadow-[0_12px_28px_rgba(2,8,23,0.22)]"
                           >
-                            <div className={`absolute inset-x-0 top-0 h-1 ${recordUnitTheme.accentClassName}`} />
-                            <div className="flex h-full flex-col">
-                              <div className="flex items-start justify-between gap-3">
-                                <div className="flex min-w-0 items-center gap-2">
-                                  <p className="truncate text-sm font-black text-slate-300">{formatStoredPlayRecordDate(record.playedAt)}</p>
-                                  {isLatestRecord && (
-                                    <span className="shrink-0 rounded-full bg-white/15 px-2 py-0.5 text-[0.68rem] font-black text-white ring-1 ring-white/35">가장 최근</span>
-                                  )}
-                                </div>
-                                <div className={`h-2.5 w-2.5 shrink-0 rounded-full ${recordUnitTheme.dotClassName}`} />
-                              </div>
-
-                              <div className="mt-auto flex items-end gap-4 pt-5">
-                                <div className="shrink-0">
-                                  <p className={`${isLatestRecord ? 'text-[5rem]' : 'text-[4.25rem]'} font-black leading-[0.82] text-white`}>{record.level}</p>
-                                  <p className="mt-2 text-sm font-black text-slate-300">/{record.totalLevels} 단계</p>
-                                </div>
-                                <div className="min-w-0 flex-1 pb-4">
-                                  <div className="h-2.5 overflow-hidden rounded-full bg-slate-700/65">
-                                    <div
-                                      className={`h-full rounded-full ${recordUnitTheme.progressClassName}`}
-                                      style={{ width: progressPercent }}
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="mt-4 min-w-0 border-t border-white/8 pt-3">
-                                <p className={`truncate text-sm font-black ${recordUnitTheme.labelClassName}`}>{record.unitTitle}</p>
-                                <p className="mt-1 truncate text-xs font-bold text-slate-400">{record.topic}</p>
-                              </div>
+                            <div className="flex items-center justify-between gap-3">
+                              <h3 className={`truncate text-sm font-black ${recordUnitTheme.labelClassName}`}>{section.unitTitle}</h3>
+                              <span className="shrink-0 text-xs font-black text-slate-400">{section.records.length}회</span>
                             </div>
-                          </div>
+                            <div className="mt-2 grid grid-cols-[repeat(auto-fill,minmax(2.75rem,1fr))] gap-2">
+                              {section.records.map((record) => {
+                                const isLatestRecord = record.id === visibleStoredPlayRecords[0]?.id;
+
+                                return (
+                                  <div
+                                    key={record.id}
+                                    aria-label={`${formatStoredPlayRecordDate(record.playedAt)} ${record.unitTitle} ${record.level}단계`}
+                                    title={`${formatStoredPlayRecordDate(record.playedAt)} · ${record.level}단계`}
+                                    className={`relative flex aspect-square min-h-11 items-center justify-center overflow-hidden rounded-lg border text-center shadow-[0_8px_18px_rgba(2,8,23,0.2)] ${
+                                      isLatestRecord ? 'ring-2 ring-cyan-200/70' : ''
+                                    } ${recordUnitTheme.cardClassName}`}
+                                  >
+                                    <div className={`absolute inset-x-0 top-0 h-1 ${recordUnitTheme.accentClassName}`} />
+                                    <p className="text-2xl font-black leading-none text-white">{record.level}</p>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </section>
                         );
                       })}
                     </div>
