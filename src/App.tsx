@@ -14228,10 +14228,7 @@ export default function App() {
                 <div className="pointer-events-none absolute -left-16 top-1/2 h-28 w-28 -translate-y-1/2 rounded-full bg-emerald-300/10 blur-2xl" />
                 <div className="pointer-events-none absolute -right-16 top-1/2 h-28 w-28 -translate-y-1/2 rounded-full bg-rose-300/10 blur-2xl" />
                 <div className="relative mx-auto flex max-w-[34rem] flex-col items-center">
-                  <p className="rounded-full border border-yellow-100/25 bg-yellow-100/10 px-4 py-1.5 text-xs font-black tracking-[0.22em] text-yellow-100 sm:text-sm">
-                    스킨 슬롯머신
-                  </p>
-                  <div className="relative mt-4 w-full">
+                  <div className="relative w-full">
                     <div className="pointer-events-none absolute left-1/2 top-[-0.2rem] z-30 h-0 w-0 -translate-x-1/2 border-x-[0.85rem] border-t-[1.35rem] border-x-transparent border-t-yellow-200 drop-shadow-[0_0_18px_rgba(253,224,71,0.9)]" />
                     <div className="relative overflow-hidden rounded-[1.45rem] border border-yellow-100/35 bg-[linear-gradient(180deg,rgba(2,6,23,0.98),rgba(15,23,42,0.94))] p-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08),0_20px_54px_rgba(2,8,23,0.42)]">
                       <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-14 bg-gradient-to-b from-slate-950 via-slate-950/70 to-transparent" />
