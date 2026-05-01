@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useEffectEvent } from 'react';
+﻿import React, { useState, useEffect, useRef, useEffectEvent } from 'react';
 import { Sword, Heart, RotateCcw, Play, Sparkles, Star, ChevronDown, Check, History, Lock, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { VisualCalculator, type VisualControlSound } from './components/VisualCalculator';
@@ -271,9 +271,9 @@ type GameState = 'start' | 'unitSelect' | 'playing' | 'win' | 'lose';
 
 type BattleDifficulty = 'easy' | 'normal' | 'hard';
 
-type LearningUnitId = 'unit2' | 'unit3';
+type LearningUnitId = 'unit1' | 'unit2' | 'unit3';
 
-type ProblemKind = 'equation' | 'story' | 'builder' | 'measurement' | 'distanceMap' | 'distanceWorksheet' | 'clockReading' | 'timeAddition';
+type ProblemKind = 'equation' | 'story' | 'builder' | 'measurement' | 'distanceMap' | 'distanceWorksheet' | 'clockReading' | 'timeAddition' | 'shapeDraw';
 type MeasurementObjectKind =
   | 'seed'
   | 'rice'
@@ -326,6 +326,7 @@ interface Problem {
   distanceWorksheet?: DistanceWorksheetProblemData;
   clockReading?: ClockReadingProblemData;
   timeAddition?: TimeAdditionProblemData;
+  shapeDraw?: ShapeDrawProblemData;
 }
 
 interface EstimationProblem {
@@ -340,6 +341,25 @@ interface UnitSelectionChallenge {
   prompt: string;
   options: string[];
   answer: string;
+}
+
+type ShapeDrawMode =
+  | 'segment'
+  | 'line'
+  | 'ray'
+  | 'rightAngle'
+  | 'acuteAngle'
+  | 'obtuseAngle'
+  | 'triangle'
+  | 'rightTriangle'
+  | 'quadrilateral'
+  | 'rectangle'
+  | 'square';
+
+interface ShapeDrawProblemData {
+  mode: ShapeDrawMode;
+  title: string;
+  answerToken: string;
 }
 
 type DistanceWorksheetInputKind = 'number' | 'place';
@@ -1643,6 +1663,15 @@ const LEVEL_OPPONENT_SPRITES: Partial<Record<number, CharacterSpriteSet>> = {
   },
 };
 const UNIT_LEVEL_DESCRIPTIONS: Record<LearningUnitId, string[]> = {
+  unit1: [
+    '',
+    '1단계: 직선, 선분, 반직선',
+    '2단계: 각과 직각',
+    '3단계: 삼각형',
+    '4단계: 직각삼각형, 예각삼각형, 둔각삼각형',
+    '5단계: 사각형',
+    '6단계: 직사각형과 정사각형',
+  ],
   unit2: [
     '',
     '1단계: 받아올림 없는 덧셈',
@@ -1716,6 +1745,13 @@ const PLAY_RECORDS_STORAGE_KEY = 'plusMinusChromebookPlayRecords';
 const MAX_STORED_PLAY_RECORDS = 30;
 const RECORD_CLEAR_HOLD_DURATION_MS = 5000;
 const STORED_PLAY_RECORD_UNIT_THEMES: Record<LearningUnitId, StoredPlayRecordUnitTheme> = {
+  unit1: {
+    cardClassName: 'border-sky-100/20 bg-[linear-gradient(180deg,rgba(12,26,44,0.98),rgba(8,13,26,0.98))]',
+    accentClassName: 'bg-sky-300',
+    progressClassName: 'bg-sky-300',
+    dotClassName: 'bg-sky-300',
+    labelClassName: 'text-sky-100',
+  },
   unit2: {
     cardClassName: 'border-cyan-100/16 bg-[linear-gradient(180deg,rgba(15,23,42,0.98),rgba(8,13,26,0.98))]',
     accentClassName: 'bg-cyan-300',
@@ -2559,6 +2595,14 @@ const BATTLE_DIFFICULTY_CONFIG: Record<BattleDifficulty, BattleDifficultyConfig>
   },
 };
 const LEARNING_UNITS: LearningUnitConfig[] = [
+  {
+    id: 'unit1',
+    chapterLabel: '1단원',
+    title: '평면도형',
+    summary: '직접 그리고 구별하기',
+    description: '점, 선, 도형 도구로 평면도형을 직접 만들어 보는 단원입니다.',
+    isAvailable: true,
+  },
   {
     id: 'unit2',
     chapterLabel: '2단원',
@@ -6814,7 +6858,54 @@ function generateRegularProblem(level: number, options: RegularProblemOptions = 
   return createEquationProblem(a, b, op, answer);
 }
 
+function createShapeDrawProblem(mode: ShapeDrawMode, title: string): Problem {
+  return {
+    text: title,
+    prompt: title,
+    answer: 1,
+    kind: 'shapeDraw',
+    shapeDraw: {
+      mode,
+      title,
+      answerToken: `${mode}-ok`,
+    },
+  };
+}
+
+function generateUnit1Problem(level: number, problemSequence = 1): Problem {
+  const modeSets: Record<number, Array<[ShapeDrawMode, string]>> = {
+    1: [
+      ['segment', '두 점을 곧게 이어 선분을 만들어 보세요.'],
+      ['line', '선분을 양쪽으로 끝없이 늘인 직선을 만들어 보세요.'],
+      ['ray', '한 점에서 시작하여 한쪽으로 끝없이 늘인 반직선을 만들어 보세요.'],
+    ],
+    2: [
+      ['rightAngle', '두 선을 직접 그어 직각을 만들어 보세요.'],
+      ['acuteAngle', '직각보다 작은 각을 만들어 보세요.'],
+      ['obtuseAngle', '직각보다 큰 각을 만들어 보세요.'],
+    ],
+    3: [['triangle', '점 3개를 찍어 삼각형을 만들어 보세요.']],
+    4: [
+      ['rightTriangle', '한 각이 직각인 삼각형을 만들어 보세요.'],
+      ['acuteAngle', '예각을 직접 만들어 보세요.'],
+      ['obtuseAngle', '둔각을 직접 만들어 보세요.'],
+    ],
+    5: [['quadrilateral', '점 4개를 찍어 사각형을 만들어 보세요.']],
+    6: [
+      ['rectangle', '네 각이 모두 직각인 사각형을 만들어 보세요.'],
+      ['square', '네 각이 모두 직각이고 네 변의 길이가 같은 사각형을 만들어 보세요.'],
+    ],
+  };
+  const entries = modeSets[level] ?? modeSets[1];
+  const [mode, title] = entries[(problemSequence - 1) % entries.length];
+  return createShapeDrawProblem(mode, title);
+}
+
 function getProblemForTurn(unitId: LearningUnitId, level: number, opponentHP: number, problemSequence?: number): Problem {
+  if (unitId === 'unit1') {
+    return generateUnit1Problem(level, problemSequence);
+  }
+
   if (unitId === 'unit3') {
     return generateUnit3Problem(level, opponentHP, problemSequence);
   }
@@ -11121,6 +11212,530 @@ function DistanceMapProblemCard({
   );
 }
 
+type ShapeTool = 'point' | 'line' | 'polygon';
+type ShapeLineMode = 'segment' | 'line' | 'ray';
+type ShapeToolMenu = 'line' | 'polygon' | null;
+interface ShapePoint { x: number; y: number; label: string; }
+interface ShapeLine { start: ShapePoint; end: ShapePoint; mode: ShapeLineMode; }
+const SHAPE_LABELS = ['ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ', 'ㅈ', 'ㅊ'];
+const SHAPE_GRID = 56;
+const SHAPE_ORIGIN = { x: 52, y: 86 };
+
+function ShapePointView({ point }: { point: ShapePoint }) {
+  return (
+    <g pointerEvents="none">
+      <circle cx={point.x} cy={point.y} r="8" fill="#fff" stroke="#2563eb" strokeWidth="4" />
+      <circle cx={point.x} cy={point.y} r="3" fill="#2563eb" />
+      <text x={point.x + 12} y={point.y - 10} fontSize="17" fontWeight="900" fill="#1e3a8a" stroke="#fff" strokeWidth="4" paintOrder="stroke">{point.label}</text>
+    </g>
+  );
+}
+
+function ShapeDrawProblemCard({ shapeDraw, answerValue, onAnswerChange, onSubmit }: { shapeDraw: ShapeDrawProblemData; answerValue: string; onAnswerChange: (value: string) => void; onSubmit: () => void }) {
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  const [tool, setTool] = useState<ShapeTool>('point');
+  const [openToolMenu, setOpenToolMenu] = useState<ShapeToolMenu>(null);
+  const [lineMode, setLineMode] = useState<ShapeLineMode>('segment');
+  const [polygonSides, setPolygonSides] = useState<3 | 4>(3);
+  const [points, setPoints] = useState<ShapePoint[]>([]);
+  const [lines, setLines] = useState<ShapeLine[]>([]);
+  const [polygons, setPolygons] = useState<ShapePoint[][]>([]);
+  const [lineStart, setLineStart] = useState<ShapePoint | null>(null);
+  const [pendingPolygon, setPendingPolygon] = useState<ShapePoint[]>([]);
+  const [history, setHistory] = useState<Array<'point' | 'lineStart' | 'line' | 'polygonPoint' | 'polygon'>>([]);
+  const allPoints = [...points, ...lines.flatMap((line) => [line.start, line.end]), ...polygons.flat(), ...pendingPolygon, ...(lineStart ? [lineStart] : [])];
+  const dist = (a: ShapePoint, b: ShapePoint) => Math.hypot(a.x - b.x, a.y - b.y);
+  const dotAt = (v: ShapePoint, a: ShapePoint, b: ShapePoint) => (a.x - v.x) * (b.x - v.x) + (a.y - v.y) * (b.y - v.y);
+  const rightAt = (v: ShapePoint, a: ShapePoint, b: ShapePoint) => Math.abs(dotAt(v, a, b)) < 160;
+  const snap = (clientX: number, clientY: number) => {
+    const rect = svgRef.current?.getBoundingClientRect();
+    const rawX = rect ? ((clientX - rect.left) / rect.width) * 640 : clientX;
+    const rawY = rect ? ((clientY - rect.top) / rect.height) * 360 : clientY;
+    const x = Math.max(SHAPE_ORIGIN.x, Math.min(612, SHAPE_ORIGIN.x + Math.round((rawX - SHAPE_ORIGIN.x) / SHAPE_GRID) * SHAPE_GRID));
+    const y = Math.max(SHAPE_ORIGIN.y, Math.min(320, SHAPE_ORIGIN.y + Math.round((rawY - SHAPE_ORIGIN.y) / SHAPE_GRID) * SHAPE_GRID));
+    return allPoints.find((point) => Math.hypot(point.x - x, point.y - y) < 8) ?? { x, y, label: SHAPE_LABELS[new Set(allPoints.map((point) => `${point.x}:${point.y}`)).size % SHAPE_LABELS.length] };
+  };
+  const undo = () => {
+    const latest = history.at(-1);
+    setHistory((previous) => previous.slice(0, -1));
+    if (latest === 'point') setPoints((previous) => previous.slice(0, -1));
+    if (latest === 'lineStart') setLineStart(null);
+    if (latest === 'line') setLines((previous) => previous.slice(0, -1));
+    if (latest === 'polygonPoint') setPendingPolygon((previous) => previous.slice(0, -1));
+    if (latest === 'polygon') setPolygons((previous) => previous.slice(0, -1));
+  };
+  const resetBoard = () => {
+    setPoints([]);
+    setLines([]);
+    setPolygons([]);
+    setLineStart(null);
+    setPendingPolygon([]);
+    setHistory([]);
+    setOpenToolMenu(null);
+  };
+  const handleShapeAttack = () => {
+    const isSuccessfulShapeAnswer = answerValue === shapeDraw.answerToken;
+    onSubmit();
+    if (isSuccessfulShapeAnswer) {
+      resetBoard();
+      onAnswerChange('');
+    }
+  };
+  const handleDown = (event: React.PointerEvent<SVGSVGElement>) => {
+    setOpenToolMenu(null);
+    const point = snap(event.clientX, event.clientY);
+    if (tool === 'point') {
+      if (!points.some((existing) => dist(existing, point) < 8)) {
+        setPoints((previous) => [...previous, point]);
+        setHistory((previous) => [...previous, 'point']);
+      }
+      return;
+    }
+    if (tool === 'polygon') {
+      if (pendingPolygon.some((existing) => dist(existing, point) < 8)) return;
+      const next = [...pendingPolygon, point];
+      if (next.length >= polygonSides) {
+        setPolygons((previous) => [...previous, next]);
+        setPendingPolygon([]);
+        setHistory((previous) => [...previous.filter((action) => action !== 'polygonPoint'), 'polygon']);
+      } else {
+        setPendingPolygon(next);
+        setHistory((previous) => [...previous, 'polygonPoint']);
+      }
+      return;
+    }
+    if (!lineStart) {
+      setLineStart(point);
+      setHistory((previous) => [...previous, 'lineStart']);
+      return;
+    }
+    if (dist(lineStart, point) < 24) return;
+    setLines((previous) => [...previous, { start: lineStart, end: point, mode: lineMode }]);
+    setLineStart(null);
+    setHistory((previous) => [...previous.filter((action) => action !== 'lineStart'), 'line']);
+  };
+  const lineEnds = (line: ShapeLine) => {
+    if (line.mode === 'segment') return { a: line.start, b: line.end };
+    const dx = line.end.x - line.start.x;
+    const dy = line.end.y - line.start.y;
+    const len = Math.max(1, Math.hypot(dx, dy));
+    if (line.mode === 'ray') return { a: line.start, b: { ...line.end, x: line.start.x + (dx / len) * 900, y: line.start.y + (dy / len) * 900 } };
+    return { a: { ...line.start, x: line.start.x - (dx / len) * 900, y: line.start.y - (dy / len) * 900 }, b: { ...line.end, x: line.start.x + (dx / len) * 900, y: line.start.y + (dy / len) * 900 } };
+  };
+  const rightAngleMarkers = (() => {
+    const markers: Array<{ key: string; vertex: ShapePoint; a: ShapePoint; b: ShapePoint }> = [];
+    const seen = new Set<string>();
+    const addMarker = (vertex: ShapePoint, a: ShapePoint, b: ShapePoint, source: string) => {
+      const cross = Math.abs((a.x - vertex.x) * (b.y - vertex.y) - (a.y - vertex.y) * (b.x - vertex.x));
+      if (cross < 300 || !rightAt(vertex, a, b)) return;
+      const key = `${Math.round(vertex.x)}:${Math.round(vertex.y)}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      markers.push({ key, vertex, a, b });
+    };
+
+    polygons.forEach((polygon, polygonIndex) => {
+      polygon.forEach((vertex, vertexIndex) => {
+        addMarker(
+          vertex,
+          polygon[(vertexIndex + polygon.length - 1) % polygon.length],
+          polygon[(vertexIndex + 1) % polygon.length],
+          `poly-${polygonIndex}-${vertexIndex}`,
+        );
+      });
+    });
+
+    lines.forEach((first, firstIndex) => {
+      lines.slice(firstIndex + 1).forEach((second, secondOffset) => {
+        const secondIndex = firstIndex + secondOffset + 1;
+        const vertex = [first.start, first.end].find((point) => [second.start, second.end].some((other) => dist(point, other) < 8));
+        if (!vertex) return;
+        const a = dist(first.start, vertex) < 8 ? first.end : first.start;
+        const b = dist(second.start, vertex) < 8 ? second.end : second.start;
+        addMarker(vertex, a, b, `line-${firstIndex}-${secondIndex}`);
+      });
+    });
+
+    return markers;
+  })();
+  const renderRightAngleMarker = ({ key, vertex, a, b }: { key: string; vertex: ShapePoint; a: ShapePoint; b: ShapePoint }) => {
+    const offset = 3;
+    const size = 10;
+    const vectorA = { x: a.x - vertex.x, y: a.y - vertex.y };
+    const vectorB = { x: b.x - vertex.x, y: b.y - vertex.y };
+    const lengthA = Math.max(1, Math.hypot(vectorA.x, vectorA.y));
+    const lengthB = Math.max(1, Math.hypot(vectorB.x, vectorB.y));
+    const unitA = { x: vectorA.x / lengthA, y: vectorA.y / lengthA };
+    const unitB = { x: vectorB.x / lengthB, y: vectorB.y / lengthB };
+    const inner = { x: vertex.x + unitA.x * offset + unitB.x * offset, y: vertex.y + unitA.y * offset + unitB.y * offset };
+    const p1 = { x: inner.x + unitA.x * size, y: inner.y + unitA.y * size };
+    const corner = { x: p1.x + unitB.x * size, y: p1.y + unitB.y * size };
+    const p2 = { x: inner.x + unitB.x * size, y: inner.y + unitB.y * size };
+    const path = `M ${p1.x} ${p1.y} L ${corner.x} ${corner.y} L ${p2.x} ${p2.y}`;
+    return (
+      <g key={key} pointerEvents="none">
+        <path d={path} fill="none" stroke="#fff" strokeWidth="8" strokeLinejoin="miter" strokeLinecap="butt" />
+        <path d={path} fill="none" stroke="#ef4444" strokeWidth="3.2" strokeLinejoin="miter" strokeLinecap="butt" />
+        <path d={path} fill="none" stroke="#b91c1c" strokeWidth="1.2" strokeLinejoin="miter" strokeLinecap="butt" />
+      </g>
+    );
+  };
+  const completed = (() => {
+    if (shapeDraw.mode === 'segment' || shapeDraw.mode === 'line' || shapeDraw.mode === 'ray') return lines.some((line) => line.mode === shapeDraw.mode);
+    if (shapeDraw.mode === 'triangle') return polygons.some((polygon) => polygon.length === 3);
+    if (shapeDraw.mode === 'quadrilateral') return polygons.some((polygon) => polygon.length === 4);
+    if (shapeDraw.mode === 'rightTriangle') return polygons.some((polygon) => polygon.length === 3 && polygon.some((point, index) => rightAt(point, polygon[(index + 2) % 3], polygon[(index + 1) % 3])));
+    if (shapeDraw.mode === 'rectangle' || shapeDraw.mode === 'square') return polygons.some((polygon) => polygon.length === 4 && polygon.every((point, index) => rightAt(point, polygon[(index + 3) % 4], polygon[(index + 1) % 4])));
+    return lines.some((first, firstIndex) => lines.slice(firstIndex + 1).some((second) => {
+      const vertex = [first.start, first.end].find((point) => [second.start, second.end].some((other) => dist(point, other) < 8));
+      if (!vertex) return false;
+      const a = dist(first.start, vertex) < 8 ? first.end : first.start;
+      const b = dist(second.start, vertex) < 8 ? second.end : second.start;
+      const cross = Math.abs((a.x - vertex.x) * (b.y - vertex.y) - (a.y - vertex.y) * (b.x - vertex.x));
+      if (cross < 300) return false;
+      if (shapeDraw.mode === 'rightAngle') return rightAt(vertex, a, b);
+      return shapeDraw.mode === 'acuteAngle' ? dotAt(vertex, a, b) > 0 : dotAt(vertex, a, b) < 0;
+    }));
+  })();
+  useEffect(() => onAnswerChange(completed ? shapeDraw.answerToken : ''), [completed, onAnswerChange, shapeDraw.answerToken]);
+  const renderLineIcon = (mode: ShapeLineMode) => (
+    <svg viewBox="0 0 48 48" className="h-10 w-10" aria-hidden="true">
+      <line
+        x1={mode === 'line' ? 5 : 12}
+        y1="34"
+        x2={mode === 'segment' ? 36 : 43}
+        y2="14"
+        stroke="#f97316"
+        strokeWidth="3.5"
+        strokeLinecap="round"
+      />
+      <circle cx="14" cy="33" r="5" fill="#6b7280" stroke="#111827" strokeWidth="3" />
+      <circle cx="34" cy="15" r="5" fill="#6b7280" stroke="#111827" strokeWidth="3" />
+    </svg>
+  );
+  const renderPolygonIcon = (sides: 3 | 4) => (
+    <svg viewBox="0 0 48 48" className="h-10 w-10" aria-hidden="true">
+      <polygon
+        points={sides === 3 ? '12,15 36,17 24,38' : '12,13 36,13 36,37 12,37'}
+        fill="#bbf7d0"
+        stroke="#ef5da8"
+        strokeWidth="3"
+      />
+      {(sides === 3 ? [[12, 15], [36, 17], [24, 38]] : [[12, 13], [36, 13], [36, 37], [12, 37]]).map(([x, y]) => (
+        <circle key={`${x}-${y}`} cx={x} cy={y} r="3.8" fill="#64748b" stroke="#111827" strokeWidth="2" />
+      ))}
+    </svg>
+  );
+
+  return (
+    <div className="flex h-full w-full flex-col gap-2 text-slate-900">
+      <h2 className="shrink-0 text-xl font-black">{shapeDraw.title}</h2>
+      <div className="relative min-h-0 flex-1 overflow-hidden rounded-2xl border-2 border-slate-300 bg-[#f8fbff]">
+        <div className="absolute left-1/2 top-3 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full bg-[#253493] px-3 py-2 shadow-lg">
+          <button type="button" onClick={() => { setTool('point'); setOpenToolMenu(null); }} className={`grid h-12 w-12 place-items-center rounded-full bg-pink-300 ${tool === 'point' ? 'ring-4 ring-sky-300 ring-offset-2' : ''}`} aria-label="점 도구">
+            <span className="block h-4 w-4 rounded-full border-4 border-slate-900 bg-slate-500" />
+          </button>
+          <button type="button" onClick={() => (tool === 'line' ? setLineMode(lineMode === 'segment' ? 'line' : lineMode === 'line' ? 'ray' : 'segment') : setTool('line'))} className={`grid h-12 w-12 place-items-center rounded-full bg-cyan-100 ${tool === 'line' ? 'ring-4 ring-sky-300 ring-offset-2' : ''}`} aria-label="???占쎄뎄"><svg viewBox="0 0 48 48" className="h-10 w-10"><line x1={lineMode === 'line' ? 6 : 12} y1="34" x2={lineMode === 'line' || lineMode === 'ray' ? 42 : 36} y2="14" stroke="#f97316" strokeWidth="3.5" strokeLinecap="round" /><circle cx="14" cy="33" r="5" fill="#6b7280" stroke="#111827" strokeWidth="3" /><circle cx="34" cy="15" r="5" fill={lineMode === 'ray' ? '#6b7280' : '#f8fbff'} stroke="#2563eb" strokeWidth="3" /></svg></button>
+          <button type="button" onClick={() => (tool === 'polygon' ? setPolygonSides(polygonSides === 3 ? 4 : 3) : setTool('polygon'))} className={`grid h-12 w-12 place-items-center rounded-full bg-lime-300 ${tool === 'polygon' ? 'ring-4 ring-sky-300 ring-offset-2' : ''}`} aria-label="?占쏀삎 ?占쎄뎄"><svg viewBox="0 0 48 48" className="h-10 w-10"><polygon points={polygonSides === 3 ? '12,15 36,17 24,38' : '12,13 36,13 36,37 12,37'} fill="#bbf7d0" stroke="#ef5da8" strokeWidth="3" /></svg></button>
+          <button type="button" onClick={undo} disabled={history.length === 0} className="grid h-12 w-12 place-items-center rounded-full bg-yellow-300 text-[#253493] disabled:opacity-40" aria-label="?占쎈룎由ш린"><RotateCcw className="h-6 w-6" strokeWidth={3} /></button>
+        </div>
+        <button type="button" onClick={onSubmit} disabled={!answerValue} className="absolute bottom-4 right-5 z-30 flex items-center gap-2 rounded-full bg-[#ffc400] px-7 py-3 text-lg font-black text-[#273b9a] shadow-lg disabled:opacity-45"><Sword size={22} /> 공격!</button>
+        <svg ref={svgRef} viewBox="0 0 640 360" className="h-full min-h-[20rem] w-full touch-none" onPointerDown={handleDown}>
+          <rect width="640" height="360" fill="#f8fbff" />
+          {Array.from({ length: 11 }, (_, i) => <line key={`gx-${i}`} x1={SHAPE_ORIGIN.x + i * SHAPE_GRID} x2={SHAPE_ORIGIN.x + i * SHAPE_GRID} y1="0" y2="360" stroke="#d7dee9" />)}
+          {Array.from({ length: 6 }, (_, i) => <line key={`gy-${i}`} y1={SHAPE_ORIGIN.y + i * SHAPE_GRID} y2={SHAPE_ORIGIN.y + i * SHAPE_GRID} x1="0" x2="640" stroke="#d7dee9" />)}
+          {Array.from({ length: 66 }, (_, i) => <circle key={`dot-${i}`} cx={SHAPE_ORIGIN.x + (i % 11) * SHAPE_GRID} cy={SHAPE_ORIGIN.y + Math.floor(i / 11) * SHAPE_GRID} r="3" fill="#64748b" opacity="0.45" />)}
+          {polygons.map((polygon, index) => <g key={`poly-${index}`}><polygon points={polygon.map((point) => `${point.x},${point.y}`).join(' ')} fill="#bef26477" stroke="#ef5da8" strokeWidth="3" />{polygon.map((point) => <g key={`${point.x}-${point.y}`}><ShapePointView point={point} /></g>)}</g>)}
+          {pendingPolygon.length > 0 && <polyline points={pendingPolygon.map((point) => `${point.x},${point.y}`).join(' ')} fill="none" stroke="#ef5da8" strokeWidth="3" />}
+          {lines.map((line, index) => { const ends = lineEnds(line); return <g key={`line-${index}`}><line x1={ends.a.x} y1={ends.a.y} x2={ends.b.x} y2={ends.b.y} stroke="#f97316" strokeWidth="3.4" strokeLinecap="round" /><ShapePointView point={line.start} /><ShapePointView point={line.end} /></g>; })}
+          {rightAngleMarkers.map(renderRightAngleMarker)}
+          {[...points, ...pendingPolygon, ...(lineStart ? [lineStart] : [])].map((point) => <g key={`point-${point.x}-${point.y}-${point.label}`}><ShapePointView point={point} /></g>)}
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+function ShapeDrawProblemCardV2({ shapeDraw, answerValue, onAnswerChange, onSubmit }: { shapeDraw: ShapeDrawProblemData; answerValue: string; onAnswerChange: (value: string) => void; onSubmit: () => void }) {
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  const [tool, setTool] = useState<ShapeTool>('point');
+  const [openMenu, setOpenMenu] = useState<ShapeToolMenu>(null);
+  const [lineMode, setLineMode] = useState<ShapeLineMode>('segment');
+  const [polygonSides, setPolygonSides] = useState<3 | 4>(3);
+  const [points, setPoints] = useState<ShapePoint[]>([]);
+  const [lines, setLines] = useState<ShapeLine[]>([]);
+  const [polygons, setPolygons] = useState<ShapePoint[][]>([]);
+  const [lineStart, setLineStart] = useState<ShapePoint | null>(null);
+  const [pendingPolygon, setPendingPolygon] = useState<ShapePoint[]>([]);
+  const [history, setHistory] = useState<Array<'point' | 'lineStart' | 'line' | 'polygonPoint' | 'polygon'>>([]);
+  const previousAnswerValueRef = useRef(answerValue);
+  const labels = ['\u3131', '\u3134', '\u3137', '\u3139', '\u3141', '\u3142', '\u3145', '\u3147', '\u3148', '\u314a'];
+  const boardPoints = [...points, ...lines.flatMap((line) => [line.start, line.end]), ...polygons.flat(), ...pendingPolygon, ...(lineStart ? [lineStart] : [])];
+  const distinctPoints = Array.from(new Map(boardPoints.map((point) => [`${point.x}:${point.y}`, point])).values());
+  const dist = (a: ShapePoint, b: ShapePoint) => Math.hypot(a.x - b.x, a.y - b.y);
+  const dotAt = (v: ShapePoint, a: ShapePoint, b: ShapePoint) => (a.x - v.x) * (b.x - v.x) + (a.y - v.y) * (b.y - v.y);
+  const rightAt = (v: ShapePoint, a: ShapePoint, b: ShapePoint) => Math.abs(dotAt(v, a, b)) < 160;
+  const snap = (clientX: number, clientY: number) => {
+    const rect = svgRef.current?.getBoundingClientRect();
+    const rawX = rect ? ((clientX - rect.left) / rect.width) * 640 : clientX;
+    const rawY = rect ? ((clientY - rect.top) / rect.height) * 360 : clientY;
+    const x = Math.max(SHAPE_ORIGIN.x, Math.min(612, SHAPE_ORIGIN.x + Math.round((rawX - SHAPE_ORIGIN.x) / SHAPE_GRID) * SHAPE_GRID));
+    const y = Math.max(SHAPE_ORIGIN.y, Math.min(320, SHAPE_ORIGIN.y + Math.round((rawY - SHAPE_ORIGIN.y) / SHAPE_GRID) * SHAPE_GRID));
+    const existing = distinctPoints.find((point) => Math.hypot(point.x - x, point.y - y) < 8);
+    return existing ?? { x, y, label: labels[distinctPoints.length % labels.length] };
+  };
+  const undo = () => {
+    const latest = history.at(-1);
+    setHistory((previous) => previous.slice(0, -1));
+    if (latest === 'point') setPoints((previous) => previous.slice(0, -1));
+    if (latest === 'lineStart') setLineStart(null);
+    if (latest === 'line') setLines((previous) => previous.slice(0, -1));
+    if (latest === 'polygonPoint') setPendingPolygon((previous) => previous.slice(0, -1));
+    if (latest === 'polygon') setPolygons((previous) => previous.slice(0, -1));
+  };
+  const resetShapeBoard = () => {
+    setPoints([]);
+    setLines([]);
+    setPolygons([]);
+    setLineStart(null);
+    setPendingPolygon([]);
+    setHistory([]);
+    setOpenMenu(null);
+  };
+  useEffect(() => {
+    if (previousAnswerValueRef.current === shapeDraw.answerToken && answerValue === '') {
+      resetShapeBoard();
+    }
+    previousAnswerValueRef.current = answerValue;
+  }, [answerValue, shapeDraw.answerToken]);
+  const handleDown = (event: React.PointerEvent<SVGSVGElement>) => {
+    setOpenMenu(null);
+    const point = snap(event.clientX, event.clientY);
+    if (tool === 'point') {
+      if (!distinctPoints.some((existing) => dist(existing, point) < 8)) {
+        setPoints((previous) => [...previous, point]);
+        setHistory((previous) => [...previous, 'point']);
+      }
+      return;
+    }
+    if (tool === 'polygon') {
+      if (pendingPolygon.some((existing) => dist(existing, point) < 8)) return;
+      const next = [...pendingPolygon, point];
+      if (next.length >= polygonSides) {
+        setPolygons((previous) => [...previous, next]);
+        setPendingPolygon([]);
+        setHistory((previous) => [...previous.filter((action) => action !== 'polygonPoint'), 'polygon']);
+      } else {
+        setPendingPolygon(next);
+        setHistory((previous) => [...previous, 'polygonPoint']);
+      }
+      return;
+    }
+    if (!lineStart) {
+      setLineStart(point);
+      setHistory((previous) => [...previous, 'lineStart']);
+      return;
+    }
+    if (dist(lineStart, point) < 24) return;
+    setLines((previous) => [...previous, { start: lineStart, end: point, mode: lineMode }]);
+    setLineStart(null);
+    setHistory((previous) => [...previous.filter((action) => action !== 'lineStart'), 'line']);
+  };
+  const lineEnds = (line: ShapeLine) => {
+    if (line.mode === 'segment') return { a: line.start, b: line.end };
+    const dx = line.end.x - line.start.x;
+    const dy = line.end.y - line.start.y;
+    const len = Math.max(1, Math.hypot(dx, dy));
+    if (line.mode === 'ray') return { a: line.start, b: { ...line.end, x: line.start.x + (dx / len) * 900, y: line.start.y + (dy / len) * 900 } };
+    return { a: { ...line.start, x: line.start.x - (dx / len) * 900, y: line.start.y - (dy / len) * 900 }, b: { ...line.end, x: line.start.x + (dx / len) * 900, y: line.start.y + (dy / len) * 900 } };
+  };
+  const rightAngleMarkers = (() => {
+    const markers: Array<{ key: string; vertex: ShapePoint; a: ShapePoint; b: ShapePoint }> = [];
+    const seen = new Set<string>();
+    const addMarker = (vertex: ShapePoint, a: ShapePoint, b: ShapePoint, source: string) => {
+      const cross = Math.abs((a.x - vertex.x) * (b.y - vertex.y) - (a.y - vertex.y) * (b.x - vertex.x));
+      if (cross < 300 || !rightAt(vertex, a, b)) return;
+      const key = `${Math.round(vertex.x)}:${Math.round(vertex.y)}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      markers.push({ key, vertex, a, b });
+    };
+
+    polygons.forEach((polygon, polygonIndex) => {
+      polygon.forEach((vertex, vertexIndex) => {
+        addMarker(
+          vertex,
+          polygon[(vertexIndex + polygon.length - 1) % polygon.length],
+          polygon[(vertexIndex + 1) % polygon.length],
+          `poly-${polygonIndex}-${vertexIndex}`,
+        );
+      });
+    });
+
+    lines.forEach((first, firstIndex) => {
+      lines.slice(firstIndex + 1).forEach((second, secondOffset) => {
+        const secondIndex = firstIndex + secondOffset + 1;
+        const vertex = [first.start, first.end].find((point) => [second.start, second.end].some((other) => dist(point, other) < 8));
+        if (!vertex) return;
+        const a = dist(first.start, vertex) < 8 ? first.end : first.start;
+        const b = dist(second.start, vertex) < 8 ? second.end : second.start;
+        addMarker(vertex, a, b, `line-${firstIndex}-${secondIndex}`);
+      });
+    });
+
+    return markers;
+  })();
+  const renderRightAngleMarker = ({ key, vertex, a, b }: { key: string; vertex: ShapePoint; a: ShapePoint; b: ShapePoint }) => {
+    const offset = 3;
+    const size = 10;
+    const vectorA = { x: a.x - vertex.x, y: a.y - vertex.y };
+    const vectorB = { x: b.x - vertex.x, y: b.y - vertex.y };
+    const lengthA = Math.max(1, Math.hypot(vectorA.x, vectorA.y));
+    const lengthB = Math.max(1, Math.hypot(vectorB.x, vectorB.y));
+    const unitA = { x: vectorA.x / lengthA, y: vectorA.y / lengthA };
+    const unitB = { x: vectorB.x / lengthB, y: vectorB.y / lengthB };
+    const inner = { x: vertex.x + unitA.x * offset + unitB.x * offset, y: vertex.y + unitA.y * offset + unitB.y * offset };
+    const p1 = { x: inner.x + unitA.x * size, y: inner.y + unitA.y * size };
+    const corner = { x: p1.x + unitB.x * size, y: p1.y + unitB.y * size };
+    const p2 = { x: inner.x + unitB.x * size, y: inner.y + unitB.y * size };
+    const path = `M ${p1.x} ${p1.y} L ${corner.x} ${corner.y} L ${p2.x} ${p2.y}`;
+    return (
+      <g key={key} pointerEvents="none">
+        <path d={path} fill="none" stroke="#fff" strokeWidth="8" strokeLinejoin="miter" strokeLinecap="butt" />
+        <path d={path} fill="none" stroke="#ef4444" strokeWidth="3.2" strokeLinejoin="miter" strokeLinecap="butt" />
+        <path d={path} fill="none" stroke="#b91c1c" strokeWidth="1.2" strokeLinejoin="miter" strokeLinecap="butt" />
+      </g>
+    );
+  };
+  const completed = (() => {
+    if (shapeDraw.mode === 'segment' || shapeDraw.mode === 'line' || shapeDraw.mode === 'ray') return lines.some((line) => line.mode === shapeDraw.mode);
+    if (shapeDraw.mode === 'triangle') return polygons.some((polygon) => polygon.length === 3);
+    if (shapeDraw.mode === 'quadrilateral') return polygons.some((polygon) => polygon.length === 4);
+    if (shapeDraw.mode === 'rightTriangle') return polygons.some((polygon) => polygon.length === 3 && polygon.some((point, index) => rightAt(point, polygon[(index + 2) % 3], polygon[(index + 1) % 3])));
+    if (shapeDraw.mode === 'rectangle' || shapeDraw.mode === 'square') return polygons.some((polygon) => polygon.length === 4 && polygon.every((point, index) => rightAt(point, polygon[(index + 3) % 4], polygon[(index + 1) % 4])));
+    return lines.some((first, firstIndex) => lines.slice(firstIndex + 1).some((second) => {
+      const vertex = [first.start, first.end].find((point) => [second.start, second.end].some((other) => dist(point, other) < 8));
+      if (!vertex) return false;
+      const a = dist(first.start, vertex) < 8 ? first.end : first.start;
+      const b = dist(second.start, vertex) < 8 ? second.end : second.start;
+      const cross = Math.abs((a.x - vertex.x) * (b.y - vertex.y) - (a.y - vertex.y) * (b.x - vertex.x));
+      if (cross < 300) return false;
+      if (shapeDraw.mode === 'rightAngle') return rightAt(vertex, a, b);
+      return shapeDraw.mode === 'acuteAngle' ? dotAt(vertex, a, b) > 0 : dotAt(vertex, a, b) < 0;
+    }));
+  })();
+  useEffect(() => onAnswerChange(completed ? shapeDraw.answerToken : ''), [completed, onAnswerChange, shapeDraw.answerToken]);
+  const lineIcon = (mode: ShapeLineMode) => {
+    const start = { x: 14, y: 33 };
+    const end = { x: 34, y: 15 };
+    return (
+      <svg viewBox="0 0 48 48" className="h-10 w-10" aria-hidden="true">
+        {mode === 'line' && (
+          <line x1="5" y1="41" x2="43" y2="7" stroke="#f97316" strokeWidth="4.2" strokeLinecap="round" />
+        )}
+        {mode === 'ray' && (
+          <line x1={start.x} y1={start.y} x2="43" y2="7" stroke="#f97316" strokeWidth="4.2" strokeLinecap="round" />
+        )}
+        {mode === 'segment' && (
+          <line x1={start.x} y1={start.y} x2={end.x} y2={end.y} stroke="#f97316" strokeWidth="4.2" strokeLinecap="round" />
+        )}
+        {mode === 'line' ? (
+          <>
+            <circle cx={start.x} cy={start.y} r="4.4" fill="#64748b" stroke="#1f2937" strokeWidth="2.8" />
+            <circle cx={end.x} cy={end.y} r="4.4" fill="#64748b" stroke="#1f2937" strokeWidth="2.8" />
+            <circle cx="5" cy="41" r="2.2" fill="#f97316" />
+            <circle cx="43" cy="7" r="2.2" fill="#f97316" />
+          </>
+        ) : mode === 'ray' ? (
+          <>
+            <circle cx={start.x} cy={start.y} r="5.2" fill="#64748b" stroke="#111827" strokeWidth="3" />
+            <circle cx={end.x} cy={end.y} r="4.3" fill="#f8fbff" stroke="#2563eb" strokeWidth="3" />
+            <circle cx="43" cy="7" r="2.5" fill="#f97316" />
+          </>
+        ) : (
+          <>
+            <circle cx={start.x} cy={start.y} r="5.2" fill="#64748b" stroke="#111827" strokeWidth="3" />
+            <circle cx={end.x} cy={end.y} r="5.2" fill="#64748b" stroke="#111827" strokeWidth="3" />
+          </>
+        )}
+      </svg>
+    );
+  };
+  const polygonIcon = (sides: 3 | 4) => {
+    const vertices = sides === 3 ? [[12, 15], [36, 17], [24, 38]] : [[12, 13], [36, 13], [36, 37], [12, 37]];
+    return (
+      <svg viewBox="0 0 48 48" className="h-10 w-10" aria-hidden="true">
+        <polygon points={vertices.map(([x, y]) => `${x},${y}`).join(' ')} fill="#bbf7d0" stroke="#ef5da8" strokeWidth="3" />
+        {vertices.map(([x, y]) => <circle key={`${x}-${y}`} cx={x} cy={y} r="3.8" fill="#64748b" stroke="#111827" strokeWidth="2" />)}
+      </svg>
+    );
+  };
+  const toolButtonClass = (active: boolean, colorClass: string) => `grid h-12 w-12 place-items-center rounded-full border-[5px] transition-all duration-200 ${
+    active
+      ? `${colorClass} -translate-y-1 scale-110 border-white shadow-[0_0_0_5px_rgba(14,165,233,0.72),0_12px_20px_rgba(15,23,42,0.28)]`
+      : `${colorClass} border-transparent opacity-80 hover:opacity-100`
+  }`;
+  const selectedToolLabel = (label: string) => (
+    <span className="pointer-events-none absolute left-1/2 top-[3.35rem] z-20 -translate-x-1/2 rounded-full bg-white px-2.5 py-0.5 text-xs font-black text-[#253493] shadow-[0_4px_10px_rgba(15,23,42,0.2)]">
+      {label}
+    </span>
+  );
+
+  return (
+    <div className="flex h-full w-full flex-col gap-2 text-slate-900">
+      <h2 className="shrink-0 text-xl font-black">{shapeDraw.title}</h2>
+      <div className="relative min-h-0 flex-1 overflow-hidden rounded-2xl border-2 border-slate-300 bg-[#f8fbff]">
+        <div className="absolute left-1/2 top-3 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full bg-[#253493] px-3 py-2 shadow-lg">
+          <button type="button" onClick={() => { setTool('point'); setOpenMenu(null); }} className={toolButtonClass(tool === 'point', 'bg-pink-300')} aria-label="점 도구">
+            <span className="block h-4 w-4 rounded-full border-4 border-slate-900 bg-slate-500" />
+          </button>
+          <div className="relative">
+            <button type="button" onClick={() => setOpenMenu((menu) => (menu === 'line' ? null : 'line'))} className={toolButtonClass(tool === 'line', 'bg-cyan-100')} aria-label="선 도구">
+              {lineIcon(lineMode)}
+            </button>
+            <div className={`absolute left-1/2 top-[3.7rem] flex -translate-x-1/2 gap-2 rounded-full bg-cyan-100/95 px-3 py-2 shadow-xl transition-all duration-200 ease-out ${openMenu === 'line' ? 'translate-y-0 scale-100 opacity-100' : 'pointer-events-none -translate-y-2 scale-95 opacity-0'}`}>
+              {(['segment', 'line', 'ray'] as ShapeLineMode[]).map((mode) => (
+                <button key={mode} type="button" onClick={() => { setTool('line'); setLineMode(mode); setOpenMenu(null); }} className={`grid h-12 w-12 place-items-center rounded-full bg-white transition-all duration-150 ${tool === 'line' && lineMode === mode ? 'ring-4 ring-[#253493]' : 'hover:scale-105'}`} aria-label={mode === 'segment' ? '선분' : mode === 'line' ? '직선' : '반직선'}>
+                  {lineIcon(mode)}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="relative">
+            <button type="button" onClick={() => setOpenMenu((menu) => (menu === 'polygon' ? null : 'polygon'))} className={toolButtonClass(tool === 'polygon', 'bg-lime-300')} aria-label="도형 도구">
+              {polygonIcon(polygonSides)}
+            </button>
+            <div className={`absolute left-1/2 top-[3.7rem] flex -translate-x-1/2 gap-2 rounded-full bg-lime-200/95 px-3 py-2 shadow-xl transition-all duration-200 ease-out ${openMenu === 'polygon' ? 'translate-y-0 scale-100 opacity-100' : 'pointer-events-none -translate-y-2 scale-95 opacity-0'}`}>
+              {([3, 4] as Array<3 | 4>).map((sides) => (
+                <button key={sides} type="button" onClick={() => { setTool('polygon'); setPolygonSides(sides); setOpenMenu(null); }} className={`grid h-12 w-12 place-items-center rounded-full bg-white transition-all duration-150 ${tool === 'polygon' && polygonSides === sides ? 'ring-4 ring-[#253493]' : 'hover:scale-105'}`} aria-label={sides === 3 ? '삼각형' : '사각형'}>
+                  {polygonIcon(sides)}
+                </button>
+              ))}
+            </div>
+          </div>
+          <button type="button" onClick={() => { setOpenMenu(null); undo(); }} disabled={history.length === 0} className="grid h-12 w-12 place-items-center rounded-full bg-yellow-300 text-[#253493] transition-opacity disabled:opacity-40" aria-label="되돌리기">
+            <RotateCcw className="h-6 w-6" strokeWidth={3} />
+          </button>
+        </div>
+        <button type="button" onClick={onSubmit} className="absolute bottom-4 right-5 z-30 flex items-center gap-2 rounded-full bg-emerald-500 px-7 py-3 text-lg font-black text-white shadow-lg shadow-emerald-900/25 transition hover:bg-emerald-400">
+          <Sword size={22} /> 공격!
+        </button>
+        <svg ref={svgRef} viewBox="0 0 640 360" className="h-full min-h-[20rem] w-full touch-none" onPointerDown={handleDown}>
+          <rect width="640" height="360" fill="#f8fbff" />
+          {Array.from({ length: 11 }, (_, i) => <line key={`gx-${i}`} x1={SHAPE_ORIGIN.x + i * SHAPE_GRID} x2={SHAPE_ORIGIN.x + i * SHAPE_GRID} y1="0" y2="360" stroke="#d7dee9" />)}
+          {Array.from({ length: 6 }, (_, i) => <line key={`gy-${i}`} y1={SHAPE_ORIGIN.y + i * SHAPE_GRID} y2={SHAPE_ORIGIN.y + i * SHAPE_GRID} x1="0" x2="640" stroke="#d7dee9" />)}
+          {Array.from({ length: 66 }, (_, i) => <circle key={`dot-${i}`} cx={SHAPE_ORIGIN.x + (i % 11) * SHAPE_GRID} cy={SHAPE_ORIGIN.y + Math.floor(i / 11) * SHAPE_GRID} r="3" fill="#64748b" opacity="0.45" />)}
+          {polygons.map((polygon, index) => <g key={`poly-${index}`}><polygon points={polygon.map((point) => `${point.x},${point.y}`).join(' ')} fill="#bef26477" stroke="#ef5da8" strokeWidth="3" />{polygon.map((point) => <g key={`${point.x}-${point.y}`}><ShapePointView point={point} /></g>)}</g>)}
+          {pendingPolygon.length > 0 && <polyline points={pendingPolygon.map((point) => `${point.x},${point.y}`).join(' ')} fill="none" stroke="#ef5da8" strokeWidth="3" />}
+          {lines.map((line, index) => { const ends = lineEnds(line); return <g key={`line-${index}`}><line x1={ends.a.x} y1={ends.a.y} x2={ends.b.x} y2={ends.b.y} stroke="#f97316" strokeWidth="3.4" strokeLinecap="round" /><ShapePointView point={line.start} /><ShapePointView point={line.end} /></g>; })}
+          {rightAngleMarkers.map(renderRightAngleMarker)}
+          {[...points, ...pendingPolygon, ...(lineStart ? [lineStart] : [])].map((point) => <g key={`point-${point.x}-${point.y}-${point.label}`}><ShapePointView point={point} /></g>)}
+        </svg>
+      </div>
+    </div>
+  );
+}
+
 function createEstimationChoices(answer: number) {
   const roundedAnswer = clamp(
     roundToNearestUnit(answer, ESTIMATION_ROUNDING_UNIT),
@@ -11984,7 +12599,9 @@ export default function App() {
   const hasSecretCodeInput = normalizedSecretCodeInput.length > 0;
   const usesTextAnswerInput = currentDistanceWorksheetPrompt?.kind === 'place';
   const canAttemptAttack =
-    isStructuredTimeAnswerProblem
+    problem.kind === 'shapeDraw'
+      ? true
+      : isStructuredTimeAnswerProblem
       ? hasValidStructuredTimeInput
       : problem.kind === 'distanceWorksheet'
       ? Boolean(hasValidDistanceWorksheetInput)
@@ -12554,6 +13171,15 @@ export default function App() {
   };
 
   const checkAnswer = () => {
+    if (problem.kind === 'shapeDraw' && problem.shapeDraw) {
+      playSound('submit', {
+        gainMultiplier: 0.9,
+        detune: 10,
+      });
+      resolveProblemResult(inputValue === problem.shapeDraw.answerToken);
+      return;
+    }
+
     if (problem.kind === 'clockReading' && problem.clockReading) {
       if (!hasValidStructuredTimeInput) {
         playSound('ui');
@@ -13120,7 +13746,7 @@ export default function App() {
               </button>
             </div>
 
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid gap-2 sm:grid-cols-3">
               {LEARNING_UNITS.map((unit) => (
                 <motion.button
                   key={unit.id}
@@ -13131,7 +13757,7 @@ export default function App() {
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.24, ease: 'easeOut' }}
-                  className={`unit-select-card group relative flex h-full min-h-[6.25rem] flex-col overflow-hidden rounded-[1.15rem] border p-4 text-left shadow-none transition duration-200 sm:min-h-[6.75rem] ${
+                  className={`unit-select-card group relative flex h-full min-h-[6rem] flex-col overflow-hidden rounded-[1.15rem] border p-4 text-left shadow-none transition duration-200 sm:min-h-[6.5rem] ${
                     selectedLearningUnitId === unit.id
                       ? 'border-emerald-400 bg-emerald-400/10 ring-1 ring-emerald-300/35'
                       : unit.isAvailable
@@ -13596,6 +14222,8 @@ export default function App() {
                 className={`flex min-h-0 flex-1 rounded-3xl ${isDenseNumberedStoryLayout ? 'border-4' : 'border-8'} border-slate-200 bg-white shadow-inner ${
                   problem.kind === 'distanceMap' || problem.kind === 'distanceWorksheet'
                     ? 'flex flex-col overflow-y-auto p-2 sm:p-3 lg:p-3'
+                    : problem.kind === 'shapeDraw'
+                      ? 'flex flex-col overflow-hidden p-3 sm:p-4 lg:p-5'
                     : problem.kind === 'timeAddition' && isStoryTimeAdditionProblem
                       ? `flex flex-col justify-center ${isCompactBattleViewport ? 'overflow-hidden p-3 sm:p-4 lg:p-5' : 'overflow-y-auto p-4 sm:p-6 lg:p-8'}`
                     : problem.kind === 'timeAddition' && isVerticalTimeAdditionProblem
@@ -13611,7 +14239,14 @@ export default function App() {
                       : 'flex flex-col items-center justify-center p-4 text-[clamp(3.5rem,18vw,8rem)] leading-none font-black font-mono text-slate-900 sm:p-6 lg:p-8'
                 }`}
               >
-                {problem.kind === 'distanceWorksheet' && problem.distanceWorksheet ? (
+                {problem.kind === 'shapeDraw' && problem.shapeDraw ? (
+                  <ShapeDrawProblemCardV2
+                    shapeDraw={problem.shapeDraw}
+                    answerValue={inputValue}
+                    onAnswerChange={setInputValue}
+                    onSubmit={checkAnswer}
+                  />
+                ) : problem.kind === 'distanceWorksheet' && problem.distanceWorksheet ? (
                     <DistanceWorksheetProblemCard
                       distanceWorksheet={problem.distanceWorksheet}
                       condensed={isCompactBattleViewport}
@@ -13869,7 +14504,7 @@ export default function App() {
             )}
             </div>
 
-            {!isSpecialChallengeActive && (
+            {!isSpecialChallengeActive && problem.kind !== 'shapeDraw' && (
               <div className={`shrink-0 flex flex-col ${battleInputResponsiveClass}`}>
                 {usesBattleStructuredTimeInput ? (
                   <BattleStructuredTimeInput
