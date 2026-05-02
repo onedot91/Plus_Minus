@@ -170,6 +170,39 @@ import playerTornadopotatoHitImage from './assets/player-tornadopotato-hit.png';
 import playerWolfAttackImage from './assets/player-wolf-attack.png';
 import playerWolfDefaultImage from './assets/player-wolf-default.png';
 import playerWolfHitImage from './assets/player-wolf-hit.png';
+import playerSoccerPlayerAttackImage from './assets/player-soccer-player-attack.png';
+import playerSoccerPlayerDefaultImage from './assets/player-soccer-player-default.png';
+import playerSoccerPlayerHitImage from './assets/player-soccer-player-hit.png';
+import playerBaseballPlayerAttackImage from './assets/player-baseball-player-attack.png';
+import playerBaseballPlayerDefaultImage from './assets/player-baseball-player-default.png';
+import playerBaseballPlayerHitImage from './assets/player-baseball-player-hit.png';
+import playerBasketballPlayerAttackImage from './assets/player-basketball-player-attack.png';
+import playerBasketballPlayerDefaultImage from './assets/player-basketball-player-default.png';
+import playerBasketballPlayerHitImage from './assets/player-basketball-player-hit.png';
+import playerTaekwondoAttackImage from './assets/player-taekwondo-attack.png';
+import playerTaekwondoDefaultImage from './assets/player-taekwondo-default.png';
+import playerTaekwondoHitImage from './assets/player-taekwondo-hit.png';
+import playerSwimmerAttackImage from './assets/player-swimmer-attack.png';
+import playerSwimmerDefaultImage from './assets/player-swimmer-default.png';
+import playerSwimmerHitImage from './assets/player-swimmer-hit.png';
+import playerGardenerAttackImage from './assets/player-gardener-attack.png';
+import playerGardenerDefaultImage from './assets/player-gardener-default.png';
+import playerGardenerHitImage from './assets/player-gardener-hit.png';
+import playerMusicianAttackImage from './assets/player-musician-attack.png';
+import playerMusicianDefaultImage from './assets/player-musician-default.png';
+import playerMusicianHitImage from './assets/player-musician-hit.png';
+import playerDoctorAttackImage from './assets/player-doctor-attack.png';
+import playerDoctorDefaultImage from './assets/player-doctor-default.png';
+import playerDoctorHitImage from './assets/player-doctor-hit.png';
+import playerPilotAttackImage from './assets/player-pilot-attack.png';
+import playerPilotDefaultImage from './assets/player-pilot-default.png';
+import playerPilotHitImage from './assets/player-pilot-hit.png';
+import playerNinjaAttackImage from './assets/player-ninja-attack.png';
+import playerNinjaDefaultImage from './assets/player-ninja-default.png';
+import playerNinjaHitImage from './assets/player-ninja-hit.png';
+import playerRobotAttackImage from './assets/player-robot-attack.png';
+import playerRobotDefaultImage from './assets/player-robot-default.png';
+import playerRobotHitImage from './assets/player-robot-hit.png';
 import opponentLevel1AttackImage from './assets/opponent-level1-attack.png';
 import opponentLevel1ChurusigiAttackImage from './assets/opponent-level1-churusigi-attack-cutout.png';
 import opponentLevel1DefaultImage from './assets/opponent-level1-default.png';
@@ -1030,7 +1063,7 @@ interface CharacterSpriteSet {
   hit: string;
 }
 
-type PlayerSkinId = 'default' | 'champion' | 'wizard' | 'cape' | 'detective' | 'knight' | 'space' | 'chef' | 'pirate' | 'firefighter' | 'fairy' | 'patissier' | 'catpajama' | 'rainbowartist' | 'heartwizard' | 'eraser' | 'safety' | 'duck' | 'wolf' | 'fox' | 'ribbon' | 'babo' | 'student' | 'fish' | 'hamster' | 'pizza' | 'ghost' | 'police' | 'spain' | 'goguma' | 'baby-potato' | 'tornadopotato' | 'smart' | 'honey' | 'tiger' | 'gumiho' | 'cat' | 'princess' | 'teacher' | 'clock' | 'mom' | 'thief' | 'diver' | 'wing' | 'scientist' | 'rainbow-dye' | 'taegeukgi' | 'tire' | 'bald' | 'mohawk';
+type PlayerSkinId = 'default' | 'champion' | 'wizard' | 'cape' | 'detective' | 'knight' | 'space' | 'chef' | 'pirate' | 'firefighter' | 'fairy' | 'patissier' | 'catpajama' | 'rainbowartist' | 'heartwizard' | 'eraser' | 'safety' | 'duck' | 'wolf' | 'fox' | 'ribbon' | 'babo' | 'student' | 'fish' | 'hamster' | 'pizza' | 'ghost' | 'police' | 'spain' | 'goguma' | 'baby-potato' | 'tornadopotato' | 'smart' | 'honey' | 'tiger' | 'gumiho' | 'cat' | 'princess' | 'teacher' | 'clock' | 'mom' | 'thief' | 'diver' | 'wing' | 'scientist' | 'rainbow-dye' | 'taegeukgi' | 'tire' | 'bald' | 'mohawk' | 'soccer-player' | 'baseball-player' | 'basketball-player' | 'taekwondo' | 'swimmer' | 'gardener' | 'musician' | 'doctor' | 'pilot' | 'ninja' | 'robot';
 
 interface PlayerSkinConfig {
   id: PlayerSkinId;
@@ -2521,6 +2554,61 @@ const TORNADOPOTATO_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
   default: playerTornadopotatoDefaultImage,
   hit: playerTornadopotatoHitImage,
 };
+const SOCCER_PLAYER_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerSoccerPlayerAttackImage,
+  default: playerSoccerPlayerDefaultImage,
+  hit: playerSoccerPlayerHitImage,
+};
+const BASEBALL_PLAYER_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerBaseballPlayerAttackImage,
+  default: playerBaseballPlayerDefaultImage,
+  hit: playerBaseballPlayerHitImage,
+};
+const BASKETBALL_PLAYER_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerBasketballPlayerAttackImage,
+  default: playerBasketballPlayerDefaultImage,
+  hit: playerBasketballPlayerHitImage,
+};
+const TAEKWONDO_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerTaekwondoAttackImage,
+  default: playerTaekwondoDefaultImage,
+  hit: playerTaekwondoHitImage,
+};
+const SWIMMER_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerSwimmerAttackImage,
+  default: playerSwimmerDefaultImage,
+  hit: playerSwimmerHitImage,
+};
+const GARDENER_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerGardenerAttackImage,
+  default: playerGardenerDefaultImage,
+  hit: playerGardenerHitImage,
+};
+const MUSICIAN_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerMusicianAttackImage,
+  default: playerMusicianDefaultImage,
+  hit: playerMusicianHitImage,
+};
+const DOCTOR_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerDoctorAttackImage,
+  default: playerDoctorDefaultImage,
+  hit: playerDoctorHitImage,
+};
+const PILOT_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerPilotAttackImage,
+  default: playerPilotDefaultImage,
+  hit: playerPilotHitImage,
+};
+const NINJA_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerNinjaAttackImage,
+  default: playerNinjaDefaultImage,
+  hit: playerNinjaHitImage,
+};
+const ROBOT_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerRobotAttackImage,
+  default: playerRobotDefaultImage,
+  hit: playerRobotHitImage,
+};
 const PLAYER_SKINS: PlayerSkinConfig[] = [
   {
     id: 'default',
@@ -2869,6 +2957,83 @@ const PLAYER_SKINS: PlayerSkinConfig[] = [
     label: '모히칸 고마',
     badge: '랜덤 보상',
     spriteSet: MOHAWK_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'soccer-player',
+    label: '축구선수 고마',
+    badge: '랜덤 보상',
+    spriteSet: SOCCER_PLAYER_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'baseball-player',
+    label: '야구선수 고마',
+    badge: '랜덤 보상',
+    spriteSet: BASEBALL_PLAYER_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'basketball-player',
+    label: '농구선수 고마',
+    badge: '랜덤 보상',
+    spriteSet: BASKETBALL_PLAYER_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'taekwondo',
+    label: '태권도 고마',
+    badge: '랜덤 보상',
+    spriteSet: TAEKWONDO_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'swimmer',
+    label: '수영선수 고마',
+    badge: '랜덤 보상',
+    spriteSet: SWIMMER_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'gardener',
+    label: '정원사 고마',
+    badge: '랜덤 보상',
+    spriteSet: GARDENER_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'musician',
+    label: '음악가 고마',
+    badge: '랜덤 보상',
+    spriteSet: MUSICIAN_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'doctor',
+    label: '의사 고마',
+    badge: '랜덤 보상',
+    spriteSet: DOCTOR_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'pilot',
+    label: '비행사 고마',
+    badge: '랜덤 보상',
+    spriteSet: PILOT_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'ninja',
+    label: '닌자 고마',
+    badge: '랜덤 보상',
+    spriteSet: NINJA_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'robot',
+    label: '로봇 고마',
+    badge: '랜덤 보상',
+    spriteSet: ROBOT_GOMA_PLAYER_SPRITES,
     isReward: true,
   },
 ];
