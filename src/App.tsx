@@ -347,20 +347,426 @@ type ShapeDrawMode =
   | 'segment'
   | 'line'
   | 'ray'
+  | 'angle'
   | 'rightAngle'
-  | 'acuteAngle'
-  | 'obtuseAngle'
   | 'triangle'
   | 'rightTriangle'
   | 'quadrilateral'
   | 'rectangle'
   | 'square';
 
+type ShapeDrawTask = 'draw' | 'identify';
+
 interface ShapeDrawProblemData {
   mode: ShapeDrawMode;
+  task: ShapeDrawTask;
   title: string;
   answerToken: string;
+  identifyVariant?: 'fold' | 'definition' | 'rightAngleMark' | 'rightAngleCount' | 'rightAngleNames' | 'clockRightAngles' | 'rightTriangleClassify' | 'rightTriangleDefinition' | 'shapeClassify' | 'shapeDefinition';
+  drawVariant?: 'point' | 'ray' | 'twoRightTriangles' | 'twoPolygons' | 'gacha';
+  figureVariant?: number;
 }
+
+const SHAPE_DRAW_MIXED_TOKEN = '__shape_draw_mixed__';
+const RIGHT_ANGLE_FOLD_ANSWER_ENABLE_DELAY_MS = 8200;
+
+const SHAPE_DRAW_ANSWER_LABELS: Record<ShapeDrawMode, string> = {
+  segment: '선분',
+  line: '직선',
+  ray: '반직선',
+  angle: '각',
+  rightAngle: '직각',
+  triangle: '삼각형',
+  rightTriangle: '직각삼각형',
+  quadrilateral: '사각형',
+  rectangle: '직사각형',
+  square: '정사각형',
+};
+
+const withObjectParticle = (word: string) => {
+  const lastCode = word.charCodeAt(word.length - 1);
+  const hangulOffset = lastCode - 0xac00;
+  const hasFinalConsonant = hangulOffset >= 0 && hangulOffset <= 11171 && hangulOffset % 28 !== 0;
+  return `${word}${hasFinalConsonant ? '을' : '를'}`;
+};
+
+const UNIT1_LEVEL8_GACHA_MODES: ShapeDrawMode[] = [
+  'segment',
+  'line',
+  'ray',
+  'angle',
+  'rightAngle',
+  'rightTriangle',
+  'rectangle',
+  'square',
+];
+
+const SHAPE_READ_COMPOUND_JAMO_EXPANSIONS: Record<string, string> = {
+  '\u3132': '\u3131\u3131',
+  '\u3133': '\u3131\u3145',
+  '\u3135': '\u3134\u3148',
+  '\u3136': '\u3134\u314e',
+  '\u3138': '\u3137\u3137',
+  '\u313a': '\u3139\u3131',
+  '\u313b': '\u3139\u3141',
+  '\u313c': '\u3139\u3142',
+  '\u313d': '\u3139\u3145',
+  '\u313e': '\u3139\u314c',
+  '\u313f': '\u3139\u314d',
+  '\u3140': '\u3139\u314e',
+  '\u3143': '\u3142\u3142',
+  '\u3144': '\u3142\u3145',
+  '\u3146': '\u3145\u3145',
+};
+
+const normalizeShapeReadAnswer = (value: string) => value
+  .replace(/번/g, '')
+  .replace(/[\s,，、./;:|·]+/g, '')
+  .trim()
+  .replace(/[ㄲㄳㄵㄶㄸㄺㄻㄼㄽㄾㄿㅀㅃㅄㅆ]/g, (char) => SHAPE_READ_COMPOUND_JAMO_EXPANSIONS[char] ?? char);
+
+const SHAPE_READ_FIRST_POINT_LABEL = '\u3131';
+const SHAPE_READ_SECOND_POINT_LABEL = '\u3134';
+const SHAPE_READ_DEFAULT_ANGLE_LABELS = ['\u3131', '\u3134', '\u3137'] as const;
+const SHAPE_READ_ANGLE_LABEL_SETS = [
+  ['\u3131', '\u3134', '\u3137'],
+  ['\u3137', '\u3134', '\u3131'],
+  ['\u3134', '\u3137', '\u3139'],
+  ['\u3131', '\u3137', '\u3141'],
+  ['\u3139', '\u3141', '\u3131'],
+  ['\u3141', '\u3139', '\u3134'],
+] as const;
+
+const getShapeReadAngleLabels = (figureVariant = 0) => SHAPE_READ_ANGLE_LABEL_SETS[figureVariant % SHAPE_READ_ANGLE_LABEL_SETS.length];
+
+const getShapeReadAnswerOptions = (mode: ShapeDrawMode, figureVariant = 0) => {
+  const label = SHAPE_DRAW_ANSWER_LABELS[mode];
+  const forward = `${SHAPE_READ_FIRST_POINT_LABEL}${SHAPE_READ_SECOND_POINT_LABEL}`;
+  const backward = `${SHAPE_READ_SECOND_POINT_LABEL}${SHAPE_READ_FIRST_POINT_LABEL}`;
+
+  if (mode === 'segment' || mode === 'line') {
+    return [`${label}${forward}`, `${label}${backward}`];
+  }
+
+  if (mode === 'ray') {
+    return [`${label}${forward}`];
+  }
+
+  if (mode === 'angle') {
+    const [first, vertex, last] = getShapeReadAngleLabels(figureVariant) ?? SHAPE_READ_DEFAULT_ANGLE_LABELS;
+    return [`${label}${first}${vertex}${last}`, `${label}${last}${vertex}${first}`];
+  }
+
+  return [label];
+};
+
+const getShapeReadAnswerToken = (mode: ShapeDrawMode, figureVariant = 0) => getShapeReadAnswerOptions(mode, figureVariant).join('|');
+
+const RIGHT_ANGLE_MARK_ANSWER_TOKENS = [
+  '8|8개',
+  '10|10개',
+  '7|7개',
+  '9|9개',
+  '11|11개',
+  '6|6개',
+] as const;
+
+const RIGHT_ANGLE_COUNT_ANSWERS = [
+  [1, 2, 4],
+  [4, 1, 2],
+  [2, 4, 1],
+  [4, 2, 1],
+  [1, 4, 2],
+  [2, 1, 4],
+] as const;
+
+const RIGHT_ANGLE_NAME_PROBLEM_VARIANTS = [
+  {
+    vertex: { x: 320, y: 178, label: '\u3142' },
+    rays: [
+      { x: 252, y: 64, label: '\u3131' },
+      { x: 192, y: 144, label: '\u3134' },
+      { x: 288, y: 296, label: '\u3137' },
+      { x: 446, y: 102, label: '\u3139' },
+      { x: 430, y: 252, label: '\u3141' },
+    ],
+    answerGroups: [
+      ['각ㄱㅂㄹ', '각ㄹㅂㄱ'],
+      ['각ㄴㅂㄷ', '각ㄷㅂㄴ'],
+    ],
+  },
+  {
+    vertex: { x: 320, y: 178, label: '\u3145' },
+    rays: [
+      { x: 320, y: 54, label: '\u3131' },
+      { x: 456, y: 178, label: '\u3134' },
+      { x: 184, y: 178, label: '\u3137' },
+      { x: 320, y: 302, label: '\u3139' },
+      { x: 432, y: 80, label: '\u3141' },
+    ],
+    answerGroups: [
+      ['각ㄱㅅㄴ', '각ㄴㅅㄱ'],
+      ['각ㄷㅅㄹ', '각ㄹㅅㄷ'],
+    ],
+  },
+  {
+    vertex: { x: 320, y: 178, label: '\u3137' },
+    rays: [
+      { x: 188, y: 178, label: '\u3131' },
+      { x: 320, y: 54, label: '\u3134' },
+      { x: 452, y: 178, label: '\u3141' },
+      { x: 320, y: 302, label: '\u3139' },
+      { x: 430, y: 82, label: '\u3142' },
+    ],
+    answerGroups: [
+      ['각ㄱㄷㄴ', '각ㄴㄷㄱ'],
+      ['각ㄴㄷㅁ', '각ㅁㄷㄴ'],
+      ['각ㅁㄷㄹ', '각ㄹㄷㅁ'],
+      ['각ㄹㄷㄱ', '각ㄱㄷㄹ'],
+    ],
+  },
+] as const;
+
+const CLOCK_RIGHT_ANGLE_OPTION_VARIANTS = [
+  [1, 3, 6, 9, 12],
+  [2, 3, 5, 9, 11],
+  [3, 4, 7, 9, 10],
+] as const;
+
+const RIGHT_TRIANGLE_CLASSIFY_VARIANTS = [
+  [
+    { points: '38,132 158,132 38,42', isRightTriangle: true },
+    { points: '94,28 34,132 158,132', isRightTriangle: false },
+    { points: '38,132 158,132 158,42', isRightTriangle: true },
+    { points: '48,124 108,34 166,118', isRightTriangle: false },
+  ],
+  [
+    { points: '92,30 28,124 166,132', isRightTriangle: false },
+    { points: '40,132 40,44 154,132', isRightTriangle: true },
+    { points: '42,120 110,34 166,104', isRightTriangle: false },
+    { points: '150,42 150,132 34,132', isRightTriangle: true },
+  ],
+  [
+    { points: '36,132 156,132 36,38', isRightTriangle: true },
+    { points: '40,38 40,132 160,38', isRightTriangle: true },
+    { points: '96,28 32,130 164,126', isRightTriangle: false },
+    { points: '50,126 118,34 166,112', isRightTriangle: false },
+  ],
+  [
+    { points: '154,42 154,132 34,132', isRightTriangle: true },
+    { points: '42,118 104,28 164,122', isRightTriangle: false },
+    { points: '92,30 34,126 158,132', isRightTriangle: false },
+    { points: '40,40 40,132 158,132', isRightTriangle: true },
+  ],
+  [
+    { points: '48,124 108,30 164,118', isRightTriangle: false },
+    { points: '42,42 42,132 158,42', isRightTriangle: true },
+    { points: '38,132 158,132 38,54', isRightTriangle: true },
+    { points: '94,30 28,132 166,124', isRightTriangle: false },
+  ],
+  [
+    { points: '36,132 154,132 154,38', isRightTriangle: true },
+    { points: '92,28 34,128 162,132', isRightTriangle: false },
+    { points: '50,124 116,34 166,110', isRightTriangle: false },
+    { points: '42,38 42,132 160,132', isRightTriangle: true },
+  ],
+] as const;
+
+const getRightTriangleClassifyItems = (figureVariant = 0) =>
+  RIGHT_TRIANGLE_CLASSIFY_VARIANTS[figureVariant % RIGHT_TRIANGLE_CLASSIFY_VARIANTS.length];
+
+const getRightTriangleClassifyCorrectNumbers = (figureVariant = 0) =>
+  getRightTriangleClassifyItems(figureVariant)
+    .map((item, index) => item.isRightTriangle ? index + 1 : null)
+    .filter((number): number is number => number !== null);
+
+const createRightTriangleClassifyAnswerToken = (figureVariant = 0) => {
+  const correctNumbers = getRightTriangleClassifyCorrectNumbers(figureVariant);
+  const compactAnswer = correctNumbers.join('');
+  const reversedCompactAnswer = [...correctNumbers].reverse().join('');
+  const commaAnswer = correctNumbers.join(',');
+  const reversedCommaAnswer = [...correctNumbers].reverse().join(',');
+  const numberedAnswer = correctNumbers.map((number) => `${number}번`).join('');
+  const reversedNumberedAnswer = [...correctNumbers].reverse().map((number) => `${number}번`).join('');
+
+  return [
+    compactAnswer,
+    reversedCompactAnswer,
+    commaAnswer,
+    reversedCommaAnswer,
+    numberedAnswer,
+    reversedNumberedAnswer,
+  ].join('|');
+};
+
+const getRightTriangleClassifyCorrectNumberText = (figureVariant = 0) =>
+  getRightTriangleClassifyCorrectNumbers(figureVariant)
+    .map((number) => `${number}번`)
+    .join('과 ');
+
+const RIGHT_TRIANGLE_CLASSIFY_ANSWER_TOKENS = RIGHT_TRIANGLE_CLASSIFY_VARIANTS.map((_, index) =>
+  createRightTriangleClassifyAnswerToken(index)
+);
+const SHAPE_CLASSIFY_CORRECT_TOKEN = '__shape_classify_correct__';
+const SHAPE_CLASSIFY_INCORRECT_TOKEN = '__shape_classify_incorrect__';
+
+type ShapeClassifyItem = {
+  points: string;
+  isTarget: boolean;
+  rightAngleCount?: 0 | 1 | 2 | 3 | 4;
+};
+
+const RECTANGLE_CLASSIFY_VARIANTS: ShapeClassifyItem[][] = [
+  [
+    { points: '36,112 86,36 166,62 122,140', isTarget: false, rightAngleCount: 0 },
+    { points: '42,132 42,42 148,76 168,132', isTarget: false, rightAngleCount: 1 },
+    { points: '32,42 158,42 124,132 32,132', isTarget: false, rightAngleCount: 2 },
+    { points: '34,44 156,44 156,126 34,126', isTarget: true, rightAngleCount: 4 },
+  ],
+  [
+    { points: '30,106 92,30 168,70 112,144', isTarget: false, rightAngleCount: 0 },
+    { points: '46,132 46,38 146,72 164,132', isTarget: false, rightAngleCount: 1 },
+    { points: '38,36 158,36 126,134 38,134', isTarget: false, rightAngleCount: 2 },
+    { points: '42,42 152,42 152,132 42,132', isTarget: true, rightAngleCount: 4 },
+  ],
+  [
+    { points: '40,118 100,34 170,78 118,142', isTarget: false, rightAngleCount: 0 },
+    { points: '48,130 48,44 138,68 160,130', isTarget: false, rightAngleCount: 1 },
+    { points: '28,54 162,54 136,126 28,126', isTarget: false, rightAngleCount: 2 },
+    { points: '28,54 162,54 162,122 28,122', isTarget: true, rightAngleCount: 4 },
+  ],
+];
+
+const SQUARE_CLASSIFY_VARIANTS: ShapeClassifyItem[][] = [
+  [
+    { points: '54,34 142,34 142,122 54,122', isTarget: true },
+    { points: '28,58 166,58 166,114 28,114', isTarget: false },
+    { points: '60,38 140,38 140,118 60,118', isTarget: true },
+    { points: '48,46 154,46 132,132 26,132', isTarget: false },
+  ],
+  [
+    { points: '50,36 138,36 138,124 50,124', isTarget: true },
+    { points: '72,20 120,20 120,144 72,144', isTarget: false },
+    { points: '56,40 136,40 136,120 56,120', isTarget: true },
+    { points: '34,50 156,50 126,130 64,130', isTarget: false },
+  ],
+  [
+    { points: '52,34 140,34 140,122 52,122', isTarget: true },
+    { points: '30,52 166,52 166,120 30,120', isTarget: false },
+    { points: '58,42 138,42 138,122 58,122', isTarget: true },
+    { points: '40,44 150,44 122,136 68,136', isTarget: false },
+  ],
+];
+
+const getShapeClassifyItems = (mode: ShapeDrawMode, figureVariant = 0): ShapeClassifyItem[] => {
+  if (mode === 'rectangle') {
+    return [...RECTANGLE_CLASSIFY_VARIANTS[figureVariant % RECTANGLE_CLASSIFY_VARIANTS.length]];
+  }
+  if (mode === 'square') {
+    return [...SQUARE_CLASSIFY_VARIANTS[figureVariant % SQUARE_CLASSIFY_VARIANTS.length]];
+  }
+  return getRightTriangleClassifyItems(figureVariant).map(({ points, isRightTriangle }) => ({
+    points,
+    isTarget: isRightTriangle,
+  }));
+};
+
+const SHAPE_CLASSIFY_ANSWER_TOKENS: Record<'rectangle' | 'square', string[]> = {
+  rectangle: RECTANGLE_CLASSIFY_VARIANTS.map(() => SHAPE_CLASSIFY_CORRECT_TOKEN),
+  square: SQUARE_CLASSIFY_VARIANTS.map(() => SHAPE_CLASSIFY_CORRECT_TOKEN),
+};
+
+const SHAPE_DEFINITION_VARIANTS: Record<'rectangle' | 'square', Array<{ blankTarget: string; lines: string[] }>> = {
+  rectangle: [
+    { blankTarget: 'fourRightAngles', lines: ['[네 각]이 모두 직각인 사각형을', '[직사각형]이라고 합니다.'] },
+    { blankTarget: 'rectangle', lines: ['네 각이 모두 직각인 사각형을', '[직사각형]이라고 합니다.'] },
+    { blankTarget: 'fourRightAngles', lines: ['사각형에서 [네 각]이 모두 직각이면', '그 사각형은 직사각형입니다.'] },
+  ],
+  square: [
+    { blankTarget: 'fourRightAngles', lines: ['[네 각]이 모두 직각이고', '[네 변]의 길이가 모두 같은 사각형을', '[정사각형]이라고 합니다.'] },
+    { blankTarget: 'fourSides', lines: ['[네 각]이 모두 직각이고', '[네 변]의 길이가 모두 같은 사각형을', '[정사각형]이라고 합니다.'] },
+    { blankTarget: 'square', lines: ['[네 각]이 모두 직각이고', '[네 변]의 길이가 모두 같은 사각형을', '[정사각형]이라고 합니다.'] },
+  ],
+};
+
+const getShapeDefinitionVariant = (mode: ShapeDrawMode, figureVariant = 0) => {
+  const variants = mode === 'square' ? SHAPE_DEFINITION_VARIANTS.square : SHAPE_DEFINITION_VARIANTS.rectangle;
+  return variants[figureVariant % variants.length];
+};
+
+const getShapeDefinitionAnswerToken = (mode: ShapeDrawMode, figureVariant = 0) => {
+  const blankTarget = getShapeDefinitionVariant(mode, figureVariant).blankTarget;
+  if (blankTarget === 'rectangle') return '직사각형';
+  if (blankTarget === 'square') return '정사각형';
+  if (blankTarget === 'fourSides') return '네 변|네변';
+  return '네 각|네각';
+};
+
+const RIGHT_TRIANGLE_DEFINITION_VARIANTS = [
+  {
+    blankTarget: 'oneAngle',
+    lines: ['[한 각]이 직각인 삼각형을', '[직각삼각형]이라고 합니다.'],
+  },
+  {
+    blankTarget: 'rightTriangle',
+    lines: ['한 각이 직각인 삼각형을', '[직각삼각형]이라고 합니다.'],
+  },
+  {
+    blankTarget: 'oneAngle',
+    lines: ['삼각형에서 [한 각]이 직각이면', '그 삼각형은 직각삼각형입니다.'],
+  },
+  {
+    blankTarget: 'rightTriangle',
+    lines: ['직각이 한 개 있는 삼각형을', '[직각삼각형]이라고 합니다.'],
+  },
+] as const;
+
+const getRightTriangleDefinitionVariant = (figureVariant = 0) =>
+  RIGHT_TRIANGLE_DEFINITION_VARIANTS[figureVariant % RIGHT_TRIANGLE_DEFINITION_VARIANTS.length];
+
+const getRightTriangleDefinitionAnswerToken = (figureVariant = 0) =>
+  getRightTriangleDefinitionVariant(figureVariant).blankTarget === 'oneAngle'
+    ? '한 각|한각'
+    : '직각삼각형';
+
+const getRightAngleMarkAnswerToken = (figureVariant = 0) =>
+  RIGHT_ANGLE_MARK_ANSWER_TOKENS[figureVariant % RIGHT_ANGLE_MARK_ANSWER_TOKENS.length];
+
+const getRightAngleCountAnswerToken = (figureVariant = 0) => {
+  const answers = RIGHT_ANGLE_COUNT_ANSWERS[figureVariant % RIGHT_ANGLE_COUNT_ANSWERS.length];
+  return `${answers.join('')}|${answers.join(',')}|${answers.map((answer) => `${answer}개`).join('')}`;
+};
+
+const getRightAngleNamesAnswerToken = (figureVariant = 0) =>
+  RIGHT_ANGLE_NAME_PROBLEM_VARIANTS[figureVariant % RIGHT_ANGLE_NAME_PROBLEM_VARIANTS.length].answerGroups
+    .map((answerGroup) => answerGroup.join('|'))
+    .join('&&');
+
+const getShapeReadAnswerExample = () => '이름 쓰기';
+
+const isShapeReadAnswerCorrect = (answer: string, answerToken: string) => {
+  const normalizedAnswer = normalizeShapeReadAnswer(answer);
+
+  if (answerToken.includes('&&')) {
+    return answerToken
+      .split('&&')
+      .every((requiredGroup) => requiredGroup
+        .split('|')
+        .some((option) => normalizedAnswer.includes(normalizeShapeReadAnswer(option))));
+  }
+
+  return answerToken
+    .split('|')
+    .some((option) => normalizeShapeReadAnswer(option) === normalizedAnswer);
+};
+
+const isShapeReadAnswerMissingPointNames = (mode: ShapeDrawMode, answer: string) => {
+  if (mode !== 'segment' && mode !== 'line' && mode !== 'ray' && mode !== 'angle') {
+    return false;
+  }
+
+  return normalizeShapeReadAnswer(answer) === normalizeShapeReadAnswer(SHAPE_DRAW_ANSWER_LABELS[mode]);
+};
 
 type DistanceWorksheetInputKind = 'number' | 'place';
 type DistanceWorksheetMapVariant = 'meadow' | 'river' | 'town' | 'campus' | 'orchard' | 'harbor' | 'village';
@@ -1666,11 +2072,13 @@ const UNIT_LEVEL_DESCRIPTIONS: Record<LearningUnitId, string[]> = {
   unit1: [
     '',
     '1단계: 직선, 선분, 반직선',
-    '2단계: 각과 직각',
-    '3단계: 삼각형',
-    '4단계: 직각삼각형, 예각삼각형, 둔각삼각형',
-    '5단계: 사각형',
-    '6단계: 직사각형과 정사각형',
+    '2단계: 각',
+    '3단계: 직각',
+    '4단계: 직각 찾기',
+    '5단계: 직각삼각형',
+    '6단계: 직사각형',
+    '7단계: 정사각형',
+    '8단계: 평면도형',
   ],
   unit2: [
     '',
@@ -2574,9 +2982,9 @@ const BATTLE_DIFFICULTY_ORDER: BattleDifficulty[] = ['easy', 'normal', 'hard'];
 const BATTLE_DIFFICULTY_CONFIG: Record<BattleDifficulty, BattleDifficultyConfig> = {
   easy: {
     label: '쉬움',
-    regularAttackDamage: 30,
+    regularAttackDamage: 25,
     regularHitDamage: 10,
-    estimationAttackDamage: 48,
+    estimationAttackDamage: 40,
     estimationHitDamage: 25,
   },
   normal: {
@@ -2588,9 +2996,9 @@ const BATTLE_DIFFICULTY_CONFIG: Record<BattleDifficulty, BattleDifficultyConfig>
   },
   hard: {
     label: '어려움',
-    regularAttackDamage: 20,
+    regularAttackDamage: 25,
     regularHitDamage: 20,
-    estimationAttackDamage: 32,
+    estimationAttackDamage: 40,
     estimationHitDamage: 35,
   },
 };
@@ -4136,12 +4544,12 @@ function createLevel12StartTimeProblem(): Problem {
     const start = {
       hours: randomInt(2, 9),
       minutes: randomInt(5, 50),
-      seconds: randomInt(10, 50),
+      seconds: sample([10, 15, 20, 25, 30, 35, 40, 45, 50]),
     };
     const duration = {
       hours: sample([0, 1]),
       minutes: randomInt(18, 45),
-      seconds: randomInt(10, 45),
+      seconds: sample([10, 15, 20, 25, 30, 35, 40, 45]),
     };
     const arrival = splitClockSeconds(toTotalTimeSeconds(start) + toTotalTimeSeconds(duration));
     const hasSecondBorrow = arrival.seconds < duration.seconds;
@@ -6858,7 +7266,38 @@ function generateRegularProblem(level: number, options: RegularProblemOptions = 
   return createEquationProblem(a, b, op, answer);
 }
 
-function createShapeDrawProblem(mode: ShapeDrawMode, title: string): Problem {
+function createShapeDrawProblem(
+  mode: ShapeDrawMode,
+  title: string,
+  task: ShapeDrawTask = 'draw',
+  identifyVariant?: ShapeDrawProblemData['identifyVariant'],
+  figureVariant = randomIntInRange(0, 2),
+  drawVariant?: ShapeDrawProblemData['drawVariant'],
+): Problem {
+  const answerToken = task === 'identify'
+    ? identifyVariant === 'definition'
+      ? figureVariant % 2 === 0
+        ? '반듯'
+        : '두 번'
+      : identifyVariant === 'rightTriangleDefinition'
+        ? getRightTriangleDefinitionAnswerToken(figureVariant)
+      : identifyVariant === 'rightTriangleClassify'
+        ? RIGHT_TRIANGLE_CLASSIFY_ANSWER_TOKENS[figureVariant % RIGHT_TRIANGLE_CLASSIFY_ANSWER_TOKENS.length]
+      : identifyVariant === 'shapeDefinition'
+        ? getShapeDefinitionAnswerToken(mode, figureVariant)
+      : identifyVariant === 'shapeClassify' && (mode === 'rectangle' || mode === 'square')
+        ? SHAPE_CLASSIFY_ANSWER_TOKENS[mode][figureVariant % SHAPE_CLASSIFY_ANSWER_TOKENS[mode].length]
+      : identifyVariant === 'rightAngleMark'
+        ? getRightAngleMarkAnswerToken(figureVariant)
+      : identifyVariant === 'rightAngleCount'
+        ? getRightAngleCountAnswerToken(figureVariant)
+      : identifyVariant === 'rightAngleNames'
+        ? getRightAngleNamesAnswerToken(figureVariant)
+      : identifyVariant === 'clockRightAngles'
+        ? '3시9시|9시3시|3시,9시|9시,3시'
+      : getShapeReadAnswerToken(mode, figureVariant)
+    : `${mode}-ok`;
+
   return {
     text: title,
     prompt: title,
@@ -6866,39 +7305,250 @@ function createShapeDrawProblem(mode: ShapeDrawMode, title: string): Problem {
     kind: 'shapeDraw',
     shapeDraw: {
       mode,
+      task,
       title,
-      answerToken: `${mode}-ok`,
+      answerToken,
+      identifyVariant,
+      drawVariant,
+      figureVariant,
     },
   };
 }
 
+const UNIT1_PROBLEM_COUNTS: Record<number, number> = {
+  1: 4,
+  2: 4,
+  3: 4,
+  4: 4,
+  5: 4,
+  6: 4,
+  7: 4,
+  8: 5,
+};
+
+type Unit1ShapeProblemEntry =
+  | [ShapeDrawMode, string]
+  | [ShapeDrawMode, string, ShapeDrawTask]
+  | [ShapeDrawMode, string, ShapeDrawTask, ShapeDrawProblemData['identifyVariant']]
+  | [ShapeDrawMode, string, ShapeDrawTask, ShapeDrawProblemData['identifyVariant'], number]
+  | [ShapeDrawMode, string, ShapeDrawTask, ShapeDrawProblemData['identifyVariant'], number, ShapeDrawProblemData['drawVariant']];
+
+const unit1ProblemOrderCache = new Map<number, Unit1ShapeProblemEntry[]>();
+
+function resetUnit1ProblemOrders() {
+  unit1ProblemOrderCache.clear();
+}
+
+function getUnit1EntrySignature(entry: Unit1ShapeProblemEntry) {
+  const [mode, , task = 'draw', identifyVariant, , drawVariant] = entry;
+  return [mode, task, identifyVariant ?? 'none', drawVariant ?? 'none'].join(':');
+}
+
+function arrangeUnit1EntriesWithoutAdjacentRepeats(entries: Unit1ShapeProblemEntry[]) {
+  const remainingEntries = [...entries];
+  const arrangedEntries: Unit1ShapeProblemEntry[] = [];
+  let previousSignature = '';
+
+  while (remainingEntries.length > 0) {
+    const candidates = shuffleValues(remainingEntries.map((entry, index) => ({ entry, index })));
+    const nextCandidate = candidates.find(({ entry }) => getUnit1EntrySignature(entry) !== previousSignature) ?? candidates[0];
+
+    arrangedEntries.push(nextCandidate.entry);
+    previousSignature = getUnit1EntrySignature(nextCandidate.entry);
+    remainingEntries.splice(nextCandidate.index, 1);
+  }
+
+  return arrangedEntries;
+}
+
+function getUnit1Level1ProblemEntries() {
+  const cachedEntries = unit1ProblemOrderCache.get(1);
+  if (cachedEntries) {
+    return cachedEntries;
+  }
+
+  const drawEntries = shuffleValues<Unit1ShapeProblemEntry>([
+    ['segment', '두 점을 곧게 이어 선분을 만들어 보세요.'],
+    ['line', '두 점을 지나 양쪽으로 끝없이 이어지는 직선을 만들어 보세요.'],
+    ['ray', '시작점에서 한쪽으로 끝없이 이어지는 반직선을 만들어 보세요.'],
+  ]).slice(0, 2);
+  const readEntries = shuffleValues<Unit1ShapeProblemEntry>([
+    ['ray', '제시된 선의 이름을 써 보세요.', 'identify', undefined, 0],
+    [Math.random() < 0.5 ? 'segment' : 'line', '선을 보고 알맞은 이름을 써 보세요.', 'identify', undefined, 1],
+  ]);
+  const entries = arrangeUnit1EntriesWithoutAdjacentRepeats([...drawEntries, ...readEntries]);
+
+  unit1ProblemOrderCache.set(1, entries);
+  return entries;
+}
+
+function getUnit1Level2ProblemEntries() {
+  const cachedEntries = unit1ProblemOrderCache.get(2);
+  if (cachedEntries) {
+    return cachedEntries;
+  }
+
+  const angleReadVariants = shuffleValues([...SHAPE_READ_ANGLE_LABEL_SETS.keys()]).slice(0, 2);
+  const entries = arrangeUnit1EntriesWithoutAdjacentRepeats([
+    ['angle', '점 ㄴ에서 두 반직선을 그어 각을 만들어 보세요.'],
+    ['angle', '점 ㄴ을 꼭짓점으로 하는 각을 만들어 보세요.'],
+    ['angle', '각을 보고 이름을 써 보세요.', 'identify', undefined, angleReadVariants[0] ?? 0],
+    ['angle', '제시된 각의 이름을 써 보세요.', 'identify', undefined, angleReadVariants[1] ?? 1],
+  ]);
+
+  unit1ProblemOrderCache.set(2, entries);
+  return entries;
+}
+
+function getUnit1Level3ProblemEntries() {
+  const cachedEntries = unit1ProblemOrderCache.get(3);
+  if (cachedEntries) {
+    return cachedEntries;
+  }
+
+  const entries = arrangeUnit1EntriesWithoutAdjacentRepeats([
+    ['rightAngle', '접어서 생긴 각의 이름을 써 보세요.', 'identify', 'fold', 0],
+    ['rightAngle', '점 ㄴ에서 두 반직선을 그어 직각을 만들어 보세요.', 'draw', undefined, randomIntInRange(0, 5), 'point'],
+    ['rightAngle', '주어진 반직선과 직각이 되도록 점 ㄴ에서 반직선을 그어 보세요.', 'draw', undefined, randomIntInRange(0, 5), 'ray'],
+    ['rightAngle', '빈칸에 알맞은 말을 써 보세요.', 'identify', 'definition'],
+  ]);
+
+  unit1ProblemOrderCache.set(3, entries);
+  return entries;
+}
+
+function getUnit1Level4ProblemEntries() {
+  const cachedEntries = unit1ProblemOrderCache.get(4);
+  if (cachedEntries) {
+    return cachedEntries;
+  }
+
+  const entries = arrangeUnit1EntriesWithoutAdjacentRepeats([
+    ['rightAngle', '도형 속 직각이 모두 몇 개인지 써 보세요.', 'identify', 'rightAngleMark', randomIntInRange(0, RIGHT_ANGLE_MARK_ANSWER_TOKENS.length - 1)],
+    ['rightAngle', '왼쪽 도형부터 직각이 몇 개인지 차례대로 써 보세요.', 'identify', 'rightAngleCount', randomIntInRange(0, RIGHT_ANGLE_COUNT_ANSWERS.length - 1)],
+    ['rightAngle', '직각을 모두 찾아 각의 이름을 써 보세요.', 'identify', 'rightAngleNames', randomIntInRange(0, RIGHT_ANGLE_NAME_PROBLEM_VARIANTS.length - 1)],
+    ['rightAngle', '직각이 되는 시각을 모두 써 보세요.', 'identify', 'clockRightAngles', randomIntInRange(0, CLOCK_RIGHT_ANGLE_OPTION_VARIANTS.length - 1)],
+  ]);
+
+  unit1ProblemOrderCache.set(4, entries);
+  return entries;
+}
+
+function getUnit1Level5ProblemEntries() {
+  const cachedEntries = unit1ProblemOrderCache.get(5);
+  if (cachedEntries) {
+    return cachedEntries;
+  }
+
+  const classifyVariant = randomIntInRange(0, RIGHT_TRIANGLE_CLASSIFY_ANSWER_TOKENS.length - 1);
+  const definitionVariant = randomIntInRange(0, RIGHT_TRIANGLE_DEFINITION_VARIANTS.length - 1);
+  const pointCompletionVariant = randomIntInRange(0, 7);
+  const twoTriangleVariant = randomIntInRange(0, 5);
+  const classifyTitles = [
+    '삼각형을 알맞은 곳으로 옮겨 분류해 보세요.',
+    '직각이 있는 삼각형과 없는 삼각형으로 나누어 보세요.',
+    '삼각형 카드를 알맞은 칸에 넣어 보세요.',
+  ];
+  const pointTitles = [
+    '나머지 한 점을 찍어 직각삼각형을 완성해 보세요.',
+    '주어진 선분에 점 하나를 더 찍어 직각삼각형을 만들어 보세요.',
+    '한 점을 찍어 선분과 함께 직각삼각형이 되게 해 보세요.',
+  ];
+  const polygonTitles = [
+    '도형 기능으로 크기가 다른 직각삼각형 2개를 그려 보세요.',
+    '삼각형 도구로 서로 다른 크기의 직각삼각형 2개를 만들어 보세요.',
+    '도형 기능만 사용해 크기가 다른 직각삼각형을 두 개 그려 보세요.',
+  ];
+  const entries: Unit1ShapeProblemEntry[] = [
+    ['rightTriangle', classifyTitles[classifyVariant % classifyTitles.length], 'identify', 'rightTriangleClassify', classifyVariant],
+    ['rightTriangle', '빈칸에 알맞은 말을 써 보세요.', 'identify', 'rightTriangleDefinition', definitionVariant],
+    ['rightTriangle', pointTitles[pointCompletionVariant % pointTitles.length], 'draw', undefined, pointCompletionVariant, 'point'],
+    ['rightTriangle', polygonTitles[twoTriangleVariant % polygonTitles.length], 'draw', undefined, twoTriangleVariant, 'twoRightTriangles'],
+  ];
+
+  unit1ProblemOrderCache.set(5, entries);
+  return entries;
+}
+
+function getUnit1Level6ProblemEntries() {
+  const cachedEntries = unit1ProblemOrderCache.get(6);
+  if (cachedEntries) {
+    return cachedEntries;
+  }
+
+  const classifyVariant = randomIntInRange(0, RECTANGLE_CLASSIFY_VARIANTS.length - 1);
+  const definitionVariant = randomIntInRange(0, SHAPE_DEFINITION_VARIANTS.rectangle.length - 1);
+  const pointCompletionVariant = randomIntInRange(0, 5);
+  const twoRectangleVariant = randomIntInRange(0, 5);
+  const entries: Unit1ShapeProblemEntry[] = [
+    ['rectangle', '직각의 수에 따라 사각형 카드를 분류해 보세요.', 'identify', 'shapeClassify', classifyVariant],
+    ['rectangle', '빈칸에 알맞은 말을 써 보세요.', 'identify', 'shapeDefinition', definitionVariant],
+    ['rectangle', '나머지 한 점을 찍어 직사각형을 완성해 보세요.', 'draw', undefined, pointCompletionVariant, 'point'],
+    ['rectangle', '도형 기능으로 크기가 다른 직사각형 2개를 그려 보세요.', 'draw', undefined, twoRectangleVariant, 'twoPolygons'],
+  ];
+
+  unit1ProblemOrderCache.set(6, entries);
+  return entries;
+}
+
+function getUnit1Level7ProblemEntries() {
+  const cachedEntries = unit1ProblemOrderCache.get(7);
+  if (cachedEntries) {
+    return cachedEntries;
+  }
+
+  const classifyVariant = randomIntInRange(0, SQUARE_CLASSIFY_VARIANTS.length - 1);
+  const definitionVariant = randomIntInRange(0, SHAPE_DEFINITION_VARIANTS.square.length - 1);
+  const pointCompletionVariant = randomIntInRange(0, 5);
+  const twoSquareVariant = randomIntInRange(0, 5);
+  const entries: Unit1ShapeProblemEntry[] = [
+    ['square', '도형 카드를 알맞은 칸에 넣어 정사각형을 분류해 보세요.', 'identify', 'shapeClassify', classifyVariant],
+    ['square', '빈칸에 알맞은 말을 써 보세요.', 'identify', 'shapeDefinition', definitionVariant],
+    ['square', '나머지 한 점을 찍어 정사각형을 완성해 보세요.', 'draw', undefined, pointCompletionVariant, 'point'],
+    ['square', '도형 기능으로 크기가 다른 정사각형 2개를 그려 보세요.', 'draw', undefined, twoSquareVariant, 'twoPolygons'],
+  ];
+
+  unit1ProblemOrderCache.set(7, entries);
+  return entries;
+}
+
+function getUnit1Level8ProblemEntries() {
+  const cachedEntries = unit1ProblemOrderCache.get(8);
+  if (cachedEntries) {
+    return cachedEntries;
+  }
+
+  const entries = arrangeUnit1EntriesWithoutAdjacentRepeats(
+    shuffleValues(UNIT1_LEVEL8_GACHA_MODES)
+      .slice(0, UNIT1_PROBLEM_COUNTS[8] ?? UNIT1_LEVEL8_GACHA_MODES.length)
+      .map((mode): Unit1ShapeProblemEntry => [
+        mode,
+        '룰렛으로 정해진 도형을 그려 보세요.',
+        'draw',
+        undefined,
+        randomIntInRange(0, 7),
+        'gacha',
+      ]),
+  );
+
+  unit1ProblemOrderCache.set(8, entries);
+  return entries;
+}
+
 function generateUnit1Problem(level: number, problemSequence = 1): Problem {
-  const modeSets: Record<number, Array<[ShapeDrawMode, string]>> = {
-    1: [
-      ['segment', '두 점을 곧게 이어 선분을 만들어 보세요.'],
-      ['line', '선분을 양쪽으로 끝없이 늘인 직선을 만들어 보세요.'],
-      ['ray', '한 점에서 시작하여 한쪽으로 끝없이 늘인 반직선을 만들어 보세요.'],
-    ],
-    2: [
-      ['rightAngle', '두 선을 직접 그어 직각을 만들어 보세요.'],
-      ['acuteAngle', '직각보다 작은 각을 만들어 보세요.'],
-      ['obtuseAngle', '직각보다 큰 각을 만들어 보세요.'],
-    ],
-    3: [['triangle', '점 3개를 찍어 삼각형을 만들어 보세요.']],
-    4: [
-      ['rightTriangle', '한 각이 직각인 삼각형을 만들어 보세요.'],
-      ['acuteAngle', '예각을 직접 만들어 보세요.'],
-      ['obtuseAngle', '둔각을 직접 만들어 보세요.'],
-    ],
-    5: [['quadrilateral', '점 4개를 찍어 사각형을 만들어 보세요.']],
-    6: [
-      ['rectangle', '네 각이 모두 직각인 사각형을 만들어 보세요.'],
-      ['square', '네 각이 모두 직각이고 네 변의 길이가 같은 사각형을 만들어 보세요.'],
-    ],
+  const modeSets: Record<number, Unit1ShapeProblemEntry[]> = {
+    1: getUnit1Level1ProblemEntries(),
+    2: getUnit1Level2ProblemEntries(),
+    3: getUnit1Level3ProblemEntries(),
+    4: getUnit1Level4ProblemEntries(),
+    5: getUnit1Level5ProblemEntries(),
+    6: getUnit1Level6ProblemEntries(),
+    7: getUnit1Level7ProblemEntries(),
+    8: getUnit1Level8ProblemEntries(),
   };
   const entries = modeSets[level] ?? modeSets[1];
-  const [mode, title] = entries[(problemSequence - 1) % entries.length];
-  return createShapeDrawProblem(mode, title);
+  const [mode, title, task = 'draw', identifyVariant, figureVariant, drawVariant] = entries[(problemSequence - 1) % entries.length];
+  return createShapeDrawProblem(mode, title, task, identifyVariant, figureVariant, drawVariant);
 }
 
 function getProblemForTurn(unitId: LearningUnitId, level: number, opponentHP: number, problemSequence?: number): Problem {
@@ -11219,7 +11869,7 @@ interface ShapePoint { x: number; y: number; label: string; }
 interface ShapeLine { start: ShapePoint; end: ShapePoint; mode: ShapeLineMode; }
 const SHAPE_LABELS = ['ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ', 'ㅈ', 'ㅊ'];
 const SHAPE_GRID = 56;
-const SHAPE_ORIGIN = { x: 52, y: 86 };
+const SHAPE_ORIGIN = { x: 52, y: 40 };
 
 function ShapePointView({ point }: { point: ShapePoint }) {
   return (
@@ -11247,10 +11897,25 @@ function ShapeDrawProblemCard({ shapeDraw, answerValue, onAnswerChange, onSubmit
   const dist = (a: ShapePoint, b: ShapePoint) => Math.hypot(a.x - b.x, a.y - b.y);
   const dotAt = (v: ShapePoint, a: ShapePoint, b: ShapePoint) => (a.x - v.x) * (b.x - v.x) + (a.y - v.y) * (b.y - v.y);
   const rightAt = (v: ShapePoint, a: ShapePoint, b: ShapePoint) => Math.abs(dotAt(v, a, b)) < 160;
+  const isRectanglePolygon = (polygon: ShapePoint[]) =>
+    polygon.length === 4 && polygon.every((point, index) => rightAt(point, polygon[(index + 3) % 4], polygon[(index + 1) % 4]));
+  const isSquarePolygon = (polygon: ShapePoint[]) => {
+    if (!isRectanglePolygon(polygon)) return false;
+    const sideLengths = polygon.map((point, index) => dist(point, polygon[(index + 1) % 4]));
+    return Math.max(...sideLengths) - Math.min(...sideLengths) < 16;
+  };
   const snap = (clientX: number, clientY: number) => {
-    const rect = svgRef.current?.getBoundingClientRect();
-    const rawX = rect ? ((clientX - rect.left) / rect.width) * 640 : clientX;
-    const rawY = rect ? ((clientY - rect.top) / rect.height) * 360 : clientY;
+    const svg = svgRef.current;
+    const screenPoint = svg?.createSVGPoint();
+    if (screenPoint && svg) {
+      screenPoint.x = clientX;
+      screenPoint.y = clientY;
+    }
+    const svgPoint = screenPoint && svg?.getScreenCTM()
+      ? screenPoint.matrixTransform(svg.getScreenCTM()!.inverse())
+      : null;
+    const rawX = svgPoint?.x ?? clientX;
+    const rawY = svgPoint?.y ?? clientY;
     const x = Math.max(SHAPE_ORIGIN.x, Math.min(612, SHAPE_ORIGIN.x + Math.round((rawX - SHAPE_ORIGIN.x) / SHAPE_GRID) * SHAPE_GRID));
     const y = Math.max(SHAPE_ORIGIN.y, Math.min(320, SHAPE_ORIGIN.y + Math.round((rawY - SHAPE_ORIGIN.y) / SHAPE_GRID) * SHAPE_GRID));
     return allPoints.find((point) => Math.hypot(point.x - x, point.y - y) < 8) ?? { x, y, label: SHAPE_LABELS[new Set(allPoints.map((point) => `${point.x}:${point.y}`)).size % SHAPE_LABELS.length] };
@@ -11380,24 +12045,76 @@ function ShapeDrawProblemCard({ shapeDraw, answerValue, onAnswerChange, onSubmit
       </g>
     );
   };
+  const hasMixedShapeKinds = (() => {
+    if (shapeDraw.task === 'identify') return false;
+    const hasLine = lines.length > 0;
+    const hasPolygon = polygons.length > 0;
+    if (shapeDraw.mode === 'segment' || shapeDraw.mode === 'line' || shapeDraw.mode === 'ray') {
+      return hasPolygon || new Set(lines.map((line) => line.mode)).size > 1;
+    }
+    if (shapeDraw.mode === 'angle' || shapeDraw.mode === 'rightAngle') {
+      const hasRay = lines.some((line) => line.mode === 'ray');
+      const hasOtherLine = lines.some((line) => line.mode !== 'ray');
+      return hasPolygon || (hasRay && hasOtherLine);
+    }
+    if (shapeDraw.mode === 'triangle') return hasLine || new Set(polygons.map((polygon) => polygon.length)).size > 1;
+    if (shapeDraw.mode === 'rightTriangle') return hasLine || new Set(polygons.map((polygon) => polygon.length)).size > 1;
+    if (shapeDraw.mode === 'quadrilateral' || shapeDraw.mode === 'rectangle' || shapeDraw.mode === 'square') {
+      if (isQuadrilateralPointCompletionProblem) return hasLine || hasPolygon || points.length > 1;
+      if (isTwoPolygonProblem) return hasLine || polygons.some((polygon) => polygon.length !== 4);
+      return hasLine || new Set(polygons.map((polygon) => polygon.length)).size > 1;
+    }
+    return false;
+  })();
   const completed = (() => {
+    if (shapeDraw.task === 'identify') {
+      if (shapeDraw.mode === 'segment' || shapeDraw.mode === 'line' || shapeDraw.mode === 'ray') return tool === 'line' && lineMode === shapeDraw.mode;
+      if (shapeDraw.mode === 'triangle') return tool === 'polygon' && polygonSides === 3;
+      if (shapeDraw.mode === 'quadrilateral') return tool === 'polygon' && polygonSides === 4;
+      return false;
+    }
     if (shapeDraw.mode === 'segment' || shapeDraw.mode === 'line' || shapeDraw.mode === 'ray') return lines.some((line) => line.mode === shapeDraw.mode);
     if (shapeDraw.mode === 'triangle') return polygons.some((polygon) => polygon.length === 3);
     if (shapeDraw.mode === 'quadrilateral') return polygons.some((polygon) => polygon.length === 4);
     if (shapeDraw.mode === 'rightTriangle') return polygons.some((polygon) => polygon.length === 3 && polygon.some((point, index) => rightAt(point, polygon[(index + 2) % 3], polygon[(index + 1) % 3])));
-    if (shapeDraw.mode === 'rectangle' || shapeDraw.mode === 'square') return polygons.some((polygon) => polygon.length === 4 && polygon.every((point, index) => rightAt(point, polygon[(index + 3) % 4], polygon[(index + 1) % 4])));
-    return lines.some((first, firstIndex) => lines.slice(firstIndex + 1).some((second) => {
+    if (shapeDraw.mode === 'rectangle') {
+      if (presetQuadrilateralPoints) {
+        return points.some((point) => isRectanglePolygon([...presetQuadrilateralPoints, point]));
+      }
+      if (isTwoPolygonProblem) {
+        const rectangles = polygons.filter(isRectanglePolygon);
+        return rectangles.some((first, firstIndex) => rectangles.slice(firstIndex + 1).some((second) => Math.abs(triangleArea(first) - triangleArea(second)) > 900));
+      }
+      return polygons.some(isRectanglePolygon);
+    }
+    if (shapeDraw.mode === 'square') {
+      if (presetQuadrilateralPoints) {
+        return points.some((point) => isSquarePolygon([...presetQuadrilateralPoints, point]));
+      }
+      if (isTwoPolygonProblem) {
+        const squares = polygons.filter(isSquarePolygon);
+        return squares.some((first, firstIndex) => squares.slice(firstIndex + 1).some((second) => Math.abs(triangleArea(first) - triangleArea(second)) > 900));
+      }
+      return polygons.some(isSquarePolygon);
+    }
+    if (shapeDraw.mode === 'rightAngle') return lines.some((first, firstIndex) => lines.slice(firstIndex + 1).some((second) => {
       const vertex = [first.start, first.end].find((point) => [second.start, second.end].some((other) => dist(point, other) < 8));
       if (!vertex) return false;
       const a = dist(first.start, vertex) < 8 ? first.end : first.start;
       const b = dist(second.start, vertex) < 8 ? second.end : second.start;
       const cross = Math.abs((a.x - vertex.x) * (b.y - vertex.y) - (a.y - vertex.y) * (b.x - vertex.x));
       if (cross < 300) return false;
-      if (shapeDraw.mode === 'rightAngle') return rightAt(vertex, a, b);
-      return shapeDraw.mode === 'acuteAngle' ? dotAt(vertex, a, b) > 0 : dotAt(vertex, a, b) < 0;
-    }));
+      return rightAt(vertex, a, b);
+    }));    
+    return false;
   })();
-  useEffect(() => onAnswerChange(completed ? shapeDraw.answerToken : ''), [completed, onAnswerChange, shapeDraw.answerToken]);
+  useEffect(() => {
+    if (isGachaDrawProblem && !rouletteResolved) {
+      onAnswerChange('');
+      return;
+    }
+    onAnswerChange(hasMixedShapeKinds ? SHAPE_DRAW_MIXED_TOKEN : completed ? shapeDraw.answerToken : '');
+  }, [completed, hasMixedShapeKinds, isGachaDrawProblem, onAnswerChange, rouletteResolved, shapeDraw.answerToken]);
   const renderLineIcon = (mode: ShapeLineMode) => (
     <svg viewBox="0 0 48 48" className="h-10 w-10" aria-hidden="true">
       <line
@@ -11429,7 +12146,7 @@ function ShapeDrawProblemCard({ shapeDraw, answerValue, onAnswerChange, onSubmit
 
   return (
     <div className="flex h-full w-full flex-col gap-2 text-slate-900">
-      <h2 className="shrink-0 text-xl font-black">{shapeDraw.title}</h2>
+      <h2 className="shrink-0 text-2xl font-black leading-tight sm:text-3xl">{shapeDraw.title}</h2>
       <div className="relative min-h-0 flex-1 overflow-hidden rounded-2xl border-2 border-slate-300 bg-[#f8fbff]">
         <div className="absolute left-1/2 top-3 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full bg-[#253493] px-3 py-2 shadow-lg">
           <button type="button" onClick={() => { setTool('point'); setOpenToolMenu(null); }} className={`grid h-12 w-12 place-items-center rounded-full bg-pink-300 ${tool === 'point' ? 'ring-4 ring-sky-300 ring-offset-2' : ''}`} aria-label="점 도구">
@@ -11456,7 +12173,21 @@ function ShapeDrawProblemCard({ shapeDraw, answerValue, onAnswerChange, onSubmit
   );
 }
 
-function ShapeDrawProblemCardV2({ shapeDraw, answerValue, onAnswerChange, onSubmit }: { shapeDraw: ShapeDrawProblemData; answerValue: string; onAnswerChange: (value: string) => void; onSubmit: () => void }) {
+function ShapeDrawProblemCardV2({
+  shapeDraw,
+  answerValue,
+  notice,
+  playAnimationSound,
+  onAnswerChange,
+  onSubmit,
+}: {
+  shapeDraw: ShapeDrawProblemData;
+  answerValue: string;
+  notice?: string;
+  playAnimationSound?: AnimationSoundPlayer;
+  onAnswerChange: (value: string) => void;
+  onSubmit: () => void;
+}) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [tool, setTool] = useState<ShapeTool>('point');
   const [openMenu, setOpenMenu] = useState<ShapeToolMenu>(null);
@@ -11468,24 +12199,151 @@ function ShapeDrawProblemCardV2({ shapeDraw, answerValue, onAnswerChange, onSubm
   const [lineStart, setLineStart] = useState<ShapePoint | null>(null);
   const [pendingPolygon, setPendingPolygon] = useState<ShapePoint[]>([]);
   const [history, setHistory] = useState<Array<'point' | 'lineStart' | 'line' | 'polygonPoint' | 'polygon'>>([]);
+  const [rouletteIndex, setRouletteIndex] = useState(0);
+  const [rouletteResolved, setRouletteResolved] = useState(false);
   const previousAnswerValueRef = useRef(answerValue);
   const labels = ['\u3131', '\u3134', '\u3137', '\u3139', '\u3141', '\u3142', '\u3145', '\u3147', '\u3148', '\u314a'];
-  const boardPoints = [...points, ...lines.flatMap((line) => [line.start, line.end]), ...polygons.flat(), ...pendingPolygon, ...(lineStart ? [lineStart] : [])];
+  const gridPoint = (col: number, row: number, label: string): ShapePoint => ({
+    x: SHAPE_ORIGIN.x + SHAPE_GRID * col,
+    y: SHAPE_ORIGIN.y + SHAPE_GRID * row,
+    label,
+  });
+  const isLineConstructionProblem = shapeDraw.task === 'draw' && (
+    shapeDraw.mode === 'segment' ||
+    shapeDraw.mode === 'line' ||
+    shapeDraw.mode === 'ray' ||
+    shapeDraw.mode === 'angle' ||
+    shapeDraw.mode === 'rightAngle'
+  );
+  const isRightTrianglePointCompletionProblem = shapeDraw.mode === 'rightTriangle' && shapeDraw.drawVariant === 'point';
+  const isRightTriangleTwoPolygonProblem = shapeDraw.mode === 'rightTriangle' && shapeDraw.drawVariant === 'twoRightTriangles';
+  const isQuadrilateralPointCompletionProblem = (shapeDraw.mode === 'rectangle' || shapeDraw.mode === 'square') && shapeDraw.drawVariant === 'point';
+  const isTwoPolygonProblem = (shapeDraw.mode === 'rectangle' || shapeDraw.mode === 'square') && shapeDraw.drawVariant === 'twoPolygons';
+  const isGachaDrawProblem = shapeDraw.task === 'draw' && shapeDraw.drawVariant === 'gacha';
+  const rouletteTargetIndex = Math.max(0, UNIT1_LEVEL8_GACHA_MODES.indexOf(shapeDraw.mode));
+  const rouletteDisplayMode = UNIT1_LEVEL8_GACHA_MODES[rouletteResolved ? rouletteTargetIndex : rouletteIndex % UNIT1_LEVEL8_GACHA_MODES.length] ?? shapeDraw.mode;
+  const rouletteDisplayLabel = SHAPE_DRAW_ANSWER_LABELS[rouletteDisplayMode];
+  const rouletteTargetLabel = SHAPE_DRAW_ANSWER_LABELS[shapeDraw.mode];
+  const rouletteTitle = isGachaDrawProblem
+    ? rouletteResolved
+      ? `${withObjectParticle(rouletteTargetLabel)} 그려 보세요.`
+      : '룰렛이 도형을 정하고 있어요.'
+    : shapeDraw.title;
+  const pointToolOnly = isRightTrianglePointCompletionProblem || isQuadrilateralPointCompletionProblem;
+  const polygonToolOnly = isRightTriangleTwoPolygonProblem || isTwoPolygonProblem;
+  const rightTriangleCompletionSegments = [
+    { start: gridPoint(3, 4, '\u3131'), end: gridPoint(7, 4, '\u3134') },
+    { start: gridPoint(4, 2, '\u3131'), end: gridPoint(4, 5, '\u3134') },
+    { start: gridPoint(2, 3, '\u3131'), end: gridPoint(7, 3, '\u3134') },
+    { start: gridPoint(7, 2, '\u3131'), end: gridPoint(7, 5, '\u3134') },
+    { start: gridPoint(3, 2, '\u3131'), end: gridPoint(6, 2, '\u3134') },
+    { start: gridPoint(5, 5, '\u3131'), end: gridPoint(9, 5, '\u3134') },
+    { start: gridPoint(2, 4, '\u3131'), end: gridPoint(2, 1, '\u3134') },
+    { start: gridPoint(8, 1, '\u3131'), end: gridPoint(8, 4, '\u3134') },
+  ];
+  const presetRightTriangleSegment = isRightTrianglePointCompletionProblem
+    ? rightTriangleCompletionSegments[(shapeDraw.figureVariant ?? 0) % rightTriangleCompletionSegments.length]
+    : null;
+  const rectangleCompletionVariants = [
+    [gridPoint(3, 2, '\u3131'), gridPoint(7, 2, '\u3134'), gridPoint(7, 5, '\u3137')],
+    [gridPoint(4, 1, '\u3131'), gridPoint(8, 1, '\u3134'), gridPoint(8, 4, '\u3137')],
+    [gridPoint(2, 3, '\u3131'), gridPoint(6, 3, '\u3134'), gridPoint(6, 5, '\u3137')],
+  ];
+  const squareCompletionVariants = [
+    [gridPoint(4, 2, '\u3131'), gridPoint(7, 2, '\u3134'), gridPoint(7, 5, '\u3137')],
+    [gridPoint(5, 1, '\u3131'), gridPoint(8, 1, '\u3134'), gridPoint(8, 4, '\u3137')],
+    [gridPoint(2, 2, '\u3131'), gridPoint(5, 2, '\u3134'), gridPoint(5, 5, '\u3137')],
+  ];
+  const quadrilateralCompletionVariants = shapeDraw.mode === 'square' ? squareCompletionVariants : rectangleCompletionVariants;
+  const presetQuadrilateralPoints = isQuadrilateralPointCompletionProblem
+    ? quadrilateralCompletionVariants[(shapeDraw.figureVariant ?? 0) % quadrilateralCompletionVariants.length]
+    : null;
+  const angleVertexPositions = [
+    { x: SHAPE_ORIGIN.x + SHAPE_GRID * 4, y: SHAPE_ORIGIN.y + SHAPE_GRID * 3 },
+    { x: SHAPE_ORIGIN.x + SHAPE_GRID * 6, y: SHAPE_ORIGIN.y + SHAPE_GRID * 3 },
+    { x: SHAPE_ORIGIN.x + SHAPE_GRID * 5, y: SHAPE_ORIGIN.y + SHAPE_GRID * 2 },
+    { x: SHAPE_ORIGIN.x + SHAPE_GRID * 5, y: SHAPE_ORIGIN.y + SHAPE_GRID * 4 },
+    { x: SHAPE_ORIGIN.x + SHAPE_GRID * 3, y: SHAPE_ORIGIN.y + SHAPE_GRID * 2 },
+    { x: SHAPE_ORIGIN.x + SHAPE_GRID * 7, y: SHAPE_ORIGIN.y + SHAPE_GRID * 4 },
+  ];
+  const angleVertexPosition = angleVertexPositions[(shapeDraw.figureVariant ?? 0) % angleVertexPositions.length];
+  const presetAngleVertex = shapeDraw.mode === 'angle' || shapeDraw.mode === 'rightAngle'
+    ? { ...angleVertexPosition, label: '\u3134' }
+    : null;
+  const rightAngleRayDirections = [
+    { col: 2, row: 0 },
+    { col: -2, row: 0 },
+    { col: 0, row: -2 },
+  ];
+  const rightAngleRayDirection = rightAngleRayDirections[(shapeDraw.figureVariant ?? 0) % rightAngleRayDirections.length];
+  const presetRightAngleRay = shapeDraw.mode === 'rightAngle' && shapeDraw.drawVariant === 'ray' && presetAngleVertex
+    ? {
+        start: presetAngleVertex,
+        end: {
+          x: presetAngleVertex.x + SHAPE_GRID * rightAngleRayDirection.col,
+          y: presetAngleVertex.y + SHAPE_GRID * rightAngleRayDirection.row,
+          label: '\u3131',
+        },
+        mode: 'ray' as const,
+      }
+    : null;
+  const boardPoints = [
+    ...(presetRightTriangleSegment ? [presetRightTriangleSegment.start, presetRightTriangleSegment.end] : []),
+    ...(presetQuadrilateralPoints ?? []),
+    ...points,
+    ...lines.flatMap((line) => [line.start, line.end]),
+    ...polygons.flat(),
+    ...pendingPolygon,
+    ...(lineStart ? [lineStart] : []),
+    ...(presetAngleVertex ? [presetAngleVertex] : []),
+    ...(presetRightAngleRay ? [presetRightAngleRay.end] : []),
+  ];
   const distinctPoints = Array.from(new Map(boardPoints.map((point) => [`${point.x}:${point.y}`, point])).values());
   const dist = (a: ShapePoint, b: ShapePoint) => Math.hypot(a.x - b.x, a.y - b.y);
   const dotAt = (v: ShapePoint, a: ShapePoint, b: ShapePoint) => (a.x - v.x) * (b.x - v.x) + (a.y - v.y) * (b.y - v.y);
   const rightAt = (v: ShapePoint, a: ShapePoint, b: ShapePoint) => Math.abs(dotAt(v, a, b)) < 160;
+  const isRectanglePolygon = (polygon: ShapePoint[]) =>
+    polygon.length === 4 && polygon.every((point, index) => rightAt(point, polygon[(index + 3) % 4], polygon[(index + 1) % 4]));
+  const isSquarePolygon = (polygon: ShapePoint[]) => {
+    if (!isRectanglePolygon(polygon)) return false;
+    const sideLengths = polygon.map((point, index) => dist(point, polygon[(index + 1) % 4]));
+    return Math.max(...sideLengths) - Math.min(...sideLengths) < 16;
+  };
+  const isRightTrianglePolygon = (polygon: ShapePoint[]) =>
+    polygon.length === 3 && polygon.some((point, index) => rightAt(point, polygon[(index + 2) % 3], polygon[(index + 1) % 3]));
+  const triangleArea = (polygon: ShapePoint[]) => Math.abs(
+    polygon.reduce((sum, point, index) => {
+      const next = polygon[(index + 1) % polygon.length];
+      return sum + point.x * next.y - next.x * point.y;
+    }, 0) / 2,
+  );
+  const playDrawSound = (effectName: SoundEffectName, options?: SoundPlaybackOptions) => {
+    playAnimationSound?.(effectName, options);
+  };
   const snap = (clientX: number, clientY: number) => {
-    const rect = svgRef.current?.getBoundingClientRect();
-    const rawX = rect ? ((clientX - rect.left) / rect.width) * 640 : clientX;
-    const rawY = rect ? ((clientY - rect.top) / rect.height) * 360 : clientY;
+    const svg = svgRef.current;
+    const screenPoint = svg?.createSVGPoint();
+    if (screenPoint && svg) {
+      screenPoint.x = clientX;
+      screenPoint.y = clientY;
+    }
+    const svgPoint = screenPoint && svg?.getScreenCTM()
+      ? screenPoint.matrixTransform(svg.getScreenCTM()!.inverse())
+      : null;
+    const rawX = svgPoint?.x ?? clientX;
+    const rawY = svgPoint?.y ?? clientY;
     const x = Math.max(SHAPE_ORIGIN.x, Math.min(612, SHAPE_ORIGIN.x + Math.round((rawX - SHAPE_ORIGIN.x) / SHAPE_GRID) * SHAPE_GRID));
     const y = Math.max(SHAPE_ORIGIN.y, Math.min(320, SHAPE_ORIGIN.y + Math.round((rawY - SHAPE_ORIGIN.y) / SHAPE_GRID) * SHAPE_GRID));
     const existing = distinctPoints.find((point) => Math.hypot(point.x - x, point.y - y) < 8);
-    return existing ?? { x, y, label: labels[distinctPoints.length % labels.length] };
+    const usedLabels = new Set(distinctPoints.map((point) => point.label));
+    const nextLabel = labels.find((label) => !usedLabels.has(label)) ?? labels[distinctPoints.length % labels.length];
+    return existing ?? { x, y, label: nextLabel };
   };
+  const findExistingPoint = (point: ShapePoint) =>
+    distinctPoints.find((existing) => dist(existing, point) < 8) ?? null;
   const undo = () => {
     const latest = history.at(-1);
+    if (latest) playDrawSound('ui', { gainMultiplier: 0.72, detune: -18 });
     setHistory((previous) => previous.slice(0, -1));
     if (latest === 'point') setPoints((previous) => previous.slice(0, -1));
     if (latest === 'lineStart') setLineStart(null);
@@ -11503,43 +12361,110 @@ function ShapeDrawProblemCardV2({ shapeDraw, answerValue, onAnswerChange, onSubm
     setOpenMenu(null);
   };
   useEffect(() => {
+    setTool('point');
+    setLineMode(
+      shapeDraw.mode === 'segment' || shapeDraw.mode === 'line' || shapeDraw.mode === 'ray'
+        ? shapeDraw.mode
+        : shapeDraw.mode === 'angle' || shapeDraw.mode === 'rightAngle'
+          ? 'ray'
+          : 'segment',
+    );
+    setPolygonSides(shapeDraw.mode === 'rectangle' || shapeDraw.mode === 'square' || shapeDraw.mode === 'quadrilateral' ? 4 : 3);
+    resetShapeBoard();
+  }, [isLineConstructionProblem, polygonToolOnly, shapeDraw.drawVariant, shapeDraw.figureVariant, shapeDraw.mode, shapeDraw.title]);
+  useEffect(() => {
+    if (!isGachaDrawProblem) {
+      setRouletteResolved(true);
+      return;
+    }
+
+    setRouletteResolved(false);
+    setRouletteIndex((rouletteTargetIndex + UNIT1_LEVEL8_GACHA_MODES.length - 3) % UNIT1_LEVEL8_GACHA_MODES.length);
+    playAnimationSound?.('rouletteStart', { gainMultiplier: 0.78, detune: 8 });
+
+    let tick = 0;
+    const tickTimer = window.setInterval(() => {
+      tick += 1;
+      setRouletteIndex((previous) => (previous + 1) % UNIT1_LEVEL8_GACHA_MODES.length);
+      playAnimationSound?.('rouletteTick', { gainMultiplier: 0.32, detune: tick * 6 });
+    }, 120);
+    const resultTimer = window.setTimeout(() => {
+      window.clearInterval(tickTimer);
+      setRouletteIndex(rouletteTargetIndex);
+      setRouletteResolved(true);
+      playAnimationSound?.('rouletteWin', { gainMultiplier: 0.86, detune: 18 });
+    }, 1900);
+
+    return () => {
+      window.clearInterval(tickTimer);
+      window.clearTimeout(resultTimer);
+    };
+  }, [isGachaDrawProblem, playAnimationSound, rouletteTargetIndex, shapeDraw.answerToken, shapeDraw.figureVariant]);
+  useEffect(() => {
     if (previousAnswerValueRef.current === shapeDraw.answerToken && answerValue === '') {
       resetShapeBoard();
     }
     previousAnswerValueRef.current = answerValue;
   }, [answerValue, shapeDraw.answerToken]);
   const handleDown = (event: React.PointerEvent<SVGSVGElement>) => {
+    if (isGachaDrawProblem && !rouletteResolved) {
+      return;
+    }
     setOpenMenu(null);
     const point = snap(event.clientX, event.clientY);
     if (tool === 'point') {
       if (!distinctPoints.some((existing) => dist(existing, point) < 8)) {
         setPoints((previous) => [...previous, point]);
         setHistory((previous) => [...previous, 'point']);
+        playDrawSound('tick', { gainMultiplier: 0.72, detune: 18 });
+      } else {
+        playDrawSound('ui', { gainMultiplier: 0.58, detune: -8 });
       }
       return;
     }
+    const selectedPoint = findExistingPoint(point);
+    if (!selectedPoint) {
+      playDrawSound('alert', { gainMultiplier: 0.45, detune: -20 });
+      return;
+    }
     if (tool === 'polygon') {
-      if (pendingPolygon.some((existing) => dist(existing, point) < 8)) return;
-      const next = [...pendingPolygon, point];
+      if (pendingPolygon.some((existing) => dist(existing, selectedPoint) < 8)) {
+        playDrawSound('alert', { gainMultiplier: 0.42, detune: -32 });
+        return;
+      }
+      const next = [...pendingPolygon, selectedPoint];
       if (next.length >= polygonSides) {
         setPolygons((previous) => [...previous, next]);
         setPendingPolygon([]);
         setHistory((previous) => [...previous.filter((action) => action !== 'polygonPoint'), 'polygon']);
+        playDrawSound('hintResolve', { gainMultiplier: 0.86, detune: polygonSides === 3 ? 18 : 34 });
       } else {
         setPendingPolygon(next);
         setHistory((previous) => [...previous, 'polygonPoint']);
+        playDrawSound('tick', { gainMultiplier: 0.64, detune: 32 + next.length * 12 });
       }
       return;
     }
-    if (!lineStart) {
-      setLineStart(point);
-      setHistory((previous) => [...previous, 'lineStart']);
+    if (!lineStart && presetAngleVertex && lineMode === 'ray' && dist(selectedPoint, presetAngleVertex) >= 24) {
+      setLines((previous) => [...previous, { start: presetAngleVertex, end: selectedPoint, mode: 'ray' }]);
+      setHistory((previous) => [...previous, 'line']);
+      playDrawSound('submit', { gainMultiplier: 0.6, detune: 24 });
       return;
     }
-    if (dist(lineStart, point) < 24) return;
-    setLines((previous) => [...previous, { start: lineStart, end: point, mode: lineMode }]);
+    if (!lineStart) {
+      setLineStart(selectedPoint);
+      setHistory((previous) => [...previous, 'lineStart']);
+      playDrawSound('tick', { gainMultiplier: 0.62, detune: -6 });
+      return;
+    }
+    if (dist(lineStart, selectedPoint) < 24) {
+      playDrawSound('alert', { gainMultiplier: 0.42, detune: -36 });
+      return;
+    }
+    setLines((previous) => [...previous, { start: lineStart, end: selectedPoint, mode: lineMode }]);
     setLineStart(null);
     setHistory((previous) => [...previous.filter((action) => action !== 'lineStart'), 'line']);
+    playDrawSound('submit', { gainMultiplier: 0.58, detune: lineMode === 'segment' ? 6 : lineMode === 'line' ? 20 : 34 });
   };
   const lineEnds = (line: ShapeLine) => {
     if (line.mode === 'segment') return { a: line.start, b: line.end };
@@ -11572,8 +12497,9 @@ function ShapeDrawProblemCardV2({ shapeDraw, answerValue, onAnswerChange, onSubm
       });
     });
 
-    lines.forEach((first, firstIndex) => {
-      lines.slice(firstIndex + 1).forEach((second, secondOffset) => {
+    const markerLines = presetRightAngleRay ? [presetRightAngleRay, ...lines] : lines;
+    markerLines.forEach((first, firstIndex) => {
+      markerLines.slice(firstIndex + 1).forEach((second, secondOffset) => {
         const secondIndex = firstIndex + secondOffset + 1;
         const vertex = [first.start, first.end].find((point) => [second.start, second.end].some((other) => dist(point, other) < 8));
         if (!vertex) return;
@@ -11607,24 +12533,86 @@ function ShapeDrawProblemCardV2({ shapeDraw, answerValue, onAnswerChange, onSubm
       </g>
     );
   };
+  const hasMixedShapeKinds = (() => {
+    if (shapeDraw.task === 'identify') return false;
+    const hasLine = lines.length > 0;
+    const hasPolygon = polygons.length > 0;
+    if (shapeDraw.mode === 'segment' || shapeDraw.mode === 'line' || shapeDraw.mode === 'ray') {
+      return hasPolygon || new Set(lines.map((line) => line.mode)).size > 1;
+    }
+    if (shapeDraw.mode === 'angle' || shapeDraw.mode === 'rightAngle') {
+      const hasRay = lines.some((line) => line.mode === 'ray');
+      const hasOtherLine = lines.some((line) => line.mode !== 'ray');
+      return hasPolygon || (hasRay && hasOtherLine);
+    }
+    if (shapeDraw.mode === 'triangle') return hasLine || new Set(polygons.map((polygon) => polygon.length)).size > 1;
+    if (shapeDraw.mode === 'rightTriangle') {
+      if (isRightTrianglePointCompletionProblem) return hasLine || hasPolygon || points.length > 1;
+      if (isRightTriangleTwoPolygonProblem) return hasLine || polygons.some((polygon) => polygon.length !== 3);
+      return hasLine || new Set(polygons.map((polygon) => polygon.length)).size > 1;
+    }
+    if (shapeDraw.mode === 'quadrilateral' || shapeDraw.mode === 'rectangle' || shapeDraw.mode === 'square') {
+      if (isQuadrilateralPointCompletionProblem) return hasLine || hasPolygon || points.length > 1;
+      if (isTwoPolygonProblem) return hasLine || polygons.some((polygon) => polygon.length !== 4);
+      return hasLine || new Set(polygons.map((polygon) => polygon.length)).size > 1;
+    }
+    return false;
+  })();
   const completed = (() => {
+    const userAngleRays = presetAngleVertex
+      ? lines.filter((line) => line.mode === 'ray' && dist(line.start, presetAngleVertex) < 8)
+      : [];
+    const constructionAngleRays = presetRightAngleRay ? [presetRightAngleRay, ...userAngleRays] : userAngleRays;
+    const hasAngleFromPreset = userAngleRays.some((first, firstIndex) => userAngleRays.slice(firstIndex + 1).some((second) => {
+      const cross = Math.abs((first.end.x - first.start.x) * (second.end.y - second.start.y) - (first.end.y - first.start.y) * (second.end.x - second.start.x));
+      return cross >= 300;
+    }));
+
+    if (shapeDraw.mode === 'angle') return hasAngleFromPreset;
     if (shapeDraw.mode === 'segment' || shapeDraw.mode === 'line' || shapeDraw.mode === 'ray') return lines.some((line) => line.mode === shapeDraw.mode);
     if (shapeDraw.mode === 'triangle') return polygons.some((polygon) => polygon.length === 3);
     if (shapeDraw.mode === 'quadrilateral') return polygons.some((polygon) => polygon.length === 4);
-    if (shapeDraw.mode === 'rightTriangle') return polygons.some((polygon) => polygon.length === 3 && polygon.some((point, index) => rightAt(point, polygon[(index + 2) % 3], polygon[(index + 1) % 3])));
-    if (shapeDraw.mode === 'rectangle' || shapeDraw.mode === 'square') return polygons.some((polygon) => polygon.length === 4 && polygon.every((point, index) => rightAt(point, polygon[(index + 3) % 4], polygon[(index + 1) % 4])));
-    return lines.some((first, firstIndex) => lines.slice(firstIndex + 1).some((second) => {
-      const vertex = [first.start, first.end].find((point) => [second.start, second.end].some((other) => dist(point, other) < 8));
-      if (!vertex) return false;
-      const a = dist(first.start, vertex) < 8 ? first.end : first.start;
-      const b = dist(second.start, vertex) < 8 ? second.end : second.start;
+    if (shapeDraw.mode === 'rightTriangle') {
+      if (presetRightTriangleSegment) {
+        return points.some((point) => isRightTrianglePolygon([presetRightTriangleSegment.start, presetRightTriangleSegment.end, point]));
+      }
+      if (isRightTriangleTwoPolygonProblem) {
+        const rightTriangles = polygons.filter(isRightTrianglePolygon);
+        return rightTriangles.some((first, firstIndex) => rightTriangles.slice(firstIndex + 1).some((second) => Math.abs(triangleArea(first) - triangleArea(second)) > 400));
+      }
+      return polygons.some(isRightTrianglePolygon);
+    }
+    if (shapeDraw.mode === 'rectangle') {
+      if (presetQuadrilateralPoints) {
+        return points.some((point) => isRectanglePolygon([...presetQuadrilateralPoints, point]));
+      }
+      if (isTwoPolygonProblem) {
+        const rectangles = polygons.filter(isRectanglePolygon);
+        return rectangles.some((first, firstIndex) => rectangles.slice(firstIndex + 1).some((second) => Math.abs(triangleArea(first) - triangleArea(second)) > 900));
+      }
+      return polygons.some(isRectanglePolygon);
+    }
+    if (shapeDraw.mode === 'square') {
+      if (presetQuadrilateralPoints) {
+        return points.some((point) => isSquarePolygon([...presetQuadrilateralPoints, point]));
+      }
+      if (isTwoPolygonProblem) {
+        const squares = polygons.filter(isSquarePolygon);
+        return squares.some((first, firstIndex) => squares.slice(firstIndex + 1).some((second) => Math.abs(triangleArea(first) - triangleArea(second)) > 900));
+      }
+      return polygons.some(isSquarePolygon);
+    }
+    if (shapeDraw.mode === 'rightAngle') return constructionAngleRays.some((first, firstIndex) => constructionAngleRays.slice(firstIndex + 1).some((second) => {
+      const vertex = presetAngleVertex ?? first.start;
+      const a = first.end;
+      const b = second.end;
       const cross = Math.abs((a.x - vertex.x) * (b.y - vertex.y) - (a.y - vertex.y) * (b.x - vertex.x));
       if (cross < 300) return false;
-      if (shapeDraw.mode === 'rightAngle') return rightAt(vertex, a, b);
-      return shapeDraw.mode === 'acuteAngle' ? dotAt(vertex, a, b) > 0 : dotAt(vertex, a, b) < 0;
+      return rightAt(vertex, a, b) && userAngleRays.some((line) => line === first || line === second);
     }));
+    return false;
   })();
-  useEffect(() => onAnswerChange(completed ? shapeDraw.answerToken : ''), [completed, onAnswerChange, shapeDraw.answerToken]);
+  useEffect(() => onAnswerChange(hasMixedShapeKinds ? SHAPE_DRAW_MIXED_TOKEN : completed ? shapeDraw.answerToken : ''), [completed, hasMixedShapeKinds, onAnswerChange, shapeDraw.answerToken]);
   const lineIcon = (mode: ShapeLineMode) => {
     const start = { x: 14, y: 33 };
     const end = { x: 34, y: 15 };
@@ -11670,8 +12658,10 @@ function ShapeDrawProblemCardV2({ shapeDraw, answerValue, onAnswerChange, onSubm
       </svg>
     );
   };
-  const toolButtonClass = (active: boolean, colorClass: string) => `grid h-12 w-12 place-items-center rounded-full border-[5px] transition-all duration-200 ${
-    active
+  const toolButtonClass = (active: boolean, colorClass: string, disabled = false) => `grid h-12 w-12 place-items-center rounded-full border-[5px] transition-all duration-200 ${
+    disabled
+      ? `${colorClass} border-transparent opacity-35 grayscale`
+      : active
       ? `${colorClass} -translate-y-1 scale-110 border-white shadow-[0_0_0_5px_rgba(14,165,233,0.72),0_12px_20px_rgba(15,23,42,0.28)]`
       : `${colorClass} border-transparent opacity-80 hover:opacity-100`
   }`;
@@ -11680,34 +12670,175 @@ function ShapeDrawProblemCardV2({ shapeDraw, answerValue, onAnswerChange, onSubm
       {label}
     </span>
   );
+  const renderGivenFigure = () => {
+    if (presetRightTriangleSegment) {
+      return (
+        <g pointerEvents="none">
+          <line x1={presetRightTriangleSegment.start.x} y1={presetRightTriangleSegment.start.y} x2={presetRightTriangleSegment.end.x} y2={presetRightTriangleSegment.end.y} stroke="#f97316" strokeWidth="4.6" strokeLinecap="round" />
+          <ShapePointView point={presetRightTriangleSegment.start} />
+          <ShapePointView point={presetRightTriangleSegment.end} />
+          {points.some((point) => isRightTrianglePolygon([presetRightTriangleSegment.start, presetRightTriangleSegment.end, point])) ? (
+            points.map((point) => (
+              <motion.polygon
+                key={`complete-right-triangle-${point.x}-${point.y}`}
+                points={[presetRightTriangleSegment.start, presetRightTriangleSegment.end, point].map((vertex) => `${vertex.x},${vertex.y}`).join(' ')}
+                fill="#bef26477"
+                stroke="#ef5da8"
+                strokeWidth="4"
+                initial={{ opacity: 0, pathLength: 0 }}
+                animate={{ opacity: 1, pathLength: 1 }}
+                transition={{ duration: 0.45, ease: 'easeOut' }}
+              />
+            ))
+          ) : null}
+        </g>
+      );
+    }
+    if (presetQuadrilateralPoints) {
+      const completedPolygons = points
+        .map((point) => [...presetQuadrilateralPoints, point])
+        .filter((polygon) => shapeDraw.mode === 'square' ? isSquarePolygon(polygon) : isRectanglePolygon(polygon));
+      return (
+        <g pointerEvents="none">
+          <polyline
+            points={presetQuadrilateralPoints.map((vertex) => `${vertex.x},${vertex.y}`).join(' ')}
+            fill="none"
+            stroke="#f97316"
+            strokeWidth="4.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          {presetQuadrilateralPoints.map((point) => <ShapePointView key={`preset-quad-${point.label}`} point={point} />)}
+          {completedPolygons.map((polygon) => (
+            <motion.polygon
+              key={`complete-quadrilateral-${polygon.map((vertex) => `${vertex.x}-${vertex.y}`).join('-')}`}
+              points={polygon.map((vertex) => `${vertex.x},${vertex.y}`).join(' ')}
+              fill="#bef26477"
+              stroke="#ef5da8"
+              strokeWidth="4"
+              initial={{ opacity: 0, pathLength: 0 }}
+              animate={{ opacity: 1, pathLength: 1 }}
+              transition={{ duration: 0.45, ease: 'easeOut' }}
+            />
+          ))}
+        </g>
+      );
+    }
+    if (presetRightAngleRay) {
+      const ends = lineEnds(presetRightAngleRay);
+      return (
+        <g pointerEvents="none">
+          <line x1={ends.a.x} y1={ends.a.y} x2={ends.b.x} y2={ends.b.y} stroke="#f97316" strokeWidth="4.6" strokeLinecap="round" />
+          <ShapePointView point={presetRightAngleRay.end} />
+        </g>
+      );
+    }
+    if (shapeDraw.task !== 'identify') return null;
+    if (shapeDraw.mode === 'segment' || shapeDraw.mode === 'line' || shapeDraw.mode === 'ray') {
+      const givenLine: ShapeLine = {
+        start: { x: 220, y: 220, label: 'ㄱ' },
+        end: { x: 420, y: 140, label: 'ㄴ' },
+        mode: shapeDraw.mode,
+      };
+      const ends = lineEnds(givenLine);
+      return (
+        <g pointerEvents="none">
+          <line x1={ends.a.x} y1={ends.a.y} x2={ends.b.x} y2={ends.b.y} stroke="#f97316" strokeWidth="4.6" strokeLinecap="round" />
+          <ShapePointView point={givenLine.start} />
+          <ShapePointView point={givenLine.end} />
+        </g>
+      );
+    }
+    if (shapeDraw.mode === 'triangle' || shapeDraw.mode === 'quadrilateral') {
+      const givenPolygon: ShapePoint[] = shapeDraw.mode === 'triangle'
+        ? [
+            { x: 240, y: 235, label: 'ㄱ' },
+            { x: 365, y: 125, label: 'ㄴ' },
+            { x: 475, y: 235, label: 'ㄷ' },
+          ]
+        : [
+            { x: 220, y: 230, label: 'ㄱ' },
+            { x: 330, y: 135, label: 'ㄴ' },
+            { x: 470, y: 170, label: 'ㄷ' },
+            { x: 435, y: 265, label: 'ㄹ' },
+          ];
+      return (
+        <g pointerEvents="none">
+          <polygon points={givenPolygon.map((point) => `${point.x},${point.y}`).join(' ')} fill="#bef26477" stroke="#ef5da8" strokeWidth="4" />
+          {givenPolygon.map((point) => <g key={`given-${point.label}`}><ShapePointView point={point} /></g>)}
+        </g>
+      );
+    }
+    return null;
+  };
 
   return (
     <div className="flex h-full w-full flex-col gap-2 text-slate-900">
-      <h2 className="shrink-0 text-xl font-black">{shapeDraw.title}</h2>
+      <h2 className="shrink-0 text-2xl font-black leading-tight sm:text-3xl">{rouletteTitle}</h2>
+      {notice ? (
+        <div className="shrink-0 rounded-2xl border-2 border-yellow-300 bg-slate-950/95 px-4 py-2 text-center text-lg font-black text-white shadow-sm">
+          {notice}
+        </div>
+      ) : null}
       <div className="relative min-h-0 flex-1 overflow-hidden rounded-2xl border-2 border-slate-300 bg-[#f8fbff]">
+        {isGachaDrawProblem && !rouletteResolved ? (
+          <div className="absolute inset-0 z-40 grid place-items-center bg-[#f8fbff]/90 backdrop-blur-[2px]">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="w-[min(26rem,86%)] rounded-[2rem] border-4 border-white bg-white p-5 text-center shadow-2xl ring-4 ring-sky-200"
+            >
+              <div className="relative mx-auto mb-4 grid h-44 w-44 place-items-center">
+                <div className="absolute -top-2 z-20 h-0 w-0 border-x-[14px] border-t-[22px] border-x-transparent border-t-[#ef4444] drop-shadow-md" />
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ repeat: Infinity, duration: 0.86, ease: 'linear' }}
+                  className="absolute inset-0 rounded-full border-[12px] border-white shadow-xl"
+                  style={{
+                    background: 'conic-gradient(#60a5fa 0 45deg, #facc15 45deg 90deg, #34d399 90deg 135deg, #fb7185 135deg 180deg, #a78bfa 180deg 225deg, #22d3ee 225deg 270deg, #f97316 270deg 315deg, #84cc16 315deg 360deg)',
+                  }}
+                >
+                  <div className="absolute inset-[1.25rem] rounded-full bg-white/92 shadow-inner" />
+                </motion.div>
+                <div className="absolute inset-[3.2rem] grid place-items-center rounded-full bg-[#253493] text-white shadow-lg">
+                  <motion.div
+                    key={`roulette-overlay-${rouletteDisplayMode}`}
+                    initial={{ scale: 0.72, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.12 }}
+                    className="text-2xl font-black"
+                  >
+                    {rouletteDisplayLabel}
+                  </motion.div>
+                </div>
+              </div>
+              <div className="text-lg font-black text-slate-800">무엇을 그릴지 정하는 중</div>
+            </motion.div>
+          </div>
+        ) : null}
         <div className="absolute left-1/2 top-3 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full bg-[#253493] px-3 py-2 shadow-lg">
-          <button type="button" onClick={() => { setTool('point'); setOpenMenu(null); }} className={toolButtonClass(tool === 'point', 'bg-pink-300')} aria-label="점 도구">
+          <button type="button" onClick={() => { playDrawSound('ui', { gainMultiplier: 0.66, detune: 12 }); setTool('point'); setOpenMenu(null); }} disabled={false} className={toolButtonClass(tool === 'point', 'bg-pink-300')} aria-label="점 도구">
             <span className="block h-4 w-4 rounded-full border-4 border-slate-900 bg-slate-500" />
           </button>
           <div className="relative">
-            <button type="button" onClick={() => setOpenMenu((menu) => (menu === 'line' ? null : 'line'))} className={toolButtonClass(tool === 'line', 'bg-cyan-100')} aria-label="선 도구">
+            <button type="button" onClick={() => { playDrawSound('ui', { gainMultiplier: 0.66, detune: 24 }); setOpenMenu((menu) => (menu === 'line' ? null : 'line')); }} disabled={pointToolOnly || polygonToolOnly} className={toolButtonClass(tool === 'line', 'bg-cyan-100', pointToolOnly || polygonToolOnly)} aria-label="선 도구">
               {lineIcon(lineMode)}
             </button>
             <div className={`absolute left-1/2 top-[3.7rem] flex -translate-x-1/2 gap-2 rounded-full bg-cyan-100/95 px-3 py-2 shadow-xl transition-all duration-200 ease-out ${openMenu === 'line' ? 'translate-y-0 scale-100 opacity-100' : 'pointer-events-none -translate-y-2 scale-95 opacity-0'}`}>
               {(['segment', 'line', 'ray'] as ShapeLineMode[]).map((mode) => (
-                <button key={mode} type="button" onClick={() => { setTool('line'); setLineMode(mode); setOpenMenu(null); }} className={`grid h-12 w-12 place-items-center rounded-full bg-white transition-all duration-150 ${tool === 'line' && lineMode === mode ? 'ring-4 ring-[#253493]' : 'hover:scale-105'}`} aria-label={mode === 'segment' ? '선분' : mode === 'line' ? '직선' : '반직선'}>
+                <button key={mode} type="button" onClick={() => { playDrawSound('ui', { gainMultiplier: 0.7, detune: mode === 'segment' ? 0 : mode === 'line' ? 18 : 34 }); setTool('line'); setLineMode(mode); setOpenMenu(null); }} className={`grid h-12 w-12 place-items-center rounded-full bg-white transition-all duration-150 ${tool === 'line' && lineMode === mode ? 'ring-4 ring-[#253493]' : 'hover:scale-105'}`} aria-label={mode === 'segment' ? '선분' : mode === 'line' ? '직선' : '반직선'}>
                   {lineIcon(mode)}
                 </button>
               ))}
             </div>
           </div>
           <div className="relative">
-            <button type="button" onClick={() => setOpenMenu((menu) => (menu === 'polygon' ? null : 'polygon'))} className={toolButtonClass(tool === 'polygon', 'bg-lime-300')} aria-label="도형 도구">
+            <button type="button" onClick={() => { playDrawSound('ui', { gainMultiplier: 0.66, detune: 36 }); setOpenMenu((menu) => (menu === 'polygon' ? null : 'polygon')); }} disabled={isLineConstructionProblem || pointToolOnly} className={toolButtonClass(tool === 'polygon', 'bg-lime-300', isLineConstructionProblem || pointToolOnly)} aria-label="도형 도구">
               {polygonIcon(polygonSides)}
             </button>
             <div className={`absolute left-1/2 top-[3.7rem] flex -translate-x-1/2 gap-2 rounded-full bg-lime-200/95 px-3 py-2 shadow-xl transition-all duration-200 ease-out ${openMenu === 'polygon' ? 'translate-y-0 scale-100 opacity-100' : 'pointer-events-none -translate-y-2 scale-95 opacity-0'}`}>
               {([3, 4] as Array<3 | 4>).map((sides) => (
-                <button key={sides} type="button" onClick={() => { setTool('polygon'); setPolygonSides(sides); setOpenMenu(null); }} className={`grid h-12 w-12 place-items-center rounded-full bg-white transition-all duration-150 ${tool === 'polygon' && polygonSides === sides ? 'ring-4 ring-[#253493]' : 'hover:scale-105'}`} aria-label={sides === 3 ? '삼각형' : '사각형'}>
+                <button key={sides} type="button" onClick={() => { playDrawSound('ui', { gainMultiplier: 0.7, detune: sides === 3 ? 24 : 42 }); setTool('polygon'); setPolygonSides(sides); setOpenMenu(null); }} disabled={(isRightTriangleTwoPolygonProblem && sides !== 3) || (isTwoPolygonProblem && sides !== 4)} className={`grid h-12 w-12 place-items-center rounded-full bg-white transition-all duration-150 disabled:opacity-35 disabled:grayscale ${tool === 'polygon' && polygonSides === sides ? 'ring-4 ring-[#253493]' : 'hover:scale-105'}`} aria-label={sides === 3 ? '삼각형' : '사각형'}>
                   {polygonIcon(sides)}
                 </button>
               ))}
@@ -11725,12 +12856,1028 @@ function ShapeDrawProblemCardV2({ shapeDraw, answerValue, onAnswerChange, onSubm
           {Array.from({ length: 11 }, (_, i) => <line key={`gx-${i}`} x1={SHAPE_ORIGIN.x + i * SHAPE_GRID} x2={SHAPE_ORIGIN.x + i * SHAPE_GRID} y1="0" y2="360" stroke="#d7dee9" />)}
           {Array.from({ length: 6 }, (_, i) => <line key={`gy-${i}`} y1={SHAPE_ORIGIN.y + i * SHAPE_GRID} y2={SHAPE_ORIGIN.y + i * SHAPE_GRID} x1="0" x2="640" stroke="#d7dee9" />)}
           {Array.from({ length: 66 }, (_, i) => <circle key={`dot-${i}`} cx={SHAPE_ORIGIN.x + (i % 11) * SHAPE_GRID} cy={SHAPE_ORIGIN.y + Math.floor(i / 11) * SHAPE_GRID} r="3" fill="#64748b" opacity="0.45" />)}
+          {renderGivenFigure()}
           {polygons.map((polygon, index) => <g key={`poly-${index}`}><polygon points={polygon.map((point) => `${point.x},${point.y}`).join(' ')} fill="#bef26477" stroke="#ef5da8" strokeWidth="3" />{polygon.map((point) => <g key={`${point.x}-${point.y}`}><ShapePointView point={point} /></g>)}</g>)}
           {pendingPolygon.length > 0 && <polyline points={pendingPolygon.map((point) => `${point.x},${point.y}`).join(' ')} fill="none" stroke="#ef5da8" strokeWidth="3" />}
-          {lines.map((line, index) => { const ends = lineEnds(line); return <g key={`line-${index}`}><line x1={ends.a.x} y1={ends.a.y} x2={ends.b.x} y2={ends.b.y} stroke="#f97316" strokeWidth="3.4" strokeLinecap="round" /><ShapePointView point={line.start} /><ShapePointView point={line.end} /></g>; })}
+          {lines.map((line, index) => {
+            const ends = lineEnds(line);
+            return (
+              <g key={`line-${index}`}>
+                <line x1={ends.a.x} y1={ends.a.y} x2={ends.b.x} y2={ends.b.y} stroke="#f97316" strokeWidth="3.4" strokeLinecap="round" />
+                <ShapePointView point={line.start} />
+                <ShapePointView point={line.end} />
+              </g>
+            );
+          })}
           {rightAngleMarkers.map(renderRightAngleMarker)}
+          {presetAngleVertex ? <ShapePointView point={presetAngleVertex} /> : null}
           {[...points, ...pendingPolygon, ...(lineStart ? [lineStart] : [])].map((point) => <g key={`point-${point.x}-${point.y}-${point.label}`}><ShapePointView point={point} /></g>)}
         </svg>
+      </div>
+    </div>
+  );
+}
+
+function ShapeIdentifyProblemCard({
+  shapeDraw,
+  onAnswerChange,
+}: {
+  shapeDraw: ShapeDrawProblemData;
+  onAnswerChange?: (value: string) => void;
+}) {
+  const figureVariant = shapeDraw.figureVariant ?? 0;
+  const [classifiedTriangleZones, setClassifiedTriangleZones] = useState<Record<number, string | null>>({});
+  const [activeClassifyDropZone, setActiveClassifyDropZone] = useState<string | null>(null);
+  const gridPoint = (col: number, row: number, label: string): ShapePoint => ({
+    x: SHAPE_ORIGIN.x + SHAPE_GRID * col,
+    y: SHAPE_ORIGIN.y + SHAPE_GRID * row,
+    label,
+  });
+  const lineEnds = (line: ShapeLine) => {
+    if (line.mode === 'segment') return { a: line.start, b: line.end };
+    const dx = line.end.x - line.start.x;
+    const dy = line.end.y - line.start.y;
+    const len = Math.max(1, Math.hypot(dx, dy));
+    if (line.mode === 'ray') return { a: line.start, b: { ...line.end, x: line.start.x + (dx / len) * 720, y: line.start.y + (dy / len) * 720 } };
+    return {
+      a: { ...line.start, x: line.start.x - (dx / len) * 720, y: line.start.y - (dy / len) * 720 },
+      b: { ...line.end, x: line.start.x + (dx / len) * 720, y: line.start.y + (dy / len) * 720 },
+    };
+  };
+  const givenLineVariants: ShapeLine[] = [
+    {
+      start: gridPoint(3, 3, '\u3131'),
+      end: gridPoint(7, 2, '\u3134'),
+      mode: shapeDraw.mode === 'segment' || shapeDraw.mode === 'line' || shapeDraw.mode === 'ray' ? shapeDraw.mode : 'segment',
+    },
+    {
+      start: gridPoint(2, 1, '\u3131'),
+      end: gridPoint(8, 4, '\u3134'),
+      mode: shapeDraw.mode === 'segment' || shapeDraw.mode === 'line' || shapeDraw.mode === 'ray' ? shapeDraw.mode : 'segment',
+    },
+    {
+      start: gridPoint(4, 4, '\u3131'),
+      end: gridPoint(6, 1, '\u3134'),
+      mode: shapeDraw.mode === 'segment' || shapeDraw.mode === 'line' || shapeDraw.mode === 'ray' ? shapeDraw.mode : 'segment',
+    },
+  ];
+  const givenLine = givenLineVariants[figureVariant % givenLineVariants.length];
+  const angleLabelSet = getShapeReadAngleLabels(figureVariant);
+  const angleVariants = [
+    {
+      vertex: gridPoint(5, 3, angleLabelSet[1]),
+      ends: [
+        gridPoint(3, 1, angleLabelSet[0]),
+        gridPoint(8, 1, angleLabelSet[2]),
+      ],
+    },
+    {
+      vertex: gridPoint(6, 3, angleLabelSet[1]),
+      ends: [
+        gridPoint(3, 4, angleLabelSet[0]),
+        gridPoint(8, 1, angleLabelSet[2]),
+      ],
+    },
+    {
+      vertex: gridPoint(4, 3, angleLabelSet[1]),
+      ends: [
+        gridPoint(2, 1, angleLabelSet[0]),
+        gridPoint(8, 4, angleLabelSet[2]),
+      ],
+    },
+    {
+      vertex: gridPoint(4, 4, angleLabelSet[1]),
+      ends: [
+        gridPoint(2, 2, angleLabelSet[0]),
+        gridPoint(7, 3, angleLabelSet[2]),
+      ],
+    },
+    {
+      vertex: gridPoint(7, 3, angleLabelSet[1]),
+      ends: [
+        gridPoint(4, 1, angleLabelSet[0]),
+        gridPoint(5, 5, angleLabelSet[2]),
+      ],
+    },
+    {
+      vertex: gridPoint(5, 2, angleLabelSet[1]),
+      ends: [
+        gridPoint(2, 2, angleLabelSet[0]),
+        gridPoint(7, 5, angleLabelSet[2]),
+      ],
+    },
+  ];
+  const givenAngle = angleVariants[figureVariant % angleVariants.length];
+  const givenAngleVertex: ShapePoint = givenAngle.vertex;
+  const givenAngleArms: ShapeLine[] = givenAngle.ends.map((end) => ({ start: givenAngleVertex, end, mode: 'ray' }));
+  const rightAngleVariants = [
+    {
+      vertex: gridPoint(5, 3, '\u3134'),
+      ends: [
+        gridPoint(5, 1, '\u3131'),
+        gridPoint(8, 3, '\u3137'),
+      ],
+    },
+    {
+      vertex: gridPoint(5, 3, '\u3134'),
+      ends: [
+        gridPoint(2, 3, '\u3131'),
+        gridPoint(5, 1, '\u3137'),
+      ],
+    },
+    {
+      vertex: gridPoint(6, 2, '\u3134'),
+      ends: [
+        gridPoint(3, 2, '\u3131'),
+        gridPoint(6, 5, '\u3137'),
+      ],
+    },
+  ];
+  const givenRightAngle = rightAngleVariants[figureVariant % rightAngleVariants.length];
+  const givenRightAngleVertex: ShapePoint = givenRightAngle.vertex;
+  const givenRightAngleArms: ShapeLine[] = givenRightAngle.ends.map((end) => ({ start: givenRightAngleVertex, end, mode: 'ray' }));
+  const triangleVariants: ShapePoint[][] = [
+    [
+      gridPoint(3, 4, '\u3131'),
+      gridPoint(5, 1, '\u3134'),
+      gridPoint(8, 4, '\u3137'),
+    ],
+    [
+      gridPoint(2, 3, '\u3131'),
+      gridPoint(7, 1, '\u3134'),
+      gridPoint(8, 4, '\u3137'),
+    ],
+    [
+      gridPoint(3, 1, '\u3131'),
+      gridPoint(8, 2, '\u3134'),
+      gridPoint(5, 5, '\u3137'),
+    ],
+  ];
+  const quadrilateralVariants: ShapePoint[][] = [
+    [
+      gridPoint(2, 4, '\u3131'),
+      gridPoint(4, 1, '\u3134'),
+      gridPoint(8, 2, '\u3137'),
+      gridPoint(7, 5, '\u3139'),
+    ],
+    [
+      gridPoint(2, 2, '\u3131'),
+      gridPoint(5, 1, '\u3134'),
+      gridPoint(8, 3, '\u3137'),
+      gridPoint(6, 5, '\u3139'),
+    ],
+    [
+      gridPoint(3, 4, '\u3131'),
+      gridPoint(3, 1, '\u3134'),
+      gridPoint(8, 1, '\u3137'),
+      gridPoint(9, 4, '\u3139'),
+    ],
+  ];
+  const givenPolygon: ShapePoint[] = shapeDraw.mode === 'triangle'
+    ? triangleVariants[figureVariant % triangleVariants.length]
+    : quadrilateralVariants[figureVariant % quadrilateralVariants.length];
+  const ends = lineEnds(givenLine);
+  const isLineFigure = shapeDraw.mode === 'segment' || shapeDraw.mode === 'line' || shapeDraw.mode === 'ray';
+  const isAngleFigure = shapeDraw.mode === 'angle';
+  const isRightAngleAnimation = shapeDraw.mode === 'rightAngle' && shapeDraw.identifyVariant === 'fold';
+  const isRightAngleDefinition = shapeDraw.mode === 'rightAngle' && shapeDraw.identifyVariant === 'definition';
+  const isRightAngleMarkProblem = shapeDraw.mode === 'rightAngle' && shapeDraw.identifyVariant === 'rightAngleMark';
+  const isRightAngleCountProblem = shapeDraw.mode === 'rightAngle' && shapeDraw.identifyVariant === 'rightAngleCount';
+  const isRightAngleNamesProblem = shapeDraw.mode === 'rightAngle' && shapeDraw.identifyVariant === 'rightAngleNames';
+  const isClockRightAnglesProblem = shapeDraw.mode === 'rightAngle' && shapeDraw.identifyVariant === 'clockRightAngles';
+  const isRightTriangleClassifyProblem = shapeDraw.mode === 'rightTriangle' && shapeDraw.identifyVariant === 'rightTriangleClassify';
+  const isRightTriangleDefinition = shapeDraw.mode === 'rightTriangle' && shapeDraw.identifyVariant === 'rightTriangleDefinition';
+  const isShapeClassifyProblem = (shapeDraw.mode === 'rectangle' || shapeDraw.mode === 'square') && shapeDraw.identifyVariant === 'shapeClassify';
+  const isRightAngleCountClassifyProblem = shapeDraw.mode === 'rectangle' && shapeDraw.identifyVariant === 'shapeClassify';
+  const isShapeDefinition = (shapeDraw.mode === 'rectangle' || shapeDraw.mode === 'square') && shapeDraw.identifyVariant === 'shapeDefinition';
+  const isRightAngleFigure = shapeDraw.mode === 'rightAngle' && shapeDraw.identifyVariant !== 'fold';
+  const definitionBlankTarget = figureVariant % 2 === 0 ? 'straight' : 'twice';
+  const rightTriangleDefinitionVariant = getRightTriangleDefinitionVariant(figureVariant);
+  const rightTriangleDefinitionBlankTarget = rightTriangleDefinitionVariant.blankTarget;
+  const shapeDefinitionVariant = getShapeDefinitionVariant(shapeDraw.mode, figureVariant);
+  const shapeDefinitionBlankTarget = shapeDefinitionVariant.blankTarget;
+  const definitionBracket = (content: string, blank: boolean) => {
+    if (!blank) {
+      return <span className="mx-1 text-slate-900">{content}</span>;
+    }
+    const blankWidthClass = content.length <= 3 ? 'min-w-24' : 'min-w-44';
+
+    return (
+      <span className={`mx-2 inline-flex ${blankWidthClass} items-center justify-center border-b-[5px] border-[#253493] px-3 pb-1 text-[#253493]`}>
+        <span className="invisible">{content}</span>
+      </span>
+    );
+  };
+  const rightTriangleClassifyVariantIndex = figureVariant % RIGHT_TRIANGLE_CLASSIFY_VARIANTS.length;
+  const rightTriangleClassifyItems = isShapeClassifyProblem
+    ? getShapeClassifyItems(shapeDraw.mode, figureVariant)
+    : getRightTriangleClassifyItems(figureVariant).map(({ points, isRightTriangle }) => ({ points, isTarget: isRightTriangle }));
+  const targetShapeLabel = shapeDraw.mode === 'square'
+    ? '정사각형'
+    : shapeDraw.mode === 'rectangle'
+      ? '직사각형'
+      : '직각이 있는 삼각형';
+  const nonTargetShapeLabel = shapeDraw.mode === 'rightTriangle'
+    ? '직각이 없는 삼각형'
+    : `${targetShapeLabel}이 아닌 도형`;
+
+  useEffect(() => {
+    if (!isRightTriangleClassifyProblem && !isShapeClassifyProblem) {
+      return;
+    }
+
+    setClassifiedTriangleZones({});
+    setActiveClassifyDropZone(null);
+    onAnswerChange?.('');
+  }, [isRightTriangleClassifyProblem, isShapeClassifyProblem, onAnswerChange, shapeDraw.answerToken, shapeDraw.figureVariant]);
+
+  useEffect(() => {
+    if (!isRightTriangleClassifyProblem && !isShapeClassifyProblem) {
+      return;
+    }
+
+    const allClassified = rightTriangleClassifyItems.every((_, index) => classifiedTriangleZones[index] !== undefined && classifiedTriangleZones[index] !== null);
+    if (!allClassified) {
+      onAnswerChange?.('');
+      return;
+    }
+
+    const isCorrect = rightTriangleClassifyItems.every((item, index) =>
+      classifiedTriangleZones[index] === (
+        isRightAngleCountClassifyProblem
+          ? `angle-${item.rightAngleCount ?? 0}`
+          : item.isTarget
+            ? 'right'
+            : 'notRight'
+      )
+    );
+    onAnswerChange?.(isCorrect ? SHAPE_CLASSIFY_CORRECT_TOKEN : SHAPE_CLASSIFY_INCORRECT_TOKEN);
+  }, [classifiedTriangleZones, isRightAngleCountClassifyProblem, isRightTriangleClassifyProblem, isShapeClassifyProblem, onAnswerChange, rightTriangleClassifyItems, rightTriangleClassifyVariantIndex]);
+
+  const renderClassifyTriangleCard = (triangle: { points: string; isTarget: boolean; rightAngleCount?: number }, index: number, compact = false) => {
+    const cardHeightClass = compact
+      ? isRightAngleCountClassifyProblem
+        ? 'h-full min-h-[7.25rem] px-2 py-2'
+        : 'h-full min-h-[9.5rem] px-2 py-2'
+      : isRightAngleCountClassifyProblem
+        ? 'h-32 px-2 py-2'
+        : 'h-36 px-2 py-2';
+    const badgeClass = isRightAngleCountClassifyProblem
+      ? 'h-9 w-9 text-lg'
+      : 'h-10 w-10 text-xl';
+    const svgHeightClass = isRightAngleCountClassifyProblem
+      ? compact
+        ? 'h-24'
+        : 'h-28'
+      : 'h-32';
+
+    return (
+      <button
+        key={`right-triangle-classify-${index}`}
+        type="button"
+        draggable
+        onDragStart={(event) => {
+          event.dataTransfer.setData('text/plain', String(index));
+          event.dataTransfer.effectAllowed = 'move';
+        }}
+        onClick={() => {
+          if (!classifiedTriangleZones[index]) return;
+          setClassifiedTriangleZones((previous) => ({ ...previous, [index]: null }));
+        }}
+        className={`group relative flex min-w-0 cursor-grab flex-col items-center justify-center overflow-hidden rounded-2xl border-[3px] border-[#9aa7b8] bg-[#ffffff] shadow-[0_8px_14px_rgba(15,23,42,0.14)] transition duration-150 hover:-translate-y-0.5 hover:border-[#253493] active:cursor-grabbing ${cardHeightClass}`}
+        aria-label={`${index + 1}번 도형`}
+      >
+        <div className={`absolute left-2 top-2 grid place-items-center rounded-full bg-[#253493] font-black text-white shadow-[0_4px_10px_rgba(37,52,147,0.35)] ${badgeClass}`}>{index + 1}</div>
+        <svg viewBox="0 0 190 160" className={`${svgHeightClass} w-full pt-1`}>
+          <polygon points={triangle.points} fill="#84cc1670" stroke="#ef5da8" strokeWidth="5" strokeLinejoin="round" />
+        </svg>
+      </button>
+    );
+  };
+
+  const renderDropZone = (zone: string, label: string) => {
+    const zoneItems = rightTriangleClassifyItems
+      .map((triangle, index) => ({ triangle, index }))
+      .filter(({ index }) => classifiedTriangleZones[index] === zone);
+    const isRightZone = zone === 'right' || zone === 'angle-4';
+    const isActive = activeClassifyDropZone === zone;
+    const Icon = isRightZone ? Check : X;
+    const zonePanelClass = isRightZone
+      ? isActive
+        ? 'border-emerald-500 bg-[#e9fff4] shadow-[0_0_0_4px_rgba(16,185,129,0.18)]'
+        : 'border-emerald-400 bg-[#f0fff8]'
+      : zone.startsWith('angle-')
+        ? isActive
+          ? 'border-[#4f8cff] bg-[#eef6ff] shadow-[0_0_0_4px_rgba(79,140,255,0.18)]'
+          : 'border-[#8eb8ff] bg-[#f7fbff]'
+      : isActive
+        ? 'border-sky-500 bg-[#eaf8ff] shadow-[0_0_0_4px_rgba(14,165,233,0.18)]'
+        : 'border-sky-400 bg-[#f1fbff]';
+    const zoneChipClass = isRightZone
+      ? 'bg-emerald-600 text-white'
+      : zone.startsWith('angle-')
+        ? 'bg-[#253493] text-white'
+      : 'bg-sky-600 text-white';
+    const emptySlotClass = isRightZone
+      ? 'border-emerald-300 bg-[#ffffff]'
+      : zone.startsWith('angle-')
+        ? 'border-[#a9c7ff] bg-[#ffffff]'
+      : 'border-sky-300 bg-[#ffffff]';
+    const expectedSlotCount = isRightAngleCountClassifyProblem ? Math.max(1, zoneItems.length) : 2;
+
+    return (
+      <div
+        className={`flex min-h-0 flex-col rounded-2xl border-[3px] border-dashed transition duration-150 ${
+          isRightAngleCountClassifyProblem ? 'px-3 py-3' : 'p-4'
+        } ${zonePanelClass}`}
+        onDragOver={(event) => {
+          event.preventDefault();
+          event.dataTransfer.dropEffect = 'move';
+          setActiveClassifyDropZone(zone);
+        }}
+        onDragEnter={() => {
+          setActiveClassifyDropZone(zone);
+        }}
+        onDragLeave={(event) => {
+          const relatedTarget = event.relatedTarget;
+          if (!(relatedTarget instanceof Node) || !event.currentTarget.contains(relatedTarget)) {
+            setActiveClassifyDropZone(null);
+          }
+        }}
+        onDrop={(event) => {
+          event.preventDefault();
+          setActiveClassifyDropZone(null);
+          const triangleIndex = Number.parseInt(event.dataTransfer.getData('text/plain'), 10);
+          if (Number.isNaN(triangleIndex)) return;
+          setClassifiedTriangleZones((previous) => ({ ...previous, [triangleIndex]: zone }));
+        }}
+      >
+        <div className="flex items-center justify-center">
+          <div className={`flex items-center gap-2 rounded-full font-black shadow-[0_5px_10px_rgba(37,52,147,0.18)] ${
+            isRightAngleCountClassifyProblem ? 'px-4 py-1.5 text-base leading-tight' : 'px-4 py-1.5 text-base sm:text-lg'
+          } ${zoneChipClass}`}>
+            {zone.startsWith('angle-') ? null : <Icon className="h-5 w-5" strokeWidth={4} />}
+            {label}
+          </div>
+        </div>
+        <div className={`grid min-h-0 flex-1 items-stretch ${isRightAngleCountClassifyProblem ? 'mt-2 grid-cols-1 gap-2' : 'mt-3 grid-cols-2 gap-3'}`}>
+          {zoneItems.map(({ triangle, index }) => renderClassifyTriangleCard(triangle, index, true))}
+          {Array.from({ length: Math.max(0, expectedSlotCount - zoneItems.length) }, (_, emptyIndex) => (
+            <div
+              key={`empty-${zone}-${emptyIndex}`}
+              className={`h-full rounded-2xl border-2 border-dashed shadow-inner ${
+                isRightAngleCountClassifyProblem ? 'min-h-[7.25rem]' : 'min-h-[9.5rem]'
+              } ${emptySlotClass}`}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderRightTriangleClassifyProblem = () => {
+    const sourceItems = rightTriangleClassifyItems
+      .map((triangle, index) => ({ triangle, index }))
+      .filter(({ index }) => !classifiedTriangleZones[index]);
+
+    return (
+      <div className={`grid h-full min-h-[20rem] w-full gap-4 bg-[#fffdf7] px-5 py-5 ${
+        isRightAngleCountClassifyProblem ? 'grid-rows-[10rem_minmax(0,1fr)]' : 'grid-rows-[10rem_minmax(0,1fr)]'
+      }`}>
+        <div
+          className={`grid min-h-0 rounded-2xl border-2 border-[#c7d2e0] bg-[#f7fbff] p-3 shadow-[0_8px_16px_rgba(15,23,42,0.08)] transition duration-150 ${
+            isRightAngleCountClassifyProblem ? 'grid-cols-4 gap-3' : 'grid-cols-4 gap-4'
+          } ${
+            activeClassifyDropZone === 'source' ? 'border-[#253493] shadow-[0_0_0_4px_rgba(37,52,147,0.18)]' : ''
+          }`}
+          onDragOver={(event) => {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'move';
+            setActiveClassifyDropZone('source');
+          }}
+          onDragEnter={() => {
+            setActiveClassifyDropZone('source');
+          }}
+          onDragLeave={(event) => {
+            const relatedTarget = event.relatedTarget;
+            if (!(relatedTarget instanceof Node) || !event.currentTarget.contains(relatedTarget)) {
+              setActiveClassifyDropZone(null);
+            }
+          }}
+          onDrop={(event) => {
+            event.preventDefault();
+            setActiveClassifyDropZone(null);
+            const triangleIndex = Number.parseInt(event.dataTransfer.getData('text/plain'), 10);
+            if (Number.isNaN(triangleIndex)) return;
+            setClassifiedTriangleZones((previous) => ({ ...previous, [triangleIndex]: null }));
+          }}
+        >
+          {sourceItems.map(({ triangle, index }) => renderClassifyTriangleCard(triangle, index))}
+          {Array.from({ length: Math.max(0, 4 - sourceItems.length) }, (_, emptyIndex) => (
+            <div
+              key={`source-empty-${emptyIndex}`}
+              className={`rounded-2xl border-2 border-dashed border-slate-300 bg-white ${
+                isRightAngleCountClassifyProblem ? 'h-32' : 'h-36'
+              }`}
+            />
+          ))}
+        </div>
+        <div className={`grid min-h-0 ${isRightAngleCountClassifyProblem ? 'grid-cols-5 gap-2' : 'grid-cols-2 gap-4'}`}>
+          {isRightAngleCountClassifyProblem ? (
+            [0, 1, 2, 3, 4].map((count) => renderDropZone(`angle-${count}`, `직각 ${count}개`))
+          ) : (
+            <>
+              {renderDropZone('right', targetShapeLabel)}
+              {renderDropZone('notRight', nonTargetShapeLabel)}
+            </>
+          )}
+        </div>
+      </div>
+    );
+  };
+  const renderStaticRightAngleMarker = (vertex: ShapePoint, a: ShapePoint, b: ShapePoint) => {
+    const size = 24;
+    const lengthA = Math.max(1, Math.hypot(a.x - vertex.x, a.y - vertex.y));
+    const lengthB = Math.max(1, Math.hypot(b.x - vertex.x, b.y - vertex.y));
+    const unitA = { x: (a.x - vertex.x) / lengthA, y: (a.y - vertex.y) / lengthA };
+    const unitB = { x: (b.x - vertex.x) / lengthB, y: (b.y - vertex.y) / lengthB };
+    const p1 = { x: vertex.x + unitA.x * size, y: vertex.y + unitA.y * size };
+    const corner = { x: p1.x + unitB.x * size, y: p1.y + unitB.y * size };
+    const p2 = { x: vertex.x + unitB.x * size, y: vertex.y + unitB.y * size };
+    const path = `M ${p1.x} ${p1.y} L ${corner.x} ${corner.y} L ${p2.x} ${p2.y}`;
+
+    return (
+      <g pointerEvents="none">
+        <path d={path} fill="none" stroke="#fff" strokeWidth="9" strokeLinejoin="miter" strokeLinecap="butt" />
+        <path d={path} fill="none" stroke="#ef4444" strokeWidth="4.5" strokeLinejoin="miter" strokeLinecap="butt" />
+      </g>
+    );
+  };
+  const rightAngleMarkerAt = (x: number, y: number, rotate = 0) => (
+    <g transform={`translate(${x} ${y}) rotate(${rotate})`} pointerEvents="none">
+      <path d="M 0 20 L 20 20 L 20 0" fill="none" stroke="#fff" strokeWidth="8" strokeLinejoin="miter" />
+      <path d="M 0 20 L 20 20 L 20 0" fill="none" stroke="#ef4444" strokeWidth="4.2" strokeLinejoin="miter" />
+    </g>
+  );
+  const renderRightAngleMarkProblem = () => {
+    const variantIndex = figureVariant % RIGHT_ANGLE_MARK_ANSWER_TOKENS.length;
+    const variantShapes = [
+      [
+        <polygon key="mark-0-a" points="42,54 184,54 184,226 42,226" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-0-b" points="234,92 410,126 410,248 234,248" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-0-c" points="462,54 574,54 616,150 574,246 462,246" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+      ],
+      [
+        <polygon key="mark-1-a" points="44,64 176,64 176,224 44,224" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-1-b" points="248,66 404,66 404,226 348,226 348,154 248,154" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-1-c" points="480,68 606,226 480,226" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+      ],
+      [
+        <polygon key="mark-2-a" points="54,68 188,68 188,202 54,202" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-2-b" points="262,72 432,72 432,226 218,226" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-2-c" points="500,72 606,226 500,226" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+      ],
+      [
+        <polygon key="mark-3-a" points="42,74 178,74 178,226 42,226" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-3-b" points="236,82 420,82 420,234 280,234" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-3-c" points="486,70 604,70 604,178 552,230 486,230" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+      ],
+      [
+        <polygon key="mark-4-a" points="38,72 174,72 174,226 38,226" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-4-b" points="246,62 410,62 410,150 350,150 350,232 246,232" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-4-c" points="486,72 606,72 570,226 486,226" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+      ],
+      [
+        <polygon key="mark-5-a" points="54,226 188,226 54,76" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-5-b" points="246,78 420,78 420,226 292,226" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-5-c" points="486,72 604,72 604,180 552,228 486,228" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+      ],
+    ][variantIndex];
+
+    return (
+      <div className="h-full min-h-[20rem] w-full px-5 py-5">
+        <svg viewBox="0 0 640 320" className="h-full w-full rounded-2xl bg-white">
+          <defs>
+            <pattern id={`right-angle-find-grid-${variantIndex}`} width="32" height="32" patternUnits="userSpaceOnUse">
+              <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#7dd3fc" strokeWidth="1.2" strokeDasharray="2 3" />
+            </pattern>
+          </defs>
+          <rect width="640" height="320" fill={`url(#right-angle-find-grid-${variantIndex})`} />
+          {variantShapes}
+        </svg>
+      </div>
+    );
+  };
+  const renderRightAngleCountProblem = () => {
+    const answerPattern = RIGHT_ANGLE_COUNT_ANSWERS[figureVariant % RIGHT_ANGLE_COUNT_ANSWERS.length];
+    const shapeStyleIndex = figureVariant % 3;
+    const shapeByAnswer = {
+      1: [
+        <svg key="count-one-0" viewBox="0 0 180 150" className="h-44 w-full">
+          <path d="M 38 122 L 38 28 L 132 28 Q 132 122 38 122 Z" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
+        <svg key="count-one-1" viewBox="0 0 180 150" className="h-44 w-full">
+          <polygon points="46,122 132,122 46,36" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
+        <svg key="count-one-2" viewBox="0 0 180 150" className="h-44 w-full">
+          <polygon points="50,122 138,122 50,34" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
+      ],
+      2: [
+        <svg key="count-two-0" viewBox="0 0 180 150" className="h-44 w-full">
+          <polygon points="46,122 132,122 132,28 86,28" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
+        <svg key="count-two-1" viewBox="0 0 180 150" className="h-44 w-full">
+          <polygon points="42,32 138,32 138,118 78,118" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
+        <svg key="count-two-2" viewBox="0 0 180 150" className="h-44 w-full">
+          <polygon points="50,34 132,34 132,122 76,122" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
+      ],
+      4: [
+        <svg key="count-four-0" viewBox="0 0 180 150" className="h-44 w-full">
+          <rect x="42" y="28" width="96" height="94" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
+        <svg key="count-four-1" viewBox="0 0 180 150" className="h-44 w-full">
+          <rect x="34" y="44" width="116" height="70" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
+        <svg key="count-four-2" viewBox="0 0 180 150" className="h-44 w-full">
+          <rect x="56" y="24" width="68" height="102" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
+      ],
+    };
+
+    return (
+      <div className="flex h-full min-h-[20rem] w-full flex-col justify-center px-6 py-6">
+        <div className="mx-auto grid h-full w-full grid-cols-3 gap-6">
+          {answerPattern.map((answer, index) => {
+            const label = ['첫째', '둘째', '셋째'][index];
+            return (
+              <div
+                key={`count-shape-${label}-${answer}`}
+                className="flex min-h-[22rem] flex-col items-center justify-between rounded-2xl border-4 border-[#d1dae8] bg-white px-6 py-7 shadow-[0_8px_16px_rgba(15,23,42,0.1)]"
+              >
+                <div className="text-2xl font-black text-[#1f3f8f]">{label}</div>
+                <div className="flex min-h-[12rem] w-full items-center justify-center">{shapeByAnswer[answer][shapeStyleIndex]}</div>
+                <div className="flex items-center justify-center gap-3">
+                  <span className="grid h-20 w-20 place-items-center rounded-xl border-4 border-slate-300 bg-[#f8fbff] text-2xl font-black text-slate-400 shadow-inner" />
+                  <span className="text-4xl font-black text-slate-950">개</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+  const renderRightAngleNamesProblem = () => {
+    const { vertex, rays } = RIGHT_ANGLE_NAME_PROBLEM_VARIANTS[figureVariant % RIGHT_ANGLE_NAME_PROBLEM_VARIANTS.length];
+
+    return (
+      <div className="h-full min-h-[20rem] w-full px-6 py-5">
+        <svg viewBox="0 0 640 330" className="h-full w-full">
+          {rays.map((ray) => (
+            <g key={ray.label}>
+              <line x1={vertex.x} y1={vertex.y} x2={ray.x} y2={ray.y} stroke="#111827" strokeWidth="3" strokeLinecap="round" />
+              <text x={ray.x + (ray.x < vertex.x ? -18 : 10)} y={ray.y + (ray.y < vertex.y ? -10 : 22)} className="fill-[#102a78] text-2xl font-black">{ray.label}</text>
+            </g>
+          ))}
+          <circle cx={vertex.x} cy={vertex.y} r="4.5" fill="#111827" />
+          <text x={vertex.x + 7} y={vertex.y + 24} className="fill-[#102a78] text-2xl font-black">{vertex.label}</text>
+        </svg>
+      </div>
+    );
+  };
+  const renderClockRightAnglesProblem = () => {
+    const clockOptions = CLOCK_RIGHT_ANGLE_OPTION_VARIANTS[figureVariant % CLOCK_RIGHT_ANGLE_OPTION_VARIANTS.length];
+
+    return (
+      <div className="flex h-full min-h-[20rem] w-full flex-col justify-center px-6 py-6">
+        <div className="grid h-full grid-cols-5 gap-6">
+          {clockOptions.map((hour) => (
+            <div
+              key={hour}
+              className="grid min-h-[18rem] place-items-center rounded-2xl border-4 px-4 py-4 text-center shadow-[0_8px_16px_rgba(15,23,42,0.12)]"
+              style={{ backgroundColor: '#ffffff', borderColor: '#cbd8ea', color: '#0f172a' }}
+            >
+              <span className="whitespace-nowrap text-5xl font-black" style={{ color: '#0f172a' }}>{hour}시</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="flex h-full w-full flex-col gap-3 text-slate-900">
+      <h2 className="shrink-0 text-2xl font-black leading-tight sm:text-3xl">{shapeDraw.title}</h2>
+      <div className="relative min-h-0 flex-1 overflow-hidden rounded-2xl border-2 border-slate-300 bg-[#f8fbff]">
+        {isRightAngleMarkProblem ? (
+          renderRightAngleMarkProblem()
+        ) : isRightAngleCountProblem ? (
+          renderRightAngleCountProblem()
+        ) : isRightAngleNamesProblem ? (
+          renderRightAngleNamesProblem()
+        ) : isClockRightAnglesProblem ? (
+          renderClockRightAnglesProblem()
+        ) : isRightTriangleClassifyProblem || isShapeClassifyProblem ? (
+          renderRightTriangleClassifyProblem()
+        ) : isShapeDefinition ? (
+          <div className="flex h-full min-h-[20rem] w-full items-center justify-center px-8 py-8">
+            <div className="w-full max-w-[58rem] rounded-[2rem] border-4 border-slate-300 bg-white px-8 py-9 text-center shadow-[0_16px_30px_rgba(15,23,42,0.16)]">
+              {shapeDefinitionVariant.lines.map((line, lineIndex) => (
+                <p key={`shape-definition-${lineIndex}`} className={`${lineIndex > 0 ? 'mt-1 ' : ''}whitespace-nowrap text-[2rem] font-black leading-[1.95] text-slate-900`}>
+                  {line.split(/(\[[^\]]+\])/g).map((part, partIndex) => {
+                    const blankMap: Record<string, string> = {
+                      '[네 각]': 'fourRightAngles',
+                      '[직사각형]': 'rectangle',
+                      '[정사각형]': 'square',
+                      '[네 변]': 'fourSides',
+                    };
+                    const target = blankMap[part];
+                    if (target) {
+                      return (
+                        <React.Fragment key={`shape-definition-blank-${lineIndex}-${partIndex}`}>
+                          {definitionBracket(part.slice(1, -1), shapeDefinitionBlankTarget === target)}
+                        </React.Fragment>
+                      );
+                    }
+                    return <span key={`shape-definition-text-${lineIndex}-${partIndex}`}>{part}</span>;
+                  })}
+                </p>
+              ))}
+            </div>
+          </div>
+        ) : isRightTriangleDefinition ? (
+          <div className="flex h-full min-h-[20rem] w-full items-center justify-center px-8 py-8">
+            <div className="w-full max-w-[48rem] rounded-[2rem] border-4 border-slate-300 bg-white px-8 py-10 text-center shadow-[0_16px_30px_rgba(15,23,42,0.16)]">
+              {rightTriangleDefinitionVariant.lines.map((line, lineIndex) => (
+                <p key={`right-triangle-definition-${lineIndex}`} className={`${lineIndex > 0 ? 'mt-2 ' : ''}text-3xl font-black leading-[2.1] text-slate-900`}>
+                  {line.split(/(\[[^\]]+\])/g).map((part, partIndex) => {
+                    if (part === '[한 각]') {
+                      return (
+                        <React.Fragment key={`definition-blank-${lineIndex}-${partIndex}`}>
+                          {definitionBracket('한 각', rightTriangleDefinitionBlankTarget === 'oneAngle')}
+                        </React.Fragment>
+                      );
+                    }
+                    if (part === '[직각삼각형]') {
+                      return (
+                        <React.Fragment key={`definition-blank-${lineIndex}-${partIndex}`}>
+                          {definitionBracket('직각삼각형', rightTriangleDefinitionBlankTarget === 'rightTriangle')}
+                        </React.Fragment>
+                      );
+                    }
+                    return <span key={`definition-text-${lineIndex}-${partIndex}`}>{part}</span>;
+                  })}
+                </p>
+              ))}
+            </div>
+          </div>
+        ) : isRightAngleDefinition ? (
+          <div className="flex h-full min-h-[20rem] w-full items-center justify-center px-8 py-8">
+            <div className="w-full max-w-[42rem] rounded-[2rem] border-4 border-slate-300 bg-white px-8 py-10 text-center shadow-[0_16px_30px_rgba(15,23,42,0.16)]">
+              <p className="text-3xl font-black leading-[2.1] text-slate-900">
+                종이를 [
+                {definitionBracket('반듯', definitionBlankTarget === 'straight')}
+                ]하게 [
+                {definitionBracket('두 번', definitionBlankTarget === 'twice')}
+                ] 접었을 때
+              </p>
+              <p className="mt-2 text-3xl font-black leading-relaxed text-slate-900">
+                생기는 각을 직각이라고 합니다.
+              </p>
+            </div>
+          </div>
+        ) : (
+        <svg viewBox="0 0 640 360" className="h-full min-h-[20rem] w-full">
+          <rect width="640" height="360" fill="#f8fbff" />
+          {Array.from({ length: 11 }, (_, i) => <line key={`gx-${i}`} x1={SHAPE_ORIGIN.x + i * SHAPE_GRID} x2={SHAPE_ORIGIN.x + i * SHAPE_GRID} y1="0" y2="360" stroke="#d7dee9" />)}
+          {Array.from({ length: 6 }, (_, i) => <line key={`gy-${i}`} y1={SHAPE_ORIGIN.y + i * SHAPE_GRID} y2={SHAPE_ORIGIN.y + i * SHAPE_GRID} x1="0" x2="640" stroke="#d7dee9" />)}
+          {Array.from({ length: 66 }, (_, i) => <circle key={`dot-${i}`} cx={SHAPE_ORIGIN.x + (i % 11) * SHAPE_GRID} cy={SHAPE_ORIGIN.y + Math.floor(i / 11) * SHAPE_GRID} r="3" fill="#64748b" opacity="0.45" />)}
+          {isRightAngleAnimation ? (
+            <g>
+              <style>{`
+                .fold-scene {
+                  position: relative;
+                  width: 230px;
+                  height: 230px;
+                  perspective: 1200px;
+                  transform-style: preserve-3d;
+                  filter: drop-shadow(0 10px 9px rgba(15, 23, 42, 0.22));
+                }
+                .fold-sheet,
+                .fold-panel,
+                .fold-face,
+                .fold-final,
+                .fold-line,
+                .fold-ring,
+                .fold-arrow {
+                  position: absolute;
+                  box-sizing: border-box;
+                }
+                .fold-sheet {
+                  left: 0;
+                  top: 0;
+                  width: 230px;
+                  height: 230px;
+                  border: 3.8px solid #94a3b8;
+                  background: #ffffff;
+                  overflow: hidden;
+                  transform-style: preserve-3d;
+                  will-change: opacity;
+                  animation: foldFullSheet 10.4s ease-in-out infinite;
+                }
+                .fold-top-half {
+                  position: absolute;
+                  left: 0;
+                  top: 0;
+                  width: 230px;
+                  height: 115px;
+                  background: #ffffff;
+                }
+                .fold-bottom-half {
+                  left: 0;
+                  top: 115px;
+                  width: 230px;
+                  height: 115px;
+                  transform-origin: 50% 0%;
+                  transform-style: preserve-3d;
+                  will-change: transform;
+                  animation: foldBottomHalf 10.4s cubic-bezier(0.35, 0, 0.18, 1) infinite;
+                }
+                .fold-face {
+                  inset: 0;
+                  backface-visibility: hidden;
+                  -webkit-backface-visibility: hidden;
+                }
+                .fold-bottom-front {
+                  background: #ffffff;
+                  box-shadow: 0 -8px 16px rgba(148, 163, 184, 0.12) inset;
+                }
+                .fold-bottom-back {
+                  background: #dbeafe;
+                  box-shadow: 0 8px 16px rgba(148, 163, 184, 0.14) inset;
+                  transform: rotateX(180deg);
+                }
+                .fold-after-one {
+                  left: 0;
+                  top: 0;
+                  width: 230px;
+                  height: 115px;
+                  border: 3.8px solid #94a3b8;
+                  background: #dbeafe;
+                  overflow: hidden;
+                  transform-style: preserve-3d;
+                  will-change: opacity;
+                  animation: foldAfterOne 10.4s ease-in-out infinite;
+                }
+                .fold-left-half {
+                  left: 0;
+                  top: 0;
+                  width: 115px;
+                  height: 115px;
+                  background: #bfdbfe;
+                }
+                .fold-right-half {
+                  left: 115px;
+                  top: 0;
+                  width: 115px;
+                  height: 115px;
+                  transform-origin: 0% 50%;
+                  transform-style: preserve-3d;
+                  will-change: transform;
+                  animation: foldRightHalf 10.4s cubic-bezier(0.35, 0, 0.18, 1) infinite;
+                }
+                .fold-right-front {
+                  background: #dbeafe;
+                  box-shadow: -8px 0 16px rgba(148, 163, 184, 0.13) inset;
+                }
+                .fold-right-back {
+                  background: #bfdbfe;
+                  box-shadow: 8px 0 16px rgba(148, 163, 184, 0.15) inset;
+                  transform: rotateY(180deg);
+                }
+                .fold-final {
+                  left: 0;
+                  top: 0;
+                  width: 115px;
+                  height: 115px;
+                  border: 3.8px solid #94a3b8;
+                  background: #bfdbfe;
+                  will-change: opacity;
+                  animation: foldFinal 10.4s ease-in-out infinite;
+                }
+                .fold-line {
+                  pointer-events: none;
+                  background: repeating-linear-gradient(90deg, #64748b 0 8px, transparent 8px 15px);
+                  height: 3.8px;
+                  opacity: 0;
+                  z-index: 7;
+                }
+                .fold-line-one {
+                  left: 0;
+                  top: 113px;
+                  width: 230px;
+                  animation: foldLineOne 10.4s ease-in-out infinite;
+                }
+                .fold-line-two {
+                  left: 113px;
+                  top: 0;
+                  width: 3.8px;
+                  height: 115px;
+                  background: repeating-linear-gradient(180deg, #64748b 0 8px, transparent 8px 15px);
+                  animation: foldLineTwo 10.4s ease-in-out infinite;
+                }
+                .fold-ring {
+                  left: 85px;
+                  top: 85px;
+                  width: 60px;
+                  height: 60px;
+                  border: 7px solid #ef4444;
+                  border-radius: 999px;
+                  background: rgba(239, 68, 68, 0.08);
+                  box-shadow: 0 0 0 8px #ffffff;
+                  opacity: 0;
+                  transform: scale(0.72);
+                  animation: foldRing 10.4s ease-in-out infinite;
+                }
+                .fold-arrow {
+                  opacity: 0;
+                  z-index: 6;
+                  pointer-events: none;
+                }
+                .fold-arrow::before,
+                .fold-arrow::after {
+                  content: "";
+                  position: absolute;
+                  display: block;
+                }
+                .fold-arrow-one {
+                  left: 102px;
+                  top: 166px;
+                  width: 26px;
+                  height: 62px;
+                  animation: foldArrowOne 10.4s ease-in-out infinite;
+                }
+                .fold-arrow-one::before {
+                  left: 11px;
+                  top: 12px;
+                  width: 5px;
+                  height: 42px;
+                  border-radius: 999px;
+                  background: #2563eb;
+                }
+                .fold-arrow-one::after {
+                  left: 4px;
+                  top: 6px;
+                  width: 18px;
+                  height: 18px;
+                  border-left: 5px solid #2563eb;
+                  border-top: 5px solid #2563eb;
+                  transform: rotate(45deg);
+                }
+                .fold-arrow-two {
+                  left: 158px;
+                  top: 44px;
+                  width: 62px;
+                  height: 26px;
+                  animation: foldArrowTwo 10.4s ease-in-out infinite;
+                }
+                .fold-arrow-two::before {
+                  left: 8px;
+                  top: 11px;
+                  width: 42px;
+                  height: 5px;
+                  border-radius: 999px;
+                  background: #2563eb;
+                }
+                .fold-arrow-two::after {
+                  left: 2px;
+                  top: 4px;
+                  width: 18px;
+                  height: 18px;
+                  border-left: 5px solid #2563eb;
+                  border-bottom: 5px solid #2563eb;
+                  transform: rotate(45deg);
+                }
+                @keyframes foldFullSheet {
+                  0%, 42% { opacity: 1; }
+                  45%, 100% { opacity: 0; }
+                }
+                @keyframes foldBottomHalf {
+                  0%, 9% { transform: rotateX(0deg); }
+                  16% { transform: rotateX(22deg); }
+                  23% { transform: rotateX(56deg); }
+                  30% { transform: rotateX(102deg); }
+                  37% { transform: rotateX(148deg); }
+                  44%, 100% { transform: rotateX(180deg); }
+                }
+                @keyframes foldAfterOne {
+                  0%, 41% { opacity: 0; }
+                  45%, 72% { opacity: 1; }
+                  75%, 100% { opacity: 0; }
+                }
+                @keyframes foldRightHalf {
+                  0%, 45% { transform: rotateY(0deg); }
+                  51% { transform: rotateY(-22deg); }
+                  57% { transform: rotateY(-56deg); }
+                  63% { transform: rotateY(-102deg); }
+                  69% { transform: rotateY(-148deg); }
+                  74%, 100% { transform: rotateY(-180deg); }
+                }
+                @keyframes foldFinal {
+                  0%, 72% { opacity: 0; }
+                  75%, 96% { opacity: 1; }
+                  100% { opacity: 0; }
+                }
+                @keyframes foldLineOne {
+                  0%, 8% { opacity: 0; }
+                  12%, 42% { opacity: 0.9; }
+                  45%, 100% { opacity: 0; }
+                }
+                @keyframes foldLineTwo {
+                  0%, 45% { opacity: 0; }
+                  48%, 72% { opacity: 0.9; }
+                  75%, 100% { opacity: 0; }
+                }
+                @keyframes foldRing {
+                  0%, 76% { opacity: 0; transform: scale(0.72); }
+                  77.5% { opacity: 1; transform: scale(1.08); }
+                  79%, 90% { opacity: 1; transform: scale(1); }
+                  96%, 100% { opacity: 0; transform: scale(0.95); }
+                }
+                @keyframes foldArrowOne {
+                  0%, 9% { opacity: 0; transform: translateY(10px); }
+                  13%, 40% { opacity: 0.9; transform: translateY(-10px); }
+                  44%, 100% { opacity: 0; transform: translateY(-18px); }
+                }
+                @keyframes foldArrowTwo {
+                  0%, 46% { opacity: 0; transform: translateX(10px); }
+                  50%, 70% { opacity: 0.9; transform: translateX(-10px); }
+                  74%, 100% { opacity: 0; transform: translateX(-18px); }
+                }
+              `}</style>
+              <foreignObject x="205" y="64" width="230" height="230" style={{ overflow: 'visible' }}>
+                <div xmlns="http://www.w3.org/1999/xhtml" className="fold-scene">
+                  <div className="fold-sheet">
+                    <div className="fold-top-half" />
+                    <div className="fold-panel fold-bottom-half">
+                      <div className="fold-face fold-bottom-front" />
+                      <div className="fold-face fold-bottom-back" />
+                    </div>
+                    <div className="fold-line fold-line-one" />
+                    <div className="fold-arrow fold-arrow-one" />
+                  </div>
+                  <div className="fold-panel fold-after-one">
+                    <div className="fold-panel fold-left-half" />
+                    <div className="fold-panel fold-right-half">
+                      <div className="fold-face fold-right-front" />
+                      <div className="fold-face fold-right-back" />
+                    </div>
+                    <div className="fold-line fold-line-two" />
+                    <div className="fold-arrow fold-arrow-two" />
+                  </div>
+                  <div className="fold-final" />
+                  <div className="fold-ring" />
+                </div>
+              </foreignObject>
+            </g>
+          ) : isLineFigure ? (
+            <g>
+              <line x1={ends.a.x} y1={ends.a.y} x2={ends.b.x} y2={ends.b.y} stroke="#f97316" strokeWidth="4.2" strokeLinecap="round" />
+              <ShapePointView point={givenLine.start} />
+              <ShapePointView point={givenLine.end} />
+            </g>
+          ) : isAngleFigure ? (
+            <g>
+              {givenAngleArms.map((line, index) => {
+                const rayEnds = lineEnds(line);
+                return <line key={`angle-arm-${index}`} x1={rayEnds.a.x} y1={rayEnds.a.y} x2={rayEnds.b.x} y2={rayEnds.b.y} stroke="#f97316" strokeWidth="4.2" strokeLinecap="round" />;
+              })}
+              <ShapePointView point={givenAngleArms[0].end} />
+              <ShapePointView point={givenAngleVertex} />
+              <ShapePointView point={givenAngleArms[1].end} />
+            </g>
+          ) : isRightAngleFigure ? (
+            <g>
+              {givenRightAngleArms.map((line, index) => {
+                const rayEnds = lineEnds(line);
+                return <line key={`right-angle-arm-${index}`} x1={rayEnds.a.x} y1={rayEnds.a.y} x2={rayEnds.b.x} y2={rayEnds.b.y} stroke="#f97316" strokeWidth="4.2" strokeLinecap="round" />;
+              })}
+              {renderStaticRightAngleMarker(givenRightAngleVertex, givenRightAngleArms[0].end, givenRightAngleArms[1].end)}
+              <ShapePointView point={givenRightAngleArms[0].end} />
+              <ShapePointView point={givenRightAngleVertex} />
+              <ShapePointView point={givenRightAngleArms[1].end} />
+            </g>
+          ) : (
+            <g>
+              <polygon points={givenPolygon.map((point) => `${point.x},${point.y}`).join(' ')} fill="#bef26477" stroke="#ef5da8" strokeWidth="4" />
+              {givenPolygon.map((point) => <g key={point.label}><ShapePointView point={point} /></g>)}
+            </g>
+          )}
+        </svg>
+        )}
       </div>
     </div>
   );
@@ -11869,6 +14016,7 @@ export default function App() {
   const countdownDangerPlayedRef = useRef(false);
   const zeroTensBorrowCoachmarkLevelsRef = useRef(new Set<number>());
   const unitSelectionChallengeLevelsRef = useRef(new Set<number>());
+  const unit1ProblemSequenceRef = useRef<Record<number, number>>({});
   const unit3ProblemSequenceRef = useRef<Record<number, number>>({});
   const unit3Level12RoundTemplateOrderRef = useRef<Level12TemplateId[] | null>(null);
   const unit3Level12PreviousTemplateOrderRef = useRef<Level12TemplateId[]>([]);
@@ -11892,6 +14040,8 @@ export default function App() {
   const [problem, setProblem] = useState<Problem>(() => getProblemForTurn(DEFAULT_LEARNING_UNIT_ID, 1, 100));
   const [inputValue, setInputValue] = useState('');
   const [unitInputValue, setUnitInputValue] = useState('');
+  const [shapeDrawNotice, setShapeDrawNotice] = useState('');
+  const [isRightAngleFoldAnswerEnabled, setIsRightAngleFoldAnswerEnabled] = useState(true);
   const [clockAnswerInput, setClockAnswerInput] = useState<ClockReadingAnswerInput>({ hours: '', minutes: '', seconds: '' });
   const [isUnitMenuOpen, setIsUnitMenuOpen] = useState(false);
   const [builderSlotValues, setBuilderSlotValues] = useState<Record<string, string>>({});
@@ -12190,6 +14340,16 @@ export default function App() {
   };
 
   const getNextProblemForTurn = (targetUnitId: LearningUnitId, targetLevel: number, targetOpponentHP: number) => {
+    if (targetUnitId === 'unit1') {
+      const nextProblemSequence =
+        targetOpponentHP === 100
+          ? 1
+          : (unit1ProblemSequenceRef.current[targetLevel] ?? 1) + 1;
+
+      unit1ProblemSequenceRef.current[targetLevel] = nextProblemSequence;
+      return getProblemForTurn(targetUnitId, targetLevel, targetOpponentHP, nextProblemSequence);
+    }
+
     if (targetUnitId !== 'unit3') {
       return getProblemForTurn(targetUnitId, targetLevel, targetOpponentHP);
     }
@@ -12227,8 +14387,10 @@ export default function App() {
     } = {},
   ) => {
     const nextOpponentHP = options.opponentHP ?? opponentHP;
+    setInputValue('');
     setUnitInputValue('');
     setClockAnswerInput({ hours: '', minutes: '', seconds: '' });
+    setShapeDrawNotice('');
     setIsUnitMenuOpen(false);
 
     if (activeLearningUnitId !== 'unit2') {
@@ -12554,7 +14716,17 @@ export default function App() {
         ? builderEvaluation.text
         : null
       : problem.text;
-  const normalizedInputValue = inputValue.trim();
+  const isInternalShapeAnswerToken =
+    inputValue === SHAPE_CLASSIFY_CORRECT_TOKEN ||
+    inputValue === SHAPE_CLASSIFY_INCORRECT_TOKEN ||
+    inputValue === SHAPE_DRAW_MIXED_TOKEN;
+  const isCurrentProblemShapeDragClassify =
+    problem.kind === 'shapeDraw' &&
+    (problem.shapeDraw?.mode === 'rightTriangle' || problem.shapeDraw?.mode === 'rectangle' || problem.shapeDraw?.mode === 'square') &&
+    problem.shapeDraw.task === 'identify' &&
+    (problem.shapeDraw.identifyVariant === 'rightTriangleClassify' || problem.shapeDraw.identifyVariant === 'shapeClassify');
+  const displayedInputValue = isInternalShapeAnswerToken && !isCurrentProblemShapeDragClassify ? '' : inputValue;
+  const normalizedInputValue = displayedInputValue.trim();
   const normalizedUnitInputValue = normalizeAnswerUnit(unitInputValue);
   const normalizedSecretCodeInput = normalizeSecretCode(secretCodeInput);
   const parsedInputAnswer = Number.parseInt(normalizedInputValue, 10);
@@ -12572,6 +14744,46 @@ export default function App() {
         ? problem.timeAddition.editableParts
         : [];
   const isStructuredTimeAnswerProblem = isClockReadingProblem || isTimeAdditionProblem;
+  const isShapeReadProblem = problem.kind === 'shapeDraw' && problem.shapeDraw?.task === 'identify';
+  const isRightAngleFoldIdentifyProblem =
+    problem.kind === 'shapeDraw' &&
+    problem.shapeDraw?.mode === 'rightAngle' &&
+    problem.shapeDraw.task === 'identify' &&
+    problem.shapeDraw.identifyVariant === 'fold';
+  const isShapeDragClassifyProblem =
+    problem.kind === 'shapeDraw' &&
+    (problem.shapeDraw?.mode === 'rightTriangle' || problem.shapeDraw?.mode === 'rectangle' || problem.shapeDraw?.mode === 'square') &&
+    problem.shapeDraw.task === 'identify' &&
+    (problem.shapeDraw.identifyVariant === 'rightTriangleClassify' || problem.shapeDraw.identifyVariant === 'shapeClassify');
+  const shapeReadInputPlaceholder = (() => {
+    if (!isShapeReadProblem) {
+      return '정답 입력';
+    }
+
+    const identifyVariant = problem.shapeDraw?.identifyVariant;
+    if (identifyVariant === 'definition') {
+      return '빈칸 답 쓰기';
+    }
+    if (identifyVariant === 'rightAngleMark') {
+      return '개수 쓰기';
+    }
+    if (identifyVariant === 'rightAngleCount') {
+      return '차례대로 개수 쓰기';
+    }
+    if (identifyVariant === 'rightAngleNames') {
+      return '각 이름 쓰기';
+    }
+    if (identifyVariant === 'clockRightAngles') {
+      return '시각 쓰기';
+    }
+    if (identifyVariant === 'rightTriangleClassify' || identifyVariant === 'shapeClassify') {
+      return '카드 분류하기';
+    }
+    if (identifyVariant === 'rightTriangleDefinition' || identifyVariant === 'shapeDefinition') {
+      return '빈칸 답 쓰기';
+    }
+    return '이름 쓰기';
+  })();
   const hasValidStructuredTimeInput =
     isStructuredTimeAnswerProblem &&
     editableClockParts.every((part) => {
@@ -12598,9 +14810,12 @@ export default function App() {
     hasValidUnitInput;
   const hasSecretCodeInput = normalizedSecretCodeInput.length > 0;
   const usesTextAnswerInput = currentDistanceWorksheetPrompt?.kind === 'place';
+  const isBattleAnswerInputDisabled = isRightAngleFoldIdentifyProblem && !isRightAngleFoldAnswerEnabled;
   const canAttemptAttack =
     problem.kind === 'shapeDraw'
-      ? true
+      ? problem.shapeDraw?.task === 'identify'
+        ? inputValue.length > 0 && (!isRightAngleFoldIdentifyProblem || isRightAngleFoldAnswerEnabled)
+        : true
       : isStructuredTimeAnswerProblem
       ? hasValidStructuredTimeInput
       : problem.kind === 'distanceWorksheet'
@@ -12691,6 +14906,49 @@ export default function App() {
   useEffect(() => {
     setShowHint(isHintForced);
   }, [problem, isHintForced]);
+
+  useEffect(() => {
+    setShapeDrawNotice('');
+  }, [problem]);
+
+  useEffect(() => {
+    if (!isRightAngleFoldIdentifyProblem) {
+      setIsRightAngleFoldAnswerEnabled(true);
+      return;
+    }
+
+    setIsRightAngleFoldAnswerEnabled(false);
+    const enableAnswerTimeoutId = window.setTimeout(() => {
+      setIsRightAngleFoldAnswerEnabled(true);
+    }, RIGHT_ANGLE_FOLD_ANSWER_ENABLE_DELAY_MS);
+
+    return () => {
+      window.clearTimeout(enableAnswerTimeoutId);
+    };
+  }, [isRightAngleFoldIdentifyProblem, problem]);
+
+  useEffect(() => {
+    if (
+      inputValue !== SHAPE_DRAW_MIXED_TOKEN &&
+      inputValue !== SHAPE_CLASSIFY_INCORRECT_TOKEN
+    ) {
+      setShapeDrawNotice('');
+    }
+  }, [inputValue]);
+
+  useEffect(() => {
+    if (!shapeDrawNotice) {
+      return;
+    }
+
+    const noticeTimeoutId = window.setTimeout(() => {
+      setShapeDrawNotice('');
+    }, 3000);
+
+    return () => {
+      window.clearTimeout(noticeTimeoutId);
+    };
+  }, [shapeDrawNotice]);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -13098,10 +15356,17 @@ export default function App() {
         });
         scheduleBattleTimeout(() => setIsOpponentHit(false), HIT_POSE_DURATION_MS, runId);
         
+        const currentUnit1ProblemSequence = unit1ProblemSequenceRef.current[level] ?? 1;
         const currentUnit3ProblemSequence = unit3ProblemSequenceRef.current[level] ?? 1;
-        const newOpponentHP = isUnit3FixedTimeSequenceLevel(activeLearningUnitId, level)
-          ? getUnit3FixedTimeOpponentHPAfterCorrect(currentUnit3ProblemSequence)
-          : Math.max(0, opponentHP - regularAttackDamage);
+        const unit1ProblemCount = UNIT1_PROBLEM_COUNTS[level] ?? 1;
+        const newOpponentHP =
+          activeLearningUnitId === 'unit1'
+            ? currentUnit1ProblemSequence >= unit1ProblemCount
+              ? 0
+              : Math.max(1, Math.round(100 - (currentUnit1ProblemSequence / unit1ProblemCount) * 100))
+            : isUnit3FixedTimeSequenceLevel(activeLearningUnitId, level)
+            ? getUnit3FixedTimeOpponentHPAfterCorrect(currentUnit3ProblemSequence)
+            : Math.max(0, opponentHP - regularAttackDamage);
         setOpponentHP(newOpponentHP);
         updateMessage('공격 성공! 데미지를 입혔다!');
         
@@ -13172,6 +15437,59 @@ export default function App() {
 
   const checkAnswer = () => {
     if (problem.kind === 'shapeDraw' && problem.shapeDraw) {
+      if (problem.shapeDraw.task === 'identify') {
+        if (isRightAngleFoldIdentifyProblem && !isRightAngleFoldAnswerEnabled) {
+          playSound('ui');
+          setShapeDrawNotice('종이가 다 접힌 뒤에 답을 써요.');
+          return;
+        }
+        if (isShapeDragClassifyProblem) {
+          if (!inputValue) {
+            playSound('ui');
+            setShapeDrawNotice('모든 카드를 알맞은 칸에 옮긴 뒤 공격해요.');
+            return;
+          }
+          if (inputValue === SHAPE_CLASSIFY_CORRECT_TOKEN) {
+            playSound('submit', {
+              gainMultiplier: 0.9,
+              detune: 10,
+            });
+            setShapeDrawNotice('');
+            resolveProblemResult(true);
+            return;
+          }
+          playSound('submit', {
+            gainMultiplier: 0.9,
+            detune: 10,
+          });
+          setShapeDrawNotice('');
+          resolveProblemResult(false);
+          return;
+        }
+        if (!normalizedInputValue) {
+          playSound('ui');
+          setShapeDrawNotice(`${shapeReadInputPlaceholder} 후 공격해요!`);
+          return;
+        }
+        if (isShapeReadAnswerMissingPointNames(problem.shapeDraw.mode, displayedInputValue)) {
+          playSound('ui');
+          setShapeDrawNotice('점 이름까지 함께 써 보세요.');
+          return;
+        }
+        playSound('submit', {
+          gainMultiplier: 0.9,
+          detune: 10,
+        });
+        resolveProblemResult(isShapeReadAnswerCorrect(displayedInputValue, problem.shapeDraw.answerToken));
+        return;
+      }
+      if (inputValue === SHAPE_DRAW_MIXED_TOKEN) {
+        playSound('ui');
+        setShapeDrawNotice('다른 것이 섞였어요. 필요한 것만 남겨요.');
+        updateMessage('다른 것이 섞였어요. 필요한 것만 남겨요.');
+        return;
+      }
+      setShapeDrawNotice('');
       playSound('submit', {
         gainMultiplier: 0.9,
         detune: 10,
@@ -13371,6 +15689,8 @@ export default function App() {
     resetDeveloperProblemHistory();
     zeroTensBorrowCoachmarkLevelsRef.current.clear();
     unitSelectionChallengeLevelsRef.current.clear();
+    resetUnit1ProblemOrders();
+    unit1ProblemSequenceRef.current = {};
     unit3ProblemSequenceRef.current = {};
     unit3Level12RoundTemplateOrderRef.current = null;
     setIsEstimation(false);
@@ -13404,6 +15724,8 @@ export default function App() {
     resetDeveloperProblemHistory();
     zeroTensBorrowCoachmarkLevelsRef.current.clear();
     unitSelectionChallengeLevelsRef.current.clear();
+    resetUnit1ProblemOrders();
+    unit1ProblemSequenceRef.current = {};
     unit3ProblemSequenceRef.current = {};
     unit3Level12RoundTemplateOrderRef.current = null;
     setIsEstimation(false);
@@ -14240,12 +16562,29 @@ export default function App() {
                 }`}
               >
                 {problem.kind === 'shapeDraw' && problem.shapeDraw ? (
-                  <ShapeDrawProblemCardV2
-                    shapeDraw={problem.shapeDraw}
-                    answerValue={inputValue}
-                    onAnswerChange={setInputValue}
-                    onSubmit={checkAnswer}
-                  />
+                  <div className="flex h-full min-h-0 w-full flex-col gap-3">
+                    {shapeDrawNotice ? (
+                      <div className="shrink-0 rounded-2xl border-2 border-yellow-300 bg-slate-950/95 px-4 py-2 text-center text-lg font-black text-white shadow-sm">
+                        {shapeDrawNotice}
+                      </div>
+                    ) : null}
+                    <div className="min-h-0 flex-1">
+                      {problem.shapeDraw.task === 'identify' ? (
+                        <ShapeIdentifyProblemCard
+                          shapeDraw={problem.shapeDraw}
+                          onAnswerChange={setInputValue}
+                        />
+                      ) : (
+                        <ShapeDrawProblemCardV2
+                          shapeDraw={problem.shapeDraw}
+                          answerValue={inputValue}
+                          playAnimationSound={playSound}
+                          onAnswerChange={setInputValue}
+                          onSubmit={checkAnswer}
+                        />
+                      )}
+                    </div>
+                  </div>
                 ) : problem.kind === 'distanceWorksheet' && problem.distanceWorksheet ? (
                     <DistanceWorksheetProblemCard
                       distanceWorksheet={problem.distanceWorksheet}
@@ -14504,7 +16843,7 @@ export default function App() {
             )}
             </div>
 
-            {!isSpecialChallengeActive && problem.kind !== 'shapeDraw' && (
+            {!isSpecialChallengeActive && (problem.kind !== 'shapeDraw' || isShapeReadProblem) && (
               <div className={`shrink-0 flex flex-col ${battleInputResponsiveClass}`}>
                 {usesBattleStructuredTimeInput ? (
                   <BattleStructuredTimeInput
@@ -14515,7 +16854,7 @@ export default function App() {
                     canSubmit={canAttemptAttack}
                     condensed={isCompactBattleViewport}
                   />
-                ) : isStructuredTimeAnswerProblem ? (
+                ) : isStructuredTimeAnswerProblem || isShapeDragClassifyProblem ? (
                   <button
                     type="button"
                     disabled={!canAttemptAttack}
@@ -14538,11 +16877,19 @@ export default function App() {
                           : 'gap-3 py-2'
                     }`}>
                       <input
-                        type={usesTextAnswerInput ? 'text' : 'number'}
-                        inputMode={usesTextAnswerInput ? 'text' : 'numeric'}
-                        value={inputValue}
-                        onChange={e => setInputValue(e.target.value)}
+                        type={usesTextAnswerInput || isShapeReadProblem ? 'text' : 'number'}
+                        inputMode={usesTextAnswerInput || isShapeReadProblem ? 'text' : 'numeric'}
+                        value={displayedInputValue}
+                        disabled={isBattleAnswerInputDisabled}
+                        onChange={e => {
+                          if (isBattleAnswerInputDisabled) return;
+                          setInputValue(e.target.value);
+                        }}
                         onKeyDown={e => {
+                          if (isBattleAnswerInputDisabled) {
+                            e.preventDefault();
+                            return;
+                          }
                           if (e.key === 'Enter' && !e.ctrlKey && !e.altKey) {
                             e.preventDefault();
                             checkAnswer();
@@ -14554,10 +16901,14 @@ export default function App() {
                             : isCompactBattleViewport
                               ? 'py-1.5 text-xl sm:text-2xl'
                               : 'py-2 text-2xl sm:text-3xl'
-                        }`}
+                        } disabled:cursor-not-allowed disabled:text-slate-400`}
                         placeholder={
-                          problem.kind === 'builder'
+                          isBattleAnswerInputDisabled
+                            ? '종이가 접히는 중'
+                            : problem.kind === 'builder'
                             ? '답'
+                            : isShapeReadProblem
+                              ? shapeReadInputPlaceholder
                             : problem.kind === 'distanceWorksheet'
                               ? usesTextAnswerInput
                                 ? '장소 이름 입력'
