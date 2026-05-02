@@ -3,7 +3,7 @@ import { Sword, Heart, RotateCcw, Play, Sparkles, Star, ChevronDown, Check, Hist
 import { motion, AnimatePresence } from 'motion/react';
 import { VisualCalculator, type VisualControlSound } from './components/VisualCalculator';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import startHeroImage from './assets/intro-math-game.jpeg';
+import startHeroImage from './assets/start-hero-math-adventure.png';
 import stage1DefeatSceneImage from './assets/stage1-defeat-scene-cutout.png';
 import stage1ChurusigiDefeatSceneImage from './assets/stage1-churusigi-defeat-scene.jpeg';
 import stage2DefeatSceneImage from './assets/stage2-defeat-scene.jpeg';
@@ -405,7 +405,7 @@ interface ShapeDrawProblemData {
   title: string;
   answerToken: string;
   identifyVariant?: 'fold' | 'definition' | 'rightAngleMark' | 'rightAngleCount' | 'rightAngleNames' | 'clockRightAngles' | 'rightTriangleClassify' | 'rightTriangleDefinition' | 'shapeClassify' | 'shapeDefinition';
-  drawVariant?: 'point' | 'ray' | 'twoRightTriangles' | 'twoPolygons' | 'mixedPolygons' | 'lineCompletion' | 'gacha';
+  drawVariant?: 'point' | 'ray' | 'twoRightTriangles' | 'threeRightTriangles' | 'twoPolygons' | 'threePolygons' | 'mixedPolygons' | 'lineCompletion' | 'gacha';
   figureVariant?: number;
 }
 
@@ -7649,9 +7649,9 @@ const UNIT1_PROBLEM_COUNTS: Record<number, number> = {
   2: 8,
   3: 8,
   4: 8,
-  5: 8,
-  6: 8,
-  7: 8,
+  5: 4,
+  6: 4,
+  7: 4,
   8: 8,
   9: 8,
 };
@@ -7718,6 +7718,13 @@ function arrangeUnit1EntriesForRound(level: number, entries: Unit1ShapeProblemEn
 
   previousUnit1EntrySignaturesByLevel.set(level, arrangedEntries.map(getUnit1EntrySignature));
   return arrangedEntries;
+}
+
+function arrangeUnit1EntriesWithFixedFirstForRound(level: number, firstEntry: Unit1ShapeProblemEntry, restEntries: Unit1ShapeProblemEntry[]) {
+  const entries = [firstEntry, ...shuffleValues(restEntries)];
+
+  previousUnit1EntrySignaturesByLevel.set(level, entries.map(getUnit1EntrySignature));
+  return entries;
 }
 
 function getUnit1Level1ProblemEntries() {
@@ -7831,46 +7838,44 @@ function getUnit1Level5ProblemEntries() {
     '한 점을 찍어 선분과 함께 직각삼각형이 되게 해 보세요.',
   ];
   const polygonTitles = [
-    '크기가 다른 직각삼각형 2개를 그려 보세요.',
-    '삼각형 도구로 서로 다른 크기의 직각삼각형 2개를 만들어 보세요.',
-    '크기가 다른 직각삼각형을 두 개 그려 보세요.',
+    '모양이 다른 직각삼각형 2개를 그려 보세요.',
+    '삼각형 도구로 서로 다른 모양의 직각삼각형 2개를 만들어 보세요.',
+    '모양이 다른 직각삼각형을 두 개 그려 보세요.',
   ];
-  const entries = arrangeUnit1EntriesForRound(5, [
+  const definitionEntry: Unit1ShapeProblemEntry = Math.random() < 0.5
+    ? ['rightTriangle', '빈칸에 알맞은 말을 써 보세요.', 'identify', 'rightTriangleDefinition', definitionVariant]
+    : [
+        'rightTriangle',
+        '직각삼각형의 뜻에 맞게 빈칸을 채워 보세요.',
+        'identify',
+        'rightTriangleDefinition',
+        (definitionVariant + 1) % RIGHT_TRIANGLE_DEFINITION_VARIANTS.length,
+      ];
+  const pointEntry: Unit1ShapeProblemEntry = Math.random() < 0.5
+    ? ['rightTriangle', pointTitles[pointCompletionVariant % pointTitles.length], 'draw', undefined, pointCompletionVariant, 'point']
+    : [
+        'rightTriangle',
+        pointTitles[(pointCompletionVariant + 1) % pointTitles.length],
+        'draw',
+        undefined,
+        (pointCompletionVariant + 3) % 8,
+        'point',
+      ];
+  const polygonEntry: Unit1ShapeProblemEntry = Math.random() < 0.5
+    ? ['rightTriangle', polygonTitles[twoTriangleVariant % polygonTitles.length], 'draw', undefined, twoTriangleVariant, 'twoRightTriangles']
+    : [
+        'rightTriangle',
+        polygonTitles[(twoTriangleVariant + 1) % polygonTitles.length],
+        'draw',
+        undefined,
+        (twoTriangleVariant + 2) % 6,
+        'twoRightTriangles',
+      ];
+  const entries = arrangeUnit1EntriesWithFixedFirstForRound(
+    5,
     ['rightTriangle', classifyTitles[classifyVariant % classifyTitles.length], 'identify', 'rightTriangleClassify', classifyVariant],
-    [
-      'rightTriangle',
-      classifyTitles[(classifyVariant + 1) % classifyTitles.length],
-      'identify',
-      'rightTriangleClassify',
-      (classifyVariant + 1) % RIGHT_TRIANGLE_CLASSIFY_ANSWER_TOKENS.length,
-    ],
-    ['rightTriangle', '빈칸에 알맞은 말을 써 보세요.', 'identify', 'rightTriangleDefinition', definitionVariant],
-    [
-      'rightTriangle',
-      '직각삼각형의 뜻에 맞게 빈칸을 채워 보세요.',
-      'identify',
-      'rightTriangleDefinition',
-      (definitionVariant + 1) % RIGHT_TRIANGLE_DEFINITION_VARIANTS.length,
-    ],
-    ['rightTriangle', pointTitles[pointCompletionVariant % pointTitles.length], 'draw', undefined, pointCompletionVariant, 'point'],
-    [
-      'rightTriangle',
-      pointTitles[(pointCompletionVariant + 1) % pointTitles.length],
-      'draw',
-      undefined,
-      (pointCompletionVariant + 3) % 8,
-      'point',
-    ],
-    ['rightTriangle', polygonTitles[twoTriangleVariant % polygonTitles.length], 'draw', undefined, twoTriangleVariant, 'twoRightTriangles'],
-    [
-      'rightTriangle',
-      polygonTitles[(twoTriangleVariant + 1) % polygonTitles.length],
-      'draw',
-      undefined,
-      (twoTriangleVariant + 2) % 6,
-      'twoRightTriangles',
-    ],
-  ]);
+    [definitionEntry, pointEntry, polygonEntry],
+  );
 
   unit1ProblemOrderCache.set(5, entries);
   return entries;
@@ -7886,42 +7891,45 @@ function getUnit1Level6ProblemEntries() {
   const definitionVariant = randomIntInRange(0, SHAPE_DEFINITION_VARIANTS.rectangle.length - 1);
   const pointCompletionVariant = randomIntInRange(0, 5);
   const twoRectangleVariant = randomIntInRange(0, 5);
-  const entries = arrangeUnit1EntriesForRound(6, [
-    ['rectangle', '직각의 수에 따라 사각형 카드를 분류해 보세요.', 'identify', 'shapeClassify', classifyVariant],
-    [
-      'rectangle',
-      '직사각형인 도형과 아닌 도형을 나누어 보세요.',
-      'identify',
-      'shapeClassify',
-      (classifyVariant + 1) % RECTANGLE_CLASSIFY_VARIANTS.length,
-    ],
-    ['rectangle', '빈칸에 알맞은 말을 써 보세요.', 'identify', 'shapeDefinition', definitionVariant],
-    [
-      'rectangle',
-      '직사각형의 성질을 생각하며 빈칸을 채워 보세요.',
-      'identify',
-      'shapeDefinition',
-      (definitionVariant + 1) % SHAPE_DEFINITION_VARIANTS.rectangle.length,
-    ],
-    ['rectangle', '나머지 한 점을 찍어 직사각형을 완성해 보세요.', 'draw', undefined, pointCompletionVariant, 'point'],
-    [
-      'rectangle',
-      '세 점을 보고 알맞은 곳에 한 점을 찍어 직사각형을 만들어 보세요.',
-      'draw',
-      undefined,
-      (pointCompletionVariant + 2) % 6,
-      'point',
-    ],
-    ['rectangle', '크기가 다른 직사각형 2개를 그려 보세요.', 'draw', undefined, twoRectangleVariant, 'twoPolygons'],
-    [
-      'rectangle',
-      '서로 다른 크기의 직사각형 두 개를 완성해 보세요.',
-      'draw',
-      undefined,
-      (twoRectangleVariant + 3) % 6,
-      'twoPolygons',
-    ],
-  ]);
+  const classifyEntry: Unit1ShapeProblemEntry = Math.random() < 0.5
+    ? ['rectangle', '직각의 수에 따라 사각형 카드를 분류해 보세요.', 'identify', 'shapeClassify', classifyVariant]
+    : [
+        'rectangle',
+        '직사각형인 도형과 아닌 도형을 나누어 보세요.',
+        'identify',
+        'shapeClassify',
+        (classifyVariant + 1) % RECTANGLE_CLASSIFY_VARIANTS.length,
+      ];
+  const definitionEntry: Unit1ShapeProblemEntry = Math.random() < 0.5
+    ? ['rectangle', '빈칸에 알맞은 말을 써 보세요.', 'identify', 'shapeDefinition', definitionVariant]
+    : [
+        'rectangle',
+        '직사각형의 성질을 생각하며 빈칸을 채워 보세요.',
+        'identify',
+        'shapeDefinition',
+        (definitionVariant + 1) % SHAPE_DEFINITION_VARIANTS.rectangle.length,
+      ];
+  const pointEntry: Unit1ShapeProblemEntry = Math.random() < 0.5
+    ? ['rectangle', '나머지 한 점을 찍어 직사각형을 완성해 보세요.', 'draw', undefined, pointCompletionVariant, 'point']
+    : [
+        'rectangle',
+        '세 점을 보고 알맞은 곳에 한 점을 찍어 직사각형을 만들어 보세요.',
+        'draw',
+        undefined,
+        (pointCompletionVariant + 2) % 6,
+        'point',
+      ];
+  const polygonEntry: Unit1ShapeProblemEntry = Math.random() < 0.5
+    ? ['rectangle', '모양이나 크기가 다른 직사각형 2개를 그려 보세요.', 'draw', undefined, twoRectangleVariant, 'twoPolygons']
+    : [
+        'rectangle',
+        '서로 다른 모양이나 크기의 직사각형 두 개를 완성해 보세요.',
+        'draw',
+        undefined,
+        (twoRectangleVariant + 3) % 6,
+        'twoPolygons',
+      ];
+  const entries = arrangeUnit1EntriesWithFixedFirstForRound(6, classifyEntry, [definitionEntry, pointEntry, polygonEntry]);
 
   unit1ProblemOrderCache.set(6, entries);
   return entries;
@@ -7937,42 +7945,45 @@ function getUnit1Level7ProblemEntries() {
   const definitionVariant = randomIntInRange(0, SHAPE_DEFINITION_VARIANTS.square.length - 1);
   const pointCompletionVariant = randomIntInRange(0, 5);
   const twoSquareVariant = randomIntInRange(0, 5);
-  const entries = arrangeUnit1EntriesForRound(7, [
-    ['square', '도형 카드를 알맞은 칸에 넣어 정사각형을 분류해 보세요.', 'identify', 'shapeClassify', classifyVariant],
-    [
-      'square',
-      '정사각형인 도형과 아닌 도형을 나누어 보세요.',
-      'identify',
-      'shapeClassify',
-      (classifyVariant + 1) % SQUARE_CLASSIFY_VARIANTS.length,
-    ],
-    ['square', '빈칸에 알맞은 말을 써 보세요.', 'identify', 'shapeDefinition', definitionVariant],
-    [
-      'square',
-      '정사각형의 성질을 생각하며 빈칸을 채워 보세요.',
-      'identify',
-      'shapeDefinition',
-      (definitionVariant + 1) % SHAPE_DEFINITION_VARIANTS.square.length,
-    ],
-    ['square', '나머지 한 점을 찍어 정사각형을 완성해 보세요.', 'draw', undefined, pointCompletionVariant, 'point'],
-    [
-      'square',
-      '세 점을 보고 알맞은 곳에 한 점을 찍어 정사각형을 만들어 보세요.',
-      'draw',
-      undefined,
-      (pointCompletionVariant + 2) % 6,
-      'point',
-    ],
-    ['square', '크기가 다른 정사각형 2개를 그려 보세요.', 'draw', undefined, twoSquareVariant, 'twoPolygons'],
-    [
-      'square',
-      '서로 다른 크기의 정사각형 두 개를 완성해 보세요.',
-      'draw',
-      undefined,
-      (twoSquareVariant + 3) % 6,
-      'twoPolygons',
-    ],
-  ]);
+  const classifyEntry: Unit1ShapeProblemEntry = Math.random() < 0.5
+    ? ['square', '도형 카드를 알맞은 칸에 넣어 정사각형을 분류해 보세요.', 'identify', 'shapeClassify', classifyVariant]
+    : [
+        'square',
+        '정사각형인 도형과 아닌 도형을 나누어 보세요.',
+        'identify',
+        'shapeClassify',
+        (classifyVariant + 1) % SQUARE_CLASSIFY_VARIANTS.length,
+      ];
+  const definitionEntry: Unit1ShapeProblemEntry = Math.random() < 0.5
+    ? ['square', '빈칸에 알맞은 말을 써 보세요.', 'identify', 'shapeDefinition', definitionVariant]
+    : [
+        'square',
+        '정사각형의 성질을 생각하며 빈칸을 채워 보세요.',
+        'identify',
+        'shapeDefinition',
+        (definitionVariant + 1) % SHAPE_DEFINITION_VARIANTS.square.length,
+      ];
+  const pointEntry: Unit1ShapeProblemEntry = Math.random() < 0.5
+    ? ['square', '나머지 한 점을 찍어 정사각형을 완성해 보세요.', 'draw', undefined, pointCompletionVariant, 'point']
+    : [
+        'square',
+        '세 점을 보고 알맞은 곳에 한 점을 찍어 정사각형을 만들어 보세요.',
+        'draw',
+        undefined,
+        (pointCompletionVariant + 2) % 6,
+        'point',
+      ];
+  const polygonEntry: Unit1ShapeProblemEntry = Math.random() < 0.5
+    ? ['square', '모양이나 크기가 다른 정사각형 2개를 그려 보세요.', 'draw', undefined, twoSquareVariant, 'twoPolygons']
+    : [
+        'square',
+        '서로 다른 모양이나 크기의 정사각형 두 개를 완성해 보세요.',
+        'draw',
+        undefined,
+        (twoSquareVariant + 3) % 6,
+        'twoPolygons',
+      ];
+  const entries = arrangeUnit1EntriesWithFixedFirstForRound(7, classifyEntry, [definitionEntry, pointEntry, polygonEntry]);
 
   unit1ProblemOrderCache.set(7, entries);
   return entries;
@@ -7984,27 +7995,31 @@ function getUnit1Level8ProblemEntries() {
     return cachedEntries;
   }
 
-  const titles = shuffleValues([
-    '모양과 크기가 다른 평면도형을 2개 이상 그려 보세요.',
-    '서로 다른 모양과 크기의 평면도형 2개 이상을 만들어 보세요.',
-    '도형 도구로 모양도 크기도 다른 평면도형을 2개 이상 그려 보세요.',
-    '모양과 크기가 모두 다른 평면도형을 두 개 이상 완성해 보세요.',
-    '여러 가지 평면도형 중 서로 다른 도형을 2개 이상 그려 보세요.',
-    '크기와 모양이 겹치지 않도록 평면도형을 2개 이상 만들어 보세요.',
-    '직각삼각형, 직사각형, 정사각형 중 서로 다른 도형을 골라 그려 보세요.',
-    '평면도형 도구를 사용해 서로 다른 모양 2개 이상을 완성해 보세요.',
+  const entriesByMode: Record<'rightTriangle' | 'rectangle' | 'square', Unit1ShapeProblemEntry[]> = {
+    rightTriangle: [
+      ['rightTriangle', '모양이나 크기가 다른 직각삼각형 세 개를 완성해 보세요.', 'draw', undefined, randomIntInRange(0, 7), 'threeRightTriangles'],
+      ['rightTriangle', '모양 또는 크기가 다른 직각삼각형 3개를 그려 보세요.', 'draw', undefined, randomIntInRange(0, 7), 'threeRightTriangles'],
+      ['rightTriangle', '직각삼각형 세 개를 서로 다른 모양이나 크기로 만들어 보세요.', 'draw', undefined, randomIntInRange(0, 7), 'threeRightTriangles'],
+    ],
+    rectangle: [
+      ['rectangle', '모양이나 크기가 다른 직사각형 세 개를 완성해 보세요.', 'draw', undefined, randomIntInRange(0, 7), 'threePolygons'],
+      ['rectangle', '모양 또는 크기가 다른 직사각형 3개를 그려 보세요.', 'draw', undefined, randomIntInRange(0, 7), 'threePolygons'],
+      ['rectangle', '직사각형 세 개를 서로 다른 모양이나 크기로 만들어 보세요.', 'draw', undefined, randomIntInRange(0, 7), 'threePolygons'],
+    ],
+    square: [
+      ['square', '모양이나 크기가 다른 정사각형 세 개를 완성해 보세요.', 'draw', undefined, randomIntInRange(0, 7), 'threePolygons'],
+      ['square', '모양 또는 크기가 다른 정사각형 3개를 그려 보세요.', 'draw', undefined, randomIntInRange(0, 7), 'threePolygons'],
+      ['square', '정사각형 세 개를 서로 다른 모양이나 크기로 만들어 보세요.', 'draw', undefined, randomIntInRange(0, 7), 'threePolygons'],
+    ],
+  };
+  const entriesPool = shuffleValues([
+    ...shuffleValues(entriesByMode.rightTriangle),
+    ...shuffleValues(entriesByMode.rectangle),
+    ...shuffleValues(entriesByMode.square),
   ]);
-  const modes = shuffleValues<ShapeDrawMode>(['rightTriangle', 'rectangle', 'square', 'quadrilateral']);
   const entries = arrangeUnit1EntriesForRound(
     8,
-    titles.slice(0, UNIT1_PROBLEM_COUNTS[8] ?? titles.length).map((title, index): Unit1ShapeProblemEntry => [
-      modes[index % modes.length] ?? 'rightTriangle',
-      title,
-      'draw',
-      undefined,
-      randomIntInRange(0, 7),
-      'mixedPolygons',
-    ]),
+    entriesPool.slice(0, UNIT1_PROBLEM_COUNTS[8] ?? entriesPool.length),
   );
 
   unit1ProblemOrderCache.set(8, entries);
@@ -12624,11 +12639,14 @@ function ShapeRainGameCard({
   const [answerValue, setAnswerValue] = useState('');
   const [blockedCount, setBlockedCount] = useState(0);
   const [status, setStatus] = useState<'playing' | 'cleared' | 'failed'>('playing');
+  const [isWrongAnswerFeedback, setIsWrongAnswerFeedback] = useState(false);
+  const [wrongAnswerShakeKey, setWrongAnswerShakeKey] = useState(0);
   const [dropAreaHeight, setDropAreaHeight] = useState(0);
   const [drops, setDrops] = useState<ShapeRainDrop[]>(() => createShapeRainDrops(shapeRain));
   const [{ activeDrops, nextDropIndex }, setDropState] = useState<ShapeRainDropState>({ activeDrops: [], nextDropIndex: 0 });
   const dropAreaRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const wrongAnswerFeedbackTimeoutRef = useRef<number | null>(null);
   const didResolveRef = useRef(false);
   const activeDropIdsRef = useRef<Set<string>>(new Set());
   const isDropAreaMeasured = dropAreaHeight > 0;
@@ -12678,7 +12696,16 @@ function ShapeRainGameCard({
       return expectedAnswers.includes(normalizedAnswer);
     });
     if (!matchedDrop) {
-      playAnimationSound('ui', { gainMultiplier: 0.72, detune: -12 });
+      playAnimationSound('wrong', { gainMultiplier: 0.46, detune: -18 });
+      setWrongAnswerShakeKey((currentKey) => currentKey + 1);
+      setIsWrongAnswerFeedback(true);
+      if (wrongAnswerFeedbackTimeoutRef.current !== null) {
+        window.clearTimeout(wrongAnswerFeedbackTimeoutRef.current);
+      }
+      wrongAnswerFeedbackTimeoutRef.current = window.setTimeout(() => {
+        setIsWrongAnswerFeedback(false);
+        wrongAnswerFeedbackTimeoutRef.current = null;
+      }, 360);
       return;
     }
 
@@ -12707,10 +12734,17 @@ function ShapeRainGameCard({
     setDropState({ activeDrops: [], nextDropIndex: 0 });
     setAnswerValue('');
     setBlockedCount(0);
+    setIsWrongAnswerFeedback(false);
     setStatus('playing');
     didResolveRef.current = false;
     window.setTimeout(() => inputRef.current?.focus(), 80);
   }, [shapeRain]);
+
+  useEffect(() => () => {
+    if (wrongAnswerFeedbackTimeoutRef.current !== null) {
+      window.clearTimeout(wrongAnswerFeedbackTimeoutRef.current);
+    }
+  }, []);
 
   useEffect(() => {
     if (status !== 'playing' || nextDropIndex >= drops.length) {
@@ -12825,8 +12859,19 @@ function ShapeRainGameCard({
         ) : null}
       </div>
 
-      <div className="grid shrink-0 gap-2 sm:grid-cols-[1fr_auto] sm:items-stretch">
-        <div className="flex min-w-0 items-center rounded-2xl border-4 border-slate-600 bg-slate-800 px-4 focus-within:border-emerald-400">
+      <motion.div
+        key={`shape-rain-answer-${wrongAnswerShakeKey}`}
+        animate={isWrongAnswerFeedback ? { x: [0, -9, 8, -6, 5, 0] } : { x: 0 }}
+        transition={{ duration: 0.34, ease: 'easeOut' }}
+        className="grid shrink-0 gap-2 sm:grid-cols-[1fr_auto] sm:items-stretch"
+      >
+        <div
+          className={`flex min-w-0 items-center rounded-2xl border-4 px-4 transition-colors ${
+            isWrongAnswerFeedback
+              ? 'border-red-400 bg-red-950'
+              : 'border-slate-600 bg-slate-800 focus-within:border-emerald-400'
+          }`}
+        >
           <input
             ref={inputRef}
             value={answerValue}
@@ -12846,11 +12891,15 @@ function ShapeRainGameCard({
           type="button"
           disabled={status !== 'playing' || answerValue.trim().length === 0}
           onClick={submitAnswer}
-          className="inline-flex min-h-[4rem] items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-6 text-xl font-black text-slate-950 shadow-lg transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-slate-500 disabled:text-slate-300"
+          className={`inline-flex min-h-[4rem] items-center justify-center gap-2 rounded-2xl px-6 text-xl font-black shadow-lg transition disabled:cursor-not-allowed disabled:bg-slate-500 disabled:text-slate-300 ${
+            isWrongAnswerFeedback
+              ? 'bg-red-500 text-white'
+              : 'bg-emerald-500 text-slate-950 hover:bg-emerald-400'
+          }`}
         >
           <Sword size={22} /> 막기
         </button>
-      </div>
+      </motion.div>
 
     </div>
   );
@@ -13207,8 +13256,12 @@ function ShapeDrawProblemCardV2({
   );
   const isRightTrianglePointCompletionProblem = shapeDraw.mode === 'rightTriangle' && shapeDraw.drawVariant === 'point';
   const isRightTriangleTwoPolygonProblem = shapeDraw.mode === 'rightTriangle' && shapeDraw.drawVariant === 'twoRightTriangles';
+  const isRightTriangleThreePolygonProblem = shapeDraw.mode === 'rightTriangle' && shapeDraw.drawVariant === 'threeRightTriangles';
+  const isRightTriangleMultiPolygonProblem = isRightTriangleTwoPolygonProblem || isRightTriangleThreePolygonProblem;
   const isQuadrilateralPointCompletionProblem = (shapeDraw.mode === 'rectangle' || shapeDraw.mode === 'square') && shapeDraw.drawVariant === 'point';
   const isTwoPolygonProblem = (shapeDraw.mode === 'rectangle' || shapeDraw.mode === 'square') && shapeDraw.drawVariant === 'twoPolygons';
+  const isThreePolygonProblem = (shapeDraw.mode === 'rectangle' || shapeDraw.mode === 'square') && shapeDraw.drawVariant === 'threePolygons';
+  const isMultiPolygonProblem = isTwoPolygonProblem || isThreePolygonProblem;
   const isMixedPolygonProblem = shapeDraw.drawVariant === 'mixedPolygons';
   const isLineCompletionProblem = shapeDraw.drawVariant === 'lineCompletion';
   const isGachaDrawProblem = shapeDraw.task === 'draw' && shapeDraw.drawVariant === 'gacha';
@@ -13223,7 +13276,7 @@ function ShapeDrawProblemCardV2({
     : shapeDraw.title;
   const pointToolOnly = isRightTrianglePointCompletionProblem || isQuadrilateralPointCompletionProblem;
   const lineToolOnly = isLineCompletionProblem;
-  const polygonToolOnly = isRightTriangleTwoPolygonProblem || isTwoPolygonProblem || isMixedPolygonProblem;
+  const polygonToolOnly = isRightTriangleMultiPolygonProblem || isMultiPolygonProblem || isMixedPolygonProblem;
   const rightTriangleCompletionSegments = [
     { start: gridPoint(3, 4, '\u3131'), end: gridPoint(7, 4, '\u3134') },
     { start: gridPoint(4, 2, '\u3131'), end: gridPoint(4, 5, '\u3134') },
@@ -13337,6 +13390,42 @@ function ShapeDrawProblemCardV2({
       return sum + point.x * next.y - next.x * point.y;
     }, 0) / 2,
   );
+  const getPolygonShapeSignature = (polygon: ShapePoint[]) => {
+    const edges = polygon.map((point, index) => {
+      const next = polygon[(index + 1) % polygon.length];
+      const dx = next.x - point.x;
+      const dy = next.y - point.y;
+      const length = Math.hypot(dx, dy);
+      const angle = ((Math.atan2(dy, dx) * 180) / Math.PI + 180) % 180;
+      return { length, angle };
+    });
+    const minLength = Math.min(...edges.map((edge) => edge.length));
+    if (!Number.isFinite(minLength) || minLength <= 0) return null;
+
+    const ratios = edges
+      .map((edge) => Math.round((edge.length / minLength) * 10) / 10)
+      .sort((a, b) => a - b)
+      .join(':');
+    const angles = edges
+      .map((edge) => Math.round(edge.angle / 15) * 15)
+      .sort((a, b) => a - b)
+      .join(':');
+    return `${ratios}|${angles}`;
+  };
+  const hasAtLeastDifferentShapedPolygons = (polygonsToCheck: ShapePoint[][], requiredCount: number) => {
+    const shapeSignatures = new Set(polygonsToCheck.map(getPolygonShapeSignature).filter(Boolean));
+    return shapeSignatures.size >= requiredCount;
+  };
+  const getPolygonShapeOrSizeSignature = (polygon: ShapePoint[]) => {
+    const shapeSignature = getPolygonShapeSignature(polygon);
+    if (!shapeSignature) return null;
+    const areaBucket = Math.round(triangleArea(polygon) / 400);
+    return `${shapeSignature}|${areaBucket}`;
+  };
+  const hasAtLeastDifferentShapedOrSizedPolygons = (polygonsToCheck: ShapePoint[][], requiredCount: number) => {
+    const shapeOrSizeSignatures = new Set(polygonsToCheck.map(getPolygonShapeOrSizeSignature).filter(Boolean));
+    return shapeOrSizeSignatures.size >= requiredCount;
+  };
   const hasDifferentAdvancedPolygonKindsAndSizes = (polygonsToCheck: ShapePoint[][]) => {
     const advancedPolygons = polygonsToCheck
       .map((polygon) => ({ kind: getAdvancedPolygonKind(polygon), area: triangleArea(polygon) }))
@@ -13624,13 +13713,13 @@ function ShapeDrawProblemCardV2({
     if (shapeDraw.mode === 'triangle') return hasLine || new Set(polygons.map((polygon) => polygon.length)).size > 1;
     if (shapeDraw.mode === 'rightTriangle') {
       if (isRightTrianglePointCompletionProblem) return hasLine || hasPolygon || points.length > 1;
-      if (isRightTriangleTwoPolygonProblem) return hasLine || polygons.some((polygon) => polygon.length !== 3);
+      if (isRightTriangleMultiPolygonProblem) return hasLine || polygons.some((polygon) => polygon.length !== 3);
       return hasLine || new Set(polygons.map((polygon) => polygon.length)).size > 1;
     }
     if (isMixedPolygonProblem) return hasLine || polygons.some((polygon) => !getAdvancedPolygonKind(polygon));
     if (shapeDraw.mode === 'quadrilateral' || shapeDraw.mode === 'rectangle' || shapeDraw.mode === 'square') {
       if (isQuadrilateralPointCompletionProblem) return hasLine || hasPolygon || points.length > 1;
-      if (isTwoPolygonProblem) return hasLine || polygons.some((polygon) => polygon.length !== 4);
+      if (isMultiPolygonProblem) return hasLine || polygons.some((polygon) => polygon.length !== 4);
       return hasLine || new Set(polygons.map((polygon) => polygon.length)).size > 1;
     }
     return false;
@@ -13660,9 +13749,11 @@ function ShapeDrawProblemCardV2({
       if (presetRightTriangleSegment) {
         return points.some((point) => isRightTrianglePolygon([presetRightTriangleSegment.start, presetRightTriangleSegment.end, point]));
       }
-      if (isRightTriangleTwoPolygonProblem) {
+      if (isRightTriangleMultiPolygonProblem) {
         const rightTriangles = polygons.filter(isRightTrianglePolygon);
-        return rightTriangles.some((first, firstIndex) => rightTriangles.slice(firstIndex + 1).some((second) => Math.abs(triangleArea(first) - triangleArea(second)) > 400));
+        return isRightTriangleThreePolygonProblem
+          ? hasAtLeastDifferentShapedOrSizedPolygons(rightTriangles, 3)
+          : hasAtLeastDifferentShapedPolygons(rightTriangles, 2);
       }
       return polygons.some(isRightTrianglePolygon);
     }
@@ -13670,9 +13761,9 @@ function ShapeDrawProblemCardV2({
       if (presetQuadrilateralPoints) {
         return points.some((point) => isRectanglePolygon([...presetQuadrilateralPoints, point]));
       }
-      if (isTwoPolygonProblem) {
+      if (isMultiPolygonProblem) {
         const rectangles = polygons.filter(isRectanglePolygon);
-        return rectangles.some((first, firstIndex) => rectangles.slice(firstIndex + 1).some((second) => Math.abs(triangleArea(first) - triangleArea(second)) > 900));
+        return hasAtLeastDifferentShapedOrSizedPolygons(rectangles, isThreePolygonProblem ? 3 : 2);
       }
       return polygons.some(isRectanglePolygon);
     }
@@ -13680,9 +13771,9 @@ function ShapeDrawProblemCardV2({
       if (presetQuadrilateralPoints) {
         return points.some((point) => isSquarePolygon([...presetQuadrilateralPoints, point]));
       }
-      if (isTwoPolygonProblem) {
+      if (isMultiPolygonProblem) {
         const squares = polygons.filter(isSquarePolygon);
-        return squares.some((first, firstIndex) => squares.slice(firstIndex + 1).some((second) => Math.abs(triangleArea(first) - triangleArea(second)) > 900));
+        return hasAtLeastDifferentShapedOrSizedPolygons(squares, isThreePolygonProblem ? 3 : 2);
       }
       return polygons.some(isSquarePolygon);
     }
@@ -13966,7 +14057,7 @@ function ShapeDrawProblemCardV2({
             </button>
             <div className={`absolute left-1/2 top-[3.7rem] flex -translate-x-1/2 gap-2 rounded-full bg-lime-200/95 px-3 py-2 shadow-xl transition-all duration-200 ease-out ${openMenu === 'polygon' ? 'translate-y-0 scale-100 opacity-100' : 'pointer-events-none -translate-y-2 scale-95 opacity-0'}`}>
               {([3, 4] as Array<3 | 4>).map((sides) => (
-                <button key={sides} type="button" onClick={() => { playDrawSound('ui', { gainMultiplier: 0.7, detune: sides === 3 ? 24 : 42 }); setTool('polygon'); setPolygonSides(sides); setOpenMenu(null); }} disabled={(isRightTriangleTwoPolygonProblem && sides !== 3) || (isTwoPolygonProblem && sides !== 4)} className={`grid h-12 w-12 place-items-center rounded-full bg-white transition-all duration-150 disabled:opacity-35 disabled:grayscale ${tool === 'polygon' && polygonSides === sides ? 'ring-4 ring-[#253493]' : 'hover:scale-105'}`} aria-label={sides === 3 ? '삼각형' : '사각형'}>
+                <button key={sides} type="button" onClick={() => { playDrawSound('ui', { gainMultiplier: 0.7, detune: sides === 3 ? 24 : 42 }); setTool('polygon'); setPolygonSides(sides); setOpenMenu(null); }} disabled={(isRightTriangleMultiPolygonProblem && sides !== 3) || (isMultiPolygonProblem && sides !== 4)} className={`grid h-12 w-12 place-items-center rounded-full bg-white transition-all duration-150 disabled:opacity-35 disabled:grayscale ${tool === 'polygon' && polygonSides === sides ? 'ring-4 ring-[#253493]' : 'hover:scale-105'}`} aria-label={sides === 3 ? '삼각형' : '사각형'}>
                   {polygonIcon(sides)}
                 </button>
               ))}
