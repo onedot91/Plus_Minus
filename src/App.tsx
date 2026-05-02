@@ -15774,7 +15774,8 @@ export default function App() {
 
   const [showHint, setShowHint] = useState(false);
   const isSpecialChallengeActive = isEstimation || isUnitSelectionChallenge;
-  const canUseHint = activeLearningUnitId === 'unit2' && level <= 7;
+  const isFinalUnit2LevelProblem = activeLearningUnitId === 'unit2' && opponentHP <= FINAL_BUILDER_HP;
+  const canUseHint = activeLearningUnitId === 'unit2' && level <= 7 && !isFinalUnit2LevelProblem;
   const isHintForced = canUseHint && opponentHP > 50;
   const shouldRenderHorizontalEquation = activeLearningUnitId === 'unit2' && level === 7 && !isHintForced && problem.kind === 'equation';
   const isResultScreen = gameState === 'win' || gameState === 'lose';
