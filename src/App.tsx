@@ -215,9 +215,17 @@ import opponentLevel7ArnyaHitImage from './assets/opponent-level7-arnya-hit-cuto
 import opponentLevel8AttackImage from './assets/opponent-level8-attack.png';
 import opponentLevel8DefaultImage from './assets/opponent-level8-default.png';
 import opponentLevel8HitImage from './assets/opponent-level8-hit.png';
+import unit1Level8CaterpillarAttackImage from './assets/unit1-level8-caterpillar-attack.png';
+import unit1Level8CaterpillarDefaultImage from './assets/unit1-level8-caterpillar-default.png';
+import unit1Level8CaterpillarDefeatSceneImage from './assets/unit1-level8-caterpillar-defeat-scene.png';
+import unit1Level8CaterpillarHitImage from './assets/unit1-level8-caterpillar-hit.png';
 import opponentLevel9AttackImage from './assets/opponent-level9-attack.png';
 import opponentLevel9DefaultImage from './assets/opponent-level9-default.png';
 import opponentLevel9HitImage from './assets/opponent-level9-hit.png';
+import unit1Level9ButterflyAttackImage from './assets/unit1-level9-butterfly-attack.png';
+import unit1Level9ButterflyDefaultImage from './assets/unit1-level9-butterfly-default.png';
+import unit1Level9ButterflyDefeatSceneImage from './assets/unit1-level9-butterfly-defeat-scene.png';
+import unit1Level9ButterflyHitImage from './assets/unit1-level9-butterfly-hit.png';
 import unit3Level1YorsiAttackImage from './assets/unit3-level1-yorsi-attack.png';
 import unit3Level1YorsiDefaultImage from './assets/unit3-level1-yorsi-default.png';
 import unit3Level1YorsiDefeatSceneImage from './assets/unit3-level1-yorsi-defeat-scene.png';
@@ -273,7 +281,7 @@ type BattleDifficulty = 'easy' | 'normal' | 'hard';
 
 type LearningUnitId = 'unit1' | 'unit2' | 'unit3';
 
-type ProblemKind = 'equation' | 'story' | 'builder' | 'measurement' | 'distanceMap' | 'distanceWorksheet' | 'clockReading' | 'timeAddition' | 'shapeDraw';
+type ProblemKind = 'equation' | 'story' | 'builder' | 'measurement' | 'distanceMap' | 'distanceWorksheet' | 'clockReading' | 'timeAddition' | 'shapeDraw' | 'shapeRain';
 type MeasurementObjectKind =
   | 'seed'
   | 'rice'
@@ -327,6 +335,7 @@ interface Problem {
   clockReading?: ClockReadingProblemData;
   timeAddition?: TimeAdditionProblemData;
   shapeDraw?: ShapeDrawProblemData;
+  shapeRain?: ShapeRainProblemData;
 }
 
 interface EstimationProblem {
@@ -363,8 +372,30 @@ interface ShapeDrawProblemData {
   title: string;
   answerToken: string;
   identifyVariant?: 'fold' | 'definition' | 'rightAngleMark' | 'rightAngleCount' | 'rightAngleNames' | 'clockRightAngles' | 'rightTriangleClassify' | 'rightTriangleDefinition' | 'shapeClassify' | 'shapeDefinition';
-  drawVariant?: 'point' | 'ray' | 'twoRightTriangles' | 'twoPolygons' | 'gacha';
+  drawVariant?: 'point' | 'ray' | 'twoRightTriangles' | 'twoPolygons' | 'mixedPolygons' | 'lineCompletion' | 'gacha';
   figureVariant?: number;
+}
+
+type ShapeRainShapeKind =
+  | 'segment'
+  | 'line'
+  | 'ray'
+  | 'angle'
+  | 'rightAngle'
+  | 'rightTriangle'
+  | 'rectangle'
+  | 'square';
+
+interface ShapeRainProblemData {
+  title: string;
+  wave: number;
+  targetCount: number;
+  fallDurationMs: number;
+  maxActiveDrops: number;
+  spawnIntervalMs: number;
+  initialDropCount: number;
+  pairSpawnEvery?: number;
+  shapes: ShapeRainShapeKind[];
 }
 
 const SHAPE_DRAW_MIXED_TOKEN = '__shape_draw_mixed__';
@@ -383,6 +414,28 @@ const SHAPE_DRAW_ANSWER_LABELS: Record<ShapeDrawMode, string> = {
   square: '정사각형',
 };
 
+const SHAPE_RAIN_LABELS: Record<ShapeRainShapeKind, string> = {
+  segment: '선분',
+  line: '직선',
+  ray: '반직선',
+  angle: '각',
+  rightAngle: '직각',
+  rightTriangle: '직각삼각형',
+  rectangle: '직사각형',
+  square: '정사각형',
+};
+
+const SHAPE_RAIN_SHAPES: ShapeRainShapeKind[] = [
+  'segment',
+  'line',
+  'ray',
+  'angle',
+  'rightAngle',
+  'rightTriangle',
+  'rectangle',
+  'square',
+];
+
 const withObjectParticle = (word: string) => {
   const lastCode = word.charCodeAt(word.length - 1);
   const hangulOffset = lastCode - 0xac00;
@@ -400,6 +453,8 @@ const UNIT1_LEVEL8_GACHA_MODES: ShapeDrawMode[] = [
   'rectangle',
   'square',
 ];
+const UNIT1_LEVEL8_GACHA_ROULETTE_TICK_MS = 90;
+const UNIT1_LEVEL8_GACHA_ROULETTE_DURATION_MS = 1000;
 
 const SHAPE_READ_COMPOUND_JAMO_EXPANSIONS: Record<string, string> = {
   '\u3132': '\u3131\u3131',
@@ -424,6 +479,9 @@ const normalizeShapeReadAnswer = (value: string) => value
   .replace(/[\s,，、./;:|·]+/g, '')
   .trim()
   .replace(/[ㄲㄳㄵㄶㄸㄺㄻㄼㄽㄾㄿㅀㅃㅄㅆ]/g, (char) => SHAPE_READ_COMPOUND_JAMO_EXPANSIONS[char] ?? char);
+
+const normalizeShapeRainAnswer = (value: string) => normalizeShapeReadAnswer(value)
+  .replace(/도형$/g, '');
 
 const SHAPE_READ_FIRST_POINT_LABEL = '\u3131';
 const SHAPE_READ_SECOND_POINT_LABEL = '\u3134';
@@ -1443,7 +1501,7 @@ const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
     ],
   },
   rouletteStart: {
-    output: 0.72,
+    output: 0.32,
     layers: [
       { kind: 'noise', duration: 0.28, gain: 0.006, attack: 0.002, release: 0.18, filter: { type: 'highpass', frequency: 2400, sweepTo: 7800, q: 0.8 }, reverbSend: 0.1, delaySend: 0.04 },
       { kind: 'oscillator', wave: 'sawtooth', frequency: 196, glideTo: 523.25, duration: 0.42, gain: 0.016, attack: 0.004, release: 0.24, filter: { type: 'lowpass', frequency: 2200, sweepTo: 3600, q: 0.7 }, pan: -0.08, delaySend: 0.05 },
@@ -1452,7 +1510,7 @@ const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
     ],
   },
   rouletteTick: {
-    output: 0.5,
+    output: 0.18,
     layers: [
       { kind: 'noise', duration: 0.018, gain: 0.0024, attack: 0.001, release: 0.012, filter: { type: 'highpass', frequency: 3600, sweepTo: 8400, q: 0.8 }, reverbSend: 0.02 },
       { kind: 'oscillator', wave: 'square', frequency: 1180, glideTo: 840, duration: 0.034, gain: 0.006, attack: 0.001, release: 0.022, filter: { type: 'lowpass', frequency: 2800, sweepTo: 1600, q: 0.8 }, panJitter: 0.08 },
@@ -1460,7 +1518,7 @@ const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
     ],
   },
   rouletteWin: {
-    output: 0.9,
+    output: 0.42,
     layers: [
       { kind: 'noise', duration: 0.36, gain: 0.008, attack: 0.002, release: 0.24, filter: { type: 'highpass', frequency: 3200, sweepTo: 9200, q: 0.8 }, reverbSend: 0.16, delaySend: 0.06 },
       { kind: 'oscillator', wave: 'triangle', frequency: 523.25, duration: 0.12, gain: 0.024, attack: 0.002, release: 0.08, reverbSend: 0.1, pan: -0.12 },
@@ -1744,7 +1802,7 @@ const LEVEL_OPPONENT_NAMES = [
   '길시대왕',
 ];
 
-const LEVEL_OPPONENT_EMOJIS = ['', '👾', '👹', '👺', '🤖', '👻', '🦖', '🐲', '😈', '👿', '⌛', '📏', '👑'];
+const LEVEL_OPPONENT_EMOJIS = ['', '👾', '👹', '👺', '🤖', '👻', '🦖', '🐲', '😈', '🪙', '⌛', '📏', '👑'];
 const DEFAULT_LEARNING_UNIT_ID: LearningUnitId = 'unit2';
 const DEFAULT_LEVEL1_OPPONENT_ID: Level1OpponentId = 'jeongichu';
 const DEFAULT_LEVEL2_OPPONENT_ID: Level2OpponentId = 'noneunpenggwin';
@@ -1901,6 +1959,26 @@ const LEVEL7_OPPONENT_VARIANTS: Record<Level7OpponentId, SpecialOpponentConfig> 
       hit: opponentLevel7ArnyaHitImage,
     },
     defeatSceneImage: stage7ArnyaDefeatSceneImage,
+  },
+};
+const UNIT1_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
+  8: {
+    name: '배추흰나비 애벌레',
+    spriteSet: {
+      attack: unit1Level8CaterpillarAttackImage,
+      default: unit1Level8CaterpillarDefaultImage,
+      hit: unit1Level8CaterpillarHitImage,
+    },
+    defeatSceneImage: unit1Level8CaterpillarDefeatSceneImage,
+  },
+  9: {
+    name: '배추흰나비',
+    spriteSet: {
+      attack: unit1Level9ButterflyAttackImage,
+      default: unit1Level9ButterflyDefaultImage,
+      hit: unit1Level9ButterflyHitImage,
+    },
+    defeatSceneImage: unit1Level9ButterflyDefeatSceneImage,
   },
 };
 const UNIT3_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
@@ -2079,6 +2157,7 @@ const UNIT_LEVEL_DESCRIPTIONS: Record<LearningUnitId, string[]> = {
     '6단계: 직사각형',
     '7단계: 정사각형',
     '8단계: 평면도형',
+    '9단계: 평면도형 심화',
   ],
   unit2: [
     '',
@@ -3105,6 +3184,10 @@ function getConfiguredOpponentForUnit(
   level: number,
   selections: SpecialOpponentSelections,
 ) {
+  if (unitId === 'unit1') {
+    return UNIT1_LEVEL_OPPONENTS[level] ?? null;
+  }
+
   if (unitId === 'unit3') {
     return UNIT3_LEVEL_OPPONENTS[level] ?? null;
   }
@@ -3121,6 +3204,10 @@ function getOpponentNameForLevel(
   level: number,
   selections: SpecialOpponentSelections = DEFAULT_SPECIAL_OPPONENT_SELECTIONS,
 ) {
+  if (unitId === 'unit1' && level === 8) {
+    return '배추흰나비 애벌레';
+  }
+
   const configuredOpponent = getConfiguredOpponentForUnit(unitId, level, selections);
   if (configuredOpponent) {
     return configuredOpponent.name;
@@ -7323,7 +7410,8 @@ const UNIT1_PROBLEM_COUNTS: Record<number, number> = {
   5: 4,
   6: 4,
   7: 4,
-  8: 5,
+  8: 4,
+  9: 4,
 };
 
 type Unit1ShapeProblemEntry =
@@ -7455,9 +7543,9 @@ function getUnit1Level5ProblemEntries() {
     '한 점을 찍어 선분과 함께 직각삼각형이 되게 해 보세요.',
   ];
   const polygonTitles = [
-    '도형 기능으로 크기가 다른 직각삼각형 2개를 그려 보세요.',
+    '크기가 다른 직각삼각형 2개를 그려 보세요.',
     '삼각형 도구로 서로 다른 크기의 직각삼각형 2개를 만들어 보세요.',
-    '도형 기능만 사용해 크기가 다른 직각삼각형을 두 개 그려 보세요.',
+    '크기가 다른 직각삼각형을 두 개 그려 보세요.',
   ];
   const entries: Unit1ShapeProblemEntry[] = [
     ['rightTriangle', classifyTitles[classifyVariant % classifyTitles.length], 'identify', 'rightTriangleClassify', classifyVariant],
@@ -7484,7 +7572,7 @@ function getUnit1Level6ProblemEntries() {
     ['rectangle', '직각의 수에 따라 사각형 카드를 분류해 보세요.', 'identify', 'shapeClassify', classifyVariant],
     ['rectangle', '빈칸에 알맞은 말을 써 보세요.', 'identify', 'shapeDefinition', definitionVariant],
     ['rectangle', '나머지 한 점을 찍어 직사각형을 완성해 보세요.', 'draw', undefined, pointCompletionVariant, 'point'],
-    ['rectangle', '도형 기능으로 크기가 다른 직사각형 2개를 그려 보세요.', 'draw', undefined, twoRectangleVariant, 'twoPolygons'],
+    ['rectangle', '크기가 다른 직사각형 2개를 그려 보세요.', 'draw', undefined, twoRectangleVariant, 'twoPolygons'],
   ];
 
   unit1ProblemOrderCache.set(6, entries);
@@ -7505,7 +7593,7 @@ function getUnit1Level7ProblemEntries() {
     ['square', '도형 카드를 알맞은 칸에 넣어 정사각형을 분류해 보세요.', 'identify', 'shapeClassify', classifyVariant],
     ['square', '빈칸에 알맞은 말을 써 보세요.', 'identify', 'shapeDefinition', definitionVariant],
     ['square', '나머지 한 점을 찍어 정사각형을 완성해 보세요.', 'draw', undefined, pointCompletionVariant, 'point'],
-    ['square', '도형 기능으로 크기가 다른 정사각형 2개를 그려 보세요.', 'draw', undefined, twoSquareVariant, 'twoPolygons'],
+    ['square', '크기가 다른 정사각형 2개를 그려 보세요.', 'draw', undefined, twoSquareVariant, 'twoPolygons'],
   ];
 
   unit1ProblemOrderCache.set(7, entries);
@@ -7518,24 +7606,92 @@ function getUnit1Level8ProblemEntries() {
     return cachedEntries;
   }
 
+  const titles = shuffleValues([
+    '모양과 크기가 다른 평면도형을 2개 이상 그려 보세요.',
+    '서로 다른 모양과 크기의 평면도형 2개 이상을 만들어 보세요.',
+    '도형 도구로 모양도 크기도 다른 평면도형을 2개 이상 그려 보세요.',
+    '모양과 크기가 모두 다른 평면도형을 두 개 이상 완성해 보세요.',
+  ]);
+  const modes = shuffleValues<ShapeDrawMode>(['rightTriangle', 'rectangle', 'square', 'quadrilateral']);
   const entries = arrangeUnit1EntriesWithoutAdjacentRepeats(
-    shuffleValues(UNIT1_LEVEL8_GACHA_MODES)
-      .slice(0, UNIT1_PROBLEM_COUNTS[8] ?? UNIT1_LEVEL8_GACHA_MODES.length)
-      .map((mode): Unit1ShapeProblemEntry => [
-        mode,
-        '룰렛으로 정해진 도형을 그려 보세요.',
-        'draw',
-        undefined,
-        randomIntInRange(0, 7),
-        'gacha',
-      ]),
+    titles.slice(0, UNIT1_PROBLEM_COUNTS[8] ?? titles.length).map((title, index): Unit1ShapeProblemEntry => [
+      modes[index % modes.length] ?? 'rightTriangle',
+      title,
+      'draw',
+      undefined,
+      randomIntInRange(0, 7),
+      'mixedPolygons',
+    ]),
   );
 
   unit1ProblemOrderCache.set(8, entries);
   return entries;
 }
 
+function createShapeRainProblem(problemSequence = 1): Problem {
+  const wave = Math.max(1, Math.min(UNIT1_PROBLEM_COUNTS[9] ?? 4, problemSequence));
+  const phaseConfig: Record<number, Pick<ShapeRainProblemData, 'targetCount' | 'fallDurationMs' | 'maxActiveDrops' | 'spawnIntervalMs' | 'initialDropCount' | 'pairSpawnEvery'>> = {
+    1: {
+      targetCount: 6,
+      fallDurationMs: 54000,
+      maxActiveDrops: 2,
+      spawnIntervalMs: 12000,
+      initialDropCount: 1,
+    },
+    2: {
+      targetCount: 7,
+      fallDurationMs: 50000,
+      maxActiveDrops: 2,
+      spawnIntervalMs: 8500,
+      initialDropCount: 1,
+    },
+    3: {
+      targetCount: 8,
+      fallDurationMs: 46000,
+      maxActiveDrops: 3,
+      spawnIntervalMs: 6800,
+      initialDropCount: 1,
+      pairSpawnEvery: 4,
+    },
+    4: {
+      targetCount: 10,
+      fallDurationMs: 42000,
+      maxActiveDrops: 3,
+      spawnIntervalMs: 5400,
+      initialDropCount: 2,
+      pairSpawnEvery: 3,
+    },
+  };
+  const config = phaseConfig[wave] ?? phaseConfig[4];
+  const requiredShapes: ShapeRainShapeKind[] =
+    wave === 1
+      ? ['segment', 'line', 'ray', 'angle']
+      : wave === 2
+        ? ['rightAngle', 'rightTriangle', 'rectangle', 'square']
+        : wave === 3
+          ? ['segment', 'ray', 'rightAngle', 'rectangle', 'rightTriangle']
+          : ['line', 'angle', 'rightAngle', 'rightTriangle', 'rectangle', 'square'];
+  const shapePool = shuffleValues([...requiredShapes, ...SHAPE_RAIN_SHAPES, ...requiredShapes]).slice(0, config.targetCount);
+
+  return {
+    text: '평면도형 산성비',
+    prompt: '하늘에서 떨어지는 평면도형의 이름을 정확히 입력해 막아 보세요.',
+    answer: 1,
+    kind: 'shapeRain',
+    shapeRain: {
+      title: `${wave}웨이브: 평면도형 산성비`,
+      wave,
+      ...config,
+      shapes: shapePool,
+    },
+  };
+}
+
 function generateUnit1Problem(level: number, problemSequence = 1): Problem {
+  if (level === 9) {
+    return createShapeRainProblem(problemSequence);
+  }
+
   const modeSets: Record<number, Unit1ShapeProblemEntry[]> = {
     1: getUnit1Level1ProblemEntries(),
     2: getUnit1Level2ProblemEntries(),
@@ -11881,6 +12037,408 @@ function ShapePointView({ point }: { point: ShapePoint }) {
   );
 }
 
+function ShapeRainGlyph({ kind, variant = 0 }: { kind: ShapeRainShapeKind; variant?: number }) {
+  const lineStroke = '#f97316';
+  const pointFill = '#64748b';
+  const pointStroke = '#111827';
+  const guideStroke = '#2563eb';
+  const polygonStroke = '#ef5da8';
+  const polygonFill = '#bbf7d0';
+  const largePointRadius = 10;
+  const mediumPointRadius = 9;
+  const smallPointRadius = 7.5;
+  const largePointStrokeWidth = 4.5;
+  const mediumPointStrokeWidth = 4;
+  const smallPointStrokeWidth = 3.5;
+  const normalizedVariant = Math.abs(variant) % 3;
+  const segmentVariants = [
+    [[48, 84], [132, 52]],
+    [[40, 56], [138, 90]],
+    [[58, 98], [124, 34]],
+  ] as const;
+  const lineVariants = [
+    { ends: [[22, 103], [158, 33]], points: [[62, 82], [118, 54]] },
+    { ends: [[24, 44], [156, 92]], points: [[64, 59], [116, 78]] },
+    { ends: [[37, 112], [143, 24]], points: [[68, 86], [112, 50]] },
+  ] as const;
+  const rayVariants = [
+    { start: [48, 88], mid: [108, 60], end: [158, 36] },
+    { start: [42, 48], mid: [98, 70], end: [154, 92] },
+    { start: [58, 98], mid: [91, 62], end: [129, 22] },
+  ] as const;
+  const angleVariants = [
+    { vertex: [52, 94], a: [146, 94], b: [112, 34], arc: 'M84 94 A34 34 0 0 0 76 70' },
+    { vertex: [60, 92], a: [139, 54], b: [70, 26], arc: 'M88 79 A32 32 0 0 0 64 60' },
+    { vertex: [116, 98], a: [42, 94], b: [148, 40], arc: 'M88 97 A30 30 0 0 1 132 74' },
+  ] as const;
+  const rightAngleVariants = [
+    { vertex: [56, 100], a: [142, 100], b: [56, 30], mark: 'M56 70 H86 V100' },
+    { vertex: [126, 96], a: [46, 96], b: [126, 36], mark: 'M126 70 H100 V96' },
+    { vertex: [62, 42], a: [62, 108], b: [142, 42], mark: 'M62 68 H88 V42' },
+  ] as const;
+  const rightTriangleVariants = [
+    { path: 'M48 103 H140 L48 30 Z', mark: 'M48 76 H75 V103', points: [[48, 103], [140, 103], [48, 30]] },
+    { path: 'M42 92 H148 L148 34 Z', mark: 'M121 92 V65 H148', points: [[42, 92], [148, 92], [148, 34]] },
+    { path: 'M58 112 V30 L132 112 Z', mark: 'M58 86 H84 V112', points: [[58, 112], [58, 30], [132, 112]] },
+  ] as const;
+  const rectangleVariants = [
+    { rect: [34, 38, 112, 66], marks: ['M34 56 H52 V38', 'M128 38 V56 H146', 'M146 86 H128 V104', 'M52 104 V86 H34'], points: [[34, 38], [146, 38], [146, 104], [34, 104]] },
+    { rect: [42, 30, 96, 78], marks: ['M42 48 H60 V30', 'M120 30 V48 H138', 'M138 90 H120 V108', 'M60 108 V90 H42'], points: [[42, 30], [138, 30], [138, 108], [42, 108]] },
+    { rect: [28, 48, 124, 52], marks: ['M28 65 H45 V48', 'M135 48 V65 H152', 'M152 83 H135 V100', 'M45 100 V83 H28'], points: [[28, 48], [152, 48], [152, 100], [28, 100]] },
+  ] as const;
+  const squareVariants = [
+    { rect: [52, 28, 84, 84], marks: ['M52 47 H71 V28', 'M117 28 V47 H136', 'M136 93 H117 V112', 'M71 112 V93 H52'], points: [[52, 28], [136, 28], [136, 112], [52, 112]] },
+    { rect: [42, 34, 76, 76], marks: ['M42 52 H60 V34', 'M100 34 V52 H118', 'M118 92 H100 V110', 'M60 110 V92 H42'], points: [[42, 34], [118, 34], [118, 110], [42, 110]] },
+    { rect: [62, 24, 88, 88], marks: ['M62 44 H82 V24', 'M130 24 V44 H150', 'M150 92 H130 V112', 'M82 112 V92 H62'], points: [[62, 24], [150, 24], [150, 112], [62, 112]] },
+  ] as const;
+  const segment = segmentVariants[normalizedVariant];
+  const line = lineVariants[normalizedVariant];
+  const ray = rayVariants[normalizedVariant];
+  const angle = angleVariants[normalizedVariant];
+  const rightAngle = rightAngleVariants[normalizedVariant];
+  const rightTriangle = rightTriangleVariants[normalizedVariant];
+  const rectangle = rectangleVariants[normalizedVariant];
+  const square = squareVariants[normalizedVariant];
+
+  return (
+    <svg viewBox="0 0 180 136" className="h-full w-full drop-shadow-[0_12px_20px_rgba(15,23,42,0.34)]" aria-hidden="true">
+      <rect x="5" y="5" width="170" height="126" rx="20" fill="#ffffff" stroke="#eff6ff" strokeWidth="7" />
+      <rect x="15" y="15" width="150" height="106" rx="14" fill="#f8fafc" stroke="#94a3b8" strokeWidth="3" />
+      {kind === 'segment' ? (
+        <>
+          <line x1={segment[0][0]} y1={segment[0][1]} x2={segment[1][0]} y2={segment[1][1]} stroke={lineStroke} strokeWidth="10" strokeLinecap="round" />
+          {segment.map(([x, y]) => <circle key={`${x}-${y}`} cx={x} cy={y} r={largePointRadius} fill={pointFill} stroke={pointStroke} strokeWidth={largePointStrokeWidth} />)}
+        </>
+      ) : kind === 'line' ? (
+        <>
+          <line x1={line.ends[0][0]} y1={line.ends[0][1]} x2={line.ends[1][0]} y2={line.ends[1][1]} stroke={lineStroke} strokeWidth="10" strokeLinecap="round" />
+          {line.points.map(([x, y]) => <circle key={`${x}-${y}`} cx={x} cy={y} r={mediumPointRadius} fill={pointFill} stroke={pointStroke} strokeWidth={mediumPointStrokeWidth} />)}
+          {line.ends.map(([x, y]) => <circle key={`${x}-${y}-end`} cx={x} cy={y} r="5" fill={lineStroke} />)}
+        </>
+      ) : kind === 'ray' ? (
+        <>
+          <line x1={ray.start[0]} y1={ray.start[1]} x2={ray.end[0]} y2={ray.end[1]} stroke={lineStroke} strokeWidth="10" strokeLinecap="round" />
+          {[ray.start, ray.mid].map(([x, y]) => <circle key={`${x}-${y}`} cx={x} cy={y} r={largePointRadius} fill={pointFill} stroke={pointStroke} strokeWidth={largePointStrokeWidth} />)}
+          <circle cx={ray.end[0]} cy={ray.end[1]} r="5" fill={lineStroke} />
+        </>
+      ) : kind === 'angle' ? (
+        <>
+          <line x1={angle.vertex[0]} y1={angle.vertex[1]} x2={angle.a[0]} y2={angle.a[1]} stroke={lineStroke} strokeWidth="10" strokeLinecap="round" />
+          <line x1={angle.vertex[0]} y1={angle.vertex[1]} x2={angle.b[0]} y2={angle.b[1]} stroke={lineStroke} strokeWidth="10" strokeLinecap="round" />
+          <path d={angle.arc} fill="none" stroke={guideStroke} strokeWidth="6" strokeLinecap="round" />
+          <circle cx={angle.vertex[0]} cy={angle.vertex[1]} r={largePointRadius} fill={pointFill} stroke={pointStroke} strokeWidth={largePointStrokeWidth} />
+          {[angle.a, angle.b].map(([x, y]) => <circle key={`${x}-${y}`} cx={x} cy={y} r={smallPointRadius} fill={pointFill} stroke={pointStroke} strokeWidth={smallPointStrokeWidth} />)}
+        </>
+      ) : kind === 'rightAngle' ? (
+        <>
+          <line x1={rightAngle.vertex[0]} y1={rightAngle.vertex[1]} x2={rightAngle.a[0]} y2={rightAngle.a[1]} stroke={lineStroke} strokeWidth="10" strokeLinecap="round" />
+          <line x1={rightAngle.vertex[0]} y1={rightAngle.vertex[1]} x2={rightAngle.b[0]} y2={rightAngle.b[1]} stroke={lineStroke} strokeWidth="10" strokeLinecap="round" />
+          <path d={rightAngle.mark} fill="none" stroke={guideStroke} strokeWidth="7" strokeLinecap="square" />
+          <circle cx={rightAngle.vertex[0]} cy={rightAngle.vertex[1]} r={largePointRadius} fill={pointFill} stroke={pointStroke} strokeWidth={largePointStrokeWidth} />
+          {[rightAngle.a, rightAngle.b].map(([x, y]) => <circle key={`${x}-${y}`} cx={x} cy={y} r={smallPointRadius} fill={pointFill} stroke={pointStroke} strokeWidth={smallPointStrokeWidth} />)}
+        </>
+      ) : kind === 'rightTriangle' ? (
+        <>
+          <path d={rightTriangle.path} fill={polygonFill} stroke={polygonStroke} strokeWidth="8" strokeLinejoin="round" />
+          <path d={rightTriangle.mark} fill="none" stroke={guideStroke} strokeWidth="6" />
+          {rightTriangle.points.map(([x, y]) => <circle key={`${x}-${y}`} cx={x} cy={y} r={smallPointRadius} fill={pointFill} stroke={pointStroke} strokeWidth={smallPointStrokeWidth} />)}
+        </>
+      ) : kind === 'rectangle' ? (
+        <>
+          <rect x={rectangle.rect[0]} y={rectangle.rect[1]} width={rectangle.rect[2]} height={rectangle.rect[3]} rx="2" fill={polygonFill} stroke={polygonStroke} strokeWidth="8" />
+          {rectangle.marks.map((mark) => <path key={mark} d={mark} fill="none" stroke={guideStroke} strokeWidth="5" strokeLinecap="square" />)}
+          {rectangle.points.map(([x, y]) => <circle key={`${x}-${y}`} cx={x} cy={y} r={smallPointRadius} fill={pointFill} stroke={pointStroke} strokeWidth={smallPointStrokeWidth} />)}
+        </>
+      ) : (
+        <>
+          <rect x={square.rect[0]} y={square.rect[1]} width={square.rect[2]} height={square.rect[3]} rx="2" fill={polygonFill} stroke={polygonStroke} strokeWidth="8" />
+          {square.marks.map((mark) => <path key={mark} d={mark} fill="none" stroke={guideStroke} strokeWidth="5" strokeLinecap="square" />)}
+          {square.points.map(([x, y]) => <circle key={`${x}-${y}`} cx={x} cy={y} r={smallPointRadius} fill={pointFill} stroke={pointStroke} strokeWidth={smallPointStrokeWidth} />)}
+        </>
+      )}
+    </svg>
+  );
+}
+
+type ShapeRainDrop = {
+  id: string;
+  shape: ShapeRainShapeKind;
+  left: number;
+  variant: number;
+  durationMs: number;
+};
+
+type ShapeRainDropState = {
+  activeDrops: ShapeRainDrop[];
+  nextDropIndex: number;
+};
+
+function createShapeRainDrops(shapeRain: ShapeRainProblemData, previousFirstShape?: ShapeRainShapeKind): ShapeRainDrop[] {
+  const shuffledShapes = shuffleValues(shapeRain.shapes);
+  if (previousFirstShape && shuffledShapes.length > 1 && shuffledShapes[0] === previousFirstShape) {
+    const replacementIndex = shuffledShapes.findIndex((shape) => shape !== previousFirstShape);
+    if (replacementIndex > 0) {
+      [shuffledShapes[0], shuffledShapes[replacementIndex]] = [shuffledShapes[replacementIndex], shuffledShapes[0]];
+    }
+  }
+
+  const dropRunId = `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+  const lanes = shuffleValues([18, 50, 82]);
+  return shuffledShapes.map((shape, index) => ({
+    id: `${shapeRain.wave}-${dropRunId}-${index}-${shape}`,
+    shape,
+    left: lanes[index % lanes.length] + (Math.random() * 4 - 2),
+    variant: (index + randomIntInRange(0, 2)) % 3,
+    durationMs: Math.max(16000, shapeRain.fallDurationMs * (1 - (index / Math.max(1, shapeRain.targetCount - 1)) * 0.42)),
+  }));
+}
+
+function ShapeRainGameCard({
+  shapeRain,
+  playAnimationSound,
+  onClear,
+  onFail,
+}: {
+  shapeRain: ShapeRainProblemData;
+  playAnimationSound: (effectName: SoundEffectName, options?: SoundPlaybackOptions) => void;
+  onClear: () => void;
+  onFail: () => void;
+}) {
+  const [answerValue, setAnswerValue] = useState('');
+  const [blockedCount, setBlockedCount] = useState(0);
+  const [status, setStatus] = useState<'playing' | 'cleared' | 'failed'>('playing');
+  const [dropAreaHeight, setDropAreaHeight] = useState(0);
+  const [drops, setDrops] = useState<ShapeRainDrop[]>(() => createShapeRainDrops(shapeRain));
+  const [{ activeDrops, nextDropIndex }, setDropState] = useState<ShapeRainDropState>({ activeDrops: [], nextDropIndex: 0 });
+  const dropAreaRef = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const didResolveRef = useRef(false);
+  const activeDropIdsRef = useRef<Set<string>>(new Set());
+  const isDropAreaMeasured = dropAreaHeight > 0;
+  const dropHeight = dropAreaHeight >= 520 ? 150 : 128;
+  const groundHeight = 52;
+  const fallTargetY = Math.max(0, dropAreaHeight - groundHeight - dropHeight + 10);
+
+  const resolveFail = () => {
+    if (didResolveRef.current) {
+      return;
+    }
+    didResolveRef.current = true;
+    setStatus('failed');
+    onFail();
+  };
+
+  const resolveClear = () => {
+    if (didResolveRef.current) {
+      return;
+    }
+    didResolveRef.current = true;
+    setStatus('cleared');
+    onClear();
+  };
+
+  const restartWave = () => {
+    didResolveRef.current = false;
+    setDrops((currentDrops) => createShapeRainDrops(shapeRain, currentDrops[0]?.shape));
+    setDropState({ activeDrops: [], nextDropIndex: 0 });
+    setAnswerValue('');
+    setBlockedCount(0);
+    setStatus('playing');
+    window.setTimeout(() => inputRef.current?.focus(), 40);
+  };
+
+  const submitAnswer = () => {
+    if (activeDrops.length === 0 || status !== 'playing') {
+      return;
+    }
+
+    const normalizedAnswer = normalizeShapeRainAnswer(answerValue);
+    const matchedDrop = activeDrops.find((drop) => {
+      const expectedAnswers = [
+        normalizeShapeRainAnswer(SHAPE_RAIN_LABELS[drop.shape]),
+        ...(drop.shape === 'square' ? [normalizeShapeRainAnswer('직사각형')] : []),
+      ];
+      return expectedAnswers.includes(normalizedAnswer);
+    });
+    if (!matchedDrop) {
+      playAnimationSound('ui', { gainMultiplier: 0.72, detune: -12 });
+      return;
+    }
+
+    const nextBlockedCount = blockedCount + 1;
+    setBlockedCount(nextBlockedCount);
+    setAnswerValue('');
+    playAnimationSound('submit', { gainMultiplier: 0.62, detune: 26 });
+
+    if (nextBlockedCount >= shapeRain.targetCount) {
+      resolveClear();
+      return;
+    }
+
+    setDropState((currentState) => ({
+      ...currentState,
+      activeDrops: currentState.activeDrops.filter((drop) => drop.id !== matchedDrop.id),
+    }));
+  };
+
+  useEffect(() => {
+    activeDropIdsRef.current = new Set(activeDrops.map((drop) => drop.id));
+  }, [activeDrops]);
+
+  useEffect(() => {
+    setDrops(createShapeRainDrops(shapeRain));
+    setDropState({ activeDrops: [], nextDropIndex: 0 });
+    setAnswerValue('');
+    setBlockedCount(0);
+    setStatus('playing');
+    didResolveRef.current = false;
+    window.setTimeout(() => inputRef.current?.focus(), 80);
+  }, [shapeRain]);
+
+  useEffect(() => {
+    if (status !== 'playing' || nextDropIndex >= drops.length) {
+      return;
+    }
+
+    const availableSlots = Math.max(0, shapeRain.maxActiveDrops - activeDrops.length);
+    if (availableSlots === 0) {
+      return;
+    }
+
+    const spawnDelayMs = activeDrops.length === 0 ? 120 : shapeRain.spawnIntervalMs;
+    const timeoutId = window.setTimeout(() => {
+      setDropState((currentState) => {
+        const currentAvailableSlots = Math.max(0, shapeRain.maxActiveDrops - currentState.activeDrops.length);
+        if (currentAvailableSlots === 0 || currentState.nextDropIndex >= drops.length) {
+          return currentState;
+        }
+
+        const isFirstSpawn = currentState.nextDropIndex === 0;
+        const shouldSpawnPair = !isFirstSpawn && Boolean(shapeRain.pairSpawnEvery) && currentState.nextDropIndex % Number(shapeRain.pairSpawnEvery) === 0;
+        const requestedCount = isFirstSpawn ? shapeRain.initialDropCount : shouldSpawnPair ? 2 : 1;
+        const spawnCount = Math.min(currentAvailableSlots, requestedCount, drops.length - currentState.nextDropIndex);
+        const nextDrops = drops.slice(currentState.nextDropIndex, currentState.nextDropIndex + spawnCount);
+
+        return {
+          activeDrops: [...currentState.activeDrops, ...nextDrops],
+          nextDropIndex: currentState.nextDropIndex + spawnCount,
+        };
+      });
+    }, spawnDelayMs);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [activeDrops.length, drops, nextDropIndex, shapeRain.initialDropCount, shapeRain.maxActiveDrops, shapeRain.pairSpawnEvery, shapeRain.spawnIntervalMs, status]);
+
+  useEffect(() => {
+    const dropAreaElement = dropAreaRef.current;
+    if (!dropAreaElement || typeof ResizeObserver === 'undefined') {
+      return;
+    }
+
+    const syncDropAreaHeight = () => {
+      const nextHeight = dropAreaElement.getBoundingClientRect().height;
+      setDropAreaHeight((previousHeight) => (
+        Math.abs(previousHeight - nextHeight) < 1 ? previousHeight : nextHeight
+      ));
+    };
+    syncDropAreaHeight();
+    const resizeObserver = new ResizeObserver(syncDropAreaHeight);
+    resizeObserver.observe(dropAreaElement);
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (status === 'playing' && activeDrops.length > 0) {
+      playAnimationSound('tick', { gainMultiplier: 0.2, detune: -80 + shapeRain.wave * 18 });
+    }
+  }, [activeDrops.length, playAnimationSound, shapeRain.wave, status]);
+
+  return (
+    <div className="flex h-full min-h-0 w-full flex-col gap-1 overflow-hidden text-slate-950">
+      <div ref={dropAreaRef} className="relative min-h-0 flex-1 overflow-hidden rounded-[1.6rem] border-4 border-slate-600 bg-[linear-gradient(180deg,#0f172a_0%,#1e3a8a_54%,#14532d_100%)] shadow-inner">
+        <div className="absolute left-0 right-0 top-0 h-20 bg-[radial-gradient(circle_at_18%_30%,rgba(255,255,255,0.42),transparent_18%),radial-gradient(circle_at_82%_22%,rgba(255,255,255,0.3),transparent_16%)] opacity-80" />
+        <div className="absolute inset-x-0 bottom-0 h-12 border-t-4 border-red-500 bg-[linear-gradient(180deg,#7f1d1d,#450a0a)] shadow-[0_-12px_30px_rgba(239,68,68,0.32)]" />
+        <div className="absolute inset-x-0 bottom-10 h-2 bg-[repeating-linear-gradient(135deg,#facc15_0_18px,#111827_18px_36px)] shadow-[0_0_22px_rgba(250,204,21,0.65)]" />
+        <div className="absolute inset-x-7 bottom-[3.35rem] h-1.5 rounded-full bg-red-400 shadow-[0_0_20px_rgba(248,113,113,0.9),0_0_46px_rgba(239,68,68,0.5)]" />
+        <div className="absolute right-3 top-3 z-20 rounded-2xl border-2 border-emerald-400/80 bg-slate-950/92 px-3 py-2 text-right shadow-[0_8px_20px_rgba(15,23,42,0.3)] sm:right-4 sm:top-4 sm:px-4">
+          <div className="text-xl font-black text-white sm:text-2xl">{blockedCount} / {shapeRain.targetCount}</div>
+        </div>
+
+        {status === 'playing' && isDropAreaMeasured ? activeDrops.map((activeDrop) => {
+          const fastEntryDurationMs = Math.min(650, Math.max(260, activeDrop.durationMs * 0.026));
+          const fastEntryProgress = clamp(fastEntryDurationMs / activeDrop.durationMs, 0.012, 0.045);
+          const visibleEntryY = Math.min(64, Math.max(24, fallTargetY * 0.09));
+
+          return (
+            <motion.div
+              key={`${activeDrop.id}-${Math.round(dropAreaHeight)}`}
+              initial={{ y: -dropHeight - 8, scale: 1, rotate: -2, opacity: 1 }}
+              animate={{ y: [-dropHeight - 8, visibleEntryY, fallTargetY], scale: 1, rotate: [-2, -1, 2], opacity: 1 }}
+              transition={{ duration: activeDrop.durationMs / 1000, times: [0, fastEntryProgress, 1], ease: 'linear' }}
+              onAnimationComplete={() => {
+                if (status === 'playing' && activeDropIdsRef.current.has(activeDrop.id)) {
+                  resolveFail();
+                }
+              }}
+              className="absolute top-0 z-10 h-32 w-44 sm:h-[9.4rem] sm:w-[12.4rem]"
+              style={{ left: `${activeDrop.left}%`, translateX: '-50%' }}
+            >
+              <ShapeRainGlyph kind={activeDrop.shape} variant={activeDrop.variant} />
+            </motion.div>
+          );
+        }) : null}
+
+        {status !== 'playing' ? (
+          <div className="absolute inset-0 flex items-center justify-center bg-slate-950/46 p-5 text-center">
+            <div className="rounded-[1.6rem] border-2 border-white/18 bg-slate-950/86 px-6 py-5 shadow-2xl">
+              <p className="break-keep text-3xl font-black text-white sm:text-4xl">
+                {status === 'cleared' ? '방어 성공!' : '실패'}
+              </p>
+              {status === 'failed' ? (
+                <button
+                  type="button"
+                  onClick={restartWave}
+                  className="mt-4 inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 py-3 text-lg font-black text-slate-950 shadow-lg hover:bg-emerald-400"
+                >
+                  <RotateCcw size={20} /> 다시 시작
+                </button>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+      </div>
+
+      <div className="grid shrink-0 gap-2 sm:grid-cols-[1fr_auto] sm:items-stretch">
+        <div className="flex min-w-0 items-center rounded-2xl border-4 border-slate-600 bg-slate-800 px-4 focus-within:border-emerald-400">
+          <input
+            ref={inputRef}
+            value={answerValue}
+            disabled={status !== 'playing'}
+            onChange={(event) => setAnswerValue(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' && !event.ctrlKey && !event.altKey) {
+                event.preventDefault();
+                submitAnswer();
+              }
+            }}
+            className="min-w-0 flex-1 bg-transparent py-3 text-center text-2xl font-black text-white outline-none placeholder:text-slate-400 disabled:text-slate-500 sm:text-3xl"
+            placeholder="도형 이름 입력"
+          />
+        </div>
+        <button
+          type="button"
+          disabled={status !== 'playing' || answerValue.trim().length === 0}
+          onClick={submitAnswer}
+          className="inline-flex min-h-[4rem] items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-6 text-xl font-black text-slate-950 shadow-lg transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-slate-500 disabled:text-slate-300"
+        >
+          <Sword size={22} /> 막기
+        </button>
+      </div>
+
+    </div>
+  );
+}
+
 function ShapeDrawProblemCard({ shapeDraw, answerValue, onAnswerChange, onSubmit }: { shapeDraw: ShapeDrawProblemData; answerValue: string; onAnswerChange: (value: string) => void; onSubmit: () => void }) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [tool, setTool] = useState<ShapeTool>('point');
@@ -12057,6 +12615,14 @@ function ShapeDrawProblemCard({ shapeDraw, answerValue, onAnswerChange, onSubmit
       const hasOtherLine = lines.some((line) => line.mode !== 'ray');
       return hasPolygon || (hasRay && hasOtherLine);
     }
+    if (lineCompletionFigure) {
+      const matchedEdgeKeys = lines.map(getMatchedLineCompletionEdgeKey);
+      return points.length > 0 ||
+        hasPolygon ||
+        lines.some((line) => line.mode !== 'segment') ||
+        matchedEdgeKeys.some((key) => key === null) ||
+        new Set(matchedEdgeKeys.filter(Boolean)).size !== matchedEdgeKeys.filter(Boolean).length;
+    }
     if (shapeDraw.mode === 'triangle') return hasLine || new Set(polygons.map((polygon) => polygon.length)).size > 1;
     if (shapeDraw.mode === 'rightTriangle') return hasLine || new Set(polygons.map((polygon) => polygon.length)).size > 1;
     if (shapeDraw.mode === 'quadrilateral' || shapeDraw.mode === 'rectangle' || shapeDraw.mode === 'square') {
@@ -12178,6 +12744,8 @@ function ShapeDrawProblemCardV2({
   answerValue,
   notice,
   playAnimationSound,
+  rouletteAlreadyResolved = false,
+  onRouletteResolved,
   onAnswerChange,
   onSubmit,
 }: {
@@ -12185,6 +12753,8 @@ function ShapeDrawProblemCardV2({
   answerValue: string;
   notice?: string;
   playAnimationSound?: AnimationSoundPlayer;
+  rouletteAlreadyResolved?: boolean;
+  onRouletteResolved?: () => void;
   onAnswerChange: (value: string) => void;
   onSubmit: () => void;
 }) {
@@ -12201,7 +12771,10 @@ function ShapeDrawProblemCardV2({
   const [history, setHistory] = useState<Array<'point' | 'lineStart' | 'line' | 'polygonPoint' | 'polygon'>>([]);
   const [rouletteIndex, setRouletteIndex] = useState(0);
   const [rouletteResolved, setRouletteResolved] = useState(false);
+  const [isRouletteOverlayVisible, setIsRouletteOverlayVisible] = useState(false);
   const previousAnswerValueRef = useRef(answerValue);
+  const playAnimationSoundRef = useRef(playAnimationSound);
+  const onRouletteResolvedRef = useRef(onRouletteResolved);
   const labels = ['\u3131', '\u3134', '\u3137', '\u3139', '\u3141', '\u3142', '\u3145', '\u3147', '\u3148', '\u314a'];
   const gridPoint = (col: number, row: number, label: string): ShapePoint => ({
     x: SHAPE_ORIGIN.x + SHAPE_GRID * col,
@@ -12219,6 +12792,8 @@ function ShapeDrawProblemCardV2({
   const isRightTriangleTwoPolygonProblem = shapeDraw.mode === 'rightTriangle' && shapeDraw.drawVariant === 'twoRightTriangles';
   const isQuadrilateralPointCompletionProblem = (shapeDraw.mode === 'rectangle' || shapeDraw.mode === 'square') && shapeDraw.drawVariant === 'point';
   const isTwoPolygonProblem = (shapeDraw.mode === 'rectangle' || shapeDraw.mode === 'square') && shapeDraw.drawVariant === 'twoPolygons';
+  const isMixedPolygonProblem = shapeDraw.drawVariant === 'mixedPolygons';
+  const isLineCompletionProblem = shapeDraw.drawVariant === 'lineCompletion';
   const isGachaDrawProblem = shapeDraw.task === 'draw' && shapeDraw.drawVariant === 'gacha';
   const rouletteTargetIndex = Math.max(0, UNIT1_LEVEL8_GACHA_MODES.indexOf(shapeDraw.mode));
   const rouletteDisplayMode = UNIT1_LEVEL8_GACHA_MODES[rouletteResolved ? rouletteTargetIndex : rouletteIndex % UNIT1_LEVEL8_GACHA_MODES.length] ?? shapeDraw.mode;
@@ -12230,7 +12805,8 @@ function ShapeDrawProblemCardV2({
       : '룰렛이 도형을 정하고 있어요.'
     : shapeDraw.title;
   const pointToolOnly = isRightTrianglePointCompletionProblem || isQuadrilateralPointCompletionProblem;
-  const polygonToolOnly = isRightTriangleTwoPolygonProblem || isTwoPolygonProblem;
+  const lineToolOnly = isLineCompletionProblem;
+  const polygonToolOnly = isRightTriangleTwoPolygonProblem || isTwoPolygonProblem || isMixedPolygonProblem;
   const rightTriangleCompletionSegments = [
     { start: gridPoint(3, 4, '\u3131'), end: gridPoint(7, 4, '\u3134') },
     { start: gridPoint(4, 2, '\u3131'), end: gridPoint(4, 5, '\u3134') },
@@ -12257,6 +12833,26 @@ function ShapeDrawProblemCardV2({
   const quadrilateralCompletionVariants = shapeDraw.mode === 'square' ? squareCompletionVariants : rectangleCompletionVariants;
   const presetQuadrilateralPoints = isQuadrilateralPointCompletionProblem
     ? quadrilateralCompletionVariants[(shapeDraw.figureVariant ?? 0) % quadrilateralCompletionVariants.length]
+    : null;
+  const lineCompletionFigures: Record<'rightTriangle' | 'rectangle' | 'square', Array<{ points: ShapePoint[]; givenEdges: Array<[number, number]>; missingEdges: Array<[number, number]> }>> = {
+    rightTriangle: [
+      { points: [gridPoint(3, 5, '\u3131'), gridPoint(7, 5, '\u3134'), gridPoint(3, 2, '\u3137')], givenEdges: [[0, 1]], missingEdges: [[0, 2], [1, 2]] },
+      { points: [gridPoint(4, 2, '\u3131'), gridPoint(8, 2, '\u3134'), gridPoint(8, 5, '\u3137')], givenEdges: [[1, 2]], missingEdges: [[0, 1], [0, 2]] },
+      { points: [gridPoint(2, 4, '\u3131'), gridPoint(6, 4, '\u3134'), gridPoint(6, 1, '\u3137')], givenEdges: [[1, 2]], missingEdges: [[0, 1], [0, 2]] },
+    ],
+    rectangle: [
+      { points: [gridPoint(3, 2, '\u3131'), gridPoint(8, 2, '\u3134'), gridPoint(8, 5, '\u3137'), gridPoint(3, 5, '\u3139')], givenEdges: [[0, 1], [1, 2]], missingEdges: [[2, 3], [3, 0]] },
+      { points: [gridPoint(2, 1, '\u3131'), gridPoint(7, 1, '\u3134'), gridPoint(7, 4, '\u3137'), gridPoint(2, 4, '\u3139')], givenEdges: [[3, 0], [0, 1]], missingEdges: [[1, 2], [2, 3]] },
+      { points: [gridPoint(4, 2, '\u3131'), gridPoint(9, 2, '\u3134'), gridPoint(9, 5, '\u3137'), gridPoint(4, 5, '\u3139')], givenEdges: [[0, 1], [2, 3]], missingEdges: [[1, 2], [3, 0]] },
+    ],
+    square: [
+      { points: [gridPoint(4, 2, '\u3131'), gridPoint(7, 2, '\u3134'), gridPoint(7, 5, '\u3137'), gridPoint(4, 5, '\u3139')], givenEdges: [[0, 1], [1, 2]], missingEdges: [[2, 3], [3, 0]] },
+      { points: [gridPoint(3, 1, '\u3131'), gridPoint(6, 1, '\u3134'), gridPoint(6, 4, '\u3137'), gridPoint(3, 4, '\u3139')], givenEdges: [[3, 0], [0, 1]], missingEdges: [[1, 2], [2, 3]] },
+      { points: [gridPoint(5, 2, '\u3131'), gridPoint(8, 2, '\u3134'), gridPoint(8, 5, '\u3137'), gridPoint(5, 5, '\u3139')], givenEdges: [[0, 1], [2, 3]], missingEdges: [[1, 2], [3, 0]] },
+    ],
+  };
+  const lineCompletionFigure = isLineCompletionProblem && (shapeDraw.mode === 'rightTriangle' || shapeDraw.mode === 'rectangle' || shapeDraw.mode === 'square')
+    ? lineCompletionFigures[shapeDraw.mode][(shapeDraw.figureVariant ?? 0) % lineCompletionFigures[shapeDraw.mode].length]
     : null;
   const angleVertexPositions = [
     { x: SHAPE_ORIGIN.x + SHAPE_GRID * 4, y: SHAPE_ORIGIN.y + SHAPE_GRID * 3 },
@@ -12290,6 +12886,7 @@ function ShapeDrawProblemCardV2({
   const boardPoints = [
     ...(presetRightTriangleSegment ? [presetRightTriangleSegment.start, presetRightTriangleSegment.end] : []),
     ...(presetQuadrilateralPoints ?? []),
+    ...(lineCompletionFigure?.points ?? []),
     ...points,
     ...lines.flatMap((line) => [line.start, line.end]),
     ...polygons.flat(),
@@ -12311,12 +12908,29 @@ function ShapeDrawProblemCardV2({
   };
   const isRightTrianglePolygon = (polygon: ShapePoint[]) =>
     polygon.length === 3 && polygon.some((point, index) => rightAt(point, polygon[(index + 2) % 3], polygon[(index + 1) % 3]));
+  const getAdvancedPolygonKind = (polygon: ShapePoint[]) => {
+    if (isRightTrianglePolygon(polygon)) return 'rightTriangle';
+    if (isSquarePolygon(polygon)) return 'square';
+    if (isRectanglePolygon(polygon)) return 'rectangle';
+    return null;
+  };
   const triangleArea = (polygon: ShapePoint[]) => Math.abs(
     polygon.reduce((sum, point, index) => {
       const next = polygon[(index + 1) % polygon.length];
       return sum + point.x * next.y - next.x * point.y;
     }, 0) / 2,
   );
+  const hasDifferentAdvancedPolygonKindsAndSizes = (polygonsToCheck: ShapePoint[][]) => {
+    const advancedPolygons = polygonsToCheck
+      .map((polygon) => ({ kind: getAdvancedPolygonKind(polygon), area: triangleArea(polygon) }))
+      .filter((polygon): polygon is { kind: NonNullable<ReturnType<typeof getAdvancedPolygonKind>>; area: number } => polygon.kind !== null);
+
+    return advancedPolygons.some((first, firstIndex) =>
+      advancedPolygons.slice(firstIndex + 1).some((second) =>
+        first.kind !== second.kind && Math.abs(first.area - second.area) > 900,
+      ),
+    );
+  };
   const playDrawSound = (effectName: SoundEffectName, options?: SoundPlaybackOptions) => {
     playAnimationSound?.(effectName, options);
   };
@@ -12361,9 +12975,11 @@ function ShapeDrawProblemCardV2({
     setOpenMenu(null);
   };
   useEffect(() => {
-    setTool('point');
+    setTool(lineToolOnly ? 'line' : 'point');
     setLineMode(
-      shapeDraw.mode === 'segment' || shapeDraw.mode === 'line' || shapeDraw.mode === 'ray'
+      lineToolOnly
+        ? 'segment'
+        : shapeDraw.mode === 'segment' || shapeDraw.mode === 'line' || shapeDraw.mode === 'ray'
         ? shapeDraw.mode
         : shapeDraw.mode === 'angle' || shapeDraw.mode === 'rightAngle'
           ? 'ray'
@@ -12371,35 +12987,58 @@ function ShapeDrawProblemCardV2({
     );
     setPolygonSides(shapeDraw.mode === 'rectangle' || shapeDraw.mode === 'square' || shapeDraw.mode === 'quadrilateral' ? 4 : 3);
     resetShapeBoard();
-  }, [isLineConstructionProblem, polygonToolOnly, shapeDraw.drawVariant, shapeDraw.figureVariant, shapeDraw.mode, shapeDraw.title]);
+  }, [isLineConstructionProblem, lineToolOnly, polygonToolOnly, shapeDraw.drawVariant, shapeDraw.figureVariant, shapeDraw.mode, shapeDraw.title]);
+  useEffect(() => {
+    playAnimationSoundRef.current = playAnimationSound;
+  }, [playAnimationSound]);
+  useEffect(() => {
+    onRouletteResolvedRef.current = onRouletteResolved;
+  }, [onRouletteResolved]);
   useEffect(() => {
     if (!isGachaDrawProblem) {
       setRouletteResolved(true);
+      setIsRouletteOverlayVisible(false);
+      return;
+    }
+
+    if (rouletteAlreadyResolved) {
+      setRouletteIndex(rouletteTargetIndex);
+      setRouletteResolved(true);
+      setIsRouletteOverlayVisible(false);
       return;
     }
 
     setRouletteResolved(false);
+    setIsRouletteOverlayVisible(true);
     setRouletteIndex((rouletteTargetIndex + UNIT1_LEVEL8_GACHA_MODES.length - 3) % UNIT1_LEVEL8_GACHA_MODES.length);
-    playAnimationSound?.('rouletteStart', { gainMultiplier: 0.78, detune: 8 });
+    const startSoundTimer = window.setTimeout(() => {
+      playAnimationSoundRef.current?.('rouletteStart', { gainMultiplier: 0.42, detune: 8 });
+    }, 40);
 
     let tick = 0;
     const tickTimer = window.setInterval(() => {
       tick += 1;
       setRouletteIndex((previous) => (previous + 1) % UNIT1_LEVEL8_GACHA_MODES.length);
-      playAnimationSound?.('rouletteTick', { gainMultiplier: 0.32, detune: tick * 6 });
-    }, 120);
+      playAnimationSoundRef.current?.('rouletteTick', { gainMultiplier: 0.16, detune: tick * 5 });
+    }, UNIT1_LEVEL8_GACHA_ROULETTE_TICK_MS);
     const resultTimer = window.setTimeout(() => {
       window.clearInterval(tickTimer);
       setRouletteIndex(rouletteTargetIndex);
       setRouletteResolved(true);
-      playAnimationSound?.('rouletteWin', { gainMultiplier: 0.86, detune: 18 });
-    }, 1900);
+      playAnimationSoundRef.current?.('rouletteWin', { gainMultiplier: 0.42, detune: 18 });
+    }, UNIT1_LEVEL8_GACHA_ROULETTE_DURATION_MS);
+    const hideOverlayTimer = window.setTimeout(() => {
+      setIsRouletteOverlayVisible(false);
+      onRouletteResolvedRef.current?.();
+    }, UNIT1_LEVEL8_GACHA_ROULETTE_DURATION_MS + 1050);
 
     return () => {
+      window.clearTimeout(startSoundTimer);
       window.clearInterval(tickTimer);
       window.clearTimeout(resultTimer);
+      window.clearTimeout(hideOverlayTimer);
     };
-  }, [isGachaDrawProblem, playAnimationSound, rouletteTargetIndex, shapeDraw.answerToken, shapeDraw.figureVariant]);
+  }, [isGachaDrawProblem, rouletteAlreadyResolved, rouletteTargetIndex, shapeDraw.answerToken, shapeDraw.figureVariant]);
   useEffect(() => {
     if (previousAnswerValueRef.current === shapeDraw.answerToken && answerValue === '') {
       resetShapeBoard();
@@ -12474,6 +13113,17 @@ function ShapeDrawProblemCardV2({
     if (line.mode === 'ray') return { a: line.start, b: { ...line.end, x: line.start.x + (dx / len) * 900, y: line.start.y + (dy / len) * 900 } };
     return { a: { ...line.start, x: line.start.x - (dx / len) * 900, y: line.start.y - (dy / len) * 900 }, b: { ...line.end, x: line.start.x + (dx / len) * 900, y: line.start.y + (dy / len) * 900 } };
   };
+  const isSameSegment = (line: ShapeLine, start: ShapePoint, end: ShapePoint) =>
+    line.mode === 'segment' &&
+    ((dist(line.start, start) < 8 && dist(line.end, end) < 8) || (dist(line.start, end) < 8 && dist(line.end, start) < 8));
+  const getLineCompletionEdgeKey = (edge: [number, number]) => [...edge].sort((a, b) => a - b).join('-');
+  const getMatchedLineCompletionEdgeKey = (line: ShapeLine) => {
+    if (!lineCompletionFigure || line.mode !== 'segment') return null;
+    const matchedEdge = lineCompletionFigure.missingEdges.find(([startIndex, endIndex]) =>
+      isSameSegment(line, lineCompletionFigure.points[startIndex], lineCompletionFigure.points[endIndex]),
+    );
+    return matchedEdge ? getLineCompletionEdgeKey(matchedEdge) : null;
+  };
   const rightAngleMarkers = (() => {
     const markers: Array<{ key: string; vertex: ShapePoint; a: ShapePoint; b: ShapePoint }> = [];
     const seen = new Set<string>();
@@ -12545,12 +13195,22 @@ function ShapeDrawProblemCardV2({
       const hasOtherLine = lines.some((line) => line.mode !== 'ray');
       return hasPolygon || (hasRay && hasOtherLine);
     }
+    if (lineCompletionFigure) {
+      const matchedEdgeKeys = lines.map(getMatchedLineCompletionEdgeKey);
+      const validMatchedEdgeKeys = matchedEdgeKeys.filter((key): key is string => key !== null);
+      return points.length > 0 ||
+        hasPolygon ||
+        lines.some((line) => line.mode !== 'segment') ||
+        matchedEdgeKeys.some((key) => key === null) ||
+        new Set(validMatchedEdgeKeys).size !== validMatchedEdgeKeys.length;
+    }
     if (shapeDraw.mode === 'triangle') return hasLine || new Set(polygons.map((polygon) => polygon.length)).size > 1;
     if (shapeDraw.mode === 'rightTriangle') {
       if (isRightTrianglePointCompletionProblem) return hasLine || hasPolygon || points.length > 1;
       if (isRightTriangleTwoPolygonProblem) return hasLine || polygons.some((polygon) => polygon.length !== 3);
       return hasLine || new Set(polygons.map((polygon) => polygon.length)).size > 1;
     }
+    if (isMixedPolygonProblem) return hasLine || polygons.some((polygon) => !getAdvancedPolygonKind(polygon));
     if (shapeDraw.mode === 'quadrilateral' || shapeDraw.mode === 'rectangle' || shapeDraw.mode === 'square') {
       if (isQuadrilateralPointCompletionProblem) return hasLine || hasPolygon || points.length > 1;
       if (isTwoPolygonProblem) return hasLine || polygons.some((polygon) => polygon.length !== 4);
@@ -12571,6 +13231,13 @@ function ShapeDrawProblemCardV2({
     if (shapeDraw.mode === 'angle') return hasAngleFromPreset;
     if (shapeDraw.mode === 'segment' || shapeDraw.mode === 'line' || shapeDraw.mode === 'ray') return lines.some((line) => line.mode === shapeDraw.mode);
     if (shapeDraw.mode === 'triangle') return polygons.some((polygon) => polygon.length === 3);
+    if (lineCompletionFigure) {
+      const matchedEdgeKeys = new Set(lines.map(getMatchedLineCompletionEdgeKey).filter(Boolean));
+      return lineCompletionFigure.missingEdges.every((edge) => matchedEdgeKeys.has(getLineCompletionEdgeKey(edge)));
+    }
+    if (isMixedPolygonProblem) {
+      return hasDifferentAdvancedPolygonKindsAndSizes(polygons);
+    }
     if (shapeDraw.mode === 'quadrilateral') return polygons.some((polygon) => polygon.length === 4);
     if (shapeDraw.mode === 'rightTriangle') {
       if (presetRightTriangleSegment) {
@@ -12671,6 +13338,29 @@ function ShapeDrawProblemCardV2({
     </span>
   );
   const renderGivenFigure = () => {
+    if (lineCompletionFigure) {
+      return (
+        <g pointerEvents="none">
+          {lineCompletionFigure.givenEdges.map(([fromIndex, toIndex]) => {
+            const from = lineCompletionFigure.points[fromIndex];
+            const to = lineCompletionFigure.points[toIndex];
+            return (
+              <line
+                key={`line-completion-given-${from.label}-${to.label}`}
+                x1={from.x}
+                y1={from.y}
+                x2={to.x}
+                y2={to.y}
+                stroke="#f97316"
+                strokeWidth="4.6"
+                strokeLinecap="round"
+              />
+            );
+          })}
+          {lineCompletionFigure.points.map((point) => <ShapePointView key={`line-completion-point-${point.label}`} point={point} />)}
+        </g>
+      );
+    }
     if (presetRightTriangleSegment) {
       return (
         <g pointerEvents="none">
@@ -12781,50 +13471,71 @@ function ShapeDrawProblemCardV2({
         </div>
       ) : null}
       <div className="relative min-h-0 flex-1 overflow-hidden rounded-2xl border-2 border-slate-300 bg-[#f8fbff]">
-        {isGachaDrawProblem && !rouletteResolved ? (
-          <div className="absolute inset-0 z-40 grid place-items-center bg-[#f8fbff]/90 backdrop-blur-[2px]">
+        {isGachaDrawProblem && isRouletteOverlayVisible ? (
+          <div className="absolute inset-0 z-40 grid place-items-center bg-slate-950/92 backdrop-blur-[2px]">
             <motion.div
-              initial={{ opacity: 0, scale: 0.92 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="w-[min(26rem,86%)] rounded-[2rem] border-4 border-white bg-white p-5 text-center shadow-2xl ring-4 ring-sky-200"
+              initial={{ opacity: 0, scale: 0.92, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              className="relative w-[min(27rem,88%)] overflow-hidden rounded-[1.25rem] border-[3px] border-slate-600 bg-[#171717] p-5 text-center shadow-[0_22px_34px_rgba(0,0,0,0.45)]"
             >
-              <div className="relative mx-auto mb-4 grid h-44 w-44 place-items-center">
-                <div className="absolute -top-2 z-20 h-0 w-0 border-x-[14px] border-t-[22px] border-x-transparent border-t-[#ef4444] drop-shadow-md" />
+              <div className="relative mx-auto mb-3 inline-flex items-center gap-2 rounded-full border-2 border-emerald-400/70 bg-slate-900 px-5 py-2 text-base font-black text-emerald-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_8px_18px_rgba(0,0,0,0.28)]">
+                <Sparkles className="h-5 w-5" />
+                {rouletteResolved ? '선정 완료' : '룰렛 진행 중'}
+              </div>
+              <div className="relative mx-auto grid h-60 w-60 place-items-center">
+                <div className="absolute -top-2 z-30 flex flex-col items-center">
+                  <div className="h-5 w-9 rounded-full bg-[#ffc400] shadow-[0_4px_10px_rgba(0,0,0,0.35)]" />
+                  <div className="-mt-1 h-0 w-0 border-x-[19px] border-t-[30px] border-x-transparent border-t-[#ffc400] drop-shadow-[0_4px_7px_rgba(0,0,0,0.35)]" />
+                </div>
+                <div className="absolute inset-0 rounded-full border-[8px] border-slate-100 bg-slate-950 shadow-[0_18px_28px_rgba(0,0,0,0.45)]" />
+                <div className="absolute inset-3 rounded-full border-[5px] border-slate-700" />
+                <div className="absolute inset-6 rounded-full border-[3px] border-slate-500/70" />
                 <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ repeat: Infinity, duration: 0.86, ease: 'linear' }}
-                  className="absolute inset-0 rounded-full border-[12px] border-white shadow-xl"
+                  animate={{ rotate: rouletteResolved ? 0 : 360 }}
+                  transition={rouletteResolved ? { duration: 0.18, ease: 'easeOut' } : { repeat: Infinity, duration: 0.82, ease: 'linear' }}
+                  className="absolute inset-8 overflow-hidden rounded-full border-[5px] border-slate-100 shadow-[inset_0_5px_12px_rgba(15,23,42,0.22)]"
                   style={{
-                    background: 'conic-gradient(#60a5fa 0 45deg, #facc15 45deg 90deg, #34d399 90deg 135deg, #fb7185 135deg 180deg, #a78bfa 180deg 225deg, #22d3ee 225deg 270deg, #f97316 270deg 315deg, #84cc16 315deg 360deg)',
+                    background:
+                      'repeating-conic-gradient(from -22.5deg, rgba(15,23,42,0.2) 0deg 2deg, transparent 2deg 45deg), conic-gradient(from -22.5deg, #16a34a 0deg 45deg, #ffc400 45deg 90deg, #22c55e 90deg 135deg, #38bdf8 135deg 180deg, #a3e635 180deg 225deg, #f59e0b 225deg 270deg, #14b8a6 270deg 315deg, #84cc16 315deg 360deg)',
                   }}
-                >
-                  <div className="absolute inset-[1.25rem] rounded-full bg-white/92 shadow-inner" />
-                </motion.div>
-                <div className="absolute inset-[3.2rem] grid place-items-center rounded-full bg-[#253493] text-white shadow-lg">
+                />
+                <div className="absolute inset-[4.55rem] grid place-items-center rounded-full border-[7px] border-slate-100 bg-[#253493] text-white shadow-[0_8px_18px_rgba(0,0,0,0.34)]">
                   <motion.div
                     key={`roulette-overlay-${rouletteDisplayMode}`}
-                    initial={{ scale: 0.72, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.12 }}
-                    className="text-2xl font-black"
+                    initial={{ scale: 0.74, opacity: 0, y: 4 }}
+                    animate={{
+                      scale: rouletteResolved ? [1, 1.16, 1.04] : 1,
+                      opacity: 1,
+                      y: 0,
+                    }}
+                    transition={{ duration: rouletteResolved ? 0.34 : 0.12 }}
+                    className="max-w-[6.2rem] break-keep text-center text-[1.45rem] font-black leading-tight"
                   >
                     {rouletteDisplayLabel}
                   </motion.div>
                 </div>
               </div>
-              <div className="text-lg font-black text-slate-800">무엇을 그릴지 정하는 중</div>
+              {rouletteResolved ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-3 text-xl font-black text-emerald-300"
+                >
+                  {withObjectParticle(rouletteTargetLabel)} 그려 보세요!
+                </motion.div>
+              ) : null}
             </motion.div>
           </div>
         ) : null}
         <div className="absolute left-1/2 top-3 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full bg-[#253493] px-3 py-2 shadow-lg">
-          <button type="button" onClick={() => { playDrawSound('ui', { gainMultiplier: 0.66, detune: 12 }); setTool('point'); setOpenMenu(null); }} disabled={false} className={toolButtonClass(tool === 'point', 'bg-pink-300')} aria-label="점 도구">
+          <button type="button" onClick={() => { playDrawSound('ui', { gainMultiplier: 0.66, detune: 12 }); setTool('point'); setOpenMenu(null); }} disabled={lineToolOnly} className={toolButtonClass(tool === 'point', 'bg-pink-300', lineToolOnly)} aria-label="점 도구">
             <span className="block h-4 w-4 rounded-full border-4 border-slate-900 bg-slate-500" />
           </button>
           <div className="relative">
-            <button type="button" onClick={() => { playDrawSound('ui', { gainMultiplier: 0.66, detune: 24 }); setOpenMenu((menu) => (menu === 'line' ? null : 'line')); }} disabled={pointToolOnly || polygonToolOnly} className={toolButtonClass(tool === 'line', 'bg-cyan-100', pointToolOnly || polygonToolOnly)} aria-label="선 도구">
+            <button type="button" onClick={() => { playDrawSound('ui', { gainMultiplier: 0.66, detune: 24 }); setTool('line'); if (lineToolOnly) setLineMode('segment'); setOpenMenu((menu) => (lineToolOnly ? null : menu === 'line' ? null : 'line')); }} disabled={pointToolOnly || polygonToolOnly} className={toolButtonClass(tool === 'line', 'bg-cyan-100', pointToolOnly || polygonToolOnly)} aria-label="선 도구">
               {lineIcon(lineMode)}
             </button>
-            <div className={`absolute left-1/2 top-[3.7rem] flex -translate-x-1/2 gap-2 rounded-full bg-cyan-100/95 px-3 py-2 shadow-xl transition-all duration-200 ease-out ${openMenu === 'line' ? 'translate-y-0 scale-100 opacity-100' : 'pointer-events-none -translate-y-2 scale-95 opacity-0'}`}>
+            <div className={`absolute left-1/2 top-[3.7rem] flex -translate-x-1/2 gap-2 rounded-full bg-cyan-100/95 px-3 py-2 shadow-xl transition-all duration-200 ease-out ${openMenu === 'line' && !lineToolOnly ? 'translate-y-0 scale-100 opacity-100' : 'pointer-events-none -translate-y-2 scale-95 opacity-0'}`}>
               {(['segment', 'line', 'ray'] as ShapeLineMode[]).map((mode) => (
                 <button key={mode} type="button" onClick={() => { playDrawSound('ui', { gainMultiplier: 0.7, detune: mode === 'segment' ? 0 : mode === 'line' ? 18 : 34 }); setTool('line'); setLineMode(mode); setOpenMenu(null); }} className={`grid h-12 w-12 place-items-center rounded-full bg-white transition-all duration-150 ${tool === 'line' && lineMode === mode ? 'ring-4 ring-[#253493]' : 'hover:scale-105'}`} aria-label={mode === 'segment' ? '선분' : mode === 'line' ? '직선' : '반직선'}>
                   {lineIcon(mode)}
@@ -12833,7 +13544,7 @@ function ShapeDrawProblemCardV2({
             </div>
           </div>
           <div className="relative">
-            <button type="button" onClick={() => { playDrawSound('ui', { gainMultiplier: 0.66, detune: 36 }); setOpenMenu((menu) => (menu === 'polygon' ? null : 'polygon')); }} disabled={isLineConstructionProblem || pointToolOnly} className={toolButtonClass(tool === 'polygon', 'bg-lime-300', isLineConstructionProblem || pointToolOnly)} aria-label="도형 도구">
+            <button type="button" onClick={() => { playDrawSound('ui', { gainMultiplier: 0.66, detune: 36 }); setOpenMenu((menu) => (menu === 'polygon' ? null : 'polygon')); }} disabled={isLineConstructionProblem || pointToolOnly || lineToolOnly} className={toolButtonClass(tool === 'polygon', 'bg-lime-300', isLineConstructionProblem || pointToolOnly || lineToolOnly)} aria-label="도형 도구">
               {polygonIcon(polygonSides)}
             </button>
             <div className={`absolute left-1/2 top-[3.7rem] flex -translate-x-1/2 gap-2 rounded-full bg-lime-200/95 px-3 py-2 shadow-xl transition-all duration-200 ease-out ${openMenu === 'polygon' ? 'translate-y-0 scale-100 opacity-100' : 'pointer-events-none -translate-y-2 scale-95 opacity-0'}`}>
@@ -14041,6 +14752,7 @@ export default function App() {
   const [inputValue, setInputValue] = useState('');
   const [unitInputValue, setUnitInputValue] = useState('');
   const [shapeDrawNotice, setShapeDrawNotice] = useState('');
+  const [resolvedShapeRouletteKey, setResolvedShapeRouletteKey] = useState<string | null>(null);
   const [isRightAngleFoldAnswerEnabled, setIsRightAngleFoldAnswerEnabled] = useState(true);
   const [clockAnswerInput, setClockAnswerInput] = useState<ClockReadingAnswerInput>({ hours: '', minutes: '', seconds: '' });
   const [isUnitMenuOpen, setIsUnitMenuOpen] = useState(false);
@@ -14070,6 +14782,7 @@ export default function App() {
   const [isSecretCodePromptOpen, setIsSecretCodePromptOpen] = useState(false);
   const [secretCodeInput, setSecretCodeInput] = useState('');
   const [secretCodeError, setSecretCodeError] = useState('');
+  const [isCaterpillarEvolutionOpen, setIsCaterpillarEvolutionOpen] = useState(false);
   const [pendingLevelTransition, setPendingLevelTransition] = useState<{
     nextLevel: number;
     shouldQueueEstimation: boolean;
@@ -14084,6 +14797,7 @@ export default function App() {
   useEffect(() => {
     gameStateRef.current = gameState;
     if (gameState !== 'playing') {
+      setIsCaterpillarEvolutionOpen(false);
       clearBattleTimeouts();
     }
   }, [gameState]);
@@ -14272,13 +14986,13 @@ export default function App() {
       return;
     }
 
-    playSound('rouletteStart', { gainMultiplier: 0.9, detune: 8 });
+    playSound('rouletteStart', { gainMultiplier: 0.45, detune: 8 });
 
     const tickDelays = [120, 250, 370, 480, 590, 710, 850, 1010, 1190, 1390, 1620, 1880, 2180, 2520, 2890];
     const tickTimeoutIds = tickDelays.map((delay, index) =>
       window.setTimeout(() => {
         playSound('rouletteTick', {
-          gainMultiplier: Math.max(0.38, 0.86 - index * 0.025),
+          gainMultiplier: Math.max(0.16, 0.38 - index * 0.012),
           detune: index * 9,
         });
       }, delay),
@@ -14287,7 +15001,7 @@ export default function App() {
     const revealTimeoutId = window.setTimeout(() => {
       unlockRouletteRewardSkin(pendingRewardSkin);
       setRewardRoulettePhase('revealed');
-      playSound('rouletteWin', { gainMultiplier: 1.04, detune: 18 });
+      playSound('rouletteWin', { gainMultiplier: 0.5, detune: 18 });
       queueSound('levelUp', 180, { gainMultiplier: 0.7, detune: 68 });
     }, 3400);
 
@@ -14745,6 +15459,19 @@ export default function App() {
         : [];
   const isStructuredTimeAnswerProblem = isClockReadingProblem || isTimeAdditionProblem;
   const isShapeReadProblem = problem.kind === 'shapeDraw' && problem.shapeDraw?.task === 'identify';
+  const currentShapeDrawRouletteKey =
+    problem.kind === 'shapeDraw' &&
+    problem.shapeDraw?.task === 'draw' &&
+    problem.shapeDraw.drawVariant === 'gacha'
+      ? [
+          activeLearningUnitId,
+          level,
+          opponentHP,
+          problem.shapeDraw.mode,
+          problem.shapeDraw.answerToken,
+          problem.shapeDraw.figureVariant ?? 0,
+        ].join(':')
+      : null;
   const isRightAngleFoldIdentifyProblem =
     problem.kind === 'shapeDraw' &&
     problem.shapeDraw?.mode === 'rightAngle' &&
@@ -15061,6 +15788,24 @@ export default function App() {
     updateMessage('3단원 8단계로 가려면 비밀암호를 입력해야 해!');
   };
 
+  const playCaterpillarEvolutionTransition = (nextLevel: number, shouldQueueEstimation = false) => {
+    const runId = currentPlayRunIdRef.current;
+
+    setIsOpponentHit(false);
+    setIsOpponentAttacking(false);
+    setIsCaterpillarEvolutionOpen(true);
+    playSound('levelUp', { gainMultiplier: 0.92, detune: 52 });
+    queueSound('correct', 620, { gainMultiplier: 0.74, detune: 96 });
+    queueSound('levelUp', 1180, { gainMultiplier: 1.02, detune: 112 });
+    updateMessage('배추흰나비 애벌레가 변신한다!');
+
+    scheduleBattleTimeout(() => {
+      setIsCaterpillarEvolutionOpen(false);
+      completeLevelTransition(nextLevel, shouldQueueEstimation);
+      updateMessage('배추흰나비 등장!');
+    }, 3100, runId);
+  };
+
   const submitSecretCode = () => {
     if (!pendingLevelTransition) {
       return;
@@ -15147,6 +15892,11 @@ export default function App() {
     scheduleBattleTimeout(() => {
       if (requiresSecretCodeForLevelTransition(currentUnitId, currentLevel, nextLevel)) {
         requestSecretCodeForNextLevel(nextLevel, shouldQueueEstimation);
+        return;
+      }
+
+      if (currentUnitId === 'unit1' && currentLevel === 8 && nextLevel === 9) {
+        playCaterpillarEvolutionTransition(nextLevel, shouldQueueEstimation);
         return;
       }
 
@@ -16544,7 +17294,7 @@ export default function App() {
                 className={`flex min-h-0 flex-1 rounded-3xl ${isDenseNumberedStoryLayout ? 'border-4' : 'border-8'} border-slate-200 bg-white shadow-inner ${
                   problem.kind === 'distanceMap' || problem.kind === 'distanceWorksheet'
                     ? 'flex flex-col overflow-y-auto p-2 sm:p-3 lg:p-3'
-                    : problem.kind === 'shapeDraw'
+                    : problem.kind === 'shapeDraw' || problem.kind === 'shapeRain'
                       ? 'flex flex-col overflow-hidden p-3 sm:p-4 lg:p-5'
                     : problem.kind === 'timeAddition' && isStoryTimeAdditionProblem
                       ? `flex flex-col justify-center ${isCompactBattleViewport ? 'overflow-hidden p-3 sm:p-4 lg:p-5' : 'overflow-y-auto p-4 sm:p-6 lg:p-8'}`
@@ -16561,7 +17311,14 @@ export default function App() {
                       : 'flex flex-col items-center justify-center p-4 text-[clamp(3.5rem,18vw,8rem)] leading-none font-black font-mono text-slate-900 sm:p-6 lg:p-8'
                 }`}
               >
-                {problem.kind === 'shapeDraw' && problem.shapeDraw ? (
+                {problem.kind === 'shapeRain' && problem.shapeRain ? (
+                  <ShapeRainGameCard
+                    shapeRain={problem.shapeRain}
+                    playAnimationSound={playSound}
+                    onClear={() => resolveProblemResult(true)}
+                    onFail={() => resolveProblemResult(false)}
+                  />
+                ) : problem.kind === 'shapeDraw' && problem.shapeDraw ? (
                   <div className="flex h-full min-h-0 w-full flex-col gap-3">
                     {shapeDrawNotice ? (
                       <div className="shrink-0 rounded-2xl border-2 border-yellow-300 bg-slate-950/95 px-4 py-2 text-center text-lg font-black text-white shadow-sm">
@@ -16579,6 +17336,12 @@ export default function App() {
                           shapeDraw={problem.shapeDraw}
                           answerValue={inputValue}
                           playAnimationSound={playSound}
+                          rouletteAlreadyResolved={currentShapeDrawRouletteKey !== null && resolvedShapeRouletteKey === currentShapeDrawRouletteKey}
+                          onRouletteResolved={() => {
+                            if (currentShapeDrawRouletteKey !== null) {
+                              setResolvedShapeRouletteKey(currentShapeDrawRouletteKey);
+                            }
+                          }}
                           onAnswerChange={setInputValue}
                           onSubmit={checkAnswer}
                         />
@@ -16843,7 +17606,7 @@ export default function App() {
             )}
             </div>
 
-            {!isSpecialChallengeActive && (problem.kind !== 'shapeDraw' || isShapeReadProblem) && (
+            {!isSpecialChallengeActive && problem.kind !== 'shapeRain' && (problem.kind !== 'shapeDraw' || isShapeReadProblem) && (
               <div className={`shrink-0 flex flex-col ${battleInputResponsiveClass}`}>
                 {usesBattleStructuredTimeInput ? (
                   <BattleStructuredTimeInput
@@ -16998,6 +17761,100 @@ export default function App() {
           </div>
         </div>
       )}
+
+      <AnimatePresence>
+        {gameState === 'playing' && isCaterpillarEvolutionOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-[linear-gradient(180deg,rgba(15,23,42,0.96),rgba(30,41,59,0.98))] p-4"
+          >
+            <div className="relative flex w-full max-w-3xl flex-col items-center justify-center text-center">
+              <div className="relative grid h-[min(62svh,28rem)] w-full place-items-center">
+                <motion.img
+                  src={unit1Level8CaterpillarDefaultImage}
+                  alt="배추흰나비 애벌레"
+                  className="absolute h-[min(48svh,20rem)] w-auto object-contain drop-shadow-[0_24px_34px_rgba(0,0,0,0.35)]"
+                  initial={{ opacity: 1, scale: 1, rotate: 0 }}
+                  animate={{ opacity: [1, 1, 0], scale: [1, 0.9, 0.44], rotate: [0, -4, 10] }}
+                  transition={{ duration: 1.15, times: [0, 0.58, 1], ease: 'easeInOut' }}
+                  draggable={false}
+                />
+                <motion.div
+                  className="absolute grid h-[min(42svh,18rem)] w-[min(42svh,18rem)] place-items-center"
+                  initial={{ opacity: 0, scale: 0.45, y: 18, rotate: -4 }}
+                  animate={{ opacity: [0, 1, 1, 0], scale: [0.45, 1.08, 1, 0.62], y: [18, 0, 0, -10], rotate: [-4, 2, -2, 8] }}
+                  transition={{ duration: 1.8, times: [0, 0.22, 0.68, 1], delay: 0.72, ease: 'easeInOut' }}
+                  aria-label="번데기"
+                >
+                  <svg viewBox="0 0 240 240" className="h-full w-full drop-shadow-[0_24px_34px_rgba(0,0,0,0.34)]" aria-hidden="true">
+                    <path
+                      d="M119 22 C156 28 184 70 178 115 C173 158 148 207 120 218 C91 207 66 158 62 116 C58 71 83 29 119 22 Z"
+                      fill="#f8fff1"
+                      stroke="#ffffff"
+                      strokeWidth="22"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M119 22 C156 28 184 70 178 115 C173 158 148 207 120 218 C91 207 66 158 62 116 C58 71 83 29 119 22 Z"
+                      fill="#d9ef95"
+                      stroke="#4f6f37"
+                      strokeWidth="6"
+                      strokeLinejoin="round"
+                    />
+                    <path d="M88 76 C108 64 139 64 158 78" fill="none" stroke="#789348" strokeWidth="7" strokeLinecap="round" />
+                    <path d="M78 113 C105 101 142 102 169 116" fill="none" stroke="#789348" strokeWidth="6" strokeLinecap="round" opacity="0.75" />
+                    <path d="M85 150 C109 160 138 160 159 148" fill="none" stroke="#789348" strokeWidth="6" strokeLinecap="round" opacity="0.7" />
+                    <path d="M112 35 C104 66 106 169 121 207" fill="none" stroke="#f3f6bf" strokeWidth="12" strokeLinecap="round" opacity="0.78" />
+                    <circle cx="149" cy="93" r="7" fill="#789348" />
+                    <circle cx="96" cy="130" r="5" fill="#789348" opacity="0.75" />
+                  </svg>
+                </motion.div>
+                <motion.div
+                  className="absolute h-72 w-72 rounded-full border-[10px] border-dashed border-emerald-100/70"
+                  initial={{ opacity: 0, scale: 0.45, rotate: 0 }}
+                  animate={{ opacity: [0, 1, 0.15], scale: [0.45, 1.18, 1.72], rotate: 300 }}
+                  transition={{ duration: 2.65, ease: 'easeInOut' }}
+                />
+                <motion.img
+                  src={unit1Level9ButterflyDefaultImage}
+                  alt="배추흰나비"
+                  className="absolute h-[min(50svh,21rem)] w-auto object-contain drop-shadow-[0_26px_38px_rgba(0,0,0,0.38)]"
+                  initial={{ opacity: 0, scale: 0.45, y: 18 }}
+                  animate={{ opacity: [0, 0, 0, 1, 1], scale: [0.45, 0.5, 0.72, 1.12, 1], y: [18, 18, 10, -8, 0] }}
+                  transition={{ duration: 2.85, times: [0, 0.38, 0.62, 0.84, 1], ease: 'easeOut' }}
+                  draggable={false}
+                />
+                {Array.from({ length: 10 }, (_, index) => (
+                  <motion.div
+                    key={`evolution-spark-${index}`}
+                    className="absolute h-3 w-3 rounded-sm bg-yellow-200"
+                    style={{
+                      left: `${18 + (index * 7) % 64}%`,
+                      top: `${18 + (index * 13) % 58}%`,
+                    }}
+                    animate={{
+                      opacity: [0, 1, 0],
+                      scale: [0.5, 1.45, 0.4],
+                      rotate: [0, 35, -20],
+                      y: [12, -16, -28],
+                    }}
+                    transition={{ repeat: Infinity, duration: 1.45, delay: index * 0.09, ease: 'easeInOut' }}
+                  />
+                ))}
+              </div>
+              <motion.h2
+                className="text-3xl font-black text-white sm:text-5xl"
+                animate={{ scale: [1, 1.04, 1] }}
+                transition={{ repeat: Infinity, duration: 1.2, ease: 'easeInOut' }}
+              >
+                배추흰나비로 변신!
+              </motion.h2>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {gameState === 'playing' && isSecretCodePromptOpen && pendingLevelTransition && (
