@@ -3039,6 +3039,12 @@ const PLAYER_SKINS: PlayerSkinConfig[] = [
 ];
 const PLAYER_SKIN_IDS = new Set<PlayerSkinId>(PLAYER_SKINS.map((skin) => skin.id));
 const REWARD_PLAYER_SKINS = PLAYER_SKINS.filter((skin) => skin.isReward);
+const REWARD_PLAYER_SKINS_BY_UNIT: Record<LearningUnitId, PlayerSkinConfig[]> = {
+  unit1: REWARD_PLAYER_SKINS.slice(0, 20),
+  unit2: REWARD_PLAYER_SKINS.slice(20, 40),
+  unit3: REWARD_PLAYER_SKINS.slice(40, 60),
+};
+
 function isPlayerSkinUnlocked(skin: PlayerSkinConfig, unlockedSkinIds: PlayerSkinId[]) {
   return !skin.isReward || unlockedSkinIds.includes(skin.id);
 }
@@ -3117,8 +3123,23 @@ function saveUnlockedPlayerSkinIds(skinIds: PlayerSkinId[]) {
   }
 }
 
-function pickRandomLockedRewardSkin(unlockedSkinIds: PlayerSkinId[]) {
-  const lockedRewardSkins = REWARD_PLAYER_SKINS.filter((skin) => !unlockedSkinIds.includes(skin.id));
+function getRewardPlayerSkinsForUnit(unitId: LearningUnitId) {
+  return REWARD_PLAYER_SKINS_BY_UNIT[unitId];
+}
+
+function getRewardUnitLabelForSkin(skinId: PlayerSkinId) {
+  const matchingEntry = Object.entries(REWARD_PLAYER_SKINS_BY_UNIT).find(([, skins]) =>
+    skins.some((skin) => skin.id === skinId),
+  );
+  if (!matchingEntry) {
+    return null;
+  }
+
+  return `${matchingEntry[0].replace('unit', '')}단원`;
+}
+
+function pickRandomLockedRewardSkin(unitId: LearningUnitId, unlockedSkinIds: PlayerSkinId[]) {
+  const lockedRewardSkins = getRewardPlayerSkinsForUnit(unitId).filter((skin) => !unlockedSkinIds.includes(skin.id));
   if (lockedRewardSkins.length === 0) {
     return null;
   }
@@ -3550,6 +3571,20 @@ const STORY_TEMPLATE_POOLS: Record<number, StoryTemplatePool> = {
 
 function sample<T>(items: readonly T[]): T {
   return items[Math.floor(Math.random() * items.length)];
+}
+
+const previousSampleByKey = new Map<string, unknown>();
+
+function sampleAvoidingImmediateRepeat<T>(key: string, items: readonly T[]): T {
+  if (items.length <= 1) {
+    return items[0];
+  }
+
+  const previousSample = previousSampleByKey.get(key);
+  const candidates = items.filter((item) => item !== previousSample);
+  const selected = sample(candidates.length > 0 ? candidates : items);
+  previousSampleByKey.set(key, selected);
+  return selected;
 }
 
 function randomInt(min: number, max: number) {
@@ -4083,7 +4118,7 @@ function createVerticalTimeAdditionProblem(step = 1): Problem {
   }
 }
 
-const UNIT3_FIXED_TIME_PROBLEM_COUNT = 4;
+const UNIT3_FIXED_TIME_PROBLEM_COUNT = 6;
 
 function createClockTimeSubtractionProblem(step = 1): Problem {
   while (true) {
@@ -4233,6 +4268,14 @@ function createLevel10TimeAdditionProblem(problemSequence = 1, _opponentHP = 100
     return createVerticalTimeAdditionProblem(1);
   }
 
+  if (resolvedSequence === 4) {
+    return createClockTimeAdditionProblem(2);
+  }
+
+  if (resolvedSequence === 5) {
+    return createBarModelTimeAdditionProblem(2);
+  }
+
   return createVerticalTimeAdditionProblem(2);
 }
 
@@ -4249,6 +4292,14 @@ function createLevel11TimeSubtractionProblem(problemSequence = 1, _opponentHP = 
 
   if (resolvedSequence === 3) {
     return createVerticalTimeSubtractionProblem(1);
+  }
+
+  if (resolvedSequence === 4) {
+    return createClockTimeSubtractionProblem(2);
+  }
+
+  if (resolvedSequence === 5) {
+    return createBarModelTimeSubtractionProblem(2);
   }
 
   return createVerticalTimeSubtractionProblem(2);
@@ -4296,15 +4347,17 @@ const LEVEL12_DEFAULT_TEMPLATE_ORDER: Level12TemplateId[] = [
   'elapsedTime',
   'activityDuration',
   'activityStartTime',
+  'tripArrivalTime',
+  'remainingAfterUse',
 ];
 
 const LEVEL12_OPERATION_PATTERNS: Level12OperationGroup[][] = [
-  ['addition', 'subtraction', 'addition', 'subtraction'],
-  ['addition', 'addition', 'subtraction', 'subtraction'],
-  ['subtraction', 'addition', 'addition', 'subtraction'],
-  ['subtraction', 'addition', 'subtraction', 'addition'],
-  ['addition', 'subtraction', 'subtraction', 'addition'],
-  ['subtraction', 'subtraction', 'addition', 'addition'],
+  ['addition', 'subtraction', 'addition', 'subtraction', 'addition', 'subtraction'],
+  ['addition', 'addition', 'subtraction', 'addition', 'subtraction', 'subtraction'],
+  ['subtraction', 'addition', 'addition', 'subtraction', 'addition', 'subtraction'],
+  ['subtraction', 'addition', 'subtraction', 'addition', 'subtraction', 'addition'],
+  ['addition', 'subtraction', 'subtraction', 'addition', 'addition', 'subtraction'],
+  ['subtraction', 'subtraction', 'addition', 'subtraction', 'addition', 'addition'],
 ];
 
 function pickLevel12TemplateSubset(
@@ -4320,9 +4373,9 @@ function pickLevel12TemplateSubset(
 function buildLevel12RoundTemplateOrder(previousOrder: Level12TemplateId[] = []) {
   const previousAdditionIds = new Set(previousOrder.filter((id) => LEVEL12_TEMPLATE_OPERATIONS[id] === 'addition'));
   const previousSubtractionIds = new Set(previousOrder.filter((id) => LEVEL12_TEMPLATE_OPERATIONS[id] === 'subtraction'));
-  const additionTemplates = shuffleValues(pickLevel12TemplateSubset(LEVEL12_ADDITION_TEMPLATE_IDS, previousAdditionIds, 2));
+  const additionTemplates = shuffleValues(pickLevel12TemplateSubset(LEVEL12_ADDITION_TEMPLATE_IDS, previousAdditionIds, 3));
   const subtractionTemplates = shuffleValues(
-    pickLevel12TemplateSubset(LEVEL12_SUBTRACTION_TEMPLATE_IDS, previousSubtractionIds, 2),
+    pickLevel12TemplateSubset(LEVEL12_SUBTRACTION_TEMPLATE_IDS, previousSubtractionIds, 3),
   );
   const operationPattern = sample(LEVEL12_OPERATION_PATTERNS);
   let additionIndex = 0;
@@ -5082,7 +5135,11 @@ function createMillimeterNeedIntroProblem(): Problem {
     '이 길이를 [[딱 맞게]] 나타내려면 어떤 단위가 필요할까요?',
     'cm보다 더 잘게 나타내려면 어떤 단위를 써야 할까요?',
   ];
-  return createShuffledOptionsProblem(`${sample(situations)}\n${sample(questions)}`, options, 'mm');
+  return createShuffledOptionsProblem(
+    `${sampleAvoidingImmediateRepeat('unit3-mm-intro-situation', situations)}\n${sampleAvoidingImmediateRepeat('unit3-mm-intro-question', questions)}`,
+    options,
+    'mm',
+  );
 }
 
 function createMillimeterNeedChoiceProblem(): Problem {
@@ -5093,7 +5150,11 @@ function createMillimeterNeedChoiceProblem(): Problem {
     'mm를 사용하면 cm보다 길이를 어떻게 나타낼 수 있을까요?',
     '아주 짧은 길이를 말할 때 mm가 필요한 까닭은 무엇일까요?',
   ];
-  return createShuffledOptionsProblem(sample(questions), options, '[[정확하게]]');
+  return createShuffledOptionsProblem(
+    sampleAvoidingImmediateRepeat('unit3-mm-choice-question', questions),
+    options,
+    '[[정확하게]]',
+  );
 }
 
 function createKilometerNeedIntroProblem(): Problem {
@@ -5113,7 +5174,11 @@ function createKilometerNeedIntroProblem(): Problem {
     '이처럼 먼 거리를 나타낼 때 쓰기 좋은 단위는 무엇일까요?',
     '숫자가 너무 길어지지 않게 하려면 어떤 단위를 써야 할까요?',
   ];
-  return createShuffledOptionsProblem(`${sample(situations)}\n${sample(questions)}`, options, 'km');
+  return createShuffledOptionsProblem(
+    `${sampleAvoidingImmediateRepeat('unit3-km-intro-situation', situations)}\n${sampleAvoidingImmediateRepeat('unit3-km-intro-question', questions)}`,
+    options,
+    'km',
+  );
 }
 
 function createKilometerNeedChoiceProblem(): Problem {
@@ -5124,7 +5189,11 @@ function createKilometerNeedChoiceProblem(): Problem {
     'km를 사용하면 먼 거리를 m보다 어떻게 나타낼 수 있을까요?',
     '먼 거리를 나타낼 때 km가 좋은 점은 무엇일까요?',
   ];
-  return createShuffledOptionsProblem(sample(questions), options, '[[편하게]]');
+  return createShuffledOptionsProblem(
+    sampleAvoidingImmediateRepeat('unit3-km-choice-question', questions),
+    options,
+    '[[편하게]]',
+  );
 }
 
 function createSecondNeedIntroProblem(): Problem {
@@ -5144,7 +5213,11 @@ function createSecondNeedIntroProblem(): Problem {
     '이처럼 짧은 시간을 나타내려면 어떤 단위가 필요할까요?',
     '분보다 더 작은 단위로 나타내려면 무엇을 써야 할까요?',
   ];
-  return createShuffledOptionsProblem(`${sample(situations)}\n${sample(questions)}`, options, '초');
+  return createShuffledOptionsProblem(
+    `${sampleAvoidingImmediateRepeat('unit3-second-intro-situation', situations)}\n${sampleAvoidingImmediateRepeat('unit3-second-intro-question', questions)}`,
+    options,
+    '초',
+  );
 }
 
 function createSecondNeedChoiceProblem(): Problem {
@@ -5155,7 +5228,11 @@ function createSecondNeedChoiceProblem(): Problem {
     '초를 사용하면 짧은 시간을 분보다 어떻게 나타낼 수 있을까요?',
     '짧은 시간을 말할 때 초가 필요한 이유는 무엇일까요?',
   ];
-  return createShuffledOptionsProblem(sample(questions), options, '[[정확하게]]');
+  return createShuffledOptionsProblem(
+    sampleAvoidingImmediateRepeat('unit3-second-choice-question', questions),
+    options,
+    '[[정확하게]]',
+  );
 }
 
 function createEquationProblem(a: number, b: number, op: '+' | '-', answer: number): Problem {
@@ -7568,15 +7645,15 @@ function createShapeDrawProblem(
 }
 
 const UNIT1_PROBLEM_COUNTS: Record<number, number> = {
-  1: 4,
-  2: 4,
-  3: 4,
-  4: 4,
-  5: 4,
-  6: 4,
-  7: 4,
-  8: 4,
-  9: 4,
+  1: 8,
+  2: 8,
+  3: 8,
+  4: 8,
+  5: 8,
+  6: 8,
+  7: 8,
+  8: 8,
+  9: 8,
 };
 
 type Unit1ShapeProblemEntry =
@@ -7587,6 +7664,7 @@ type Unit1ShapeProblemEntry =
   | [ShapeDrawMode, string, ShapeDrawTask, ShapeDrawProblemData['identifyVariant'], number, ShapeDrawProblemData['drawVariant']];
 
 const unit1ProblemOrderCache = new Map<number, Unit1ShapeProblemEntry[]>();
+const previousUnit1EntrySignaturesByLevel = new Map<number, string[]>();
 
 function resetUnit1ProblemOrders() {
   unit1ProblemOrderCache.clear();
@@ -7614,6 +7692,34 @@ function arrangeUnit1EntriesWithoutAdjacentRepeats(entries: Unit1ShapeProblemEnt
   return arrangedEntries;
 }
 
+function arrangeUnit1EntriesForRound(level: number, entries: Unit1ShapeProblemEntry[]) {
+  const previousSignatures = previousUnit1EntrySignaturesByLevel.get(level) ?? [];
+  const remainingEntries = arrangeUnit1EntriesWithoutAdjacentRepeats(entries);
+  const arrangedEntries: Unit1ShapeProblemEntry[] = [];
+  let previousSignature = '';
+
+  while (remainingEntries.length > 0) {
+    const position = arrangedEntries.length;
+    const candidates = remainingEntries.map((entry, index) => ({
+      entry,
+      index,
+      signature: getUnit1EntrySignature(entry),
+    }));
+    const nextCandidate =
+      candidates.find(({ signature }) => signature !== previousSignature && signature !== previousSignatures[position])
+      ?? candidates.find(({ signature }) => signature !== previousSignature)
+      ?? candidates.find(({ signature }) => signature !== previousSignatures[position])
+      ?? candidates[0];
+
+    arrangedEntries.push(nextCandidate.entry);
+    previousSignature = nextCandidate.signature;
+    remainingEntries.splice(nextCandidate.index, 1);
+  }
+
+  previousUnit1EntrySignaturesByLevel.set(level, arrangedEntries.map(getUnit1EntrySignature));
+  return arrangedEntries;
+}
+
 function getUnit1Level1ProblemEntries() {
   const cachedEntries = unit1ProblemOrderCache.get(1);
   if (cachedEntries) {
@@ -7622,14 +7728,19 @@ function getUnit1Level1ProblemEntries() {
 
   const drawEntries = shuffleValues<Unit1ShapeProblemEntry>([
     ['segment', '두 점을 곧게 이어 선분을 만들어 보세요.'],
+    ['segment', '점 ㄱ과 점 ㄴ을 이어 선분을 완성해 보세요.'],
     ['line', '두 점을 지나 양쪽으로 끝없이 이어지는 직선을 만들어 보세요.'],
+    ['line', '두 점을 지나 계속 이어지는 직선을 그려 보세요.'],
     ['ray', '시작점에서 한쪽으로 끝없이 이어지는 반직선을 만들어 보세요.'],
-  ]).slice(0, 2);
+    ['ray', '점 ㄱ에서 시작해 한쪽으로 이어지는 반직선을 만들어 보세요.'],
+  ]).slice(0, 4);
   const readEntries = shuffleValues<Unit1ShapeProblemEntry>([
     ['ray', '제시된 선의 이름을 써 보세요.', 'identify', undefined, 0],
     [Math.random() < 0.5 ? 'segment' : 'line', '선을 보고 알맞은 이름을 써 보세요.', 'identify', undefined, 1],
+    ['segment', '제시된 선의 이름을 써 보세요.', 'identify', undefined, 2],
+    ['line', '선을 보고 알맞은 이름을 써 보세요.', 'identify', undefined, 3],
   ]);
-  const entries = arrangeUnit1EntriesWithoutAdjacentRepeats([...drawEntries, ...readEntries]);
+  const entries = arrangeUnit1EntriesForRound(1, [...drawEntries, ...readEntries]);
 
   unit1ProblemOrderCache.set(1, entries);
   return entries;
@@ -7641,12 +7752,16 @@ function getUnit1Level2ProblemEntries() {
     return cachedEntries;
   }
 
-  const angleReadVariants = shuffleValues([...SHAPE_READ_ANGLE_LABEL_SETS.keys()]).slice(0, 2);
-  const entries = arrangeUnit1EntriesWithoutAdjacentRepeats([
+  const angleReadVariants = shuffleValues([...SHAPE_READ_ANGLE_LABEL_SETS.keys()]);
+  const entries = arrangeUnit1EntriesForRound(2, [
     ['angle', '점 ㄴ에서 두 반직선을 그어 각을 만들어 보세요.'],
     ['angle', '점 ㄴ을 꼭짓점으로 하는 각을 만들어 보세요.'],
+    ['angle', '두 반직선이 만나는 점을 꼭짓점으로 하여 각을 그려 보세요.'],
+    ['angle', '점 ㄴ에서 시작하는 두 반직선으로 각을 완성해 보세요.'],
     ['angle', '각을 보고 이름을 써 보세요.', 'identify', undefined, angleReadVariants[0] ?? 0],
     ['angle', '제시된 각의 이름을 써 보세요.', 'identify', undefined, angleReadVariants[1] ?? 1],
+    ['angle', '각의 이름을 알맞게 써 보세요.', 'identify', undefined, angleReadVariants[2] ?? 2],
+    ['angle', '그림 속 각을 읽고 이름을 써 보세요.', 'identify', undefined, angleReadVariants[3] ?? 3],
   ]);
 
   unit1ProblemOrderCache.set(2, entries);
@@ -7659,11 +7774,15 @@ function getUnit1Level3ProblemEntries() {
     return cachedEntries;
   }
 
-  const entries = arrangeUnit1EntriesWithoutAdjacentRepeats([
+  const entries = arrangeUnit1EntriesForRound(3, [
     ['rightAngle', '접어서 생긴 각의 이름을 써 보세요.', 'identify', 'fold', 0],
+    ['rightAngle', '종이를 접어 생긴 반듯한 각의 이름을 써 보세요.', 'identify', 'fold', 1],
     ['rightAngle', '점 ㄴ에서 두 반직선을 그어 직각을 만들어 보세요.', 'draw', undefined, randomIntInRange(0, 5), 'point'],
+    ['rightAngle', '꼭짓점 ㄴ을 기준으로 직각을 완성해 보세요.', 'draw', undefined, randomIntInRange(0, 5), 'point'],
     ['rightAngle', '주어진 반직선과 직각이 되도록 점 ㄴ에서 반직선을 그어 보세요.', 'draw', undefined, randomIntInRange(0, 5), 'ray'],
+    ['rightAngle', '반직선 하나를 더 그어 직각을 만들어 보세요.', 'draw', undefined, randomIntInRange(0, 5), 'ray'],
     ['rightAngle', '빈칸에 알맞은 말을 써 보세요.', 'identify', 'definition'],
+    ['rightAngle', '직각의 뜻을 떠올려 빈칸을 채워 보세요.', 'identify', 'definition', 1],
   ]);
 
   unit1ProblemOrderCache.set(3, entries);
@@ -7676,11 +7795,15 @@ function getUnit1Level4ProblemEntries() {
     return cachedEntries;
   }
 
-  const entries = arrangeUnit1EntriesWithoutAdjacentRepeats([
+  const entries = arrangeUnit1EntriesForRound(4, [
     ['rightAngle', '도형 속 직각이 모두 몇 개인지 써 보세요.', 'identify', 'rightAngleMark', randomIntInRange(0, RIGHT_ANGLE_MARK_ANSWER_TOKENS.length - 1)],
+    ['rightAngle', '표시된 직각의 수를 세어 보세요.', 'identify', 'rightAngleMark', randomIntInRange(0, RIGHT_ANGLE_MARK_ANSWER_TOKENS.length - 1)],
     ['rightAngle', '왼쪽 도형부터 직각이 몇 개인지 차례대로 써 보세요.', 'identify', 'rightAngleCount', randomIntInRange(0, RIGHT_ANGLE_COUNT_ANSWERS.length - 1)],
+    ['rightAngle', '두 도형의 직각 수를 차례대로 써 보세요.', 'identify', 'rightAngleCount', randomIntInRange(0, RIGHT_ANGLE_COUNT_ANSWERS.length - 1)],
     ['rightAngle', '직각을 모두 찾아 각의 이름을 써 보세요.', 'identify', 'rightAngleNames', randomIntInRange(0, RIGHT_ANGLE_NAME_PROBLEM_VARIANTS.length - 1)],
+    ['rightAngle', '그림에서 직각인 각의 이름을 모두 써 보세요.', 'identify', 'rightAngleNames', randomIntInRange(0, RIGHT_ANGLE_NAME_PROBLEM_VARIANTS.length - 1)],
     ['rightAngle', '직각이 되는 시각을 모두 써 보세요.', 'identify', 'clockRightAngles', randomIntInRange(0, CLOCK_RIGHT_ANGLE_OPTION_VARIANTS.length - 1)],
+    ['rightAngle', '시계에서 직각을 만드는 시각을 찾아 써 보세요.', 'identify', 'clockRightAngles', randomIntInRange(0, CLOCK_RIGHT_ANGLE_OPTION_VARIANTS.length - 1)],
   ]);
 
   unit1ProblemOrderCache.set(4, entries);
@@ -7712,12 +7835,42 @@ function getUnit1Level5ProblemEntries() {
     '삼각형 도구로 서로 다른 크기의 직각삼각형 2개를 만들어 보세요.',
     '크기가 다른 직각삼각형을 두 개 그려 보세요.',
   ];
-  const entries: Unit1ShapeProblemEntry[] = [
+  const entries = arrangeUnit1EntriesForRound(5, [
     ['rightTriangle', classifyTitles[classifyVariant % classifyTitles.length], 'identify', 'rightTriangleClassify', classifyVariant],
+    [
+      'rightTriangle',
+      classifyTitles[(classifyVariant + 1) % classifyTitles.length],
+      'identify',
+      'rightTriangleClassify',
+      (classifyVariant + 1) % RIGHT_TRIANGLE_CLASSIFY_ANSWER_TOKENS.length,
+    ],
     ['rightTriangle', '빈칸에 알맞은 말을 써 보세요.', 'identify', 'rightTriangleDefinition', definitionVariant],
+    [
+      'rightTriangle',
+      '직각삼각형의 뜻에 맞게 빈칸을 채워 보세요.',
+      'identify',
+      'rightTriangleDefinition',
+      (definitionVariant + 1) % RIGHT_TRIANGLE_DEFINITION_VARIANTS.length,
+    ],
     ['rightTriangle', pointTitles[pointCompletionVariant % pointTitles.length], 'draw', undefined, pointCompletionVariant, 'point'],
+    [
+      'rightTriangle',
+      pointTitles[(pointCompletionVariant + 1) % pointTitles.length],
+      'draw',
+      undefined,
+      (pointCompletionVariant + 3) % 8,
+      'point',
+    ],
     ['rightTriangle', polygonTitles[twoTriangleVariant % polygonTitles.length], 'draw', undefined, twoTriangleVariant, 'twoRightTriangles'],
-  ];
+    [
+      'rightTriangle',
+      polygonTitles[(twoTriangleVariant + 1) % polygonTitles.length],
+      'draw',
+      undefined,
+      (twoTriangleVariant + 2) % 6,
+      'twoRightTriangles',
+    ],
+  ]);
 
   unit1ProblemOrderCache.set(5, entries);
   return entries;
@@ -7733,12 +7886,42 @@ function getUnit1Level6ProblemEntries() {
   const definitionVariant = randomIntInRange(0, SHAPE_DEFINITION_VARIANTS.rectangle.length - 1);
   const pointCompletionVariant = randomIntInRange(0, 5);
   const twoRectangleVariant = randomIntInRange(0, 5);
-  const entries: Unit1ShapeProblemEntry[] = [
+  const entries = arrangeUnit1EntriesForRound(6, [
     ['rectangle', '직각의 수에 따라 사각형 카드를 분류해 보세요.', 'identify', 'shapeClassify', classifyVariant],
+    [
+      'rectangle',
+      '직사각형인 도형과 아닌 도형을 나누어 보세요.',
+      'identify',
+      'shapeClassify',
+      (classifyVariant + 1) % RECTANGLE_CLASSIFY_VARIANTS.length,
+    ],
     ['rectangle', '빈칸에 알맞은 말을 써 보세요.', 'identify', 'shapeDefinition', definitionVariant],
+    [
+      'rectangle',
+      '직사각형의 성질을 생각하며 빈칸을 채워 보세요.',
+      'identify',
+      'shapeDefinition',
+      (definitionVariant + 1) % SHAPE_DEFINITION_VARIANTS.rectangle.length,
+    ],
     ['rectangle', '나머지 한 점을 찍어 직사각형을 완성해 보세요.', 'draw', undefined, pointCompletionVariant, 'point'],
+    [
+      'rectangle',
+      '세 점을 보고 알맞은 곳에 한 점을 찍어 직사각형을 만들어 보세요.',
+      'draw',
+      undefined,
+      (pointCompletionVariant + 2) % 6,
+      'point',
+    ],
     ['rectangle', '크기가 다른 직사각형 2개를 그려 보세요.', 'draw', undefined, twoRectangleVariant, 'twoPolygons'],
-  ];
+    [
+      'rectangle',
+      '서로 다른 크기의 직사각형 두 개를 완성해 보세요.',
+      'draw',
+      undefined,
+      (twoRectangleVariant + 3) % 6,
+      'twoPolygons',
+    ],
+  ]);
 
   unit1ProblemOrderCache.set(6, entries);
   return entries;
@@ -7754,12 +7937,42 @@ function getUnit1Level7ProblemEntries() {
   const definitionVariant = randomIntInRange(0, SHAPE_DEFINITION_VARIANTS.square.length - 1);
   const pointCompletionVariant = randomIntInRange(0, 5);
   const twoSquareVariant = randomIntInRange(0, 5);
-  const entries: Unit1ShapeProblemEntry[] = [
+  const entries = arrangeUnit1EntriesForRound(7, [
     ['square', '도형 카드를 알맞은 칸에 넣어 정사각형을 분류해 보세요.', 'identify', 'shapeClassify', classifyVariant],
+    [
+      'square',
+      '정사각형인 도형과 아닌 도형을 나누어 보세요.',
+      'identify',
+      'shapeClassify',
+      (classifyVariant + 1) % SQUARE_CLASSIFY_VARIANTS.length,
+    ],
     ['square', '빈칸에 알맞은 말을 써 보세요.', 'identify', 'shapeDefinition', definitionVariant],
+    [
+      'square',
+      '정사각형의 성질을 생각하며 빈칸을 채워 보세요.',
+      'identify',
+      'shapeDefinition',
+      (definitionVariant + 1) % SHAPE_DEFINITION_VARIANTS.square.length,
+    ],
     ['square', '나머지 한 점을 찍어 정사각형을 완성해 보세요.', 'draw', undefined, pointCompletionVariant, 'point'],
+    [
+      'square',
+      '세 점을 보고 알맞은 곳에 한 점을 찍어 정사각형을 만들어 보세요.',
+      'draw',
+      undefined,
+      (pointCompletionVariant + 2) % 6,
+      'point',
+    ],
     ['square', '크기가 다른 정사각형 2개를 그려 보세요.', 'draw', undefined, twoSquareVariant, 'twoPolygons'],
-  ];
+    [
+      'square',
+      '서로 다른 크기의 정사각형 두 개를 완성해 보세요.',
+      'draw',
+      undefined,
+      (twoSquareVariant + 3) % 6,
+      'twoPolygons',
+    ],
+  ]);
 
   unit1ProblemOrderCache.set(7, entries);
   return entries;
@@ -7776,9 +7989,14 @@ function getUnit1Level8ProblemEntries() {
     '서로 다른 모양과 크기의 평면도형 2개 이상을 만들어 보세요.',
     '도형 도구로 모양도 크기도 다른 평면도형을 2개 이상 그려 보세요.',
     '모양과 크기가 모두 다른 평면도형을 두 개 이상 완성해 보세요.',
+    '여러 가지 평면도형 중 서로 다른 도형을 2개 이상 그려 보세요.',
+    '크기와 모양이 겹치지 않도록 평면도형을 2개 이상 만들어 보세요.',
+    '직각삼각형, 직사각형, 정사각형 중 서로 다른 도형을 골라 그려 보세요.',
+    '평면도형 도구를 사용해 서로 다른 모양 2개 이상을 완성해 보세요.',
   ]);
   const modes = shuffleValues<ShapeDrawMode>(['rightTriangle', 'rectangle', 'square', 'quadrilateral']);
-  const entries = arrangeUnit1EntriesWithoutAdjacentRepeats(
+  const entries = arrangeUnit1EntriesForRound(
+    8,
     titles.slice(0, UNIT1_PROBLEM_COUNTS[8] ?? titles.length).map((title, index): Unit1ShapeProblemEntry => [
       modes[index % modes.length] ?? 'rightTriangle',
       title,
@@ -7826,8 +8044,40 @@ function createShapeRainProblem(problemSequence = 1): Problem {
       initialDropCount: 2,
       pairSpawnEvery: 3,
     },
+    5: {
+      targetCount: 11,
+      fallDurationMs: 40000,
+      maxActiveDrops: 3,
+      spawnIntervalMs: 5000,
+      initialDropCount: 2,
+      pairSpawnEvery: 3,
+    },
+    6: {
+      targetCount: 12,
+      fallDurationMs: 38000,
+      maxActiveDrops: 4,
+      spawnIntervalMs: 4600,
+      initialDropCount: 2,
+      pairSpawnEvery: 3,
+    },
+    7: {
+      targetCount: 13,
+      fallDurationMs: 36000,
+      maxActiveDrops: 4,
+      spawnIntervalMs: 4200,
+      initialDropCount: 3,
+      pairSpawnEvery: 2,
+    },
+    8: {
+      targetCount: 14,
+      fallDurationMs: 34000,
+      maxActiveDrops: 4,
+      spawnIntervalMs: 3800,
+      initialDropCount: 3,
+      pairSpawnEvery: 2,
+    },
   };
-  const config = phaseConfig[wave] ?? phaseConfig[4];
+  const config = phaseConfig[wave] ?? phaseConfig[8];
   const requiredShapes: ShapeRainShapeKind[] =
     wave === 1
       ? ['segment', 'line', 'ray', 'angle']
@@ -7835,7 +8085,9 @@ function createShapeRainProblem(problemSequence = 1): Problem {
         ? ['rightAngle', 'rightTriangle', 'rectangle', 'square']
         : wave === 3
           ? ['segment', 'ray', 'rightAngle', 'rectangle', 'rightTriangle']
-          : ['line', 'angle', 'rightAngle', 'rightTriangle', 'rectangle', 'square'];
+          : wave <= 5
+            ? ['line', 'angle', 'rightAngle', 'rightTriangle', 'rectangle', 'square']
+            : ['segment', 'line', 'ray', 'angle', 'rightAngle', 'rightTriangle', 'rectangle', 'square'];
   const shapePool = shuffleValues([...requiredShapes, ...SHAPE_RAIN_SHAPES, ...requiredShapes]).slice(0, config.targetCount);
 
   return {
@@ -14933,6 +15185,7 @@ export default function App() {
   const [selectedPlayerSkinId, setSelectedPlayerSkinId] = useState<PlayerSkinId>(() => readSelectedPlayerSkinId(readUnlockedPlayerSkinIds(readChampionGomaUnlock())));
   const [isSkinPickerOpen, setIsSkinPickerOpen] = useState(false);
   const [pendingRewardSkin, setPendingRewardSkin] = useState<PlayerSkinConfig | null>(null);
+  const [isRewardPoolDepleted, setIsRewardPoolDepleted] = useState(false);
   const [rewardRoulettePhase, setRewardRoulettePhase] = useState<RewardRoulettePhase>('spinning');
   const [rewardRouletteSpinKey, setRewardRouletteSpinKey] = useState(0);
   const [storedPlayRecords, setStoredPlayRecords] = useState<StoredPlayRecord[]>(readStoredPlayRecords);
@@ -15022,7 +15275,7 @@ export default function App() {
       const nextRecords = [record, ...previousRecords].slice(0, MAX_STORED_PLAY_RECORDS);
       saveStoredPlayRecords(nextRecords);
       if (result === 'win') {
-        prepareRandomSkinRewardForClear();
+        prepareRandomSkinRewardForClear(activeLearningUnitId);
       }
       return nextRecords;
     });
@@ -15117,13 +15370,15 @@ export default function App() {
     saveSelectedPlayerSkinId(skinId);
   };
 
-  const prepareRandomSkinRewardForClear = () => {
-    const rewardSkin = pickRandomLockedRewardSkin(unlockedPlayerSkinIds);
+  const prepareRandomSkinRewardForClear = (unitId: LearningUnitId) => {
+    const rewardSkin = pickRandomLockedRewardSkin(unitId, unlockedPlayerSkinIds);
     if (!rewardSkin) {
       setPendingRewardSkin(null);
+      setIsRewardPoolDepleted(true);
       return;
     }
 
+    setIsRewardPoolDepleted(false);
     setPendingRewardSkin(rewardSkin);
     setRewardRoulettePhase('spinning');
     setRewardRouletteSpinKey((spinKey) => spinKey + 1);
@@ -15445,7 +15700,7 @@ export default function App() {
   const currentLevelDescription = levelDescriptions[level] ?? `${level}단계`;
   const finalRecordLabel = gameState === 'win' ? `${level}단계 클리어` : `${level}단계 도달`;
   const finalRecordTopic = currentLevelDescription.replace(/^\d+단계:\s*/, '');
-  const rewardRouletteSkins = REWARD_PLAYER_SKINS;
+  const rewardRouletteSkins = getRewardPlayerSkinsForUnit(activeLearningUnitId);
   const rewardSlotMachineItems = pendingRewardSkin
     ? [...rewardRouletteSkins, ...rewardRouletteSkins, ...rewardRouletteSkins, pendingRewardSkin]
     : rewardRouletteSkins;
@@ -15494,6 +15749,7 @@ export default function App() {
     setUnitSelectionChallenge(null);
     setIsSpecialChallengeResolving(false);
     setTimeLeft(ESTIMATION_TIME_LIMIT_SECONDS);
+    setIsRewardPoolDepleted(false);
     setInputValue('');
     setUnitInputValue('');
     setClockAnswerInput({ hours: '', minutes: '', seconds: '' });
@@ -16592,6 +16848,7 @@ export default function App() {
     gameStateRef.current = 'playing';
     setGameState('playing');
     setPendingRewardSkin(null);
+    setIsRewardPoolDepleted(false);
     setRewardRoulettePhase('spinning');
     setIsAttacking(false);
     setIsOpponentAttacking(false);
@@ -16631,6 +16888,7 @@ export default function App() {
     gameStateRef.current = 'start';
     setGameState('start');
     setPendingRewardSkin(null);
+    setIsRewardPoolDepleted(false);
     setRewardRoulettePhase('spinning');
     setIsNamePromptOpen(false);
     setIsRecordModalOpen(false);
@@ -17112,6 +17370,7 @@ export default function App() {
                                 const isSkinUnlocked = isDeveloperMode || isPlayerSkinUnlocked(skin, unlockedPlayerSkinIds);
                                 const isSelectedSkin = selectedPlayerSkinId === skin.id;
                                 const displaySkinLabel = isSkinUnlocked ? skin.label : '비공개';
+                                const lockedRewardUnitLabel = !isSkinUnlocked ? getRewardUnitLabelForSkin(skin.id) : null;
 
                                 return (
                                   <button
@@ -17143,6 +17402,11 @@ export default function App() {
                                       )}
                                     </span>
                                     <span className="w-full truncate text-[11px] font-black leading-tight">{displaySkinLabel}</span>
+                                    {lockedRewardUnitLabel && (
+                                      <span className="w-full truncate text-[9px] font-black leading-none text-emerald-300/85">
+                                        {lockedRewardUnitLabel} 보상
+                                      </span>
+                                    )}
                                     {isSelectedSkin && (
                                       <span className="absolute right-1.5 top-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-400 text-slate-950">
                                         <Check className="h-3 w-3" />
@@ -18297,6 +18561,22 @@ export default function App() {
                     </p>
                   </motion.div>
                 </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <AnimatePresence>
+            {isWinResult && isRewardPoolDepleted && !pendingRewardSkin && (
+              <motion.div
+                key="reward-pool-depleted"
+                initial={{ opacity: 0, y: 14, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                transition={{ duration: 0.24, ease: 'easeOut' }}
+                className="mb-4 rounded-[1.5rem] border border-emerald-200/30 bg-slate-950/70 px-4 py-4 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] sm:px-6"
+              >
+                <p className="break-keep text-sm font-black tracking-[0.12em] text-emerald-200 sm:text-base">
+                  이 단원의 모든 보상 스킨을 이미 해금했습니다
+                </p>
               </motion.div>
             )}
           </AnimatePresence>
