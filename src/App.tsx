@@ -12768,6 +12768,7 @@ function ShapeRainGameCard({
   const [blockedCount, setBlockedCount] = useState(0);
   const [status, setStatus] = useState<'playing' | 'cleared' | 'failed'>('playing');
   const [isWrongAnswerFeedback, setIsWrongAnswerFeedback] = useState(false);
+  const [showStartHint, setShowStartHint] = useState(true);
   const [wrongAnswerShakeKey, setWrongAnswerShakeKey] = useState(0);
   const [dropAreaHeight, setDropAreaHeight] = useState(0);
   const [drops, setDrops] = useState<ShapeRainDrop[]>(() => createShapeRainDrops(shapeRain));
@@ -12806,6 +12807,7 @@ function ShapeRainGameCard({
     setDropState({ activeDrops: [], nextDropIndex: 0 });
     setAnswerValue('');
     setBlockedCount(0);
+    setShowStartHint(true);
     setStatus('playing');
     window.setTimeout(() => inputRef.current?.focus(), 40);
   };
@@ -12862,11 +12864,21 @@ function ShapeRainGameCard({
     setDropState({ activeDrops: [], nextDropIndex: 0 });
     setAnswerValue('');
     setBlockedCount(0);
+    setShowStartHint(true);
     setIsWrongAnswerFeedback(false);
     setStatus('playing');
     didResolveRef.current = false;
     window.setTimeout(() => inputRef.current?.focus(), 80);
   }, [shapeRain]);
+
+  useEffect(() => {
+    if (!showStartHint || status !== 'playing') {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => setShowStartHint(false), 2200);
+    return () => window.clearTimeout(timeoutId);
+  }, [showStartHint, status]);
 
   useEffect(() => () => {
     if (wrongAnswerFeedbackTimeoutRef.current !== null) {
@@ -12942,7 +12954,7 @@ function ShapeRainGameCard({
         <div className="absolute right-3 top-3 z-20 rounded-2xl border-2 border-emerald-400/80 bg-slate-950/92 px-3 py-2 text-right shadow-[0_8px_20px_rgba(15,23,42,0.3)] sm:right-4 sm:top-4 sm:px-4">
           <div className="text-xl font-black text-white sm:text-2xl">{blockedCount} / {shapeRain.targetCount}</div>
         </div>
-        {status === 'playing' && blockedCount === 0 ? (
+        {status === 'playing' && blockedCount === 0 && showStartHint ? (
           <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center px-5 text-center">
             <div className="rounded-3xl border-2 border-white/20 bg-slate-950/72 px-6 py-4 shadow-2xl backdrop-blur-sm">
               <p className="break-keep text-2xl font-black text-white sm:text-4xl">도형의 이름을 적으세요.</p>
