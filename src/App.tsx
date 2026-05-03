@@ -3961,6 +3961,34 @@ function getClockReadingEditableParts(_difficulty: ClockReadingDifficulty): Cloc
   return ['hours', 'minutes', 'seconds'];
 }
 
+const RECENT_CLOCK_READING_SECOND_LIMIT = 4;
+const recentClockReadingSeconds: number[] = [];
+
+function getClockReadingSecondCandidates(difficulty: ClockReadingDifficulty) {
+  if (difficulty === 1) {
+    return [5, 10, 15, 20];
+  }
+
+  if (difficulty === 2) {
+    return [5, 10, 15, 20, 25, 30];
+  }
+
+  return [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
+}
+
+function createClockReadingSecond(difficulty: ClockReadingDifficulty) {
+  const candidates = getClockReadingSecondCandidates(difficulty);
+  const availableCandidates = candidates.filter((second) => !recentClockReadingSeconds.includes(second));
+  const second = sample(availableCandidates.length > 0 ? availableCandidates : candidates);
+
+  recentClockReadingSeconds.push(second);
+  if (recentClockReadingSeconds.length > RECENT_CLOCK_READING_SECOND_LIMIT) {
+    recentClockReadingSeconds.shift();
+  }
+
+  return second;
+}
+
 function createClockReadingVisualProblem(difficulty: ClockReadingDifficulty = 3): Problem {
   const hour = randomInt(1, 12);
   const minute =
@@ -3969,16 +3997,7 @@ function createClockReadingVisualProblem(difficulty: ClockReadingDifficulty = 3)
       : difficulty === 2 || difficulty === 3
         ? randomInt(0, 11) * 5
         : randomInt(0, 59);
-  // Exclude 0 seconds so learners always read the second hand, while keeping the
-  // minute hand close enough to the current minute for elementary learners.
-  const second =
-    difficulty === 1
-      ? sample([5, 10])
-      : difficulty === 2
-        ? sample([5, 10, 15])
-        : difficulty === 3 || difficulty === 4
-        ? sample([5, 10, 15])
-        : sample([5, 10, 15, 20]);
+  const second = createClockReadingSecond(difficulty);
   const editableParts = getClockReadingEditableParts(difficulty);
   const question =
     editableParts.length === 3
@@ -4246,7 +4265,7 @@ function createVerticalTimeAdditionProblem(step = 1): Problem {
   }
 }
 
-const UNIT3_FIXED_TIME_PROBLEM_COUNT = 6;
+const UNIT3_FIXED_TIME_PROBLEM_COUNT = 4;
 
 function createClockTimeSubtractionProblem(step = 1): Problem {
   while (true) {
@@ -4397,11 +4416,7 @@ function createLevel10TimeAdditionProblem(problemSequence = 1, _opponentHP = 100
   }
 
   if (resolvedSequence === 4) {
-    return createClockTimeAdditionProblem(2);
-  }
-
-  if (resolvedSequence === 5) {
-    return createBarModelTimeAdditionProblem(2);
+    return createVerticalTimeAdditionProblem(2);
   }
 
   return createVerticalTimeAdditionProblem(2);
@@ -4423,11 +4438,7 @@ function createLevel11TimeSubtractionProblem(problemSequence = 1, _opponentHP = 
   }
 
   if (resolvedSequence === 4) {
-    return createClockTimeSubtractionProblem(2);
-  }
-
-  if (resolvedSequence === 5) {
-    return createBarModelTimeSubtractionProblem(2);
+    return createVerticalTimeSubtractionProblem(2);
   }
 
   return createVerticalTimeSubtractionProblem(2);
@@ -4475,17 +4486,13 @@ const LEVEL12_DEFAULT_TEMPLATE_ORDER: Level12TemplateId[] = [
   'elapsedTime',
   'activityDuration',
   'activityStartTime',
-  'tripArrivalTime',
-  'remainingAfterUse',
 ];
 
 const LEVEL12_OPERATION_PATTERNS: Level12OperationGroup[][] = [
-  ['addition', 'subtraction', 'addition', 'subtraction', 'addition', 'subtraction'],
-  ['addition', 'addition', 'subtraction', 'addition', 'subtraction', 'subtraction'],
-  ['subtraction', 'addition', 'addition', 'subtraction', 'addition', 'subtraction'],
-  ['subtraction', 'addition', 'subtraction', 'addition', 'subtraction', 'addition'],
-  ['addition', 'subtraction', 'subtraction', 'addition', 'addition', 'subtraction'],
-  ['subtraction', 'subtraction', 'addition', 'subtraction', 'addition', 'addition'],
+  ['addition', 'subtraction', 'addition', 'subtraction'],
+  ['addition', 'addition', 'subtraction', 'subtraction'],
+  ['subtraction', 'addition', 'subtraction', 'addition'],
+  ['subtraction', 'subtraction', 'addition', 'addition'],
 ];
 
 function pickLevel12TemplateSubset(
@@ -4501,11 +4508,15 @@ function pickLevel12TemplateSubset(
 function buildLevel12RoundTemplateOrder(previousOrder: Level12TemplateId[] = []) {
   const previousAdditionIds = new Set(previousOrder.filter((id) => LEVEL12_TEMPLATE_OPERATIONS[id] === 'addition'));
   const previousSubtractionIds = new Set(previousOrder.filter((id) => LEVEL12_TEMPLATE_OPERATIONS[id] === 'subtraction'));
-  const additionTemplates = shuffleValues(pickLevel12TemplateSubset(LEVEL12_ADDITION_TEMPLATE_IDS, previousAdditionIds, 3));
-  const subtractionTemplates = shuffleValues(
-    pickLevel12TemplateSubset(LEVEL12_SUBTRACTION_TEMPLATE_IDS, previousSubtractionIds, 3),
-  );
   const operationPattern = sample(LEVEL12_OPERATION_PATTERNS);
+  const additionCount = operationPattern.filter((group) => group === 'addition').length;
+  const subtractionCount = operationPattern.length - additionCount;
+  const additionTemplates = shuffleValues(
+    pickLevel12TemplateSubset(LEVEL12_ADDITION_TEMPLATE_IDS, previousAdditionIds, additionCount),
+  );
+  const subtractionTemplates = shuffleValues(
+    pickLevel12TemplateSubset(LEVEL12_SUBTRACTION_TEMPLATE_IDS, previousSubtractionIds, subtractionCount),
+  );
   let additionIndex = 0;
   let subtractionIndex = 0;
 
@@ -9601,11 +9612,11 @@ function ClockTimeAdditionFigure({
       </div>
 
       <div className="flex flex-col items-center gap-2.5">
-        <div className="w-full max-w-[17.5rem] rounded-[1.35rem] border-2 border-sky-300 bg-gradient-to-b from-sky-50 to-white px-4 py-2.5 text-center text-sky-900 shadow-[0_10px_24px_rgba(14,165,233,0.14)]">
+        <div className="w-full max-w-[17.5rem] rounded-[1.35rem] border-2 border-sky-300 bg-gradient-to-b from-sky-50 to-white px-4 py-2.5 text-center text-[#0f172a] shadow-[0_10px_24px_rgba(14,165,233,0.14)]">
           <div className="text-[0.76rem] font-black tracking-[0.08em] text-sky-700 sm:text-[0.82rem]">
             {operationLabel}
           </div>
-          <div className="mt-1 text-[1.2rem] font-black leading-none sm:text-[1.4rem]">
+          <div className="mt-1 text-[1.2rem] font-black leading-none text-[#0f172a] sm:text-[1.4rem]">
             {totalAddText}
           </div>
         </div>
@@ -9617,9 +9628,9 @@ function ClockTimeAdditionFigure({
           className={`flex min-w-0 items-center justify-between gap-1.5 rounded-[1.15rem] border px-2.5 py-2 text-left shadow-sm transition ${
             canAnimateMinutes
               ? 'border-rose-300 bg-rose-50 text-rose-900 hover:-translate-y-0.5 hover:bg-rose-100'
-              : animationStep !== 'idle'
-                ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
-                : 'cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400'
+            : animationStep !== 'idle'
+              ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
+              : 'cursor-not-allowed border-[#e2e8f0] bg-[#f1f5f9] text-[#64748b]'
           }`}
         >
           <div className="flex min-w-0 items-center gap-1.5">
@@ -9638,10 +9649,10 @@ function ClockTimeAdditionFigure({
           onClick={() => animateClockHands(finalTargetSeconds, 'seconds', 'secondsDone')}
           className={`flex min-w-0 items-center justify-between gap-1.5 rounded-[1.15rem] border px-2.5 py-2 text-left shadow-sm transition ${
             canAnimateSeconds
-              ? 'border-slate-400 bg-slate-100 text-slate-900 hover:-translate-y-0.5 hover:bg-slate-200'
-              : hasCompletedAllSteps
-                ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
-                : 'cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400'
+              ? 'border-[#94a3b8] bg-[#f1f5f9] text-[#0f172a] hover:-translate-y-0.5 hover:bg-[#e2e8f0]'
+            : hasCompletedAllSteps
+              ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
+              : 'cursor-not-allowed border-[#e2e8f0] bg-[#f1f5f9] text-[#64748b]'
           }`}
         >
           <div className="flex min-w-0 items-center gap-1.5">
