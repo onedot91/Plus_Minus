@@ -7909,16 +7909,19 @@ function getUnit1Level3ProblemEntries() {
     return cachedEntries;
   }
 
-  const entries = arrangeUnit1EntriesForRound(3, [
-    ['rightAngle', '접어서 생긴 각의 이름을 써 보세요.', 'identify', 'fold', 0],
-    ['rightAngle', '종이를 접어 생긴 반듯한 각의 이름을 써 보세요.', 'identify', 'fold', 1],
+  const foldEntry: Unit1ShapeProblemEntry = Math.random() < 0.5
+    ? ['rightAngle', '접어서 생긴 각의 이름을 써 보세요.', 'identify', 'fold', 0]
+    : ['rightAngle', '종이를 접어 생긴 반듯한 각의 이름을 써 보세요.', 'identify', 'fold', 1];
+  const definitionEntry: Unit1ShapeProblemEntry = Math.random() < 0.5
+    ? ['rightAngle', '빈칸에 알맞은 말을 써 보세요.', 'identify', 'definition']
+    : ['rightAngle', '직각의 뜻을 떠올려 빈칸을 채워 보세요.', 'identify', 'definition', 1];
+  const drawEntries = shuffleValues<Unit1ShapeProblemEntry>([
     ['rightAngle', '점 ㄴ에서 두 반직선을 그어 직각을 만들어 보세요.', 'draw', undefined, randomIntInRange(0, 5), 'point'],
     ['rightAngle', '꼭짓점 ㄴ을 기준으로 직각을 완성해 보세요.', 'draw', undefined, randomIntInRange(0, 5), 'point'],
     ['rightAngle', '주어진 반직선과 직각이 되도록 점 ㄴ에서 반직선을 그어 보세요.', 'draw', undefined, randomIntInRange(0, 5), 'ray'],
     ['rightAngle', '반직선 하나를 더 그어 직각을 만들어 보세요.', 'draw', undefined, randomIntInRange(0, 5), 'ray'],
-    ['rightAngle', '빈칸에 알맞은 말을 써 보세요.', 'identify', 'definition'],
-    ['rightAngle', '직각의 뜻을 떠올려 빈칸을 채워 보세요.', 'identify', 'definition', 1],
-  ]);
+  ]).slice(0, 2);
+  const entries = arrangeUnit1EntriesForRound(3, [foldEntry, definitionEntry, ...drawEntries]);
 
   unit1ProblemOrderCache.set(3, entries);
   return entries;
@@ -13158,6 +13161,14 @@ function ShapeDrawProblemCard({ shapeDraw, answerValue, onAnswerChange, onSubmit
     if (line.mode === 'ray') return { a: line.start, b: { ...line.end, x: line.start.x + (dx / len) * 900, y: line.start.y + (dy / len) * 900 } };
     return { a: { ...line.start, x: line.start.x - (dx / len) * 900, y: line.start.y - (dy / len) * 900 }, b: { ...line.end, x: line.start.x + (dx / len) * 900, y: line.start.y + (dy / len) * 900 } };
   };
+  const isTargetLineConstruction = (line: ShapeLine, mode: ShapeLineMode) => {
+    if (line.mode !== mode) return false;
+    if (mode === 'ray') {
+      return line.start.label === SHAPE_READ_FIRST_POINT_LABEL && line.end.label === SHAPE_READ_SECOND_POINT_LABEL;
+    }
+    return [line.start.label, line.end.label].includes(SHAPE_READ_FIRST_POINT_LABEL) &&
+      [line.start.label, line.end.label].includes(SHAPE_READ_SECOND_POINT_LABEL);
+  };
   const rightAngleMarkers = (() => {
     const markers: Array<{ key: string; vertex: ShapePoint; a: ShapePoint; b: ShapePoint }> = [];
     const seen = new Set<string>();
@@ -13252,7 +13263,10 @@ function ShapeDrawProblemCard({ shapeDraw, answerValue, onAnswerChange, onSubmit
       if (shapeDraw.mode === 'quadrilateral') return tool === 'polygon' && polygonSides === 4;
       return false;
     }
-    if (shapeDraw.mode === 'segment' || shapeDraw.mode === 'line' || shapeDraw.mode === 'ray') return lines.some((line) => line.mode === shapeDraw.mode);
+    if (shapeDraw.mode === 'segment' || shapeDraw.mode === 'line' || shapeDraw.mode === 'ray') {
+      const targetLineMode = shapeDraw.mode;
+      return lines.some((line) => isTargetLineConstruction(line, targetLineMode));
+    }
     if (shapeDraw.mode === 'triangle') return polygons.some((polygon) => polygon.length === 3);
     if (shapeDraw.mode === 'quadrilateral') return polygons.some((polygon) => polygon.length === 4);
     if (shapeDraw.mode === 'rightTriangle') return polygons.some((polygon) => polygon.length === 3 && polygon.some((point, index) => rightAt(point, polygon[(index + 2) % 3], polygon[(index + 1) % 3])));
@@ -13769,6 +13783,14 @@ function ShapeDrawProblemCardV2({
   const isSameSegment = (line: ShapeLine, start: ShapePoint, end: ShapePoint) =>
     line.mode === 'segment' &&
     ((dist(line.start, start) < 8 && dist(line.end, end) < 8) || (dist(line.start, end) < 8 && dist(line.end, start) < 8));
+  const isTargetLineConstruction = (line: ShapeLine, mode: ShapeLineMode) => {
+    if (line.mode !== mode) return false;
+    if (mode === 'ray') {
+      return line.start.label === SHAPE_READ_FIRST_POINT_LABEL && line.end.label === SHAPE_READ_SECOND_POINT_LABEL;
+    }
+    return [line.start.label, line.end.label].includes(SHAPE_READ_FIRST_POINT_LABEL) &&
+      [line.start.label, line.end.label].includes(SHAPE_READ_SECOND_POINT_LABEL);
+  };
   const getLineCompletionEdgeKey = (edge: [number, number]) => [...edge].sort((a, b) => a - b).join('-');
   const getMatchedLineCompletionEdgeKey = (line: ShapeLine) => {
     if (!lineCompletionFigure || line.mode !== 'segment') return null;
@@ -13882,7 +13904,10 @@ function ShapeDrawProblemCardV2({
     }));
 
     if (shapeDraw.mode === 'angle') return hasAngleFromPreset;
-    if (shapeDraw.mode === 'segment' || shapeDraw.mode === 'line' || shapeDraw.mode === 'ray') return lines.some((line) => line.mode === shapeDraw.mode);
+    if (shapeDraw.mode === 'segment' || shapeDraw.mode === 'line' || shapeDraw.mode === 'ray') {
+      const targetLineMode = shapeDraw.mode;
+      return lines.some((line) => isTargetLineConstruction(line, targetLineMode));
+    }
     if (shapeDraw.mode === 'triangle') return polygons.some((polygon) => polygon.length === 3);
     if (lineCompletionFigure) {
       const matchedEdgeKeys = new Set(lines.map(getMatchedLineCompletionEdgeKey).filter(Boolean));
@@ -14022,11 +14047,12 @@ function ShapeDrawProblemCardV2({
           <line x1={presetRightTriangleSegment.start.x} y1={presetRightTriangleSegment.start.y} x2={presetRightTriangleSegment.end.x} y2={presetRightTriangleSegment.end.y} stroke="#f97316" strokeWidth="4.6" strokeLinecap="round" />
           <ShapePointView point={presetRightTriangleSegment.start} />
           <ShapePointView point={presetRightTriangleSegment.end} />
-          {points.some((point) => isRightTrianglePolygon([presetRightTriangleSegment.start, presetRightTriangleSegment.end, point])) ? (
-            points.map((point) => (
+          {points.map((point) => {
+            const triangle = [presetRightTriangleSegment.start, presetRightTriangleSegment.end, point];
+            return triangleArea(triangle) > 120 ? (
               <motion.polygon
                 key={`complete-right-triangle-${point.x}-${point.y}`}
-                points={[presetRightTriangleSegment.start, presetRightTriangleSegment.end, point].map((vertex) => `${vertex.x},${vertex.y}`).join(' ')}
+                points={triangle.map((vertex) => `${vertex.x},${vertex.y}`).join(' ')}
                 fill="#bef26477"
                 stroke="#ef5da8"
                 strokeWidth="4"
@@ -14034,15 +14060,15 @@ function ShapeDrawProblemCardV2({
                 animate={{ opacity: 1, pathLength: 1 }}
                 transition={{ duration: 0.45, ease: 'easeOut' }}
               />
-            ))
-          ) : null}
+            ) : null;
+          })}
         </g>
       );
     }
     if (presetQuadrilateralPoints) {
       const completedPolygons = points
         .map((point) => [...presetQuadrilateralPoints, point])
-        .filter((polygon) => shapeDraw.mode === 'square' ? isSquarePolygon(polygon) : isRectanglePolygon(polygon));
+        .filter((polygon) => triangleArea(polygon) > 120);
       return (
         <g pointerEvents="none">
           <polyline
