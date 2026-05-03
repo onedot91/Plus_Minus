@@ -1,5 +1,5 @@
 ﻿import React, { useState, useEffect, useRef, useEffectEvent } from 'react';
-import { Sword, Heart, RotateCcw, Play, Sparkles, Star, ChevronDown, Check, History, Lock, X } from 'lucide-react';
+import { Sword, Heart, RotateCcw, Play, Sparkles, Star, ChevronDown, Check, History, Lock, X, Crown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { VisualCalculator, type VisualControlSound } from './components/VisualCalculator';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -3331,7 +3331,7 @@ function readStoredPlayRecords(): StoredPlayRecord[] {
       record &&
       typeof record.id === 'string' &&
       typeof record.playerName === 'string' &&
-      (record.unitId === 'unit2' || record.unitId === 'unit3') &&
+      (record.unitId === 'unit1' || record.unitId === 'unit2' || record.unitId === 'unit3') &&
       typeof record.unitTitle === 'string' &&
       (record.result === 'win' || record.result === 'lose') &&
       typeof record.level === 'number' &&
@@ -3368,6 +3368,43 @@ function formatStoredPlayRecordDate(playedAt: string) {
     hour: '2-digit',
     minute: '2-digit',
   }).format(playedDate);
+}
+
+function hasKoreanFinalConsonant(text: string) {
+  const lastKoreanChar = [...text].reverse().find((char) => {
+    const codePoint = char.charCodeAt(0);
+    return codePoint >= 0xac00 && codePoint <= 0xd7a3;
+  });
+
+  if (!lastKoreanChar) {
+    return false;
+  }
+
+  return (lastKoreanChar.charCodeAt(0) - 0xac00) % 28 !== 0;
+}
+
+function getKoreanParticle(text: string, withFinalConsonant: string, withoutFinalConsonant: string) {
+  return hasKoreanFinalConsonant(text) ? withFinalConsonant : withoutFinalConsonant;
+}
+
+function getStoredPlayRecordSummary(sections: Array<{ unitTitle: string; records: StoredPlayRecord[] }>, totalCount: number) {
+  if (sections.length === 0 || totalCount === 0) {
+    return '';
+  }
+
+  const sortedSections = [...sections].sort((a, b) => b.records.length - a.records.length);
+  const mostPlayedSection = sortedSections[0];
+  const leastPlayedSection = sortedSections[sortedSections.length - 1];
+
+  if (sections.length === 1 || mostPlayedSection.records.length / totalCount >= 0.6) {
+    return `${mostPlayedSection.unitTitle}${getKoreanParticle(mostPlayedSection.unitTitle, '을', '를')} 가장 많이 했어요`;
+  }
+
+  if (leastPlayedSection.records.length <= 1 && mostPlayedSection.records.length - leastPlayedSection.records.length >= 2) {
+    return `${leastPlayedSection.unitTitle}${getKoreanParticle(leastPlayedSection.unitTitle, '은', '는')} 조금 더 해봐요`;
+  }
+
+  return '여러 유형을 골고루 했어요';
 }
 
 const DEFAULT_PLAYER_NAME = '나';
@@ -16002,7 +16039,8 @@ export default function App() {
     }
 
     return sections;
-  }, []);
+  }, []).sort((a, b) => LEARNING_UNITS.findIndex((unit) => unit.id === a.unitId) - LEARNING_UNITS.findIndex((unit) => unit.id === b.unitId));
+  const visibleStoredPlayRecordSummary = getStoredPlayRecordSummary(visibleStoredPlayRecordSections, visibleStoredPlayRecords.length);
   const builderSlotsById =
     problem.kind === 'builder' && problem.builder
       ? Object.fromEntries(problem.builder.slots.map((slot) => [slot.id, slot])) as Record<string, BuildSlotConfig>
@@ -17371,18 +17409,20 @@ export default function App() {
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.94, y: 12 }}
                   transition={{ duration: 0.2, ease: 'easeOut' }}
-                  className="relative my-auto flex h-full max-h-[calc(100svh-1.5rem)] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-cyan-100/16 bg-slate-950/92 p-4 text-left shadow-[0_28px_90px_rgba(2,8,23,0.62)] sm:max-h-[calc(100svh-2rem)] sm:p-5"
+                  className="relative my-auto flex max-h-[calc(100svh-1.5rem)] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-cyan-100/16 bg-slate-950/92 p-4 text-left shadow-[0_28px_90px_rgba(2,8,23,0.62)] sm:max-h-[calc(100svh-2rem)] sm:p-5"
                   role="dialog"
                   aria-modal="true"
                   aria-labelledby="my-records-title"
                 >
                   <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-100/35 to-transparent" />
 
-                  <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+                  <div className="relative flex min-h-0 flex-col overflow-hidden">
                     <div className="flex items-start justify-between gap-4 pr-12">
                       <div className="min-w-0">
                         <h2 id="my-records-title" className="text-2xl font-black text-white sm:text-3xl">나의 기록</h2>
-                        <p className="mt-1 text-sm font-semibold text-slate-400">최근 {visibleStoredPlayRecords.length}번의 배틀 진행 상황</p>
+                        {visibleStoredPlayRecordSummary ? (
+                          <p className="mt-2 inline-flex rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-sm font-black text-slate-100 sm:text-base">{visibleStoredPlayRecordSummary}</p>
+                        ) : null}
                       </div>
                       <button
                         type="button"
@@ -17398,7 +17438,7 @@ export default function App() {
                       </button>
                     </div>
 
-                    <div className="skin-scrollbar mt-4 min-h-0 flex-1 overflow-y-auto overscroll-contain pb-4 pr-1">
+                    <div className="skin-scrollbar mt-4 min-h-0 max-h-[min(66svh,38rem)] overflow-y-auto overscroll-contain pr-1">
                       {hasStoredPlayRecords ? (
                         <div className="space-y-3">
                           {visibleStoredPlayRecordSections.map((section) => {
@@ -17407,27 +17447,30 @@ export default function App() {
                             return (
                               <section
                                 key={section.unitId}
-                                className="rounded-lg border border-white/10 bg-white/[0.03] p-3 shadow-[0_12px_28px_rgba(2,8,23,0.22)]"
+                                className="rounded-lg border border-white/10 bg-white/[0.035] p-3 shadow-[0_10px_24px_rgba(2,8,23,0.2)]"
                               >
-                                <div className="flex items-center justify-between gap-3">
-                                  <h3 className={`truncate text-sm font-black ${recordUnitTheme.labelClassName}`}>{section.unitTitle}</h3>
-                                  <span className="shrink-0 text-xs font-black text-slate-400">{section.records.length}회</span>
+                                <div className="flex items-center gap-3">
+                                  <h3 className={`truncate text-base font-black ${recordUnitTheme.labelClassName}`}>{section.unitTitle} · {section.records.length}번</h3>
                                 </div>
-                                <div className="mt-2 grid grid-cols-[repeat(auto-fill,minmax(2.75rem,1fr))] gap-2">
+                                <div className="mt-3 flex flex-wrap gap-2">
                                   {section.records.map((record) => {
                                     const isLatestRecord = record.id === visibleStoredPlayRecords[0]?.id;
+                                    const isFullClearRecord = record.result === 'win' && record.level >= record.totalLevels;
 
                                     return (
                                       <div
                                         key={record.id}
-                                        aria-label={`${formatStoredPlayRecordDate(record.playedAt)} ${record.unitTitle} ${record.level}단계`}
-                                        title={`${formatStoredPlayRecordDate(record.playedAt)} · ${record.level}단계`}
-                                        className={`relative flex aspect-square min-h-11 items-center justify-center overflow-hidden rounded-lg border text-center shadow-[0_8px_18px_rgba(2,8,23,0.2)] ${
+                                        aria-label={`${formatStoredPlayRecordDate(record.playedAt)} ${record.unitTitle} ${record.level}단계${isFullClearRecord ? ' 클리어' : ''}`}
+                                        title={`${formatStoredPlayRecordDate(record.playedAt)} · ${record.level}단계${isFullClearRecord ? ' 클리어' : ''}`}
+                                        className={`relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border text-center shadow-[0_8px_18px_rgba(2,8,23,0.2)] sm:h-14 sm:w-14 ${
                                           isLatestRecord ? 'ring-2 ring-cyan-200/70' : ''
                                         } ${recordUnitTheme.cardClassName}`}
                                       >
                                         <div className={`absolute inset-x-0 top-0 h-1 ${recordUnitTheme.accentClassName}`} />
-                                        <p className="text-2xl font-black leading-none text-white">{record.level}</p>
+                                        {isFullClearRecord ? (
+                                          <Crown className="absolute top-1.5 h-3 w-3 text-amber-300 drop-shadow-[0_1px_4px_rgba(251,191,36,0.45)]" strokeWidth={3} aria-hidden="true" />
+                                        ) : null}
+                                        <p className={`text-2xl font-black leading-none text-white ${isFullClearRecord ? 'pt-2.5' : ''}`}>{record.level}</p>
                                       </div>
                                     );
                                   })}
@@ -18975,18 +19018,20 @@ export default function App() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.94, y: 12 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="relative my-auto flex h-full max-h-[calc(100svh-1.5rem)] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-cyan-100/16 bg-slate-950/92 p-4 text-left shadow-[0_28px_90px_rgba(2,8,23,0.62)] sm:max-h-[calc(100svh-2rem)] sm:p-5"
+              className="relative my-auto flex max-h-[calc(100svh-1.5rem)] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-cyan-100/16 bg-slate-950/92 p-4 text-left shadow-[0_28px_90px_rgba(2,8,23,0.62)] sm:max-h-[calc(100svh-2rem)] sm:p-5"
               role="dialog"
               aria-modal="true"
               aria-labelledby="result-records-title"
             >
               <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-100/35 to-transparent" />
 
-              <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+              <div className="relative flex min-h-0 flex-col overflow-hidden">
                 <div className="flex items-start justify-between gap-4 pr-12">
                   <div className="min-w-0">
                     <h2 id="result-records-title" className="text-2xl font-black text-white sm:text-3xl">나의 기록</h2>
-                    <p className="mt-1 text-sm font-semibold text-slate-400">최근 {visibleStoredPlayRecords.length}번의 배틀 진행 상황</p>
+                    {visibleStoredPlayRecordSummary ? (
+                      <p className="mt-2 inline-flex rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-sm font-black text-slate-100 sm:text-base">{visibleStoredPlayRecordSummary}</p>
+                    ) : null}
                   </div>
                   <button
                     type="button"
@@ -19002,7 +19047,7 @@ export default function App() {
                   </button>
                 </div>
 
-                <div className="skin-scrollbar mt-4 min-h-0 flex-1 overflow-y-auto overscroll-contain pb-4 pr-1">
+                <div className="skin-scrollbar mt-4 min-h-0 max-h-[min(66svh,38rem)] overflow-y-auto overscroll-contain pr-1">
                   {hasStoredPlayRecords ? (
                     <div className="space-y-3">
                       {visibleStoredPlayRecordSections.map((section) => {
@@ -19011,27 +19056,30 @@ export default function App() {
                         return (
                           <section
                             key={section.unitId}
-                            className="rounded-lg border border-white/10 bg-white/[0.03] p-3 shadow-[0_12px_28px_rgba(2,8,23,0.22)]"
+                            className="rounded-lg border border-white/10 bg-white/[0.035] p-3 shadow-[0_10px_24px_rgba(2,8,23,0.2)]"
                           >
-                            <div className="flex items-center justify-between gap-3">
-                              <h3 className={`truncate text-sm font-black ${recordUnitTheme.labelClassName}`}>{section.unitTitle}</h3>
-                              <span className="shrink-0 text-xs font-black text-slate-400">{section.records.length}회</span>
+                            <div className="flex items-center gap-3">
+                              <h3 className={`truncate text-base font-black ${recordUnitTheme.labelClassName}`}>{section.unitTitle} · {section.records.length}번</h3>
                             </div>
-                            <div className="mt-2 grid grid-cols-[repeat(auto-fill,minmax(2.75rem,1fr))] gap-2">
+                            <div className="mt-3 flex flex-wrap gap-2">
                               {section.records.map((record) => {
                                 const isLatestRecord = record.id === visibleStoredPlayRecords[0]?.id;
+                                const isFullClearRecord = record.result === 'win' && record.level >= record.totalLevels;
 
                                 return (
                                   <div
                                     key={record.id}
-                                    aria-label={`${formatStoredPlayRecordDate(record.playedAt)} ${record.unitTitle} ${record.level}단계`}
-                                    title={`${formatStoredPlayRecordDate(record.playedAt)} · ${record.level}단계`}
-                                    className={`relative flex aspect-square min-h-11 items-center justify-center overflow-hidden rounded-lg border text-center shadow-[0_8px_18px_rgba(2,8,23,0.2)] ${
+                                    aria-label={`${formatStoredPlayRecordDate(record.playedAt)} ${record.unitTitle} ${record.level}단계${isFullClearRecord ? ' 클리어' : ''}`}
+                                    title={`${formatStoredPlayRecordDate(record.playedAt)} · ${record.level}단계${isFullClearRecord ? ' 클리어' : ''}`}
+                                    className={`relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border text-center shadow-[0_8px_18px_rgba(2,8,23,0.2)] sm:h-14 sm:w-14 ${
                                       isLatestRecord ? 'ring-2 ring-cyan-200/70' : ''
                                     } ${recordUnitTheme.cardClassName}`}
                                   >
                                     <div className={`absolute inset-x-0 top-0 h-1 ${recordUnitTheme.accentClassName}`} />
-                                    <p className="text-2xl font-black leading-none text-white">{record.level}</p>
+                                    {isFullClearRecord ? (
+                                      <Crown className="absolute top-1.5 h-3 w-3 text-amber-300 drop-shadow-[0_1px_4px_rgba(251,191,36,0.45)]" strokeWidth={3} aria-hidden="true" />
+                                    ) : null}
+                                    <p className={`text-2xl font-black leading-none text-white ${isFullClearRecord ? 'pt-2.5' : ''}`}>{record.level}</p>
                                   </div>
                                 );
                               })}
