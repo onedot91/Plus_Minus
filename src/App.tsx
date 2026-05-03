@@ -248,6 +248,35 @@ import opponentLevel7ArnyaHitImage from './assets/opponent-level7-arnya-hit-cuto
 import opponentLevel8AttackImage from './assets/opponent-level8-attack.png';
 import opponentLevel8DefaultImage from './assets/opponent-level8-default.png';
 import opponentLevel8HitImage from './assets/opponent-level8-hit.png';
+import unit1Level1OlrapoAttackImage from './assets/unit1-level1-olrapo-attack.png';
+import unit1Level1OlrapoDefaultImage from './assets/unit1-level1-olrapo-default.png';
+import unit1Level1OlrapoDefeatSceneImage from './assets/unit1-level1-olrapo-defeat-scene.jpeg';
+import unit1Level1OlrapoHitImage from './assets/unit1-level1-olrapo-hit.png';
+import unit1Level2MarimarioAttackImage from './assets/unit1-level2-marimario-attack.png';
+import unit1Level2MarimarioDefaultImage from './assets/unit1-level2-marimario-default.png';
+import unit1Level2MarimarioDefeatSceneImage from './assets/unit1-level2-marimario-defeat-scene.jpeg';
+import unit1Level2MarimarioHitImage from './assets/unit1-level2-marimario-hit.png';
+import unit1Level3HoppangboyAttackImage from './assets/unit1-level3-hoppangboy-attack.png';
+import unit1Level3HoppangboyDefaultImage from './assets/unit1-level3-hoppangboy-default.png';
+import unit1Level3HoppangboyDefeatSceneImage from './assets/unit1-level3-hoppangboy-defeat-scene.jpeg';
+import unit1Level3HoppangboyHitImage from './assets/unit1-level3-hoppangboy-hit.png';
+import unit1Level4DogPigToastAttackImage from './assets/unit1-level4-dog-pig-toast-attack.png';
+import unit1Level4DogPigToastDefaultImage from './assets/unit1-level4-dog-pig-toast-default.png';
+import unit1Level4DogPigToastDefeatSceneImage from './assets/unit1-level4-dog-pig-toast-defeat-scene.jpeg';
+import unit1Level4DogPigToastHitImage from './assets/unit1-level4-dog-pig-toast-hit.png';
+import unit1Level5PenguinsuAttackImage from './assets/unit1-level5-penguinsu-attack.png';
+import unit1Level5PenguinsuDefaultImage from './assets/unit1-level5-penguinsu-default.png';
+import unit1Level5PenguinsuDefeatSceneImage from './assets/unit1-level5-penguinsu-defeat-scene.jpeg';
+import unit1Level5PenguinsuHitImage from './assets/unit1-level5-penguinsu-hit.png';
+import unit1Level6MetamonAttackImage from './assets/unit1-level6-metamon-attack.png';
+import unit1Level6MetamonDefaultImage from './assets/unit1-level6-metamon-default.png';
+import unit1Level6MetamonDefeatSceneImage from './assets/unit1-level6-metamon-defeat-scene.jpeg';
+import unit1Level6MetamonHitImage from './assets/unit1-level6-metamon-hit.png';
+import unit1Level6MetamonTransformImage from './assets/unit1-level6-metamon-transform.png';
+import unit1Level7MetagomaAttackImage from './assets/unit1-level7-metagoma-attack.png';
+import unit1Level7MetagomaDefaultImage from './assets/unit1-level7-metagoma-default.png';
+import unit1Level7MetagomaDefeatSceneImage from './assets/unit1-level7-metagoma-defeat-scene.jpeg';
+import unit1Level7MetagomaHitImage from './assets/unit1-level7-metagoma-hit.png';
 import unit1Level8CaterpillarAttackImage from './assets/unit1-level8-caterpillar-attack.png';
 import unit1Level8CaterpillarDefaultImage from './assets/unit1-level8-caterpillar-default.png';
 import unit1Level8CaterpillarDefeatSceneImage from './assets/unit1-level8-caterpillar-defeat-scene.png';
@@ -709,19 +738,55 @@ type ShapeClassifyItem = {
 
 const RECTANGLE_CLASSIFY_VARIANTS: ShapeClassifyItem[][] = [
   [
-    { points: '36,112 86,36 166,62 122,140', isTarget: false, rightAngleCount: 0 },
+    { points: '96,38 182,82 96,126 10,82', isTarget: false, rightAngleCount: 0 },
     { points: '42,132 42,42 148,76 168,132', isTarget: false, rightAngleCount: 1 },
     { points: '32,42 158,42 124,132 32,132', isTarget: false, rightAngleCount: 2 },
     { points: '34,44 156,44 156,126 34,126', isTarget: true, rightAngleCount: 4 },
   ],
   [
-    { points: '30,106 92,30 168,70 112,144', isTarget: false, rightAngleCount: 0 },
+    { points: '98,36 184,78 98,122 12,78', isTarget: false, rightAngleCount: 0 },
     { points: '46,132 46,38 146,72 164,132', isTarget: false, rightAngleCount: 1 },
     { points: '38,36 158,36 126,134 38,134', isTarget: false, rightAngleCount: 2 },
     { points: '42,42 152,42 152,132 42,132', isTarget: true, rightAngleCount: 4 },
   ],
   [
-    { points: '40,118 100,34 170,78 118,142', isTarget: false, rightAngleCount: 0 },
+    { points: '96,38 184,80 96,122 8,80', isTarget: false, rightAngleCount: 0 },
+    { points: '48,130 48,44 138,68 160,130', isTarget: false, rightAngleCount: 1 },
+    { points: '28,54 162,54 136,126 28,126', isTarget: false, rightAngleCount: 2 },
+    { points: '28,54 162,54 162,122 28,122', isTarget: true, rightAngleCount: 4 },
+  ],
+  [
+    { points: '94,32 178,76 94,120 10,76', isTarget: false, rightAngleCount: 0 },
+    { points: '42,132 42,42 148,76 168,132', isTarget: false, rightAngleCount: 1 },
+    { points: '32,42 158,42 124,132 32,132', isTarget: false, rightAngleCount: 2 },
+    { points: '34,44 156,44 156,126 34,126', isTarget: true, rightAngleCount: 4 },
+  ],
+  [
+    { points: '104,42 184,82 104,122 24,82', isTarget: false, rightAngleCount: 0 },
+    { points: '46,132 46,38 146,72 164,132', isTarget: false, rightAngleCount: 1 },
+    { points: '38,36 158,36 126,134 38,134', isTarget: false, rightAngleCount: 2 },
+    { points: '42,42 152,42 152,132 42,132', isTarget: true, rightAngleCount: 4 },
+  ],
+  [
+    { points: '88,30 172,80 88,130 4,80', isTarget: false, rightAngleCount: 0 },
+    { points: '48,130 48,44 138,68 160,130', isTarget: false, rightAngleCount: 1 },
+    { points: '28,54 162,54 136,126 28,126', isTarget: false, rightAngleCount: 2 },
+    { points: '28,54 162,54 162,122 28,122', isTarget: true, rightAngleCount: 4 },
+  ],
+  [
+    { points: '100,28 180,72 100,116 20,72', isTarget: false, rightAngleCount: 0 },
+    { points: '42,132 42,42 148,76 168,132', isTarget: false, rightAngleCount: 1 },
+    { points: '32,42 158,42 124,132 32,132', isTarget: false, rightAngleCount: 2 },
+    { points: '34,44 156,44 156,126 34,126', isTarget: true, rightAngleCount: 4 },
+  ],
+  [
+    { points: '92,44 184,84 92,124 0,84', isTarget: false, rightAngleCount: 0 },
+    { points: '46,132 46,38 146,72 164,132', isTarget: false, rightAngleCount: 1 },
+    { points: '38,36 158,36 126,134 38,134', isTarget: false, rightAngleCount: 2 },
+    { points: '42,42 152,42 152,132 42,132', isTarget: true, rightAngleCount: 4 },
+  ],
+  [
+    { points: '106,34 186,82 106,130 26,82', isTarget: false, rightAngleCount: 0 },
     { points: '48,130 48,44 138,68 160,130', isTarget: false, rightAngleCount: 1 },
     { points: '28,54 162,54 136,126 28,126', isTarget: false, rightAngleCount: 2 },
     { points: '28,54 162,54 162,122 28,122', isTarget: true, rightAngleCount: 4 },
@@ -1995,6 +2060,69 @@ const LEVEL7_OPPONENT_VARIANTS: Record<Level7OpponentId, SpecialOpponentConfig> 
   },
 };
 const UNIT1_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
+  1: {
+    name: '올라포',
+    spriteSet: {
+      attack: unit1Level1OlrapoAttackImage,
+      default: unit1Level1OlrapoDefaultImage,
+      hit: unit1Level1OlrapoHitImage,
+    },
+    defeatSceneImage: unit1Level1OlrapoDefeatSceneImage,
+  },
+  2: {
+    name: '마리마리오',
+    spriteSet: {
+      attack: unit1Level2MarimarioAttackImage,
+      default: unit1Level2MarimarioDefaultImage,
+      hit: unit1Level2MarimarioHitImage,
+    },
+    defeatSceneImage: unit1Level2MarimarioDefeatSceneImage,
+  },
+  3: {
+    name: '호빵보이',
+    spriteSet: {
+      attack: unit1Level3HoppangboyAttackImage,
+      default: unit1Level3HoppangboyDefaultImage,
+      hit: unit1Level3HoppangboyHitImage,
+    },
+    defeatSceneImage: unit1Level3HoppangboyDefeatSceneImage,
+  },
+  4: {
+    name: '개, 돼지, 식빵',
+    spriteSet: {
+      attack: unit1Level4DogPigToastAttackImage,
+      default: unit1Level4DogPigToastDefaultImage,
+      hit: unit1Level4DogPigToastHitImage,
+    },
+    defeatSceneImage: unit1Level4DogPigToastDefeatSceneImage,
+  },
+  5: {
+    name: '펭귄수',
+    spriteSet: {
+      attack: unit1Level5PenguinsuAttackImage,
+      default: unit1Level5PenguinsuDefaultImage,
+      hit: unit1Level5PenguinsuHitImage,
+    },
+    defeatSceneImage: unit1Level5PenguinsuDefeatSceneImage,
+  },
+  6: {
+    name: '메타몬',
+    spriteSet: {
+      attack: unit1Level6MetamonAttackImage,
+      default: unit1Level6MetamonDefaultImage,
+      hit: unit1Level6MetamonHitImage,
+    },
+    defeatSceneImage: unit1Level6MetamonDefeatSceneImage,
+  },
+  7: {
+    name: '메타고마',
+    spriteSet: {
+      attack: unit1Level7MetagomaAttackImage,
+      default: unit1Level7MetagomaDefaultImage,
+      hit: unit1Level7MetagomaHitImage,
+    },
+    defeatSceneImage: unit1Level7MetagomaDefeatSceneImage,
+  },
   8: {
     name: '배추흰나비 애벌레',
     spriteSet: {
@@ -7645,15 +7773,15 @@ function createShapeDrawProblem(
 }
 
 const UNIT1_PROBLEM_COUNTS: Record<number, number> = {
-  1: 8,
-  2: 8,
-  3: 8,
-  4: 8,
+  1: 4,
+  2: 4,
+  3: 4,
+  4: 4,
   5: 4,
   6: 4,
   7: 4,
-  8: 8,
-  9: 8,
+  8: 4,
+  9: 4,
 };
 
 type Unit1ShapeProblemEntry =
@@ -12814,6 +12942,13 @@ function ShapeRainGameCard({
         <div className="absolute right-3 top-3 z-20 rounded-2xl border-2 border-emerald-400/80 bg-slate-950/92 px-3 py-2 text-right shadow-[0_8px_20px_rgba(15,23,42,0.3)] sm:right-4 sm:top-4 sm:px-4">
           <div className="text-xl font-black text-white sm:text-2xl">{blockedCount} / {shapeRain.targetCount}</div>
         </div>
+        {status === 'playing' && blockedCount === 0 ? (
+          <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center px-5 text-center">
+            <div className="rounded-3xl border-2 border-white/20 bg-slate-950/72 px-6 py-4 shadow-2xl backdrop-blur-sm">
+              <p className="break-keep text-2xl font-black text-white sm:text-4xl">도형의 이름을 적으세요.</p>
+            </div>
+          </div>
+        ) : null}
 
         {status === 'playing' && isDropAreaMeasured ? activeDrops.map((activeDrop) => {
           const fastEntryDurationMs = Math.min(650, Math.max(260, activeDrop.durationMs * 0.026));
@@ -15292,6 +15427,7 @@ export default function App() {
   const [secretCodeInput, setSecretCodeInput] = useState('');
   const [secretCodeError, setSecretCodeError] = useState('');
   const [isCaterpillarEvolutionOpen, setIsCaterpillarEvolutionOpen] = useState(false);
+  const [isMetamonTransformOpen, setIsMetamonTransformOpen] = useState(false);
   const [pendingLevelTransition, setPendingLevelTransition] = useState<{
     nextLevel: number;
     shouldQueueEstimation: boolean;
@@ -15307,6 +15443,7 @@ export default function App() {
     gameStateRef.current = gameState;
     if (gameState !== 'playing') {
       setIsCaterpillarEvolutionOpen(false);
+      setIsMetamonTransformOpen(false);
       clearBattleTimeouts();
     }
   }, [gameState]);
@@ -16319,6 +16456,24 @@ export default function App() {
     }, 3100, runId);
   };
 
+  const playMetamonTransformTransition = (nextLevel: number, shouldQueueEstimation = false) => {
+    const runId = currentPlayRunIdRef.current;
+
+    setIsOpponentHit(false);
+    setIsOpponentAttacking(false);
+    setIsMetamonTransformOpen(true);
+    playSound('levelUp', { gainMultiplier: 0.9, detune: 36 });
+    queueSound('correct', 620, { gainMultiplier: 0.72, detune: 84 });
+    queueSound('levelUp', 1220, { gainMultiplier: 1.04, detune: 120 });
+    updateMessage('메타몬이 변신한다!');
+
+    scheduleBattleTimeout(() => {
+      setIsMetamonTransformOpen(false);
+      completeLevelTransition(nextLevel, shouldQueueEstimation);
+      updateMessage('메타고마 등장!');
+    }, 3100, runId);
+  };
+
   const submitSecretCode = () => {
     if (!pendingLevelTransition) {
       return;
@@ -16410,6 +16565,11 @@ export default function App() {
 
       if (currentUnitId === 'unit1' && currentLevel === 8 && nextLevel === 9) {
         playCaterpillarEvolutionTransition(nextLevel, shouldQueueEstimation);
+        return;
+      }
+
+      if (currentUnitId === 'unit1' && currentLevel === 6 && nextLevel === 7) {
+        playMetamonTransformTransition(nextLevel, shouldQueueEstimation);
         return;
       }
 
@@ -18282,6 +18442,61 @@ export default function App() {
           </div>
         </div>
       )}
+
+      <AnimatePresence>
+        {gameState === 'playing' && isMetamonTransformOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-[radial-gradient(circle_at_50%_42%,rgba(168,85,247,0.25),transparent_34%),linear-gradient(180deg,rgba(15,23,42,0.96),rgba(24,18,44,0.98))] p-4"
+          >
+            <div className="relative flex w-full max-w-3xl flex-col items-center justify-center text-center">
+              <div className="relative grid h-[min(62svh,30rem)] w-full place-items-center">
+                <motion.div
+                  className="absolute h-[min(48svh,23rem)] w-[min(48svh,23rem)] rounded-full border-[10px] border-dashed border-violet-200/70"
+                  initial={{ opacity: 0, scale: 0.42, rotate: 0 }}
+                  animate={{ opacity: [0, 1, 0.18], scale: [0.42, 1.12, 1.7], rotate: 320 }}
+                  transition={{ duration: 2.75, ease: 'easeInOut' }}
+                />
+                <motion.img
+                  src={unit1Level6MetamonTransformImage}
+                  alt="메타몬 변신"
+                  className="relative z-10 h-[min(56svh,26rem)] w-auto object-contain drop-shadow-[0_28px_42px_rgba(0,0,0,0.42)]"
+                  initial={{ opacity: 0, scale: 0.64, rotate: -8 }}
+                  animate={{ opacity: [0, 1, 1, 0.92], scale: [0.64, 1.08, 1, 1.06], rotate: [-8, 5, -3, 0] }}
+                  transition={{ duration: 2.45, times: [0, 0.28, 0.72, 1], ease: 'easeInOut' }}
+                  draggable={false}
+                />
+                {Array.from({ length: 12 }, (_, index) => (
+                  <motion.div
+                    key={`metamon-transform-spark-${index}`}
+                    className="absolute h-3 w-3 rounded-sm bg-violet-200"
+                    style={{
+                      left: `${14 + (index * 11) % 72}%`,
+                      top: `${16 + (index * 17) % 60}%`,
+                    }}
+                    animate={{
+                      opacity: [0, 1, 0],
+                      scale: [0.45, 1.6, 0.35],
+                      rotate: [0, 45, -28],
+                      y: [14, -18, -34],
+                    }}
+                    transition={{ repeat: Infinity, duration: 1.35, delay: index * 0.08, ease: 'easeInOut' }}
+                  />
+                ))}
+              </div>
+              <motion.h2
+                className="text-3xl font-black text-white sm:text-5xl"
+                animate={{ scale: [1, 1.04, 1] }}
+                transition={{ repeat: Infinity, duration: 1.2, ease: 'easeInOut' }}
+              >
+                메타고마로 변신!
+              </motion.h2>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {gameState === 'playing' && isCaterpillarEvolutionOpen && (
