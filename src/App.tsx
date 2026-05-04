@@ -8470,36 +8470,19 @@ function getUnit1Level8ProblemEntries() {
     return cachedEntries;
   }
 
-  const entriesByMode: Record<'rightTriangle' | 'rectangle' | 'square', Unit1ShapeProblemEntry[]> = {
-    rightTriangle: [
-      ['rightTriangle', '모양이나 크기가 다른 직각삼각형 세 개를 완성해 보세요.', 'draw', undefined, randomIntInRange(0, 7), 'threeRightTriangles'],
-      ['rightTriangle', '모양 또는 크기가 다른 직각삼각형 3개를 그려 보세요.', 'draw', undefined, randomIntInRange(0, 7), 'threeRightTriangles'],
-      ['rightTriangle', '직각삼각형 세 개를 서로 다른 모양이나 크기로 만들어 보세요.', 'draw', undefined, randomIntInRange(0, 7), 'threeRightTriangles'],
-    ],
-    rectangle: [
-      ['rectangle', '모양이나 크기가 다른 직사각형 세 개를 완성해 보세요.', 'draw', undefined, randomIntInRange(0, 7), 'threePolygons'],
-      ['rectangle', '모양 또는 크기가 다른 직사각형 3개를 그려 보세요.', 'draw', undefined, randomIntInRange(0, 7), 'threePolygons'],
-      ['rectangle', '직사각형 세 개를 서로 다른 모양이나 크기로 만들어 보세요.', 'draw', undefined, randomIntInRange(0, 7), 'threePolygons'],
-    ],
-    square: [
-      ['square', '크기가 다른 정사각형 세 개를 완성해 보세요.', 'draw', undefined, randomIntInRange(0, 7), 'threePolygons'],
-      ['square', '크기가 다른 정사각형 3개를 그려 보세요.', 'draw', undefined, randomIntInRange(0, 7), 'threePolygons'],
-      ['square', '정사각형 세 개를 서로 다른 크기로 만들어 보세요.', 'draw', undefined, randomIntInRange(0, 7), 'threePolygons'],
-    ],
-  };
-  const requiredEntries = [
-    sample(entriesByMode.rightTriangle),
-    sample(entriesByMode.rectangle),
-    sample(entriesByMode.square),
-  ];
-  const optionalEntries = [
-    ...entriesByMode.rightTriangle,
-    ...entriesByMode.rectangle,
-    ...entriesByMode.square,
-  ].filter((entry) => !requiredEntries.includes(entry));
-  const entriesPool = shuffleValues([
-    ...requiredEntries,
-    ...shuffleValues(optionalEntries),
+  const rightTriangleVariant = randomIntInRange(0, 7);
+  const rectangleVariant = randomIntInRange(0, 7);
+  const squareVariant = randomIntInRange(0, 7);
+  const entriesPool = shuffleValues<Unit1ShapeProblemEntry>([
+    ['rightTriangle', '나머지 한 점을 찍어 직각삼각형을 완성해 보세요.', 'draw', undefined, rightTriangleVariant, 'point'],
+    ['rightTriangle', '선분을 이어 직각삼각형을 완성해 보세요.', 'draw', undefined, (rightTriangleVariant + 1) % 8, 'lineCompletion'],
+    ['rightTriangle', '모양 또는 크기가 다른 직각삼각형 3개를 그려 보세요.', 'draw', undefined, (rightTriangleVariant + 2) % 8, 'threeRightTriangles'],
+    ['rectangle', '나머지 한 점을 찍어 직사각형을 완성해 보세요.', 'draw', undefined, rectangleVariant, 'point'],
+    ['rectangle', '선분을 이어 직사각형을 완성해 보세요.', 'draw', undefined, (rectangleVariant + 1) % 8, 'lineCompletion'],
+    ['rectangle', '모양 또는 크기가 다른 직사각형 3개를 그려 보세요.', 'draw', undefined, (rectangleVariant + 2) % 8, 'threePolygons'],
+    ['square', '나머지 한 점을 찍어 정사각형을 완성해 보세요.', 'draw', undefined, squareVariant, 'point'],
+    ['square', '선분을 이어 정사각형을 완성해 보세요.', 'draw', undefined, (squareVariant + 1) % 8, 'lineCompletion'],
+    ['square', '크기가 다른 정사각형 3개를 그려 보세요.', 'draw', undefined, (squareVariant + 2) % 8, 'threePolygons'],
   ]);
   const entries = arrangeUnit1EntriesForRound(
     8,
