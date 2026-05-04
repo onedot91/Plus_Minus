@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { VisualCalculator, type VisualControlSound } from './components/VisualCalculator';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import startHeroImage from './assets/start-hero-math-adventure.png';
+import readingActivityWarningImage from './assets/reading-activity-warning.png';
 import stage1DefeatSceneImage from './assets/stage1-defeat-scene-cutout.png';
 import stage1ChurusigiDefeatSceneImage from './assets/stage1-churusigi-defeat-scene.jpeg';
 import stage2DefeatSceneImage from './assets/stage2-defeat-scene.jpeg';
@@ -336,6 +337,50 @@ import unit3Level12AkmagomaAttackImage from './assets/unit3-level12-akmagoma-att
 import unit3Level12AkmagomaDefaultImage from './assets/unit3-level12-akmagoma-default.jpeg';
 import unit3Level12AkmagomaDefeatSceneImage from './assets/unit3-level12-akmagoma-defeat-scene.jpeg';
 import unit3Level12AkmagomaHitImage from './assets/unit3-level12-akmagoma-hit.jpeg';
+import { installReadingActivityBlocker } from './readingActivityBlocker';
+
+installReadingActivityBlocker();
+
+const READING_ACTIVITY_START_HOUR = 8;
+const READING_ACTIVITY_START_MINUTE = 0;
+const READING_ACTIVITY_END_HOUR = 8;
+const READING_ACTIVITY_END_MINUTE = 50;
+
+const READING_ACTIVITY_BLOCK_WINDOWS = [
+  {
+    startHour: READING_ACTIVITY_START_HOUR,
+    startMinute: READING_ACTIVITY_START_MINUTE,
+    endHour: READING_ACTIVITY_END_HOUR,
+    endMinute: READING_ACTIVITY_END_MINUTE,
+  },
+] as const;
+
+function isReadingActivityTime(date = new Date()) {
+  const minutesFromMidnight = date.getHours() * 60 + date.getMinutes();
+  return READING_ACTIVITY_BLOCK_WINDOWS.some((blockWindow) => {
+    const startMinutes = blockWindow.startHour * 60 + blockWindow.startMinute;
+    const endMinutes = blockWindow.endHour * 60 + blockWindow.endMinute;
+    return minutesFromMidnight >= startMinutes && minutesFromMidnight < endMinutes;
+  });
+}
+
+function getMillisecondsUntilNextReadingActivityBoundary(date = new Date()) {
+  const nextBoundaries = READING_ACTIVITY_BLOCK_WINDOWS.flatMap((blockWindow) => [
+    [blockWindow.startHour, blockWindow.startMinute],
+    [blockWindow.endHour, blockWindow.endMinute],
+  ] as const)
+    .map(([hour, minute]) => {
+      const boundary = new Date(date);
+      boundary.setHours(hour, minute, 0, 0);
+      if (boundary.getTime() <= date.getTime()) {
+        boundary.setDate(boundary.getDate() + 1);
+      }
+      return boundary.getTime() - date.getTime();
+    })
+    .sort((a, b) => a - b);
+
+  return Math.max(1_000, nextBoundaries[0] ?? 60_000);
+}
 
 type GameState = 'start' | 'unitSelect' | 'playing' | 'win' | 'lose';
 
@@ -547,6 +592,20 @@ const normalizeShapeRainAnswer = (value: string) => normalizeShapeReadAnswer(val
 
 const SHAPE_READ_FIRST_POINT_LABEL = '\u3131';
 const SHAPE_READ_SECOND_POINT_LABEL = '\u3134';
+const SHAPE_READ_LINE_LABEL_SETS = [
+  ['\u3131', '\u3134'],
+  ['\u3137', '\u3139'],
+  ['\u3141', '\u3142'],
+  ['\u3145', '\u3147'],
+  ['\u3134', '\u3141'],
+  ['\u3131', '\u3137'],
+  ['\u3139', '\u3142'],
+  ['\u3141', '\u3145'],
+  ['\u3142', '\u3147'],
+  ['\u3134', '\u3139'],
+  ['\u3137', '\u3145'],
+  ['\u3131', '\u3141'],
+] as const;
 const SHAPE_READ_DEFAULT_ANGLE_LABELS = ['\u3131', '\u3134', '\u3137'] as const;
 const SHAPE_READ_ANGLE_LABEL_SETS = [
   ['\u3131', '\u3134', '\u3137'],
@@ -555,14 +614,22 @@ const SHAPE_READ_ANGLE_LABEL_SETS = [
   ['\u3131', '\u3137', '\u3141'],
   ['\u3139', '\u3141', '\u3131'],
   ['\u3141', '\u3139', '\u3134'],
+  ['\u3142', '\u3145', '\u3147'],
+  ['\u3131', '\u3141', '\u3142'],
+  ['\u3137', '\u3142', '\u3145'],
+  ['\u3139', '\u3134', '\u3147'],
+  ['\u3141', '\u3137', '\u3131'],
+  ['\u3145', '\u3142', '\u3139'],
 ] as const;
 
+const getShapeReadLineLabels = (figureVariant = 0) => SHAPE_READ_LINE_LABEL_SETS[figureVariant % SHAPE_READ_LINE_LABEL_SETS.length];
 const getShapeReadAngleLabels = (figureVariant = 0) => SHAPE_READ_ANGLE_LABEL_SETS[figureVariant % SHAPE_READ_ANGLE_LABEL_SETS.length];
 
 const getShapeReadAnswerOptions = (mode: ShapeDrawMode, figureVariant = 0) => {
   const label = SHAPE_DRAW_ANSWER_LABELS[mode];
-  const forward = `${SHAPE_READ_FIRST_POINT_LABEL}${SHAPE_READ_SECOND_POINT_LABEL}`;
-  const backward = `${SHAPE_READ_SECOND_POINT_LABEL}${SHAPE_READ_FIRST_POINT_LABEL}`;
+  const [firstPointLabel, secondPointLabel] = getShapeReadLineLabels(figureVariant);
+  const forward = `${firstPointLabel}${secondPointLabel}`;
+  const backward = `${secondPointLabel}${firstPointLabel}`;
 
   if (mode === 'segment' || mode === 'line') {
     return [`${label}${forward}`, `${label}${backward}`];
@@ -589,6 +656,14 @@ const RIGHT_ANGLE_MARK_ANSWER_TOKENS = [
   '9|9개',
   '11|11개',
   '6|6개',
+  '12|12개',
+  '5|5개',
+  '13|13개',
+  '14|14개',
+  '4|4개',
+  '15|15개',
+  '16|16개',
+  '3|3개',
 ] as const;
 
 const RIGHT_ANGLE_COUNT_ANSWERS = [
@@ -598,6 +673,14 @@ const RIGHT_ANGLE_COUNT_ANSWERS = [
   [4, 2, 1],
   [1, 4, 2],
   [2, 1, 4],
+  [0, 1, 4],
+  [4, 0, 2],
+  [2, 3, 4],
+  [3, 1, 0],
+  [4, 3, 1],
+  [0, 2, 3],
+  [3, 4, 0],
+  [1, 3, 2],
 ] as const;
 
 const RIGHT_ANGLE_NAME_PROBLEM_VARIANTS = [
@@ -626,7 +709,9 @@ const RIGHT_ANGLE_NAME_PROBLEM_VARIANTS = [
     ],
     answerGroups: [
       ['각ㄱㅅㄴ', '각ㄴㅅㄱ'],
-      ['각ㄷㅅㄹ', '각ㄹㅅㄷ'],
+      ['각ㄴㅅㄹ', '각ㄹㅅㄴ'],
+      ['각ㄹㅅㄷ', '각ㄷㅅㄹ'],
+      ['각ㄷㅅㄱ', '각ㄱㅅㄷ'],
     ],
   },
   {
@@ -645,12 +730,165 @@ const RIGHT_ANGLE_NAME_PROBLEM_VARIANTS = [
       ['각ㄹㄷㄱ', '각ㄱㄷㄹ'],
     ],
   },
+  {
+    vertex: { x: 300, y: 186, label: '\u3134' },
+    rays: [
+      { x: 300, y: 58, label: '\u3131' },
+      { x: 428, y: 186, label: '\u3137' },
+      { x: 168, y: 186, label: '\u3139' },
+      { x: 300, y: 314, label: '\u3141' },
+      { x: 408, y: 84, label: '\u3142' },
+    ],
+    answerGroups: [
+      ['각ㄱㄴㄷ', '각ㄷㄴㄱ'],
+      ['각ㄷㄴㅁ', '각ㅁㄴㄷ'],
+      ['각ㅁㄴㄹ', '각ㄹㄴㅁ'],
+      ['각ㄹㄴㄱ', '각ㄱㄴㄹ'],
+    ],
+  },
+  {
+    vertex: { x: 332, y: 178, label: '\u3139' },
+    rays: [
+      { x: 210, y: 68, label: '\u3131' },
+      { x: 442, y: 56, label: '\u3134' },
+      { x: 454, y: 288, label: '\u3137' },
+      { x: 220, y: 300, label: '\u3141' },
+      { x: 168, y: 180, label: '\u3142' },
+    ],
+    answerGroups: [
+      ['각ㄱㄹㄴ', '각ㄴㄹㄱ'],
+      ['각ㄴㄹㄷ', '각ㄷㄹㄴ'],
+      ['각ㄷㄹㅁ', '각ㅁㄹㄷ'],
+      ['각ㅁㄹㄱ', '각ㄱㄹㅁ'],
+    ],
+  },
+  {
+    vertex: { x: 312, y: 178, label: '\u3141' },
+    rays: [
+      { x: 196, y: 76, label: '\u3131' },
+      { x: 414, y: 62, label: '\u3134' },
+      { x: 428, y: 280, label: '\u3137' },
+      { x: 210, y: 294, label: '\u3139' },
+      { x: 480, y: 178, label: '\u3142' },
+    ],
+    answerGroups: [
+      ['각ㄱㅁㄴ', '각ㄴㅁㄱ'],
+      ['각ㄴㅁㄷ', '각ㄷㅁㄴ'],
+      ['각ㄷㅁㄹ', '각ㄹㅁㄷ'],
+      ['각ㄹㅁㄱ', '각ㄱㅁㄹ'],
+    ],
+  },
+  {
+    vertex: { x: 318, y: 182, label: '\u3142' },
+    rays: [
+      { x: 318, y: 46, label: '\u3131' },
+      { x: 466, y: 182, label: '\u3134' },
+      { x: 318, y: 318, label: '\u3137' },
+      { x: 170, y: 182, label: '\u3139' },
+      { x: 438, y: 76, label: '\u3145' },
+    ],
+    answerGroups: [
+      ['각ㄱㅂㄴ', '각ㄴㅂㄱ'],
+      ['각ㄴㅂㄷ', '각ㄷㅂㄴ'],
+      ['각ㄷㅂㄹ', '각ㄹㅂㄷ'],
+      ['각ㄹㅂㄱ', '각ㄱㅂㄹ'],
+    ],
+  },
+  {
+    vertex: { x: 328, y: 174, label: '\u3145' },
+    rays: [
+      { x: 238, y: 54, label: '\u3131' },
+      { x: 448, y: 84, label: '\u3134' },
+      { x: 418, y: 294, label: '\u3137' },
+      { x: 208, y: 264, label: '\u3139' },
+      { x: 506, y: 174, label: '\u3141' },
+    ],
+    answerGroups: [
+      ['각ㄱㅅㄴ', '각ㄴㅅㄱ'],
+      ['각ㄴㅅㄷ', '각ㄷㅅㄴ'],
+      ['각ㄷㅅㄹ', '각ㄹㅅㄷ'],
+      ['각ㄹㅅㄱ', '각ㄱㅅㄹ'],
+    ],
+  },
+  {
+    vertex: { x: 304, y: 180, label: '\u3137' },
+    rays: [
+      { x: 184, y: 80, label: '\u3131' },
+      { x: 404, y: 60, label: '\u3134' },
+      { x: 424, y: 280, label: '\u3139' },
+      { x: 204, y: 300, label: '\u3141' },
+      { x: 304, y: 44, label: '\u3142' },
+    ],
+    answerGroups: [
+      ['각ㄱㄷㄴ', '각ㄴㄷㄱ'],
+      ['각ㄴㄷㄹ', '각ㄹㄷㄴ'],
+      ['각ㄹㄷㅁ', '각ㅁㄷㄹ'],
+      ['각ㅁㄷㄱ', '각ㄱㄷㅁ'],
+    ],
+  },
+  {
+    vertex: { x: 322, y: 186, label: '\u3134' },
+    rays: [
+      { x: 322, y: 54, label: '\u3131' },
+      { x: 458, y: 186, label: '\u3137' },
+      { x: 322, y: 318, label: '\u3139' },
+      { x: 186, y: 186, label: '\u3141' },
+      { x: 214, y: 82, label: '\u3142' },
+    ],
+    answerGroups: [
+      ['각ㄱㄴㄷ', '각ㄷㄴㄱ'],
+      ['각ㄷㄴㄹ', '각ㄹㄴㄷ'],
+      ['각ㄹㄴㅁ', '각ㅁㄴㄹ'],
+      ['각ㅁㄴㄱ', '각ㄱㄴㅁ'],
+    ],
+  },
+  {
+    vertex: { x: 316, y: 176, label: '\u3139' },
+    rays: [
+      { x: 196, y: 66, label: '\u3131' },
+      { x: 426, y: 56, label: '\u3134' },
+      { x: 436, y: 286, label: '\u3137' },
+      { x: 206, y: 296, label: '\u3141' },
+      { x: 150, y: 176, label: '\u3142' },
+    ],
+    answerGroups: [
+      ['각ㄱㄹㄴ', '각ㄴㄹㄱ'],
+      ['각ㄴㄹㄷ', '각ㄷㄹㄴ'],
+      ['각ㄷㄹㅁ', '각ㅁㄹㄷ'],
+      ['각ㅁㄹㄱ', '각ㄱㄹㅁ'],
+    ],
+  },
+  {
+    vertex: { x: 310, y: 184, label: '\u3141' },
+    rays: [
+      { x: 220, y: 64, label: '\u3131' },
+      { x: 430, y: 94, label: '\u3134' },
+      { x: 400, y: 304, label: '\u3137' },
+      { x: 190, y: 274, label: '\u3139' },
+      { x: 310, y: 48, label: '\u3142' },
+    ],
+    answerGroups: [
+      ['각ㄱㅁㄴ', '각ㄴㅁㄱ'],
+      ['각ㄴㅁㄷ', '각ㄷㅁㄴ'],
+      ['각ㄷㅁㄹ', '각ㄹㅁㄷ'],
+      ['각ㄹㅁㄱ', '각ㄱㅁㄹ'],
+    ],
+  },
 ] as const;
 
 const CLOCK_RIGHT_ANGLE_OPTION_VARIANTS = [
   [1, 3, 6, 9, 12],
   [2, 3, 5, 9, 11],
   [3, 4, 7, 9, 10],
+  [3, 6, 8, 9, 12],
+  [1, 3, 7, 9, 11],
+  [2, 3, 6, 8, 9],
+  [3, 5, 9, 10, 12],
+  [1, 3, 4, 8, 9],
+  [2, 3, 7, 9, 12],
+  [3, 6, 9, 10, 11],
+  [1, 3, 5, 6, 9],
+  [3, 4, 8, 9, 12],
 ] as const;
 
 const RIGHT_TRIANGLE_CLASSIFY_VARIANTS = [
@@ -811,6 +1049,60 @@ const SQUARE_CLASSIFY_VARIANTS: ShapeClassifyItem[][] = [
     { points: '30,52 166,52 166,120 30,120', isTarget: false },
     { points: '58,42 138,42 138,122 58,122', isTarget: true },
     { points: '40,44 150,44 122,136 68,136', isTarget: false },
+  ],
+  [
+    { points: '48,30 138,30 138,120 48,120', isTarget: true },
+    { points: '34,48 160,48 160,116 34,116', isTarget: false },
+    { points: '66,40 136,40 136,110 66,110', isTarget: true },
+    { points: '92,28 158,84 92,140 26,84', isTarget: false },
+  ],
+  [
+    { points: '62,28 150,28 150,116 62,116', isTarget: true },
+    { points: '40,34 146,48 130,128 24,114', isTarget: false },
+    { points: '44,44 122,44 122,122 44,122', isTarget: true },
+    { points: '30,64 166,64 142,128 54,128', isTarget: false },
+  ],
+  [
+    { points: '50,26 134,26 134,110 50,110', isTarget: true },
+    { points: '72,24 128,24 128,140 72,140', isTarget: false },
+    { points: '66,46 144,46 144,124 66,124', isTarget: true },
+    { points: '38,42 152,42 136,122 54,122', isTarget: false },
+  ],
+  [
+    { points: '42,36 132,36 132,126 42,126', isTarget: true },
+    { points: '50,28 142,60 112,138 20,106', isTarget: false },
+    { points: '72,44 140,44 140,112 72,112', isTarget: true },
+    { points: '34,52 158,52 158,118 34,118', isTarget: false },
+  ],
+  [
+    { points: '58,32 140,32 140,114 58,114', isTarget: true },
+    { points: '92,22 150,80 92,138 34,80', isTarget: false },
+    { points: '36,42 116,42 116,122 36,122', isTarget: true },
+    { points: '44,40 152,58 138,128 30,110', isTarget: false },
+  ],
+  [
+    { points: '46,28 130,28 130,112 46,112', isTarget: true },
+    { points: '30,46 164,46 164,116 30,116', isTarget: false },
+    { points: '76,44 146,44 146,114 76,114', isTarget: true },
+    { points: '42,38 144,38 118,132 68,132', isTarget: false },
+  ],
+  [
+    { points: '60,36 142,36 142,118 60,118', isTarget: true },
+    { points: '40,30 152,52 132,126 20,104', isTarget: false },
+    { points: '42,50 112,50 112,120 42,120', isTarget: true },
+    { points: '68,22 126,22 126,142 68,142', isTarget: false },
+  ],
+  [
+    { points: '52,40 134,40 134,122 52,122', isTarget: true },
+    { points: '36,56 158,56 142,126 52,126', isTarget: false },
+    { points: '72,26 144,26 144,98 72,98', isTarget: true },
+    { points: '92,30 158,86 92,142 26,86', isTarget: false },
+  ],
+  [
+    { points: '40,34 122,34 122,116 40,116', isTarget: true },
+    { points: '58,26 146,26 146,126 58,126', isTarget: false },
+    { points: '76,46 146,46 146,116 76,116', isTarget: true },
+    { points: '34,42 154,42 126,130 62,130', isTarget: false },
   ],
 ];
 
@@ -7847,8 +8139,8 @@ function resetUnit1ProblemOrders() {
 }
 
 function getUnit1EntrySignature(entry: Unit1ShapeProblemEntry) {
-  const [mode, , task = 'draw', identifyVariant, , drawVariant] = entry;
-  return [mode, task, identifyVariant ?? 'none', drawVariant ?? 'none'].join(':');
+  const [mode, , task = 'draw', identifyVariant, figureVariant, drawVariant] = entry;
+  return [mode, task, identifyVariant ?? 'none', figureVariant ?? 'random', drawVariant ?? 'none'].join(':');
 }
 
 function arrangeUnit1EntriesWithoutAdjacentRepeats(entries: Unit1ShapeProblemEntry[]) {
@@ -7964,10 +8256,10 @@ function getUnit1Level3ProblemEntries() {
     ? ['rightAngle', '빈칸에 알맞은 말을 써 보세요.', 'identify', 'definition']
     : ['rightAngle', '직각의 뜻을 떠올려 빈칸을 채워 보세요.', 'identify', 'definition', 1];
   const drawEntries = shuffleValues<Unit1ShapeProblemEntry>([
-    ['rightAngle', '점 ㄴ에서 두 반직선을 그어 직각을 만들어 보세요.', 'draw', undefined, randomIntInRange(0, 5), 'point'],
-    ['rightAngle', '꼭짓점 ㄴ을 기준으로 직각을 완성해 보세요.', 'draw', undefined, randomIntInRange(0, 5), 'point'],
-    ['rightAngle', '주어진 반직선과 직각이 되도록 점 ㄴ에서 반직선을 그어 보세요.', 'draw', undefined, randomIntInRange(0, 5), 'ray'],
-    ['rightAngle', '반직선 하나를 더 그어 직각을 만들어 보세요.', 'draw', undefined, randomIntInRange(0, 5), 'ray'],
+    ['rightAngle', '점 ㄴ에서 두 반직선을 그어 직각을 만들어 보세요.', 'draw', undefined, randomIntInRange(0, 9), 'point'],
+    ['rightAngle', '꼭짓점 ㄴ을 기준으로 직각을 완성해 보세요.', 'draw', undefined, randomIntInRange(0, 9), 'point'],
+    ['rightAngle', '주어진 반직선과 직각이 되도록 점 ㄴ에서 반직선을 그어 보세요.', 'draw', undefined, randomIntInRange(0, 9), 'ray'],
+    ['rightAngle', '반직선 하나를 더 그어 직각을 만들어 보세요.', 'draw', undefined, randomIntInRange(0, 9), 'ray'],
   ]).slice(0, 2);
   const entries = arrangeUnit1EntriesForRound(3, [foldEntry, definitionEntry, ...drawEntries]);
 
@@ -7981,15 +8273,19 @@ function getUnit1Level4ProblemEntries() {
     return cachedEntries;
   }
 
+  const markVariant = randomIntInRange(0, RIGHT_ANGLE_MARK_ANSWER_TOKENS.length - 1);
+  const countVariant = randomIntInRange(0, RIGHT_ANGLE_COUNT_ANSWERS.length - 1);
+  const nameVariant = randomIntInRange(0, RIGHT_ANGLE_NAME_PROBLEM_VARIANTS.length - 1);
+  const clockVariant = randomIntInRange(0, CLOCK_RIGHT_ANGLE_OPTION_VARIANTS.length - 1);
   const entries = arrangeUnit1EntriesForRound(4, [
-    ['rightAngle', '도형 속 직각이 모두 몇 개인지 써 보세요.', 'identify', 'rightAngleMark', randomIntInRange(0, RIGHT_ANGLE_MARK_ANSWER_TOKENS.length - 1)],
-    ['rightAngle', '표시된 직각의 수를 세어 보세요.', 'identify', 'rightAngleMark', randomIntInRange(0, RIGHT_ANGLE_MARK_ANSWER_TOKENS.length - 1)],
-    ['rightAngle', '왼쪽 도형부터 직각이 몇 개인지 차례대로 써 보세요.', 'identify', 'rightAngleCount', randomIntInRange(0, RIGHT_ANGLE_COUNT_ANSWERS.length - 1)],
-    ['rightAngle', '두 도형의 직각 수를 차례대로 써 보세요.', 'identify', 'rightAngleCount', randomIntInRange(0, RIGHT_ANGLE_COUNT_ANSWERS.length - 1)],
-    ['rightAngle', '직각을 모두 찾아 각의 이름을 써 보세요.', 'identify', 'rightAngleNames', randomIntInRange(0, RIGHT_ANGLE_NAME_PROBLEM_VARIANTS.length - 1)],
-    ['rightAngle', '그림에서 직각인 각의 이름을 모두 써 보세요.', 'identify', 'rightAngleNames', randomIntInRange(0, RIGHT_ANGLE_NAME_PROBLEM_VARIANTS.length - 1)],
-    ['rightAngle', '직각이 되는 시각을 모두 써 보세요.', 'identify', 'clockRightAngles', randomIntInRange(0, CLOCK_RIGHT_ANGLE_OPTION_VARIANTS.length - 1)],
-    ['rightAngle', '시계에서 직각을 만드는 시각을 찾아 써 보세요.', 'identify', 'clockRightAngles', randomIntInRange(0, CLOCK_RIGHT_ANGLE_OPTION_VARIANTS.length - 1)],
+    ['rightAngle', '도형 속 직각이 모두 몇 개인지 써 보세요.', 'identify', 'rightAngleMark', markVariant],
+    ['rightAngle', '도형 속 직각이 모두 몇 개인지 세어 보세요.', 'identify', 'rightAngleMark', (markVariant + 1) % RIGHT_ANGLE_MARK_ANSWER_TOKENS.length],
+    ['rightAngle', '왼쪽 도형부터 직각이 몇 개인지 차례대로 써 보세요.', 'identify', 'rightAngleCount', countVariant],
+    ['rightAngle', '세 도형의 직각 수를 차례대로 써 보세요.', 'identify', 'rightAngleCount', (countVariant + 1) % RIGHT_ANGLE_COUNT_ANSWERS.length],
+    ['rightAngle', '직각을 모두 찾아 각의 이름을 써 보세요.', 'identify', 'rightAngleNames', nameVariant],
+    ['rightAngle', '그림에서 직각인 각의 이름을 모두 써 보세요.', 'identify', 'rightAngleNames', (nameVariant + 1) % RIGHT_ANGLE_NAME_PROBLEM_VARIANTS.length],
+    ['rightAngle', '직각이 되는 시각을 모두 써 보세요.', 'identify', 'clockRightAngles', clockVariant],
+    ['rightAngle', '시계에서 직각을 만드는 시각을 찾아 써 보세요.', 'identify', 'clockRightAngles', (clockVariant + 1) % CLOCK_RIGHT_ANGLE_OPTION_VARIANTS.length],
   ]);
 
   unit1ProblemOrderCache.set(4, entries);
@@ -8083,7 +8379,7 @@ function getUnit1Level6ProblemEntries() {
     ? ['rectangle', '빈칸에 알맞은 말을 써 보세요.', 'identify', 'shapeDefinition', definitionVariant]
     : [
         'rectangle',
-        '직사각형의 성질을 생각하며 빈칸을 채워 보세요.',
+        '직사각형의 뜻을 생각하며 빈칸을 채워 보세요.',
         'identify',
         'shapeDefinition',
         (definitionVariant + 1) % SHAPE_DEFINITION_VARIANTS.rectangle.length,
@@ -8137,7 +8433,7 @@ function getUnit1Level7ProblemEntries() {
     ? ['square', '빈칸에 알맞은 말을 써 보세요.', 'identify', 'shapeDefinition', definitionVariant]
     : [
         'square',
-        '정사각형의 성질을 생각하며 빈칸을 채워 보세요.',
+        '정사각형의 뜻을 생각하며 빈칸을 채워 보세요.',
         'identify',
         'shapeDefinition',
         (definitionVariant + 1) % SHAPE_DEFINITION_VARIANTS.square.length,
@@ -8153,10 +8449,10 @@ function getUnit1Level7ProblemEntries() {
         'point',
       ];
   const polygonEntry: Unit1ShapeProblemEntry = Math.random() < 0.5
-    ? ['square', '모양이나 크기가 다른 정사각형 2개를 그려 보세요.', 'draw', undefined, twoSquareVariant, 'twoPolygons']
+    ? ['square', '크기가 다른 정사각형 2개를 그려 보세요.', 'draw', undefined, twoSquareVariant, 'twoPolygons']
     : [
         'square',
-        '서로 다른 모양이나 크기의 정사각형 두 개를 완성해 보세요.',
+        '서로 크기가 다른 정사각형 두 개를 완성해 보세요.',
         'draw',
         undefined,
         (twoSquareVariant + 3) % 6,
@@ -8186,15 +8482,24 @@ function getUnit1Level8ProblemEntries() {
       ['rectangle', '직사각형 세 개를 서로 다른 모양이나 크기로 만들어 보세요.', 'draw', undefined, randomIntInRange(0, 7), 'threePolygons'],
     ],
     square: [
-      ['square', '모양이나 크기가 다른 정사각형 세 개를 완성해 보세요.', 'draw', undefined, randomIntInRange(0, 7), 'threePolygons'],
-      ['square', '모양 또는 크기가 다른 정사각형 3개를 그려 보세요.', 'draw', undefined, randomIntInRange(0, 7), 'threePolygons'],
-      ['square', '정사각형 세 개를 서로 다른 모양이나 크기로 만들어 보세요.', 'draw', undefined, randomIntInRange(0, 7), 'threePolygons'],
+      ['square', '크기가 다른 정사각형 세 개를 완성해 보세요.', 'draw', undefined, randomIntInRange(0, 7), 'threePolygons'],
+      ['square', '크기가 다른 정사각형 3개를 그려 보세요.', 'draw', undefined, randomIntInRange(0, 7), 'threePolygons'],
+      ['square', '정사각형 세 개를 서로 다른 크기로 만들어 보세요.', 'draw', undefined, randomIntInRange(0, 7), 'threePolygons'],
     ],
   };
+  const requiredEntries = [
+    sample(entriesByMode.rightTriangle),
+    sample(entriesByMode.rectangle),
+    sample(entriesByMode.square),
+  ];
+  const optionalEntries = [
+    ...entriesByMode.rightTriangle,
+    ...entriesByMode.rectangle,
+    ...entriesByMode.square,
+  ].filter((entry) => !requiredEntries.includes(entry));
   const entriesPool = shuffleValues([
-    ...shuffleValues(entriesByMode.rightTriangle),
-    ...shuffleValues(entriesByMode.rectangle),
-    ...shuffleValues(entriesByMode.square),
+    ...requiredEntries,
+    ...shuffleValues(optionalEntries),
   ]);
   const entries = arrangeUnit1EntriesForRound(
     8,
@@ -13212,7 +13517,10 @@ function ShapeDrawProblemCard({ shapeDraw, answerValue, onAnswerChange, onSubmit
   const isTargetLineConstruction = (line: ShapeLine, mode: ShapeLineMode) => {
     if (line.mode !== mode) return false;
     if (mode === 'ray') {
-      return line.start.label === SHAPE_READ_FIRST_POINT_LABEL && line.end.label === SHAPE_READ_SECOND_POINT_LABEL;
+      const usesTargetPoints = [line.start.label, line.end.label].includes(SHAPE_READ_FIRST_POINT_LABEL) &&
+        [line.start.label, line.end.label].includes(SHAPE_READ_SECOND_POINT_LABEL);
+      if (!usesTargetPoints) return false;
+      return !shapeDraw.title.includes('점 ㄱ') || line.start.label === SHAPE_READ_FIRST_POINT_LABEL;
     }
     return [line.start.label, line.end.label].includes(SHAPE_READ_FIRST_POINT_LABEL) &&
       [line.start.label, line.end.label].includes(SHAPE_READ_SECOND_POINT_LABEL);
@@ -13540,6 +13848,10 @@ function ShapeDrawProblemCardV2({
     { x: SHAPE_ORIGIN.x + SHAPE_GRID * 5, y: SHAPE_ORIGIN.y + SHAPE_GRID * 4 },
     { x: SHAPE_ORIGIN.x + SHAPE_GRID * 3, y: SHAPE_ORIGIN.y + SHAPE_GRID * 2 },
     { x: SHAPE_ORIGIN.x + SHAPE_GRID * 7, y: SHAPE_ORIGIN.y + SHAPE_GRID * 4 },
+    { x: SHAPE_ORIGIN.x + SHAPE_GRID * 3, y: SHAPE_ORIGIN.y + SHAPE_GRID * 4 },
+    { x: SHAPE_ORIGIN.x + SHAPE_GRID * 7, y: SHAPE_ORIGIN.y + SHAPE_GRID * 2 },
+    { x: SHAPE_ORIGIN.x + SHAPE_GRID * 4, y: SHAPE_ORIGIN.y + SHAPE_GRID * 1 },
+    { x: SHAPE_ORIGIN.x + SHAPE_GRID * 6, y: SHAPE_ORIGIN.y + SHAPE_GRID * 5 },
   ];
   const angleVertexPosition = angleVertexPositions[(shapeDraw.figureVariant ?? 0) % angleVertexPositions.length];
   const presetAngleVertex = shapeDraw.mode === 'angle' || shapeDraw.mode === 'rightAngle'
@@ -13549,6 +13861,7 @@ function ShapeDrawProblemCardV2({
     { col: 2, row: 0 },
     { col: -2, row: 0 },
     { col: 0, row: -2 },
+    { col: 0, row: 2 },
   ];
   const rightAngleRayDirection = rightAngleRayDirections[(shapeDraw.figureVariant ?? 0) % rightAngleRayDirections.length];
   const presetRightAngleRay = shapeDraw.mode === 'rightAngle' && shapeDraw.drawVariant === 'ray' && presetAngleVertex
@@ -13834,7 +14147,10 @@ function ShapeDrawProblemCardV2({
   const isTargetLineConstruction = (line: ShapeLine, mode: ShapeLineMode) => {
     if (line.mode !== mode) return false;
     if (mode === 'ray') {
-      return line.start.label === SHAPE_READ_FIRST_POINT_LABEL && line.end.label === SHAPE_READ_SECOND_POINT_LABEL;
+      const usesTargetPoints = [line.start.label, line.end.label].includes(SHAPE_READ_FIRST_POINT_LABEL) &&
+        [line.start.label, line.end.label].includes(SHAPE_READ_SECOND_POINT_LABEL);
+      if (!usesTargetPoints) return false;
+      return !shapeDraw.title.includes('점 ㄱ') || line.start.label === SHAPE_READ_FIRST_POINT_LABEL;
     }
     return [line.start.label, line.end.label].includes(SHAPE_READ_FIRST_POINT_LABEL) &&
       [line.start.label, line.end.label].includes(SHAPE_READ_SECOND_POINT_LABEL);
@@ -14344,20 +14660,46 @@ function ShapeIdentifyProblemCard({
       b: { ...line.end, x: line.start.x + (dx / len) * 720, y: line.start.y + (dy / len) * 720 },
     };
   };
+  const lineLabelSet = getShapeReadLineLabels(figureVariant);
   const givenLineVariants: ShapeLine[] = [
     {
-      start: gridPoint(3, 3, '\u3131'),
-      end: gridPoint(7, 2, '\u3134'),
+      start: gridPoint(3, 3, lineLabelSet[0]),
+      end: gridPoint(7, 2, lineLabelSet[1]),
       mode: shapeDraw.mode === 'segment' || shapeDraw.mode === 'line' || shapeDraw.mode === 'ray' ? shapeDraw.mode : 'segment',
     },
     {
-      start: gridPoint(2, 1, '\u3131'),
-      end: gridPoint(8, 4, '\u3134'),
+      start: gridPoint(2, 1, lineLabelSet[0]),
+      end: gridPoint(8, 4, lineLabelSet[1]),
       mode: shapeDraw.mode === 'segment' || shapeDraw.mode === 'line' || shapeDraw.mode === 'ray' ? shapeDraw.mode : 'segment',
     },
     {
-      start: gridPoint(4, 4, '\u3131'),
-      end: gridPoint(6, 1, '\u3134'),
+      start: gridPoint(4, 4, lineLabelSet[0]),
+      end: gridPoint(6, 1, lineLabelSet[1]),
+      mode: shapeDraw.mode === 'segment' || shapeDraw.mode === 'line' || shapeDraw.mode === 'ray' ? shapeDraw.mode : 'segment',
+    },
+    {
+      start: gridPoint(2, 5, lineLabelSet[0]),
+      end: gridPoint(8, 2, lineLabelSet[1]),
+      mode: shapeDraw.mode === 'segment' || shapeDraw.mode === 'line' || shapeDraw.mode === 'ray' ? shapeDraw.mode : 'segment',
+    },
+    {
+      start: gridPoint(3, 1, lineLabelSet[0]),
+      end: gridPoint(9, 1, lineLabelSet[1]),
+      mode: shapeDraw.mode === 'segment' || shapeDraw.mode === 'line' || shapeDraw.mode === 'ray' ? shapeDraw.mode : 'segment',
+    },
+    {
+      start: gridPoint(8, 5, lineLabelSet[0]),
+      end: gridPoint(4, 2, lineLabelSet[1]),
+      mode: shapeDraw.mode === 'segment' || shapeDraw.mode === 'line' || shapeDraw.mode === 'ray' ? shapeDraw.mode : 'segment',
+    },
+    {
+      start: gridPoint(5, 5, lineLabelSet[0]),
+      end: gridPoint(5, 1, lineLabelSet[1]),
+      mode: shapeDraw.mode === 'segment' || shapeDraw.mode === 'line' || shapeDraw.mode === 'ray' ? shapeDraw.mode : 'segment',
+    },
+    {
+      start: gridPoint(1, 2, lineLabelSet[0]),
+      end: gridPoint(9, 4, lineLabelSet[1]),
       mode: shapeDraw.mode === 'segment' || shapeDraw.mode === 'line' || shapeDraw.mode === 'ray' ? shapeDraw.mode : 'segment',
     },
   ];
@@ -14792,6 +15134,53 @@ function ShapeIdentifyProblemCard({
         <polygon key="mark-5-b" points="246,78 420,78 420,226 292,226" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
         <polygon key="mark-5-c" points="486,72 604,72 604,180 552,228 486,228" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
       ],
+      [
+        <polygon key="mark-6-a" points="36,62 172,62 172,214 36,214" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-6-b" points="242,50 420,50 420,228 242,228" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-6-c" points="488,76 610,76 610,232 488,232" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+      ],
+      [
+        <polygon key="mark-7-a" points="42,68 178,68 178,220 42,220" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-7-b" points="270,226 420,226 270,86" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-7-c" points="494,88 610,128 570,232 454,194" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+      ],
+      [
+        <polygon key="mark-8-a" points="34,70 158,70 158,226 34,226" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-8-b" points="210,52 374,52 374,212 210,212" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-8-c" points="430,74 606,74 606,230 430,230" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-8-d" points="250,282 374,282 250,240" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+      ],
+      [
+        <polygon key="mark-9-a" points="26,62 158,62 158,214 26,214" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-9-b" points="208,60 380,60 380,220 208,220" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-9-c" points="448,68 604,68 604,220 448,220" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-9-d" points="220,282 330,282 220,238" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-9-e" points="410,282 526,282 526,236" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+      ],
+      [
+        <polygon key="mark-10-a" points="42,74 196,74 196,228 42,228" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-10-b" points="286,80 420,126 370,236 238,190" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-10-c" points="504,76 612,142 558,232 450,168" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+      ],
+      [
+        <polygon key="mark-11-a" points="22,62 150,62 150,214 22,214" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-11-b" points="184,58 332,58 332,214 184,214" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-11-c" points="368,64 516,64 516,216 368,216" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-11-d" points="74,282 158,282 74,236" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-11-e" points="282,282 380,282 380,236" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-11-f" points="508,282 606,282 508,236" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+      ],
+      [
+        <polygon key="mark-12-a" points="26,62 148,62 148,206 26,206" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-12-b" points="184,54 310,54 310,210 184,210" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-12-c" points="344,68 470,68 470,224 344,224" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-12-d" points="506,58 620,58 620,220 506,220" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+      ],
+      [
+        <polygon key="mark-13-a" points="58,230 186,230 58,92" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-13-b" points="276,84 414,230 276,230" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+        <polygon key="mark-13-c" points="494,230 614,230 614,100" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
+      ],
     ][variantIndex];
 
     return (
@@ -14810,8 +15199,28 @@ function ShapeIdentifyProblemCard({
   };
   const renderRightAngleCountProblem = () => {
     const answerPattern = RIGHT_ANGLE_COUNT_ANSWERS[figureVariant % RIGHT_ANGLE_COUNT_ANSWERS.length];
-    const shapeStyleIndex = figureVariant % 3;
+    const shapeStyleIndex = figureVariant % 6;
     const shapeByAnswer = {
+      0: [
+        <svg key="count-zero-0" viewBox="0 0 180 150" className="h-44 w-full">
+          <polygon points="48,112 98,30 150,112" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
+        <svg key="count-zero-1" viewBox="0 0 180 150" className="h-44 w-full">
+          <polygon points="44,42 144,30 132,118 30,130" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
+        <svg key="count-zero-2" viewBox="0 0 180 150" className="h-44 w-full">
+          <polygon points="54,38 142,54 126,122 34,108" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
+        <svg key="count-zero-3" viewBox="0 0 180 150" className="h-44 w-full">
+          <polygon points="48,36 138,58 156,118 34,128" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
+        <svg key="count-zero-4" viewBox="0 0 180 150" className="h-44 w-full">
+          <polygon points="92,24 154,84 118,132 28,104" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
+        <svg key="count-zero-5" viewBox="0 0 180 150" className="h-44 w-full">
+          <polygon points="34,62 120,28 156,98 78,130" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
+      ],
       1: [
         <svg key="count-one-0" viewBox="0 0 180 150" className="h-44 w-full">
           <path d="M 38 122 L 38 28 L 132 28 Q 132 122 38 122 Z" fill="#fff" stroke="#111827" strokeWidth="3" />
@@ -14821,6 +15230,15 @@ function ShapeIdentifyProblemCard({
         </svg>,
         <svg key="count-one-2" viewBox="0 0 180 150" className="h-44 w-full">
           <polygon points="50,122 138,122 50,34" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
+        <svg key="count-one-3" viewBox="0 0 180 150" className="h-44 w-full">
+          <path d="M 46 118 L 46 34 L 138 118 Z" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
+        <svg key="count-one-4" viewBox="0 0 180 150" className="h-44 w-full">
+          <polygon points="42,38 42,122 146,96 132,44" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
+        <svg key="count-one-5" viewBox="0 0 180 150" className="h-44 w-full">
+          <path d="M 54 124 L 54 36 L 146 64 Q 118 124 54 124 Z" fill="#fff" stroke="#111827" strokeWidth="3" />
         </svg>,
       ],
       2: [
@@ -14833,6 +15251,35 @@ function ShapeIdentifyProblemCard({
         <svg key="count-two-2" viewBox="0 0 180 150" className="h-44 w-full">
           <polygon points="50,34 132,34 132,122 76,122" fill="#fff" stroke="#111827" strokeWidth="3" />
         </svg>,
+        <svg key="count-two-3" viewBox="0 0 180 150" className="h-44 w-full">
+          <polygon points="42,42 136,42 136,122 92,122 72,86 42,86" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
+        <svg key="count-two-4" viewBox="0 0 180 150" className="h-44 w-full">
+          <polygon points="48,34 132,34 132,118 102,118 74,76 48,76" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
+        <svg key="count-two-5" viewBox="0 0 180 150" className="h-44 w-full">
+          <polygon points="42,118 42,38 130,38 130,72 82,118" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
+      ],
+      3: [
+        <svg key="count-three-0" viewBox="0 0 180 150" className="h-44 w-full">
+          <polygon points="42,34 136,34 136,96 94,124 42,124" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
+        <svg key="count-three-1" viewBox="0 0 180 150" className="h-44 w-full">
+          <polygon points="44,38 142,38 142,102 104,126 44,126" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
+        <svg key="count-three-2" viewBox="0 0 180 150" className="h-44 w-full">
+          <polygon points="38,36 130,36 130,92 86,122 38,122" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
+        <svg key="count-three-3" viewBox="0 0 180 150" className="h-44 w-full">
+          <polygon points="52,30 140,30 140,96 98,130 52,130" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
+        <svg key="count-three-4" viewBox="0 0 180 150" className="h-44 w-full">
+          <polygon points="46,42 138,42 138,104 90,126 46,126" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
+        <svg key="count-three-5" viewBox="0 0 180 150" className="h-44 w-full">
+          <polygon points="36,34 128,34 128,100 82,124 36,124" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
       ],
       4: [
         <svg key="count-four-0" viewBox="0 0 180 150" className="h-44 w-full">
@@ -14843,6 +15290,15 @@ function ShapeIdentifyProblemCard({
         </svg>,
         <svg key="count-four-2" viewBox="0 0 180 150" className="h-44 w-full">
           <rect x="56" y="24" width="68" height="102" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
+        <svg key="count-four-3" viewBox="0 0 180 150" className="h-44 w-full">
+          <rect x="36" y="34" width="112" height="86" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
+        <svg key="count-four-4" viewBox="0 0 180 150" className="h-44 w-full">
+          <rect x="52" y="32" width="84" height="92" fill="#fff" stroke="#111827" strokeWidth="3" />
+        </svg>,
+        <svg key="count-four-5" viewBox="0 0 180 150" className="h-44 w-full">
+          <rect x="30" y="48" width="124" height="66" fill="#fff" stroke="#111827" strokeWidth="3" />
         </svg>,
       ],
     };
@@ -15470,6 +15926,7 @@ export default function App() {
   const didClearRecordsByHoldRef = useRef(false);
   const isDeveloperShortcutEnabled = true;
   const [isDeveloperMode, setIsDeveloperMode] = useState(false);
+  const [isReadingActivityBlocked, setIsReadingActivityBlocked] = useState(() => isReadingActivityTime());
   const [gameState, setGameState] = useState<GameState>('start');
   const [playerName, setPlayerName] = useState(DEFAULT_PLAYER_NAME);
   const [pendingPlayerName, setPendingPlayerName] = useState('');
@@ -15524,6 +15981,40 @@ export default function App() {
     setShowMsg(true);
     setTimeout(() => setShowMsg(false), 2000);
   };
+
+  useEffect(() => {
+    let boundaryTimeoutId: number | null = null;
+
+    const refreshReadingActivityBlock = () => {
+      setIsReadingActivityBlocked(isReadingActivityTime());
+    };
+
+    const scheduleNextReadingActivityBoundary = () => {
+      if (boundaryTimeoutId !== null) {
+        window.clearTimeout(boundaryTimeoutId);
+      }
+
+      boundaryTimeoutId = window.setTimeout(() => {
+        refreshReadingActivityBlock();
+        scheduleNextReadingActivityBoundary();
+      }, getMillisecondsUntilNextReadingActivityBoundary());
+    };
+
+    refreshReadingActivityBlock();
+    scheduleNextReadingActivityBoundary();
+    const intervalId = window.setInterval(refreshReadingActivityBlock, 1_000);
+    window.addEventListener('focus', refreshReadingActivityBlock);
+    document.addEventListener('visibilitychange', refreshReadingActivityBlock);
+
+    return () => {
+      if (boundaryTimeoutId !== null) {
+        window.clearTimeout(boundaryTimeoutId);
+      }
+      window.clearInterval(intervalId);
+      window.removeEventListener('focus', refreshReadingActivityBlock);
+      document.removeEventListener('visibilitychange', refreshReadingActivityBlock);
+    };
+  }, []);
 
   useEffect(() => {
     gameStateRef.current = gameState;
@@ -19095,6 +19586,42 @@ export default function App() {
                     </div>
                   )}
                 </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isReadingActivityBlocked && (
+          <motion.div
+            key="reading-activity-block"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[1000] flex items-center justify-center overflow-y-auto bg-slate-950/88 p-4 backdrop-blur-md sm:p-6"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.94, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.94, y: 16 }}
+              transition={{ duration: 0.22, ease: 'easeOut' }}
+              className="relative w-full max-w-2xl overflow-hidden rounded-[2rem] border-4 border-red-300/70 bg-[linear-gradient(180deg,rgba(127,29,29,0.98),rgba(15,23,42,0.98))] p-4 text-center shadow-[0_32px_100px_rgba(0,0,0,0.68)] sm:p-6"
+              role="alertdialog"
+              aria-modal="true"
+              aria-labelledby="reading-activity-block-title"
+            >
+              <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-red-100/80 to-transparent" />
+              <img
+                src={readingActivityWarningImage}
+                alt="잡았다 요놈 경고 이미지"
+                className="mx-auto max-h-[52svh] w-full rounded-[1.5rem] border border-white/15 object-contain shadow-[0_18px_48px_rgba(0,0,0,0.38)]"
+                draggable={false}
+              />
+              <div className="mt-5">
+                <h2 id="reading-activity-block-title" className="mt-5 break-keep text-3xl font-black leading-tight text-white sm:text-5xl">
+                  지금은 독서시간입니다.
+                </h2>
               </div>
             </motion.div>
           </motion.div>
