@@ -18154,7 +18154,7 @@ export default function App() {
                     className="flex w-full items-center justify-center gap-2 rounded-full border-2 border-yellow-100/70 bg-amber-500 px-7 py-4 text-xl font-black text-slate-950 transition hover:scale-[1.01] hover:bg-amber-400 sm:w-auto sm:min-w-[12rem] sm:px-8 sm:py-5 sm:text-2xl"
                   >
                     <RotateCcw className="h-6 w-6" />
-                    이어하기
+                    <span>이어하기 · {storedBattleProgress.unitId.replace('unit', '')}단원 {storedBattleProgress.level}단계</span>
                   </button>
                 )}
                 <button
