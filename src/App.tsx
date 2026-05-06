@@ -8278,14 +8278,22 @@ function getUnit1Level4ProblemEntries() {
   const nameVariant = randomIntInRange(0, RIGHT_ANGLE_NAME_PROBLEM_VARIANTS.length - 1);
   const clockVariant = randomIntInRange(0, CLOCK_RIGHT_ANGLE_OPTION_VARIANTS.length - 1);
   const entries = arrangeUnit1EntriesForRound(4, [
-    ['rightAngle', '도형 속 직각이 모두 몇 개인지 써 보세요.', 'identify', 'rightAngleMark', markVariant],
-    ['rightAngle', '도형 속 직각이 모두 몇 개인지 세어 보세요.', 'identify', 'rightAngleMark', (markVariant + 1) % RIGHT_ANGLE_MARK_ANSWER_TOKENS.length],
-    ['rightAngle', '왼쪽 도형부터 직각이 몇 개인지 차례대로 써 보세요.', 'identify', 'rightAngleCount', countVariant],
-    ['rightAngle', '세 도형의 직각 수를 차례대로 써 보세요.', 'identify', 'rightAngleCount', (countVariant + 1) % RIGHT_ANGLE_COUNT_ANSWERS.length],
-    ['rightAngle', '직각을 모두 찾아 각의 이름을 써 보세요.', 'identify', 'rightAngleNames', nameVariant],
-    ['rightAngle', '그림에서 직각인 각의 이름을 모두 써 보세요.', 'identify', 'rightAngleNames', (nameVariant + 1) % RIGHT_ANGLE_NAME_PROBLEM_VARIANTS.length],
-    ['rightAngle', '직각이 되는 시각을 모두 써 보세요.', 'identify', 'clockRightAngles', clockVariant],
-    ['rightAngle', '시계에서 직각을 만드는 시각을 찾아 써 보세요.', 'identify', 'clockRightAngles', (clockVariant + 1) % CLOCK_RIGHT_ANGLE_OPTION_VARIANTS.length],
+    shuffleValues<Unit1ShapeProblemEntry>([
+      ['rightAngle', '도형 속 직각이 모두 몇 개인지 써 보세요.', 'identify', 'rightAngleMark', markVariant],
+      ['rightAngle', '도형 속 직각이 모두 몇 개인지 세어 보세요.', 'identify', 'rightAngleMark', (markVariant + 1) % RIGHT_ANGLE_MARK_ANSWER_TOKENS.length],
+    ])[0],
+    shuffleValues<Unit1ShapeProblemEntry>([
+      ['rightAngle', '왼쪽 도형부터 직각이 몇 개인지 차례대로 써 보세요.', 'identify', 'rightAngleCount', countVariant],
+      ['rightAngle', '세 도형의 직각 수를 차례대로 써 보세요.', 'identify', 'rightAngleCount', (countVariant + 1) % RIGHT_ANGLE_COUNT_ANSWERS.length],
+    ])[0],
+    shuffleValues<Unit1ShapeProblemEntry>([
+      ['rightAngle', '직각을 모두 찾아 각의 이름을 써 보세요.', 'identify', 'rightAngleNames', nameVariant],
+      ['rightAngle', '그림에서 직각인 각의 이름을 모두 써 보세요.', 'identify', 'rightAngleNames', (nameVariant + 1) % RIGHT_ANGLE_NAME_PROBLEM_VARIANTS.length],
+    ])[0],
+    shuffleValues<Unit1ShapeProblemEntry>([
+      ['rightAngle', '직각이 되는 시각을 모두 써 보세요.', 'identify', 'clockRightAngles', clockVariant],
+      ['rightAngle', '시계에서 직각을 만드는 시각을 찾아 써 보세요.', 'identify', 'clockRightAngles', (clockVariant + 1) % CLOCK_RIGHT_ANGLE_OPTION_VARIANTS.length],
+    ])[0],
   ]);
 
   unit1ProblemOrderCache.set(4, entries);
@@ -15315,12 +15323,17 @@ function ShapeIdentifyProblemCard({
     return (
       <div className="h-full min-h-[20rem] w-full px-6 py-5">
         <svg viewBox="0 0 640 330" className="h-full w-full">
-          {rays.map((ray) => (
-            <g key={ray.label}>
-              <line x1={vertex.x} y1={vertex.y} x2={ray.x} y2={ray.y} stroke="#111827" strokeWidth="3" strokeLinecap="round" />
-              <text x={ray.x + (ray.x < vertex.x ? -18 : 10)} y={ray.y + (ray.y < vertex.y ? -10 : 22)} className="fill-[#102a78] text-2xl font-black">{ray.label}</text>
-            </g>
-          ))}
+          {rays.map((ray) => {
+            const labelX = ray.x + (ray.x < vertex.x ? -18 : 10);
+            const labelY = Math.max(24, Math.min(306, ray.y + (ray.y < vertex.y ? -18 : 18)));
+
+            return (
+              <g key={ray.label}>
+                <line x1={vertex.x} y1={vertex.y} x2={ray.x} y2={ray.y} stroke="#111827" strokeWidth="3" strokeLinecap="round" />
+                <text x={labelX} y={labelY} dominantBaseline="middle" className="fill-[#102a78] text-2xl font-black">{ray.label}</text>
+              </g>
+            );
+          })}
           <circle cx={vertex.x} cy={vertex.y} r="4.5" fill="#111827" />
           <text x={vertex.x + 7} y={vertex.y + 24} className="fill-[#102a78] text-2xl font-black">{vertex.label}</text>
         </svg>
