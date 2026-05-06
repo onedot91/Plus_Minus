@@ -1282,6 +1282,23 @@ interface StoredPlayRecord {
   playedAt: string;
 }
 
+interface StoredBattleProgress {
+  savedAt: string;
+  playerName: string;
+  unitId: LearningUnitId;
+  battleDifficulty: BattleDifficulty;
+  specialOpponentSelections: SpecialOpponentSelections;
+  level: number;
+  playerHP: number;
+  opponentHP: number;
+  problem: Problem | null;
+  problemCoachmark: string | null;
+  unit1ProblemSequence: Record<number, number>;
+  unit3ProblemSequence: Record<number, number>;
+  unit3Level12RoundTemplateOrder: Level12TemplateId[] | null;
+  unit3Level12PreviousTemplateOrder: Level12TemplateId[];
+}
+
 interface StoredPlayRecordUnitTheme {
   cardClassName: string;
   accentClassName: string;
@@ -2682,6 +2699,7 @@ const DEFEAT_SCENE_IMAGES: Partial<Record<number, string>> = {
   9: stage9DefeatSceneImage,
 };
 const PLAY_RECORDS_STORAGE_KEY = 'plusMinusChromebookPlayRecords';
+const BATTLE_PROGRESS_STORAGE_KEY = 'plusMinusChromebookBattleProgress';
 const MAX_STORED_PLAY_RECORDS = 30;
 const RECORD_CLEAR_HOLD_DURATION_MS = 5000;
 const STORED_PLAY_RECORD_UNIT_THEMES: Record<LearningUnitId, StoredPlayRecordUnitTheme> = {
@@ -3645,6 +3663,138 @@ function saveStoredPlayRecords(records: StoredPlayRecord[]) {
     window.localStorage.setItem(PLAY_RECORDS_STORAGE_KEY, JSON.stringify(records.slice(0, MAX_STORED_PLAY_RECORDS)));
   } catch {
     // The on-screen history still updates for the current browser session.
+  }
+}
+
+const LEVEL12_TEMPLATE_ID_SET = new Set([
+  'eventStartTime',
+  'activityDuration',
+  'tripArrivalTime',
+  'dailyPracticeTotal',
+  'activityStartTime',
+  'elapsedTime',
+  'remainingUntilEvent',
+  'remainingAfterUse',
+]);
+
+function isLearningUnitId(value: unknown): value is LearningUnitId {
+  return value === 'unit1' || value === 'unit2' || value === 'unit3';
+}
+
+function isBattleDifficulty(value: unknown): value is BattleDifficulty {
+  return value === 'easy' || value === 'normal' || value === 'hard';
+}
+
+function isStoredProblem(value: unknown): value is Problem {
+  return Boolean(
+    value &&
+    typeof value === 'object' &&
+    typeof (value as Problem).text === 'string' &&
+    typeof (value as Problem).prompt === 'string' &&
+    typeof (value as Problem).answer === 'number' &&
+    typeof (value as Problem).kind === 'string',
+  );
+}
+
+function normalizeStoredNumberRecord(value: unknown): Record<number, number> {
+  if (!value || typeof value !== 'object') {
+    return {};
+  }
+
+  return Object.entries(value as Record<string, unknown>).reduce<Record<number, number>>((record, [key, entryValue]) => {
+    const numericKey = Number(key);
+    if (Number.isInteger(numericKey) && typeof entryValue === 'number' && Number.isFinite(entryValue)) {
+      record[numericKey] = entryValue;
+    }
+
+    return record;
+  }, {});
+}
+
+function normalizeStoredLevel12TemplateOrder(value: unknown): Level12TemplateId[] | null {
+  if (!Array.isArray(value)) {
+    return null;
+  }
+
+  const templateIds = value.filter((templateId): templateId is Level12TemplateId => (
+    typeof templateId === 'string' && LEVEL12_TEMPLATE_ID_SET.has(templateId)
+  ));
+
+  return templateIds.length > 0 ? templateIds : null;
+}
+
+function readStoredBattleProgress(): StoredBattleProgress | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  try {
+    const rawProgress = window.localStorage.getItem(BATTLE_PROGRESS_STORAGE_KEY);
+    if (!rawProgress) {
+      return null;
+    }
+
+    const parsedProgress = JSON.parse(rawProgress) as Partial<StoredBattleProgress>;
+    if (
+      !parsedProgress ||
+      typeof parsedProgress !== 'object' ||
+      !isLearningUnitId(parsedProgress.unitId) ||
+      !isBattleDifficulty(parsedProgress.battleDifficulty) ||
+      typeof parsedProgress.playerName !== 'string' ||
+      typeof parsedProgress.savedAt !== 'string' ||
+      typeof parsedProgress.level !== 'number' ||
+      typeof parsedProgress.playerHP !== 'number' ||
+      typeof parsedProgress.opponentHP !== 'number' ||
+      parsedProgress.level < 1 ||
+      parsedProgress.level > getTotalLevelsForUnit(parsedProgress.unitId) ||
+      parsedProgress.playerHP <= 0 ||
+      parsedProgress.opponentHP <= 0
+    ) {
+      return null;
+    }
+
+    return {
+      savedAt: parsedProgress.savedAt,
+      playerName: parsedProgress.playerName,
+      unitId: parsedProgress.unitId,
+      battleDifficulty: parsedProgress.battleDifficulty,
+      specialOpponentSelections: parsedProgress.specialOpponentSelections ?? DEFAULT_SPECIAL_OPPONENT_SELECTIONS,
+      level: parsedProgress.level,
+      playerHP: Math.min(100, Math.max(1, parsedProgress.playerHP)),
+      opponentHP: Math.min(100, Math.max(1, parsedProgress.opponentHP)),
+      problem: isStoredProblem(parsedProgress.problem) ? parsedProgress.problem : null,
+      problemCoachmark: typeof parsedProgress.problemCoachmark === 'string' ? parsedProgress.problemCoachmark : null,
+      unit1ProblemSequence: normalizeStoredNumberRecord(parsedProgress.unit1ProblemSequence),
+      unit3ProblemSequence: normalizeStoredNumberRecord(parsedProgress.unit3ProblemSequence),
+      unit3Level12RoundTemplateOrder: normalizeStoredLevel12TemplateOrder(parsedProgress.unit3Level12RoundTemplateOrder),
+      unit3Level12PreviousTemplateOrder: normalizeStoredLevel12TemplateOrder(parsedProgress.unit3Level12PreviousTemplateOrder) ?? [],
+    };
+  } catch {
+    return null;
+  }
+}
+
+function saveStoredBattleProgress(progress: StoredBattleProgress) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(BATTLE_PROGRESS_STORAGE_KEY, JSON.stringify(progress));
+  } catch {
+    // The current in-memory battle can still continue.
+  }
+}
+
+function clearStoredBattleProgress() {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    window.localStorage.removeItem(BATTLE_PROGRESS_STORAGE_KEY);
+  } catch {
+    // Nothing else to do if storage is unavailable.
   }
 }
 
@@ -15954,6 +16104,7 @@ export default function App() {
   const [rewardRoulettePhase, setRewardRoulettePhase] = useState<RewardRoulettePhase>('spinning');
   const [rewardRouletteSpinKey, setRewardRouletteSpinKey] = useState(0);
   const [storedPlayRecords, setStoredPlayRecords] = useState<StoredPlayRecord[]>(readStoredPlayRecords);
+  const [storedBattleProgress, setStoredBattleProgress] = useState<StoredBattleProgress | null>(readStoredBattleProgress);
   const [selectedLearningUnitId, setSelectedLearningUnitId] = useState<LearningUnitId | null>(null);
   const activeLearningUnitId = selectedLearningUnitId ?? DEFAULT_LEARNING_UNIT_ID;
   const [isEstimation, setIsEstimation] = useState(false);
@@ -16018,6 +16169,13 @@ export default function App() {
       setIsCaterpillarEvolutionOpen(false);
       setIsMetamonTransformOpen(false);
       clearBattleTimeouts();
+    }
+  }, [gameState]);
+
+  useEffect(() => {
+    if (gameState === 'win' || gameState === 'lose') {
+      clearStoredBattleProgress();
+      setStoredBattleProgress(null);
     }
   }, [gameState]);
 
@@ -16975,6 +17133,45 @@ export default function App() {
     }
   }, [gameState, isSpecialChallengeActive, playerHP, timeLeft]);
 
+  useEffect(() => {
+    if (gameState !== 'playing' || playerHP <= 0 || opponentHP <= 0) {
+      return;
+    }
+
+    const nextProgress: StoredBattleProgress = {
+      savedAt: new Date().toISOString(),
+      playerName,
+      unitId: activeLearningUnitId,
+      battleDifficulty,
+      specialOpponentSelections,
+      level,
+      playerHP,
+      opponentHP,
+      problem: problem.kind === 'builder' ? null : problem,
+      problemCoachmark,
+      unit1ProblemSequence: { ...unit1ProblemSequenceRef.current },
+      unit3ProblemSequence: { ...unit3ProblemSequenceRef.current },
+      unit3Level12RoundTemplateOrder: unit3Level12RoundTemplateOrderRef.current
+        ? [...unit3Level12RoundTemplateOrderRef.current]
+        : null,
+      unit3Level12PreviousTemplateOrder: [...unit3Level12PreviousTemplateOrderRef.current],
+    };
+
+    saveStoredBattleProgress(nextProgress);
+    setStoredBattleProgress(nextProgress);
+  }, [
+    activeLearningUnitId,
+    battleDifficulty,
+    gameState,
+    level,
+    opponentHP,
+    playerHP,
+    playerName,
+    problem,
+    problemCoachmark,
+    specialOpponentSelections,
+  ]);
+
   const toggleHint = () => {
     playSound('ui');
     setShowHint(prev => !prev);
@@ -17666,6 +17863,8 @@ export default function App() {
   const startGame = () => {
     const nextSpecialOpponentSelections = pickSpecialOpponentSelections();
 
+    clearStoredBattleProgress();
+    setStoredBattleProgress(null);
     clearBattleTimeouts();
     currentPlayRunIdRef.current += 1;
     recordedPlayRunIdRef.current = null;
@@ -17704,6 +17903,83 @@ export default function App() {
     setClockAnswerInput({ hours: '', minutes: '', seconds: '' });
     setIsUnitMenuOpen(false);
     updateMessage(getOpponentEntranceMessage(activeLearningUnitId, 1, nextSpecialOpponentSelections));
+  };
+
+  const resumeStoredBattleProgress = () => {
+    const progress = readStoredBattleProgress();
+    if (!progress) {
+      setStoredBattleProgress(null);
+      updateMessage('이어할 배틀이 없어요.');
+      playSound('ui', { gainMultiplier: 0.78, detune: -12 });
+      return;
+    }
+
+    const restoredProblem =
+      progress.problem && progress.problem.kind !== 'builder'
+        ? progress.problem
+        : getProblemForTurn(
+            progress.unitId,
+            progress.level,
+            progress.opponentHP,
+            progress.unitId === 'unit1'
+              ? progress.unit1ProblemSequence[progress.level] ?? 1
+              : progress.unitId === 'unit3'
+                ? progress.unit3ProblemSequence[progress.level] ?? 1
+                : undefined,
+          );
+
+    clearBattleTimeouts();
+    currentPlayRunIdRef.current += 1;
+    recordedPlayRunIdRef.current = null;
+    warmAudio();
+    playSound('start', { gainMultiplier: 0.72, detune: 6 });
+    gameStateRef.current = 'playing';
+    setGameState('playing');
+    setPendingRewardSkin(null);
+    setIsRewardPoolDepleted(false);
+    setRewardRoulettePhase('spinning');
+    setIsNamePromptOpen(false);
+    setIsRecordModalOpen(false);
+    setIsAttacking(false);
+    setIsOpponentAttacking(false);
+    setIsOpponentHit(false);
+    setIsPlayerHit(false);
+    setPlayerName(progress.playerName.trim() || DEFAULT_PLAYER_NAME);
+    setSelectedLearningUnitId(progress.unitId);
+    setBattleDifficulty(progress.battleDifficulty);
+    setSpecialOpponentSelections(progress.specialOpponentSelections);
+    setLevel(progress.level);
+    setPlayerHP(progress.playerHP);
+    setOpponentHP(progress.opponentHP);
+    resetDeveloperProblemHistory();
+    zeroTensBorrowCoachmarkLevelsRef.current.clear();
+    unitSelectionChallengeLevelsRef.current.clear();
+    unit1ProblemSequenceRef.current = { ...progress.unit1ProblemSequence };
+    unit3ProblemSequenceRef.current = { ...progress.unit3ProblemSequence };
+    unit3Level12RoundTemplateOrderRef.current = progress.unit3Level12RoundTemplateOrder
+      ? [...progress.unit3Level12RoundTemplateOrder]
+      : null;
+    unit3Level12PreviousTemplateOrderRef.current = [...progress.unit3Level12PreviousTemplateOrder];
+    setIsEstimation(false);
+    setEstimationProblem(null);
+    setIsUnitSelectionChallenge(false);
+    setUnitSelectionChallenge(null);
+    setIsSpecialChallengeResolving(false);
+    setTimeLeft(ESTIMATION_TIME_LIMIT_SECONDS);
+    resetSecretCodePrompt();
+    setProblem(restoredProblem);
+    setProblemCoachmark(progress.problemCoachmark);
+    pushDeveloperProblemSnapshot({
+      level: progress.level,
+      opponentHP: progress.opponentHP,
+      problem: restoredProblem,
+      problemCoachmark: progress.problemCoachmark,
+    });
+    setInputValue('');
+    setUnitInputValue('');
+    setClockAnswerInput({ hours: '', minutes: '', seconds: '' });
+    setIsUnitMenuOpen(false);
+    updateMessage('저장된 배틀을 이어합니다!');
   };
 
   const returnToStartScreen = () => {
@@ -17865,11 +18141,22 @@ export default function App() {
                 <button
                   onPointerDown={warmAudio}
                   onClick={openNamePrompt}
-                  className="flex w-full items-center justify-center gap-3 rounded-full bg-yellow-400 px-8 py-4 text-xl font-black text-slate-950 transition hover:scale-[1.01] hover:bg-yellow-300 sm:w-auto sm:min-w-[17rem] sm:px-10 sm:py-5 sm:text-2xl"
+                  className="flex w-full items-center justify-center gap-3 rounded-full bg-yellow-400 px-8 py-4 text-xl font-black text-slate-950 transition hover:scale-[1.01] hover:bg-yellow-300 sm:w-auto sm:min-w-[14rem] sm:px-10 sm:py-5 sm:text-2xl"
                 >
                   <Play className="h-6 w-6" />
                   배틀 시작!
                 </button>
+                {storedBattleProgress && (
+                  <button
+                    type="button"
+                    onPointerDown={warmAudio}
+                    onClick={resumeStoredBattleProgress}
+                    className="flex w-full items-center justify-center gap-2 rounded-full border-2 border-yellow-100/70 bg-amber-500 px-7 py-4 text-xl font-black text-slate-950 transition hover:scale-[1.01] hover:bg-amber-400 sm:w-auto sm:min-w-[12rem] sm:px-8 sm:py-5 sm:text-2xl"
+                  >
+                    <RotateCcw className="h-6 w-6" />
+                    이어하기
+                  </button>
+                )}
                 <button
                   type="button"
                   onPointerDown={warmAudio}
