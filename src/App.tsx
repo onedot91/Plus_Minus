@@ -605,6 +605,12 @@ const SHAPE_READ_LINE_LABEL_SETS = [
   ['\u3134', '\u3139'],
   ['\u3137', '\u3145'],
   ['\u3131', '\u3141'],
+  ['\u3137', '\u3139'],
+  ['\u3145', '\u3147'],
+  ['\u3139', '\u3141'],
+  ['\u3134', '\u3142'],
+  ['\u3131', '\u3145'],
+  ['\u3137', '\u3147'],
 ] as const;
 const SHAPE_READ_DEFAULT_ANGLE_LABELS = ['\u3131', '\u3134', '\u3137'] as const;
 const SHAPE_READ_ANGLE_LABEL_SETS = [
@@ -620,6 +626,12 @@ const SHAPE_READ_ANGLE_LABEL_SETS = [
   ['\u3139', '\u3134', '\u3147'],
   ['\u3141', '\u3137', '\u3131'],
   ['\u3145', '\u3142', '\u3139'],
+  ['\u3137', '\u3139', '\u3141'],
+  ['\u3142', '\u3141', '\u3131'],
+  ['\u3131', '\u3145', '\u3147'],
+  ['\u3134', '\u3142', '\u3141'],
+  ['\u3139', '\u3145', '\u3137'],
+  ['\u3141', '\u3147', '\u3134'],
 ] as const;
 
 const getShapeReadLineLabels = (figureVariant = 0) => SHAPE_READ_LINE_LABEL_SETS[figureVariant % SHAPE_READ_LINE_LABEL_SETS.length];
@@ -651,10 +663,10 @@ const getShapeReadAnswerToken = (mode: ShapeDrawMode, figureVariant = 0) => getS
 
 const RIGHT_ANGLE_MARK_ANSWER_TOKENS = [
   '8|8개',
-  '10|10개',
+  '11|11개',
   '7|7개',
   '9|9개',
-  '11|11개',
+  '12|12개',
   '6|6개',
   '12|12개',
   '5|5개',
@@ -681,6 +693,12 @@ const RIGHT_ANGLE_COUNT_ANSWERS = [
   [0, 2, 3],
   [3, 4, 0],
   [1, 3, 2],
+  [2, 0, 4],
+  [3, 2, 0],
+  [4, 1, 3],
+  [0, 4, 1],
+  [2, 4, 3],
+  [1, 0, 3],
 ] as const;
 
 const RIGHT_ANGLE_NAME_PROBLEM_VARIANTS = [
@@ -874,6 +892,38 @@ const RIGHT_ANGLE_NAME_PROBLEM_VARIANTS = [
       ['각ㄹㅁㄱ', '각ㄱㅁㄹ'],
     ],
   },
+  {
+    vertex: { x: 318, y: 180, label: '\u3147' },
+    rays: [
+      { x: 318, y: 52, label: '\u3131' },
+      { x: 450, y: 180, label: '\u3134' },
+      { x: 318, y: 308, label: '\u3137' },
+      { x: 186, y: 180, label: '\u3139' },
+      { x: 430, y: 82, label: '\u3141' },
+    ],
+    answerGroups: [
+      ['각ㄱㅇㄴ', '각ㄴㅇㄱ'],
+      ['각ㄴㅇㄷ', '각ㄷㅇㄴ'],
+      ['각ㄷㅇㄹ', '각ㄹㅇㄷ'],
+      ['각ㄹㅇㄱ', '각ㄱㅇㄹ'],
+    ],
+  },
+  {
+    vertex: { x: 326, y: 178, label: '\u3142' },
+    rays: [
+      { x: 222, y: 70, label: '\u3137' },
+      { x: 438, y: 70, label: '\u3139' },
+      { x: 434, y: 286, label: '\u3141' },
+      { x: 218, y: 286, label: '\u3145' },
+      { x: 326, y: 46, label: '\u3147' },
+    ],
+    answerGroups: [
+      ['각ㄷㅂㄹ', '각ㄹㅂㄷ'],
+      ['각ㄹㅂㅁ', '각ㅁㅂㄹ'],
+      ['각ㅁㅂㅅ', '각ㅅㅂㅁ'],
+      ['각ㅅㅂㄷ', '각ㄷㅂㅅ'],
+    ],
+  },
 ] as const;
 
 const CLOCK_RIGHT_ANGLE_OPTION_VARIANTS = [
@@ -889,6 +939,12 @@ const CLOCK_RIGHT_ANGLE_OPTION_VARIANTS = [
   [3, 6, 9, 10, 11],
   [1, 3, 5, 6, 9],
   [3, 4, 8, 9, 12],
+  [2, 3, 4, 9, 12],
+  [3, 5, 6, 8, 9],
+  [1, 3, 6, 8, 9],
+  [3, 4, 6, 9, 11],
+  [2, 3, 7, 8, 9],
+  [1, 3, 5, 9, 12],
 ] as const;
 
 const RIGHT_TRIANGLE_CLASSIFY_VARIANTS = [
@@ -927,6 +983,24 @@ const RIGHT_TRIANGLE_CLASSIFY_VARIANTS = [
     { points: '92,28 34,128 162,132', isRightTriangle: false },
     { points: '50,124 116,34 166,110', isRightTriangle: false },
     { points: '42,38 42,132 160,132', isRightTriangle: true },
+  ],
+  [
+    { points: '44,130 44,38 154,130', isRightTriangle: true },
+    { points: '92,26 28,128 166,122', isRightTriangle: false },
+    { points: '150,40 150,132 34,40', isRightTriangle: true },
+    { points: '48,118 110,34 164,124', isRightTriangle: false },
+  ],
+  [
+    { points: '40,132 156,132 156,48', isRightTriangle: true },
+    { points: '36,44 96,130 164,50', isRightTriangle: false },
+    { points: '42,126 42,34 158,34', isRightTriangle: true },
+    { points: '90,28 30,118 160,132', isRightTriangle: false },
+  ],
+  [
+    { points: '44,42 44,132 160,132', isRightTriangle: true },
+    { points: '48,124 104,30 166,114', isRightTriangle: false },
+    { points: '154,38 154,128 38,128', isRightTriangle: true },
+    { points: '92,26 30,130 160,118', isRightTriangle: false },
   ],
 ] as const;
 
@@ -1029,6 +1103,24 @@ const RECTANGLE_CLASSIFY_VARIANTS: ShapeClassifyItem[][] = [
     { points: '28,54 162,54 136,126 28,126', isTarget: false, rightAngleCount: 2 },
     { points: '28,54 162,54 162,122 28,122', isTarget: true, rightAngleCount: 4 },
   ],
+  [
+    { points: '28,42 160,42 160,122 28,122', isTarget: true, rightAngleCount: 4 },
+    { points: '90,28 178,78 90,128 2,78', isTarget: false, rightAngleCount: 0 },
+    { points: '42,132 42,44 148,96 168,132', isTarget: false, rightAngleCount: 1 },
+    { points: '34,46 164,46 132,130 34,130', isTarget: false, rightAngleCount: 2 },
+  ],
+  [
+    { points: '42,36 152,36 152,132 42,132', isTarget: true, rightAngleCount: 4 },
+    { points: '28,64 162,64 136,126 54,126', isTarget: false, rightAngleCount: 2 },
+    { points: '96,34 184,82 96,130 8,82', isTarget: false, rightAngleCount: 0 },
+    { points: '50,132 50,38 138,72 162,132', isTarget: false, rightAngleCount: 1 },
+  ],
+  [
+    { points: '34,54 160,54 160,118 34,118', isTarget: true, rightAngleCount: 4 },
+    { points: '102,30 184,78 102,126 20,78', isTarget: false, rightAngleCount: 0 },
+    { points: '30,42 164,42 122,132 30,132', isTarget: false, rightAngleCount: 2 },
+    { points: '46,132 46,40 148,84 166,132', isTarget: false, rightAngleCount: 1 },
+  ],
 ];
 
 const SQUARE_CLASSIFY_VARIANTS: ShapeClassifyItem[][] = [
@@ -1104,6 +1196,24 @@ const SQUARE_CLASSIFY_VARIANTS: ShapeClassifyItem[][] = [
     { points: '76,46 146,46 146,116 76,116', isTarget: true },
     { points: '34,42 154,42 126,130 62,130', isTarget: false },
   ],
+  [
+    { points: '48,38 136,38 136,126 48,126', isTarget: true },
+    { points: '32,54 164,54 164,116 32,116', isTarget: false },
+    { points: '72,28 150,28 150,106 72,106', isTarget: true },
+    { points: '94,28 160,84 94,140 28,84', isTarget: false },
+  ],
+  [
+    { points: '58,34 142,34 142,118 58,118', isTarget: true },
+    { points: '46,28 148,58 124,136 22,106', isTarget: false },
+    { points: '38,46 116,46 116,124 38,124', isTarget: true },
+    { points: '66,30 134,30 134,136 66,136', isTarget: false },
+  ],
+  [
+    { points: '44,32 130,32 130,118 44,118', isTarget: true },
+    { points: '28,48 166,48 166,112 28,112', isTarget: false },
+    { points: '78,42 148,42 148,112 78,112', isTarget: true },
+    { points: '44,48 152,48 126,130 70,130', isTarget: false },
+  ],
 ];
 
 const getShapeClassifyItems = (mode: ShapeDrawMode, figureVariant = 0): ShapeClassifyItem[] => {
@@ -1129,11 +1239,13 @@ const SHAPE_DEFINITION_VARIANTS: Record<'rectangle' | 'square', Array<{ blankTar
     { blankTarget: 'fourRightAngles', lines: ['[네 각]이 모두 직각인 사각형을', '[직사각형]이라고 합니다.'] },
     { blankTarget: 'rectangle', lines: ['네 각이 모두 직각인 사각형을', '[직사각형]이라고 합니다.'] },
     { blankTarget: 'fourRightAngles', lines: ['사각형에서 [네 각]이 모두 직각이면', '그 사각형은 직사각형입니다.'] },
+    { blankTarget: 'rectangle', lines: ['사각형의 [네 각]이 모두 직각이면', '[직사각형]이라고 합니다.'] },
   ],
   square: [
     { blankTarget: 'fourRightAngles', lines: ['[네 각]이 모두 직각이고', '[네 변]의 길이가 모두 같은 사각형을', '[정사각형]이라고 합니다.'] },
     { blankTarget: 'fourSides', lines: ['[네 각]이 모두 직각이고', '[네 변]의 길이가 모두 같은 사각형을', '[정사각형]이라고 합니다.'] },
     { blankTarget: 'square', lines: ['[네 각]이 모두 직각이고', '[네 변]의 길이가 모두 같은 사각형을', '[정사각형]이라고 합니다.'] },
+    { blankTarget: 'square', lines: ['직각이 4개이고', '[네 변]의 길이가 모두 같은 사각형을', '[정사각형]이라고 합니다.'] },
   ],
 };
 
@@ -1166,6 +1278,14 @@ const RIGHT_TRIANGLE_DEFINITION_VARIANTS = [
   {
     blankTarget: 'rightTriangle',
     lines: ['직각이 한 개 있는 삼각형을', '[직각삼각형]이라고 합니다.'],
+  },
+  {
+    blankTarget: 'oneAngle',
+    lines: ['[한 각]이 직각이면', '그 삼각형은 직각삼각형입니다.'],
+  },
+  {
+    blankTarget: 'rightTriangle',
+    lines: ['직각이 있는 삼각형을', '[직각삼각형]이라고 합니다.'],
   },
 ] as const;
 
@@ -8354,16 +8474,23 @@ function getUnit1Level1ProblemEntries() {
   const drawEntries = shuffleValues<Unit1ShapeProblemEntry>([
     ['segment', '두 점을 곧게 이어 선분을 만들어 보세요.'],
     ['segment', '점 ㄱ과 점 ㄴ을 이어 선분을 완성해 보세요.'],
+    ['segment', '두 점을 곧게 이어 선분을 완성해 보세요.'],
     ['line', '두 점을 지나 양쪽으로 끝없이 이어지는 직선을 만들어 보세요.'],
     ['line', '두 점을 지나 계속 이어지는 직선을 그려 보세요.'],
+    ['line', '두 점을 지나는 직선을 만들어 보세요.'],
     ['ray', '시작점에서 한쪽으로 끝없이 이어지는 반직선을 만들어 보세요.'],
     ['ray', '점 ㄱ에서 시작해 한쪽으로 이어지는 반직선을 만들어 보세요.'],
+    ['ray', '시작점에서 한쪽으로 뻗는 반직선을 그려 보세요.'],
   ]).slice(0, 4);
+  const lineReadVariants = shuffleValues([...SHAPE_READ_LINE_LABEL_SETS.keys()]);
   const readEntries = shuffleValues<Unit1ShapeProblemEntry>([
-    ['ray', '제시된 선의 이름을 써 보세요.', 'identify', undefined, 0],
-    [Math.random() < 0.5 ? 'segment' : 'line', '선을 보고 알맞은 이름을 써 보세요.', 'identify', undefined, 1],
-    ['segment', '제시된 선의 이름을 써 보세요.', 'identify', undefined, 2],
-    ['line', '선을 보고 알맞은 이름을 써 보세요.', 'identify', undefined, 3],
+    ['ray', '제시된 선의 이름을 써 보세요.', 'identify', undefined, lineReadVariants[0] ?? 0],
+    [Math.random() < 0.5 ? 'segment' : 'line', '선을 보고 알맞은 이름을 써 보세요.', 'identify', undefined, lineReadVariants[1] ?? 1],
+    ['segment', '제시된 선의 이름을 써 보세요.', 'identify', undefined, lineReadVariants[2] ?? 2],
+    ['line', '선을 보고 알맞은 이름을 써 보세요.', 'identify', undefined, lineReadVariants[3] ?? 3],
+    ['ray', '선을 보고 이름을 알맞게 써 보세요.', 'identify', undefined, lineReadVariants[4] ?? 4],
+    ['segment', '선을 읽고 알맞은 이름을 써 보세요.', 'identify', undefined, lineReadVariants[5] ?? 5],
+    ['line', '제시된 선의 이름을 써 보세요.', 'identify', undefined, lineReadVariants[6] ?? 6],
   ]);
   const entries = arrangeUnit1EntriesForRound(1, [...drawEntries, ...readEntries]);
 
@@ -8383,10 +8510,14 @@ function getUnit1Level2ProblemEntries() {
     ['angle', '점 ㄴ을 꼭짓점으로 하는 각을 만들어 보세요.'],
     ['angle', '두 반직선이 만나는 점을 꼭짓점으로 하여 각을 그려 보세요.'],
     ['angle', '점 ㄴ에서 시작하는 두 반직선으로 각을 완성해 보세요.'],
+    ['angle', '한 점에서 시작하는 두 반직선으로 각을 만들어 보세요.'],
+    ['angle', '꼭짓점에서 두 반직선을 그어 각을 완성해 보세요.'],
     ['angle', '각을 보고 이름을 써 보세요.', 'identify', undefined, angleReadVariants[0] ?? 0],
     ['angle', '제시된 각의 이름을 써 보세요.', 'identify', undefined, angleReadVariants[1] ?? 1],
     ['angle', '각의 이름을 알맞게 써 보세요.', 'identify', undefined, angleReadVariants[2] ?? 2],
     ['angle', '그림 속 각을 읽고 이름을 써 보세요.', 'identify', undefined, angleReadVariants[3] ?? 3],
+    ['angle', '각을 읽고 알맞은 이름을 써 보세요.', 'identify', undefined, angleReadVariants[4] ?? 4],
+    ['angle', '그림의 각 이름을 써 보세요.', 'identify', undefined, angleReadVariants[5] ?? 5],
   ]);
 
   unit1ProblemOrderCache.set(2, entries);
@@ -8399,17 +8530,23 @@ function getUnit1Level3ProblemEntries() {
     return cachedEntries;
   }
 
-  const foldEntry: Unit1ShapeProblemEntry = Math.random() < 0.5
-    ? ['rightAngle', '접어서 생긴 각의 이름을 써 보세요.', 'identify', 'fold', 0]
-    : ['rightAngle', '종이를 접어 생긴 반듯한 각의 이름을 써 보세요.', 'identify', 'fold', 1];
-  const definitionEntry: Unit1ShapeProblemEntry = Math.random() < 0.5
-    ? ['rightAngle', '빈칸에 알맞은 말을 써 보세요.', 'identify', 'definition']
-    : ['rightAngle', '직각의 뜻을 떠올려 빈칸을 채워 보세요.', 'identify', 'definition', 1];
+  const foldEntry = sample<Unit1ShapeProblemEntry>([
+    ['rightAngle', '접어서 생긴 각의 이름을 써 보세요.', 'identify', 'fold', 0],
+    ['rightAngle', '종이를 접어 생긴 반듯한 각의 이름을 써 보세요.', 'identify', 'fold', 1],
+    ['rightAngle', '종이를 반듯하게 접어 생긴 각의 이름을 써 보세요.', 'identify', 'fold', 0],
+  ]);
+  const definitionEntry = sample<Unit1ShapeProblemEntry>([
+    ['rightAngle', '빈칸에 알맞은 말을 써 보세요.', 'identify', 'definition'],
+    ['rightAngle', '직각의 뜻을 떠올려 빈칸을 채워 보세요.', 'identify', 'definition', 1],
+    ['rightAngle', '직각의 뜻에 맞게 빈칸을 채워 보세요.', 'identify', 'definition', randomIntInRange(0, 1)],
+  ]);
   const drawEntries = shuffleValues<Unit1ShapeProblemEntry>([
-    ['rightAngle', '점 ㄴ에서 두 반직선을 그어 직각을 만들어 보세요.', 'draw', undefined, randomIntInRange(0, 9), 'point'],
-    ['rightAngle', '꼭짓점 ㄴ을 기준으로 직각을 완성해 보세요.', 'draw', undefined, randomIntInRange(0, 9), 'point'],
-    ['rightAngle', '주어진 반직선과 직각이 되도록 점 ㄴ에서 반직선을 그어 보세요.', 'draw', undefined, randomIntInRange(0, 9), 'ray'],
-    ['rightAngle', '반직선 하나를 더 그어 직각을 만들어 보세요.', 'draw', undefined, randomIntInRange(0, 9), 'ray'],
+    ['rightAngle', '점 ㄴ에서 두 반직선을 그어 직각을 만들어 보세요.', 'draw', undefined, randomIntInRange(0, 11), 'point'],
+    ['rightAngle', '꼭짓점 ㄴ을 기준으로 직각을 완성해 보세요.', 'draw', undefined, randomIntInRange(0, 11), 'point'],
+    ['rightAngle', '점에서 두 반직선을 그어 직각을 만들어 보세요.', 'draw', undefined, randomIntInRange(0, 11), 'point'],
+    ['rightAngle', '주어진 반직선과 직각이 되도록 점 ㄴ에서 반직선을 그어 보세요.', 'draw', undefined, randomIntInRange(0, 11), 'ray'],
+    ['rightAngle', '반직선 하나를 더 그어 직각을 만들어 보세요.', 'draw', undefined, randomIntInRange(0, 11), 'ray'],
+    ['rightAngle', '주어진 반직선에 맞추어 직각을 완성해 보세요.', 'draw', undefined, randomIntInRange(0, 11), 'ray'],
   ]).slice(0, 2);
   const entries = arrangeUnit1EntriesForRound(3, [foldEntry, definitionEntry, ...drawEntries]);
 
@@ -8464,16 +8601,20 @@ function getUnit1Level5ProblemEntries() {
     '삼각형을 알맞은 곳으로 옮겨 분류해 보세요.',
     '직각이 있는 삼각형과 없는 삼각형으로 나누어 보세요.',
     '삼각형 카드를 알맞은 칸에 넣어 보세요.',
+    '직각삼각형과 직각삼각형이 아닌 도형으로 나누어 보세요.',
+    '직각이 있는 삼각형을 찾아 알맞은 칸에 넣어 보세요.',
   ];
   const pointTitles = [
     '나머지 한 점을 찍어 직각삼각형을 완성해 보세요.',
     '주어진 선분에 점 하나를 더 찍어 직각삼각형을 만들어 보세요.',
     '한 점을 찍어 선분과 함께 직각삼각형이 되게 해 보세요.',
+    '알맞은 곳에 점을 찍어 직각삼각형을 완성해 보세요.',
   ];
   const polygonTitles = [
     '모양이 다른 직각삼각형 2개를 그려 보세요.',
     '삼각형 도구로 서로 다른 모양의 직각삼각형 2개를 만들어 보세요.',
     '모양이 다른 직각삼각형을 두 개 그려 보세요.',
+    '크기나 모양이 다른 직각삼각형 두 개를 만들어 보세요.',
   ];
   const definitionEntry: Unit1ShapeProblemEntry = Math.random() < 0.5
     ? ['rightTriangle', '빈칸에 알맞은 말을 써 보세요.', 'identify', 'rightTriangleDefinition', definitionVariant]
@@ -8533,35 +8674,21 @@ function getUnit1Level6ProblemEntries() {
         'shapeClassify',
         (classifyVariant + 1) % RECTANGLE_CLASSIFY_VARIANTS.length,
       ];
-  const definitionEntry: Unit1ShapeProblemEntry = Math.random() < 0.5
-    ? ['rectangle', '빈칸에 알맞은 말을 써 보세요.', 'identify', 'shapeDefinition', definitionVariant]
-    : [
-        'rectangle',
-        '직사각형의 뜻을 생각하며 빈칸을 채워 보세요.',
-        'identify',
-        'shapeDefinition',
-        (definitionVariant + 1) % SHAPE_DEFINITION_VARIANTS.rectangle.length,
-      ];
-  const pointEntry: Unit1ShapeProblemEntry = Math.random() < 0.5
-    ? ['rectangle', '나머지 한 점을 찍어 직사각형을 완성해 보세요.', 'draw', undefined, pointCompletionVariant, 'point']
-    : [
-        'rectangle',
-        '세 점을 보고 알맞은 곳에 한 점을 찍어 직사각형을 만들어 보세요.',
-        'draw',
-        undefined,
-        (pointCompletionVariant + 2) % 6,
-        'point',
-      ];
-  const polygonEntry: Unit1ShapeProblemEntry = Math.random() < 0.5
-    ? ['rectangle', '모양이나 크기가 다른 직사각형 2개를 그려 보세요.', 'draw', undefined, twoRectangleVariant, 'twoPolygons']
-    : [
-        'rectangle',
-        '서로 다른 모양이나 크기의 직사각형 두 개를 완성해 보세요.',
-        'draw',
-        undefined,
-        (twoRectangleVariant + 3) % 6,
-        'twoPolygons',
-      ];
+  const definitionEntry = sample<Unit1ShapeProblemEntry>([
+    ['rectangle', '빈칸에 알맞은 말을 써 보세요.', 'identify', 'shapeDefinition', definitionVariant],
+    ['rectangle', '직사각형의 뜻을 생각하며 빈칸을 채워 보세요.', 'identify', 'shapeDefinition', (definitionVariant + 1) % SHAPE_DEFINITION_VARIANTS.rectangle.length],
+    ['rectangle', '직사각형의 이름과 성질을 떠올려 빈칸을 채워 보세요.', 'identify', 'shapeDefinition', (definitionVariant + 2) % SHAPE_DEFINITION_VARIANTS.rectangle.length],
+  ]);
+  const pointEntry = sample<Unit1ShapeProblemEntry>([
+    ['rectangle', '나머지 한 점을 찍어 직사각형을 완성해 보세요.', 'draw', undefined, pointCompletionVariant, 'point'],
+    ['rectangle', '세 점을 보고 알맞은 곳에 한 점을 찍어 직사각형을 만들어 보세요.', 'draw', undefined, (pointCompletionVariant + 2) % 6, 'point'],
+    ['rectangle', '알맞은 곳에 점을 찍어 직사각형을 완성해 보세요.', 'draw', undefined, (pointCompletionVariant + 4) % 6, 'point'],
+  ]);
+  const polygonEntry = sample<Unit1ShapeProblemEntry>([
+    ['rectangle', '모양이나 크기가 다른 직사각형 2개를 그려 보세요.', 'draw', undefined, twoRectangleVariant, 'twoPolygons'],
+    ['rectangle', '서로 다른 모양이나 크기의 직사각형 두 개를 완성해 보세요.', 'draw', undefined, (twoRectangleVariant + 3) % 6, 'twoPolygons'],
+    ['rectangle', '크기가 다른 직사각형 두 개를 만들어 보세요.', 'draw', undefined, (twoRectangleVariant + 1) % 6, 'twoPolygons'],
+  ]);
   const entries = arrangeUnit1EntriesWithFixedFirstForRound(6, classifyEntry, [definitionEntry, pointEntry, polygonEntry]);
 
   unit1ProblemOrderCache.set(6, entries);
@@ -8587,35 +8714,21 @@ function getUnit1Level7ProblemEntries() {
         'shapeClassify',
         (classifyVariant + 1) % SQUARE_CLASSIFY_VARIANTS.length,
       ];
-  const definitionEntry: Unit1ShapeProblemEntry = Math.random() < 0.5
-    ? ['square', '빈칸에 알맞은 말을 써 보세요.', 'identify', 'shapeDefinition', definitionVariant]
-    : [
-        'square',
-        '정사각형의 뜻을 생각하며 빈칸을 채워 보세요.',
-        'identify',
-        'shapeDefinition',
-        (definitionVariant + 1) % SHAPE_DEFINITION_VARIANTS.square.length,
-      ];
-  const pointEntry: Unit1ShapeProblemEntry = Math.random() < 0.5
-    ? ['square', '나머지 한 점을 찍어 정사각형을 완성해 보세요.', 'draw', undefined, pointCompletionVariant, 'point']
-    : [
-        'square',
-        '세 점을 보고 알맞은 곳에 한 점을 찍어 정사각형을 만들어 보세요.',
-        'draw',
-        undefined,
-        (pointCompletionVariant + 2) % 6,
-        'point',
-      ];
-  const polygonEntry: Unit1ShapeProblemEntry = Math.random() < 0.5
-    ? ['square', '크기가 다른 정사각형 2개를 그려 보세요.', 'draw', undefined, twoSquareVariant, 'twoPolygons']
-    : [
-        'square',
-        '서로 크기가 다른 정사각형 두 개를 완성해 보세요.',
-        'draw',
-        undefined,
-        (twoSquareVariant + 3) % 6,
-        'twoPolygons',
-      ];
+  const definitionEntry = sample<Unit1ShapeProblemEntry>([
+    ['square', '빈칸에 알맞은 말을 써 보세요.', 'identify', 'shapeDefinition', definitionVariant],
+    ['square', '정사각형의 뜻을 생각하며 빈칸을 채워 보세요.', 'identify', 'shapeDefinition', (definitionVariant + 1) % SHAPE_DEFINITION_VARIANTS.square.length],
+    ['square', '정사각형의 이름과 성질을 떠올려 빈칸을 채워 보세요.', 'identify', 'shapeDefinition', (definitionVariant + 2) % SHAPE_DEFINITION_VARIANTS.square.length],
+  ]);
+  const pointEntry = sample<Unit1ShapeProblemEntry>([
+    ['square', '나머지 한 점을 찍어 정사각형을 완성해 보세요.', 'draw', undefined, pointCompletionVariant, 'point'],
+    ['square', '세 점을 보고 알맞은 곳에 한 점을 찍어 정사각형을 만들어 보세요.', 'draw', undefined, (pointCompletionVariant + 2) % 6, 'point'],
+    ['square', '알맞은 곳에 점을 찍어 정사각형을 완성해 보세요.', 'draw', undefined, (pointCompletionVariant + 4) % 6, 'point'],
+  ]);
+  const polygonEntry = sample<Unit1ShapeProblemEntry>([
+    ['square', '크기가 다른 정사각형 2개를 그려 보세요.', 'draw', undefined, twoSquareVariant, 'twoPolygons'],
+    ['square', '서로 크기가 다른 정사각형 두 개를 완성해 보세요.', 'draw', undefined, (twoSquareVariant + 3) % 6, 'twoPolygons'],
+    ['square', '크기가 서로 다른 정사각형 두 개를 만들어 보세요.', 'draw', undefined, (twoSquareVariant + 1) % 6, 'twoPolygons'],
+  ]);
   const entries = arrangeUnit1EntriesWithFixedFirstForRound(7, classifyEntry, [definitionEntry, pointEntry, polygonEntry]);
 
   unit1ProblemOrderCache.set(7, entries);
@@ -8635,12 +8748,18 @@ function getUnit1Level8ProblemEntries() {
     ['rightTriangle', '나머지 한 점을 찍어 직각삼각형을 완성해 보세요.', 'draw', undefined, rightTriangleVariant, 'point'],
     ['rightTriangle', '선분을 이어 직각삼각형을 완성해 보세요.', 'draw', undefined, (rightTriangleVariant + 1) % 8, 'lineCompletion'],
     ['rightTriangle', '모양 또는 크기가 다른 직각삼각형 3개를 그려 보세요.', 'draw', undefined, (rightTriangleVariant + 2) % 8, 'threeRightTriangles'],
+    ['rightTriangle', '알맞은 곳에 점을 찍어 직각삼각형을 만들어 보세요.', 'draw', undefined, (rightTriangleVariant + 3) % 8, 'point'],
+    ['rightTriangle', '서로 다른 직각삼각형 세 개를 만들어 보세요.', 'draw', undefined, (rightTriangleVariant + 4) % 8, 'threeRightTriangles'],
     ['rectangle', '나머지 한 점을 찍어 직사각형을 완성해 보세요.', 'draw', undefined, rectangleVariant, 'point'],
     ['rectangle', '선분을 이어 직사각형을 완성해 보세요.', 'draw', undefined, (rectangleVariant + 1) % 8, 'lineCompletion'],
     ['rectangle', '모양 또는 크기가 다른 직사각형 3개를 그려 보세요.', 'draw', undefined, (rectangleVariant + 2) % 8, 'threePolygons'],
+    ['rectangle', '알맞은 곳에 점을 찍어 직사각형을 만들어 보세요.', 'draw', undefined, (rectangleVariant + 3) % 8, 'point'],
+    ['rectangle', '서로 다른 직사각형 세 개를 만들어 보세요.', 'draw', undefined, (rectangleVariant + 4) % 8, 'threePolygons'],
     ['square', '나머지 한 점을 찍어 정사각형을 완성해 보세요.', 'draw', undefined, squareVariant, 'point'],
     ['square', '선분을 이어 정사각형을 완성해 보세요.', 'draw', undefined, (squareVariant + 1) % 8, 'lineCompletion'],
     ['square', '크기가 다른 정사각형 3개를 그려 보세요.', 'draw', undefined, (squareVariant + 2) % 8, 'threePolygons'],
+    ['square', '알맞은 곳에 점을 찍어 정사각형을 만들어 보세요.', 'draw', undefined, (squareVariant + 3) % 8, 'point'],
+    ['square', '크기가 서로 다른 정사각형 세 개를 만들어 보세요.', 'draw', undefined, (squareVariant + 4) % 8, 'threePolygons'],
   ]);
   const entries = arrangeUnit1EntriesForRound(
     8,
@@ -13666,6 +13785,19 @@ function ShapeDrawProblemCard({ shapeDraw, answerValue, onAnswerChange, onSubmit
     return [line.start.label, line.end.label].includes(SHAPE_READ_FIRST_POINT_LABEL) &&
       [line.start.label, line.end.label].includes(SHAPE_READ_SECOND_POINT_LABEL);
   };
+  const lineCompletionFigure = null;
+  const getMatchedLineCompletionEdgeKey = (_line: ShapeLine) => null;
+  const isQuadrilateralPointCompletionProblem = false;
+  const isTwoPolygonProblem = false;
+  const presetQuadrilateralPoints = null;
+  const triangleArea = (polygon: ShapePoint[]) => Math.abs(
+    polygon.reduce((sum, point, index) => {
+      const next = polygon[(index + 1) % polygon.length];
+      return sum + point.x * next.y - next.x * point.y;
+    }, 0) / 2,
+  );
+  const isGachaDrawProblem = false;
+  const rouletteResolved = true;
   const rightAngleMarkers = (() => {
     const markers: Array<{ key: string; vertex: ShapePoint; a: ShapePoint; b: ShapePoint }> = [];
     const seen = new Set<string>();
@@ -14542,7 +14674,11 @@ function ShapeDrawProblemCardV2({
               />
             );
           })}
-          {lineCompletionFigure.points.map((point) => <ShapePointView key={`line-completion-point-${point.label}`} point={point} />)}
+          {lineCompletionFigure.points.map((point) => (
+            <g key={`line-completion-point-${point.label}`}>
+              <ShapePointView point={point} />
+            </g>
+          ))}
         </g>
       );
     }
@@ -14584,7 +14720,11 @@ function ShapeDrawProblemCardV2({
             strokeLinecap="round"
             strokeLinejoin="round"
           />
-          {presetQuadrilateralPoints.map((point) => <ShapePointView key={`preset-quad-${point.label}`} point={point} />)}
+          {presetQuadrilateralPoints.map((point) => (
+            <g key={`preset-quad-${point.label}`}>
+              <ShapePointView point={point} />
+            </g>
+          ))}
           {completedPolygons.map((polygon) => (
             <motion.polygon
               key={`complete-quadrilateral-${polygon.map((vertex) => `${vertex.x}-${vertex.y}`).join('-')}`}
@@ -14915,6 +15055,27 @@ function ShapeIdentifyProblemCard({
         gridPoint(6, 5, '\u3137'),
       ],
     },
+    {
+      vertex: gridPoint(4, 4, '\u3134'),
+      ends: [
+        gridPoint(4, 1, '\u3131'),
+        gridPoint(8, 4, '\u3137'),
+      ],
+    },
+    {
+      vertex: gridPoint(7, 3, '\u3134'),
+      ends: [
+        gridPoint(7, 1, '\u3131'),
+        gridPoint(4, 3, '\u3137'),
+      ],
+    },
+    {
+      vertex: gridPoint(3, 2, '\u3134'),
+      ends: [
+        gridPoint(3, 5, '\u3131'),
+        gridPoint(7, 2, '\u3137'),
+      ],
+    },
   ];
   const givenRightAngle = rightAngleVariants[figureVariant % rightAngleVariants.length];
   const givenRightAngleVertex: ShapePoint = givenRightAngle.vertex;
@@ -14992,7 +15153,7 @@ function ShapeIdentifyProblemCard({
     );
   };
   const rightTriangleClassifyVariantIndex = figureVariant % RIGHT_TRIANGLE_CLASSIFY_VARIANTS.length;
-  const rightTriangleClassifyItems = isShapeClassifyProblem
+  const rightTriangleClassifyItems: ShapeClassifyItem[] = isShapeClassifyProblem
     ? getShapeClassifyItems(shapeDraw.mode, figureVariant)
     : getRightTriangleClassifyItems(figureVariant).map(({ points, isRightTriangle }) => ({ points, isTarget: isRightTriangle }));
   const targetShapeLabel = shapeDraw.mode === 'square'
@@ -15364,7 +15525,7 @@ function ShapeIdentifyProblemCard({
       ],
       1: [
         <svg key="count-one-0" viewBox="0 0 180 150" className="h-44 w-full">
-          <path d="M 38 122 L 38 28 L 132 28 Q 132 122 38 122 Z" fill="#fff" stroke="#111827" strokeWidth="3" />
+          <polygon points="38,122 38,28 132,122" fill="#fff" stroke="#111827" strokeWidth="3" />
         </svg>,
         <svg key="count-one-1" viewBox="0 0 180 150" className="h-44 w-full">
           <polygon points="46,122 132,122 46,36" fill="#fff" stroke="#111827" strokeWidth="3" />
@@ -15373,13 +15534,13 @@ function ShapeIdentifyProblemCard({
           <polygon points="50,122 138,122 50,34" fill="#fff" stroke="#111827" strokeWidth="3" />
         </svg>,
         <svg key="count-one-3" viewBox="0 0 180 150" className="h-44 w-full">
-          <path d="M 46 118 L 46 34 L 138 118 Z" fill="#fff" stroke="#111827" strokeWidth="3" />
+          <polygon points="46,118 46,34 138,118" fill="#fff" stroke="#111827" strokeWidth="3" />
         </svg>,
         <svg key="count-one-4" viewBox="0 0 180 150" className="h-44 w-full">
-          <polygon points="42,38 42,122 146,96 132,44" fill="#fff" stroke="#111827" strokeWidth="3" />
+          <polygon points="42,122 146,122 42,38" fill="#fff" stroke="#111827" strokeWidth="3" />
         </svg>,
         <svg key="count-one-5" viewBox="0 0 180 150" className="h-44 w-full">
-          <path d="M 54 124 L 54 36 L 146 64 Q 118 124 54 124 Z" fill="#fff" stroke="#111827" strokeWidth="3" />
+          <polygon points="54,124 54,36 146,124" fill="#fff" stroke="#111827" strokeWidth="3" />
         </svg>,
       ],
       2: [
@@ -15393,13 +15554,13 @@ function ShapeIdentifyProblemCard({
           <polygon points="50,34 132,34 132,122 76,122" fill="#fff" stroke="#111827" strokeWidth="3" />
         </svg>,
         <svg key="count-two-3" viewBox="0 0 180 150" className="h-44 w-full">
-          <polygon points="42,42 136,42 136,122 92,122 72,86 42,86" fill="#fff" stroke="#111827" strokeWidth="3" />
+          <polygon points="42,118 136,118 136,42 72,42" fill="#fff" stroke="#111827" strokeWidth="3" />
         </svg>,
         <svg key="count-two-4" viewBox="0 0 180 150" className="h-44 w-full">
-          <polygon points="48,34 132,34 132,118 102,118 74,76 48,76" fill="#fff" stroke="#111827" strokeWidth="3" />
+          <polygon points="48,118 132,118 132,34 78,34" fill="#fff" stroke="#111827" strokeWidth="3" />
         </svg>,
         <svg key="count-two-5" viewBox="0 0 180 150" className="h-44 w-full">
-          <polygon points="42,118 42,38 130,38 130,72 82,118" fill="#fff" stroke="#111827" strokeWidth="3" />
+          <polygon points="42,122 42,38 130,38 86,122" fill="#fff" stroke="#111827" strokeWidth="3" />
         </svg>,
       ],
       3: [
@@ -16066,6 +16227,7 @@ export default function App() {
   const developerProblemHistoryIndexRef = useRef(-1);
   const currentPlayRunIdRef = useRef(0);
   const recordedPlayRunIdRef = useRef<number | null>(null);
+  const isBattleActionResolvingRef = useRef(false);
   const gameStateRef = useRef<GameState>('start');
   const battleTimeoutIdsRef = useRef<number[]>([]);
   const recordClearHoldTimeoutRef = useRef<number | null>(null);
@@ -16700,6 +16862,7 @@ export default function App() {
   };
 
   const resetDeveloperBattleState = () => {
+    isBattleActionResolvingRef.current = false;
     setIsAttacking(false);
     setIsOpponentAttacking(false);
     setIsOpponentHit(false);
@@ -17183,6 +17346,7 @@ export default function App() {
   };
 
   const completeLevelTransition = (nextLevel: number, shouldQueueEstimation = false) => {
+    isBattleActionResolvingRef.current = false;
     setIsOpponentHit(false);
     setIsOpponentAttacking(false);
     setLevel(nextLevel);
@@ -17199,6 +17363,7 @@ export default function App() {
   };
 
   const requestSecretCodeForNextLevel = (nextLevel: number, shouldQueueEstimation = false) => {
+    isBattleActionResolvingRef.current = false;
     setIsOpponentHit(false);
     setIsOpponentAttacking(false);
     setSecretCodeInput('');
@@ -17531,6 +17696,11 @@ export default function App() {
       skipSpecialChallenges?: boolean;
     } = {},
   ) => {
+    if (isBattleActionResolvingRef.current || isAttacking || isOpponentAttacking || isOpponentHit || isPlayerHit) {
+      return;
+    }
+
+    isBattleActionResolvingRef.current = true;
     const skipSpecialChallenges = options.skipSpecialChallenges === true;
     const runId = currentPlayRunIdRef.current;
 
@@ -17578,6 +17748,7 @@ export default function App() {
           }
         } else {
           setProblemWithCoachmark(getNextProblemForTurn(activeLearningUnitId, level, newOpponentHP), level, { opponentHP: newOpponentHP });
+          isBattleActionResolvingRef.current = false;
           if (
             !skipSpecialChallenges &&
             activeLearningUnitId === 'unit2' &&
@@ -17621,6 +17792,8 @@ export default function App() {
           gameStateRef.current = 'lose';
           setGameState('lose');
           playSound('lose', { gainMultiplier: 1.06, detune: -18 });
+        } else {
+          isBattleActionResolvingRef.current = false;
         }
       }, ATTACK_POSE_DURATION_MS, runId);
     }
@@ -17866,6 +18039,7 @@ export default function App() {
     clearStoredBattleProgress();
     setStoredBattleProgress(null);
     clearBattleTimeouts();
+    isBattleActionResolvingRef.current = false;
     currentPlayRunIdRef.current += 1;
     recordedPlayRunIdRef.current = null;
     warmAudio();
@@ -17929,6 +18103,7 @@ export default function App() {
           );
 
     clearBattleTimeouts();
+    isBattleActionResolvingRef.current = false;
     currentPlayRunIdRef.current += 1;
     recordedPlayRunIdRef.current = null;
     warmAudio();
@@ -17984,6 +18159,7 @@ export default function App() {
 
   const returnToStartScreen = () => {
     clearBattleTimeouts();
+    isBattleActionResolvingRef.current = false;
     currentPlayRunIdRef.current += 1;
     warmAudio();
     playSound('ui');
