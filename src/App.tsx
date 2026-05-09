@@ -1,5 +1,5 @@
-﻿import React, { useState, useEffect, useRef, useEffectEvent } from 'react';
-import { Sword, Heart, RotateCcw, Play, Sparkles, Star, ChevronDown, Check, History, Lock, X, Crown } from 'lucide-react';
+﻿import React, { useState, useEffect, useRef, useEffectEvent, useMemo } from 'react';
+import { Sword, Heart, RotateCcw, Play, Sparkles, Star, ChevronDown, Check, History, Lock, X, Crown, Archive } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { VisualCalculator, type VisualControlSound } from './components/VisualCalculator';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -382,7 +382,7 @@ function getMillisecondsUntilNextReadingActivityBoundary(date = new Date()) {
   return Math.max(1_000, nextBoundaries[0] ?? 60_000);
 }
 
-type GameState = 'start' | 'unitSelect' | 'playing' | 'win' | 'lose';
+type GameState = 'start' | 'unitSelect' | 'archive' | 'playing' | 'win' | 'lose';
 
 type BattleDifficulty = 'easy' | 'normal' | 'hard';
 
@@ -478,7 +478,7 @@ interface ShapeDrawProblemData {
   task: ShapeDrawTask;
   title: string;
   answerToken: string;
-  identifyVariant?: 'fold' | 'definition' | 'rightAngleMark' | 'rightAngleCount' | 'rightAngleNames' | 'clockRightAngles' | 'rightTriangleClassify' | 'rightTriangleDefinition' | 'shapeClassify' | 'shapeDefinition';
+  identifyVariant?: 'fold' | 'definition' | 'lineChoice' | 'anglePart' | 'rightAngleMark' | 'rightAngleCount' | 'rightAngleNames' | 'clockRightAngles' | 'rightTriangleClassify' | 'rightTriangleDefinition' | 'shapeClassify' | 'shapeChoice' | 'shapeDefinition' | 'polygonParts';
   drawVariant?: 'point' | 'ray' | 'twoRightTriangles' | 'threeRightTriangles' | 'twoPolygons' | 'threePolygons' | 'mixedPolygons' | 'lineCompletion' | 'gacha';
   figureVariant?: number;
 }
@@ -666,7 +666,7 @@ const RIGHT_ANGLE_MARK_ANSWER_TOKENS = [
   '11|11개',
   '7|7개',
   '9|9개',
-  '12|12개',
+  '11|11개',
   '6|6개',
   '12|12개',
   '5|5개',
@@ -1309,6 +1309,31 @@ const getRightAngleNamesAnswerToken = (figureVariant = 0) =>
   RIGHT_ANGLE_NAME_PROBLEM_VARIANTS[figureVariant % RIGHT_ANGLE_NAME_PROBLEM_VARIANTS.length].answerGroups
     .map((answerGroup) => answerGroup.join('|'))
     .join('&&');
+
+const getAnglePartAnswerToken = (figureVariant = 0) =>
+  figureVariant % 2 === 0
+    ? '꼭짓점|꼭지점'
+    : '2|2개|두개|두 개';
+
+const getPolygonPartsAnswerToken = (mode: ShapeDrawMode) => {
+  const count = mode === 'rightTriangle' ? 3 : 4;
+  return `${count}|${count}개`;
+};
+
+const getShapeChoiceAnswerToken = (mode: ShapeDrawMode) => {
+  if (mode === 'rectangle') {
+    return '3&&4';
+  }
+
+  const shapeChoiceNumbers: Partial<Record<ShapeDrawMode, number>> = {
+    rightTriangle: 1,
+    triangle: 2,
+    square: 4,
+  };
+  const choiceNumber = shapeChoiceNumbers[mode];
+
+  return choiceNumber ? `${choiceNumber}` : SHAPE_DRAW_ANSWER_LABELS[mode];
+};
 
 const getShapeReadAnswerExample = () => '이름 쓰기';
 
@@ -8346,12 +8371,20 @@ function createShapeDrawProblem(
       ? figureVariant % 2 === 0
         ? '반듯'
         : '두 번'
+      : identifyVariant === 'lineChoice'
+        ? SHAPE_DRAW_ANSWER_LABELS[mode]
+      : identifyVariant === 'shapeChoice'
+        ? getShapeChoiceAnswerToken(mode)
+      : identifyVariant === 'anglePart'
+        ? getAnglePartAnswerToken(figureVariant)
       : identifyVariant === 'rightTriangleDefinition'
         ? getRightTriangleDefinitionAnswerToken(figureVariant)
       : identifyVariant === 'rightTriangleClassify'
         ? RIGHT_TRIANGLE_CLASSIFY_ANSWER_TOKENS[figureVariant % RIGHT_TRIANGLE_CLASSIFY_ANSWER_TOKENS.length]
       : identifyVariant === 'shapeDefinition'
         ? getShapeDefinitionAnswerToken(mode, figureVariant)
+      : identifyVariant === 'polygonParts'
+        ? getPolygonPartsAnswerToken(mode)
       : identifyVariant === 'shapeClassify' && (mode === 'rectangle' || mode === 'square')
         ? SHAPE_CLASSIFY_ANSWER_TOKENS[mode][figureVariant % SHAPE_CLASSIFY_ANSWER_TOKENS[mode].length]
       : identifyVariant === 'rightAngleMark'
@@ -8491,6 +8524,9 @@ function getUnit1Level1ProblemEntries() {
     ['ray', '선을 보고 이름을 알맞게 써 보세요.', 'identify', undefined, lineReadVariants[4] ?? 4],
     ['segment', '선을 읽고 알맞은 이름을 써 보세요.', 'identify', undefined, lineReadVariants[5] ?? 5],
     ['line', '제시된 선의 이름을 써 보세요.', 'identify', undefined, lineReadVariants[6] ?? 6],
+    ['segment', '그림을 보고 선분, 직선, 반직선 중 알맞은 것을 고르세요.', 'identify', 'lineChoice', lineReadVariants[7] ?? 7],
+    ['line', '그림을 보고 선분, 직선, 반직선 중 알맞은 것을 고르세요.', 'identify', 'lineChoice', lineReadVariants[8] ?? 8],
+    ['ray', '그림을 보고 선분, 직선, 반직선 중 알맞은 것을 고르세요.', 'identify', 'lineChoice', lineReadVariants[9] ?? 9],
   ]);
   const entries = arrangeUnit1EntriesForRound(1, [...drawEntries, ...readEntries]);
 
@@ -8518,6 +8554,8 @@ function getUnit1Level2ProblemEntries() {
     ['angle', '그림 속 각을 읽고 이름을 써 보세요.', 'identify', undefined, angleReadVariants[3] ?? 3],
     ['angle', '각을 읽고 알맞은 이름을 써 보세요.', 'identify', undefined, angleReadVariants[4] ?? 4],
     ['angle', '그림의 각 이름을 써 보세요.', 'identify', undefined, angleReadVariants[5] ?? 5],
+    ['angle', '각에서 점 ㄴ을 무엇이라고 하는지 써 보세요.', 'identify', 'anglePart', 0],
+    ['angle', '각은 몇 개의 반직선으로 이루어졌는지 써 보세요.', 'identify', 'anglePart', 1],
   ]);
 
   unit1ProblemOrderCache.set(2, entries);
@@ -8648,7 +8686,13 @@ function getUnit1Level5ProblemEntries() {
   const entries = arrangeUnit1EntriesWithFixedFirstForRound(
     5,
     ['rightTriangle', classifyTitles[classifyVariant % classifyTitles.length], 'identify', 'rightTriangleClassify', classifyVariant],
-    [definitionEntry, pointEntry, polygonEntry],
+    [
+      definitionEntry,
+      ['rightTriangle', '여러 도형 중 직각삼각형을 모두 골라 보세요.', 'identify', 'shapeChoice', classifyVariant],
+      ['rightTriangle', '직각삼각형의 변은 몇 개인지 써 보세요.', 'identify', 'polygonParts', definitionVariant],
+      pointEntry,
+      polygonEntry,
+    ],
   );
 
   unit1ProblemOrderCache.set(5, entries);
@@ -8689,7 +8733,13 @@ function getUnit1Level6ProblemEntries() {
     ['rectangle', '서로 다른 모양이나 크기의 직사각형 두 개를 완성해 보세요.', 'draw', undefined, (twoRectangleVariant + 3) % 6, 'twoPolygons'],
     ['rectangle', '크기가 다른 직사각형 두 개를 만들어 보세요.', 'draw', undefined, (twoRectangleVariant + 1) % 6, 'twoPolygons'],
   ]);
-  const entries = arrangeUnit1EntriesWithFixedFirstForRound(6, classifyEntry, [definitionEntry, pointEntry, polygonEntry]);
+  const entries = arrangeUnit1EntriesWithFixedFirstForRound(6, classifyEntry, [
+    definitionEntry,
+    ['rectangle', '여러 도형 중 직사각형을 모두 골라 보세요.', 'identify', 'shapeChoice', classifyVariant],
+    ['rectangle', '직사각형의 변은 몇 개인지 써 보세요.', 'identify', 'polygonParts', definitionVariant],
+    pointEntry,
+    polygonEntry,
+  ]);
 
   unit1ProblemOrderCache.set(6, entries);
   return entries;
@@ -8729,7 +8779,13 @@ function getUnit1Level7ProblemEntries() {
     ['square', '서로 크기가 다른 정사각형 두 개를 완성해 보세요.', 'draw', undefined, (twoSquareVariant + 3) % 6, 'twoPolygons'],
     ['square', '크기가 서로 다른 정사각형 두 개를 만들어 보세요.', 'draw', undefined, (twoSquareVariant + 1) % 6, 'twoPolygons'],
   ]);
-  const entries = arrangeUnit1EntriesWithFixedFirstForRound(7, classifyEntry, [definitionEntry, pointEntry, polygonEntry]);
+  const entries = arrangeUnit1EntriesWithFixedFirstForRound(7, classifyEntry, [
+    definitionEntry,
+    ['square', '여러 도형 중 정사각형을 모두 골라 보세요.', 'identify', 'shapeChoice', classifyVariant],
+    ['square', '정사각형의 변은 몇 개인지 써 보세요.', 'identify', 'polygonParts', definitionVariant],
+    pointEntry,
+    polygonEntry,
+  ]);
 
   unit1ProblemOrderCache.set(7, entries);
   return entries;
@@ -8897,6 +8953,447 @@ function getProblemForTurn(unitId: LearningUnitId, level: number, opponentHP: nu
 
 function fillBuilderTemplate(template: string, slotValues: Record<string, string>, emptyValue = '') {
   return template.replace(/\[([a-z]+)\]/g, (_, slotId: string) => slotValues[slotId] ?? emptyValue);
+}
+
+interface ArchiveProblemRecord {
+  id: string;
+  label: string;
+  kind: string;
+  problem: Problem;
+  question: string;
+  answer: string;
+}
+
+interface ArchiveLevelSection {
+  level: number;
+  title: string;
+  problems: ArchiveProblemRecord[];
+}
+
+interface ArchiveUnitSection {
+  unit: LearningUnitConfig;
+  levels: ArchiveLevelSection[];
+  totalProblems: number;
+}
+
+function getUnit1ArchiveEntries(level: number) {
+  switch (level) {
+    case 1:
+      return getUnit1Level1ProblemEntries();
+    case 2:
+      return getUnit1Level2ProblemEntries();
+    case 3:
+      return getUnit1Level3ProblemEntries();
+    case 4:
+      return getUnit1Level4ProblemEntries();
+    case 5:
+      return getUnit1Level5ProblemEntries();
+    case 6:
+      return getUnit1Level6ProblemEntries();
+    case 7:
+      return getUnit1Level7ProblemEntries();
+    case 8:
+      return getUnit1Level8ProblemEntries();
+    default:
+      return [];
+  }
+}
+
+function getProblemKindLabel(problem: Problem) {
+  if (problem.kind === 'equation') return '계산';
+  if (problem.kind === 'story') return '문장제';
+  if (problem.kind === 'builder') return '문제 만들기';
+  if (problem.kind === 'measurement') return '길이 재기';
+  if (problem.kind === 'distanceWorksheet') return '거리 지도';
+  if (problem.kind === 'clockReading') return '시각 읽기';
+  if (problem.kind === 'timeAddition') return problem.timeAddition?.operation === '-' ? '시간 뺄셈' : '시간 덧셈';
+  if (problem.kind === 'shapeDraw') return problem.shapeDraw?.task === 'identify' ? '도형 확인' : '도형 그리기';
+  if (problem.kind === 'shapeRain') return '평면도형 산성비';
+  return problem.kind;
+}
+
+function formatArchiveTimeAnswer(value: TimeValue) {
+  return formatDuration(value.hours, value.minutes, value.seconds);
+}
+
+function getProblemArchiveQuestion(problem: Problem) {
+  if (problem.kind === 'builder' && problem.builder) {
+    const top = fillBuilderTemplate(problem.builder.topTemplate, {}, '□');
+    const bottom = fillBuilderTemplate(problem.builder.bottomTemplate, {}, '□');
+    return `${problem.builder.instruction}\n${top} ${problem.builder.op} ${bottom}`;
+  }
+
+  if (problem.kind === 'measurement' && problem.measurement) {
+    return `${problem.measurement.title}\n${problem.measurement.question}`;
+  }
+
+  if (problem.kind === 'distanceWorksheet' && problem.distanceWorksheet) {
+    return `${problem.distanceWorksheet.title}\n${problem.prompt}`;
+  }
+
+  if (problem.kind === 'clockReading' && problem.clockReading) {
+    return `${problem.clockReading.title}\n${problem.clockReading.question}`;
+  }
+
+  if (problem.kind === 'timeAddition' && problem.timeAddition) {
+    return `${problem.timeAddition.title}\n${problem.timeAddition.instruction}`;
+  }
+
+  if (problem.kind === 'shapeDraw' && problem.shapeDraw) {
+    return problem.shapeDraw.title;
+  }
+
+  if (problem.kind === 'shapeRain' && problem.shapeRain) {
+    return `${problem.shapeRain.title}\n${problem.prompt}`;
+  }
+
+  return problem.prompt || problem.text;
+}
+
+function getProblemArchiveAnswer(problem: Problem) {
+  if (problem.kind === 'builder') {
+    return '조건을 만족하는 수';
+  }
+
+  if (problem.kind === 'distanceWorksheet' && problem.distanceWorksheet) {
+    return `${problem.distanceWorksheet.prompt.answer}${problem.distanceWorksheet.prompt.answerUnit ?? ''}`;
+  }
+
+  if (problem.kind === 'clockReading' && problem.clockReading) {
+    return formatClockTime(problem.clockReading.hour, problem.clockReading.minute, problem.clockReading.second);
+  }
+
+  if (problem.kind === 'timeAddition' && problem.timeAddition) {
+    return formatArchiveTimeAnswer(problem.timeAddition.result);
+  }
+
+  if (problem.kind === 'shapeDraw' && problem.shapeDraw) {
+    return problem.shapeDraw.task === 'draw' ? '그리기 완료' : problem.shapeDraw.answerToken;
+  }
+
+  if (problem.kind === 'shapeRain' && problem.shapeRain) {
+    return `${problem.shapeRain.targetCount}개 방어`;
+  }
+
+  return `${problem.answer}${problem.answerUnit ?? ''}`;
+}
+
+function createArchiveProblemRecord(problem: Problem, id: string, label: string): ArchiveProblemRecord {
+  return {
+    id,
+    label,
+    kind: getProblemKindLabel(problem),
+    problem,
+    question: getProblemArchiveQuestion(problem),
+    answer: getProblemArchiveAnswer(problem),
+  };
+}
+
+function getArchiveProblemsForLevel(unitId: LearningUnitId, level: number) {
+  if (unitId === 'unit1') {
+    if (level === 9) {
+      return Array.from({ length: UNIT1_PROBLEM_COUNTS[9] ?? 4 }, (_, index) =>
+        createArchiveProblemRecord(generateUnit1Problem(level, index + 1), `${unitId}-${level}-${index + 1}`, `${index + 1}번`),
+      );
+    }
+
+    return getUnit1ArchiveEntries(level).map((entry, index) => {
+      const [mode, title, task = 'draw', identifyVariant, figureVariant, drawVariant] = entry;
+      return createArchiveProblemRecord(
+        createShapeDrawProblem(mode, title, task, identifyVariant, figureVariant, drawVariant),
+        `${unitId}-${level}-${index + 1}`,
+        `${index + 1}번`,
+      );
+    });
+  }
+
+  if (unitId === 'unit3') {
+    if (level === 9 || level === 10 || level === 11 || level === 12) {
+      return Array.from({ length: UNIT3_FIXED_TIME_PROBLEM_COUNT }, (_, index) =>
+        createArchiveProblemRecord(generateUnit3Problem(level, 100, index + 1), `${unitId}-${level}-${index + 1}`, `${index + 1}번`),
+      );
+    }
+
+    const factories = UNIT3_PROBLEM_FACTORIES[level] ?? [];
+    const specialProblems =
+      level === 1 || level === 5 || level === 8
+        ? [
+            generateUnit3Problem(level, 100, 1),
+            generateUnit3Problem(level, 75, 2),
+          ]
+        : [];
+    const factoryProblems = factories.map((factory) => factory());
+    return [...specialProblems, ...factoryProblems].map((archiveProblem, index) =>
+      createArchiveProblemRecord(archiveProblem, `${unitId}-${level}-${index + 1}`, `${index + 1}번`),
+    );
+  }
+
+  return Array.from({ length: 4 }, (_, index) => {
+    const opponentHP = Math.max(25, 100 - index * 25);
+    return createArchiveProblemRecord(
+      getProblemForTurn(unitId, level, opponentHP),
+      `${unitId}-${level}-${index + 1}`,
+      index === 3 && isFinalBuilderTurn(level, opponentHP) ? '마무리' : `${index + 1}번`,
+    );
+  });
+}
+
+function buildArchiveSections(): ArchiveUnitSection[] {
+  const unit1ProblemOrderCacheSnapshot = new Map(unit1ProblemOrderCache);
+  const previousUnit1EntrySignaturesSnapshot = new Map(
+    [...previousUnit1EntrySignaturesByLevel.entries()].map(([level, signatures]) => [level, [...signatures]]),
+  );
+
+  try {
+    return LEARNING_UNITS.map((unit) => {
+      const levels = getLevelDescriptionsForUnit(unit.id)
+        .slice(1)
+        .map((title, index) => {
+          const level = index + 1;
+          return {
+            level,
+            title,
+            problems: getArchiveProblemsForLevel(unit.id, level),
+          };
+        });
+
+      return {
+        unit,
+        levels,
+        totalProblems: levels.reduce((sum, section) => sum + section.problems.length, 0),
+      };
+    });
+  } finally {
+    unit1ProblemOrderCache.clear();
+    unit1ProblemOrderCacheSnapshot.forEach((entries, level) => unit1ProblemOrderCache.set(level, entries));
+    previousUnit1EntrySignaturesByLevel.clear();
+    previousUnit1EntrySignaturesSnapshot.forEach((signatures, level) => {
+      previousUnit1EntrySignaturesByLevel.set(level, signatures);
+    });
+  }
+}
+
+function getArchivePreviewFrameClass(problem: Problem) {
+  if (problem.kind === 'shapeDraw' || problem.kind === 'shapeRain') {
+    return 'flex flex-col overflow-hidden p-3';
+  }
+
+  if (
+    problem.kind === 'measurement' ||
+    problem.kind === 'distanceMap' ||
+    problem.kind === 'distanceWorksheet' ||
+    problem.kind === 'clockReading' ||
+    problem.kind === 'timeAddition'
+  ) {
+    return 'flex flex-col overflow-hidden p-2';
+  }
+
+  if (problem.kind === 'equation') {
+    return 'flex flex-col items-center justify-center p-4 text-[clamp(2.25rem,9vw,4.25rem)] leading-none font-black font-mono text-slate-900';
+  }
+
+  return 'flex flex-col justify-center overflow-hidden p-4';
+}
+
+function ArchiveShapeRainPreview({ shapeRain }: { shapeRain: ShapeRainProblemData }) {
+  const previewShapes = shapeRain.shapes.slice(0, Math.min(3, shapeRain.shapes.length));
+
+  return (
+    <div className="flex h-full min-h-0 w-full flex-col gap-2 overflow-hidden text-slate-950">
+      <div className="relative min-h-0 flex-1 overflow-hidden rounded-[1.6rem] border-4 border-slate-600 bg-[linear-gradient(180deg,#0f172a_0%,#1e3a8a_54%,#14532d_100%)] shadow-inner">
+        <div className="absolute left-0 right-0 top-0 h-20 bg-[radial-gradient(circle_at_18%_30%,rgba(255,255,255,0.42),transparent_18%),radial-gradient(circle_at_82%_22%,rgba(255,255,255,0.3),transparent_16%)] opacity-80" />
+        <div className="absolute inset-x-0 bottom-0 h-12 border-t-4 border-red-500 bg-[linear-gradient(180deg,#7f1d1d,#450a0a)] shadow-[0_-12px_30px_rgba(239,68,68,0.32)]" />
+        <div className="absolute inset-x-0 bottom-10 h-2 bg-[repeating-linear-gradient(135deg,#facc15_0_18px,#111827_18px_36px)] shadow-[0_0_22px_rgba(250,204,21,0.65)]" />
+        <div className="absolute right-3 top-3 z-20 rounded-2xl border-2 border-emerald-400/80 bg-slate-950/92 px-3 py-2 text-right shadow-[0_8px_20px_rgba(15,23,42,0.3)]">
+          <div className="text-xl font-black text-white">0 / {shapeRain.targetCount}</div>
+        </div>
+        <div className="absolute inset-0 flex items-start justify-center gap-4 px-5 pt-16">
+          {previewShapes.map((shape, index) => (
+            <div
+              key={`${shapeRain.wave}-${shape}-${index}`}
+              className="h-28 w-36"
+              style={{ transform: `translateY(${index * 32}px)` }}
+            >
+              <ShapeRainGlyph kind={shape} variant={index} />
+            </div>
+          ))}
+        </div>
+        <div className="pointer-events-none absolute inset-x-6 top-5 z-20 rounded-3xl border-2 border-white/20 bg-slate-950/72 px-5 py-3 text-center shadow-2xl backdrop-blur-sm">
+          <p className="break-keep text-xl font-black text-white">{shapeRain.title}</p>
+        </div>
+      </div>
+      <div className="grid shrink-0 gap-2 sm:grid-cols-[1fr_auto] sm:items-stretch">
+        <div className="flex min-w-0 items-center rounded-2xl border-4 border-slate-600 bg-slate-800 px-4">
+          <div className="min-w-0 flex-1 py-3 text-center text-2xl font-black text-slate-400">도형 이름 입력</div>
+        </div>
+        <div className="inline-flex min-h-[4rem] items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-6 text-xl font-black text-slate-950 shadow-lg">
+          <Sword size={22} /> 막기
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ArchiveStoryPreview({ problem }: { problem: Problem }) {
+  const storyPromptSections = splitStoryPromptSections(problem.prompt);
+
+  if (storyPromptSections) {
+    return (
+      <div className="mx-auto flex h-full w-full max-w-[52rem] flex-col gap-3 text-left text-slate-900">
+        {storyPromptSections.introLines.length > 0 ? (
+          <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50/85 px-4 py-3 shadow-sm">
+            <div className="flex flex-col gap-2">
+              {storyPromptSections.introLines.map((line, index) => (
+                <p
+                  key={`${line}-${index}`}
+                  className={`break-keep tracking-[-0.01em] ${
+                    index === storyPromptSections.introLines.length - 1
+                      ? 'text-[1.25rem] font-black leading-[1.45] text-slate-900'
+                      : 'text-[1rem] font-bold leading-[1.55] text-slate-700'
+                  }`}
+                >
+                  {renderPromptWithHighlight(line)}
+                </p>
+              ))}
+            </div>
+          </div>
+        ) : null}
+        {problem.storyTable ? (
+          <StoryPromptTableCard table={problem.storyTable} condensed dense />
+        ) : null}
+        <div className="grid min-h-0 flex-1 gap-2">
+          {storyPromptSections.optionLines.map((line, index) => (
+            <div key={`${line}-${index}`} className="flex min-h-0 items-center rounded-[1.25rem] border border-slate-200 bg-slate-50/90 px-4 py-3 shadow-sm">
+              <p className="break-keep text-[1.15rem] font-black leading-[1.35] tracking-[-0.01em] text-slate-900">
+                {renderPromptWithHighlight(line)}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto flex w-full max-w-[52rem] flex-col text-left text-slate-900">
+      <div className="rounded-[2rem] border border-slate-200 bg-slate-50/85 px-5 py-4 shadow-sm">
+        <div className="flex flex-col gap-3">
+          {getStoryPromptLines(problem.prompt).map((line, index, lines) => (
+            <p
+              key={`${line}-${index}`}
+              className={`break-keep tracking-[-0.01em] ${
+                lines.length === 1 || index === lines.length - 1
+                  ? 'text-[1.35rem] font-black leading-[1.5] text-slate-900'
+                  : 'text-[1.05rem] font-bold leading-[1.6] text-slate-700'
+              }`}
+            >
+              {renderPromptWithHighlight(line)}
+            </p>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ArchiveBuilderPreview({ builder }: { builder: BuilderProblemData }) {
+  const slotsById = Object.fromEntries(builder.slots.map((slot) => [slot.id, slot])) as Record<string, BuildSlotConfig>;
+
+  return (
+    <div className="flex h-full w-full flex-col gap-3 text-left text-slate-900">
+      <div>
+        <h2 className="text-2xl font-black text-slate-900">{builder.title}</h2>
+        <p className="mt-1 break-keep text-lg font-bold leading-[1.4] text-slate-700">{builder.instruction}</p>
+      </div>
+      <div className="grid flex-1 gap-3 lg:grid-cols-[minmax(0,1fr)_190px]">
+        <div className="rounded-[28px] border-4 border-slate-200 bg-slate-50 p-5">
+          <div className="flex h-full items-center justify-end">
+            <div className="inline-flex flex-col items-end gap-4">
+              <BuilderNumberRow template={builder.topTemplate} slotsById={slotsById} slotValues={{}} onSlotChange={() => undefined} />
+              <div className="flex items-center justify-end gap-4">
+                <span className="text-5xl font-black text-slate-500">{builder.op}</span>
+                <BuilderNumberRow template={builder.bottomTemplate} slotsById={slotsById} slotValues={{}} onSlotChange={() => undefined} />
+              </div>
+              <div className="h-2 w-full rounded-full bg-slate-900" />
+            </div>
+          </div>
+        </div>
+        <div className="rounded-[24px] border border-sky-200 bg-sky-50 p-3">
+          <div className="flex flex-col gap-2">
+            {builder.slots.map((slot) => (
+              <div key={slot.id} className="rounded-2xl border border-sky-200 bg-white px-3 py-3">
+                <div className="text-xs font-black text-slate-500">{slot.label}</div>
+                <div className="mt-1 text-2xl font-black text-sky-700">{formatDigitChoices(slot.digits)}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ArchiveProblemPreview({ problem }: { problem: Problem }) {
+  const emptyClockAnswer = { hours: '', minutes: '', seconds: '' };
+
+  return (
+    <div className={`archive-preview-frame flex h-[28rem] min-h-0 rounded-2xl border-4 border-slate-200 bg-white shadow-inner ${getArchivePreviewFrameClass(problem)}`}>
+      {problem.kind === 'shapeRain' && problem.shapeRain ? (
+        <ArchiveShapeRainPreview shapeRain={problem.shapeRain} />
+      ) : problem.kind === 'shapeDraw' && problem.shapeDraw ? (
+        <div className="flex h-full min-h-0 w-full flex-col gap-3">
+          <div className="min-h-0 flex-1">
+            {problem.shapeDraw.task === 'identify' ? (
+              <ShapeIdentifyProblemCard shapeDraw={problem.shapeDraw} onAnswerChange={() => undefined} />
+            ) : (
+              <ShapeDrawProblemCardV2
+                shapeDraw={problem.shapeDraw}
+                answerValue=""
+                playAnimationSound={() => undefined}
+                rouletteAlreadyResolved
+                onRouletteResolved={() => undefined}
+                onAnswerChange={() => undefined}
+                onSubmit={() => undefined}
+              />
+            )}
+          </div>
+        </div>
+      ) : problem.kind === 'distanceWorksheet' && problem.distanceWorksheet ? (
+        <DistanceWorksheetProblemCard distanceWorksheet={problem.distanceWorksheet} condensed />
+      ) : problem.kind === 'distanceMap' && problem.distanceMap ? (
+        <DistanceMapProblemCard distanceMap={problem.distanceMap} answerValue="" onAnswerChange={() => undefined} onSubmit={() => undefined} />
+      ) : problem.kind === 'measurement' && problem.measurement ? (
+        <MeasurementProblemCard measurement={problem.measurement} />
+      ) : problem.kind === 'clockReading' && problem.clockReading ? (
+        <ClockReadingProblemCard clockReading={problem.clockReading} answerValue={emptyClockAnswer} onAnswerChange={() => undefined} onSubmit={() => undefined} />
+      ) : problem.kind === 'timeAddition' && problem.timeAddition ? (
+        <TimeAdditionProblemCard
+          timeAddition={problem.timeAddition}
+          answerValue={emptyClockAnswer}
+          onAnswerChange={() => undefined}
+          onSubmit={() => undefined}
+          playAnimationSound={() => undefined}
+          condensed
+          showAnswerFields={problem.timeAddition.mode !== 'story'}
+        />
+      ) : problem.kind === 'story' ? (
+        <ArchiveStoryPreview problem={problem} />
+      ) : problem.kind === 'builder' && problem.builder ? (
+        <ArchiveBuilderPreview builder={problem.builder} />
+      ) : problem.kind === 'equation' ? (
+        <>
+          <div className="flex flex-col items-end">
+            <span>{problem.text.split(' ')[0]}</span>
+            <div className="flex items-center gap-4">
+              <span>{problem.text.split(' ')[1]}</span>
+              <span>{problem.text.split(' ')[2]}</span>
+            </div>
+          </div>
+          <div className="my-6 h-4 w-full rounded-full bg-slate-900" />
+        </>
+      ) : null}
+    </div>
+  );
 }
 
 function parseProblemExpression(text: string) {
@@ -14917,9 +15414,11 @@ function ShapeDrawProblemCardV2({
 
 function ShapeIdentifyProblemCard({
   shapeDraw,
+  answerValue = '',
   onAnswerChange,
 }: {
   shapeDraw: ShapeDrawProblemData;
+  answerValue?: string;
   onAnswerChange?: (value: string) => void;
 }) {
   const figureVariant = shapeDraw.figureVariant ?? 0;
@@ -15123,6 +15622,8 @@ function ShapeIdentifyProblemCard({
   const ends = lineEnds(givenLine);
   const isLineFigure = shapeDraw.mode === 'segment' || shapeDraw.mode === 'line' || shapeDraw.mode === 'ray';
   const isAngleFigure = shapeDraw.mode === 'angle';
+  const isLineChoiceProblem = isLineFigure && shapeDraw.identifyVariant === 'lineChoice';
+  const isAnglePartProblem = shapeDraw.mode === 'angle' && shapeDraw.identifyVariant === 'anglePart';
   const isRightAngleAnimation = shapeDraw.mode === 'rightAngle' && shapeDraw.identifyVariant === 'fold';
   const isRightAngleDefinition = shapeDraw.mode === 'rightAngle' && shapeDraw.identifyVariant === 'definition';
   const isRightAngleMarkProblem = shapeDraw.mode === 'rightAngle' && shapeDraw.identifyVariant === 'rightAngleMark';
@@ -15132,8 +15633,10 @@ function ShapeIdentifyProblemCard({
   const isRightTriangleClassifyProblem = shapeDraw.mode === 'rightTriangle' && shapeDraw.identifyVariant === 'rightTriangleClassify';
   const isRightTriangleDefinition = shapeDraw.mode === 'rightTriangle' && shapeDraw.identifyVariant === 'rightTriangleDefinition';
   const isShapeClassifyProblem = (shapeDraw.mode === 'rectangle' || shapeDraw.mode === 'square') && shapeDraw.identifyVariant === 'shapeClassify';
+  const isShapeChoiceProblem = (shapeDraw.mode === 'rightTriangle' || shapeDraw.mode === 'rectangle' || shapeDraw.mode === 'square') && shapeDraw.identifyVariant === 'shapeChoice';
   const isRightAngleCountClassifyProblem = shapeDraw.mode === 'rectangle' && shapeDraw.identifyVariant === 'shapeClassify';
   const isShapeDefinition = (shapeDraw.mode === 'rectangle' || shapeDraw.mode === 'square') && shapeDraw.identifyVariant === 'shapeDefinition';
+  const isPolygonPartsProblem = (shapeDraw.mode === 'rightTriangle' || shapeDraw.mode === 'rectangle' || shapeDraw.mode === 'square') && shapeDraw.identifyVariant === 'polygonParts';
   const isRightAngleFigure = shapeDraw.mode === 'rightAngle' && shapeDraw.identifyVariant !== 'fold';
   const definitionBlankTarget = figureVariant % 2 === 0 ? 'straight' : 'twice';
   const rightTriangleDefinitionVariant = getRightTriangleDefinitionVariant(figureVariant);
@@ -15379,8 +15882,14 @@ function ShapeIdentifyProblemCard({
       </div>
     );
   };
-  const renderStaticRightAngleMarker = (vertex: ShapePoint, a: ShapePoint, b: ShapePoint) => {
-    const size = 24;
+  const renderStaticRightAngleMarker = (
+    vertex: { x: number; y: number },
+    a: { x: number; y: number },
+    b: { x: number; y: number },
+    size = 24,
+    strokeWidth = 4.5,
+    haloWidth = 9,
+  ) => {
     const lengthA = Math.max(1, Math.hypot(a.x - vertex.x, a.y - vertex.y));
     const lengthB = Math.max(1, Math.hypot(b.x - vertex.x, b.y - vertex.y));
     const unitA = { x: (a.x - vertex.x) / lengthA, y: (a.y - vertex.y) / lengthA };
@@ -15392,15 +15901,15 @@ function ShapeIdentifyProblemCard({
 
     return (
       <g pointerEvents="none">
-        <path d={path} fill="none" stroke="#fff" strokeWidth="9" strokeLinejoin="miter" strokeLinecap="butt" />
-        <path d={path} fill="none" stroke="#ef4444" strokeWidth="4.5" strokeLinejoin="miter" strokeLinecap="butt" />
+        {haloWidth > 0 ? <path d={path} fill="none" stroke="#fff" strokeWidth={haloWidth} strokeLinejoin="miter" strokeLinecap="butt" /> : null}
+        <path d={path} fill="none" stroke="#ef4444" strokeWidth={strokeWidth} strokeLinejoin="miter" strokeLinecap="butt" />
       </g>
     );
   };
   const rightAngleMarkerAt = (x: number, y: number, rotate = 0) => (
     <g transform={`translate(${x} ${y}) rotate(${rotate})`} pointerEvents="none">
-      <path d="M 0 20 L 20 20 L 20 0" fill="none" stroke="#fff" strokeWidth="8" strokeLinejoin="miter" />
-      <path d="M 0 20 L 20 20 L 20 0" fill="none" stroke="#ef4444" strokeWidth="4.2" strokeLinejoin="miter" />
+      <path d="M 6 20 L 6 6 L 20 6" fill="none" stroke="#fff" strokeWidth="8" strokeLinejoin="miter" strokeLinecap="butt" />
+      <path d="M 6 20 L 6 6 L 20 6" fill="none" stroke="#ef4444" strokeWidth="4.2" strokeLinejoin="miter" strokeLinecap="butt" />
     </g>
   );
   const renderRightAngleMarkProblem = () => {
@@ -15670,12 +16179,281 @@ function ShapeIdentifyProblemCard({
       </div>
     );
   };
+  const renderLineChoiceProblem = () => {
+    const lineChoices: ShapeLineMode[] = ['segment', 'line', 'ray'];
+    const selectedLineStart: ShapePoint = { x: 220, y: 172, label: lineLabelSet[0] };
+    const selectedLineEnd: ShapePoint = { x: 420, y: 82, label: lineLabelSet[1] };
+    const getVisibleLineEnds = (
+      mode: ShapeLineMode,
+      start: Pick<ShapePoint, 'x' | 'y'>,
+      end: Pick<ShapePoint, 'x' | 'y'>,
+      extension = 120,
+    ) => {
+      const dx = end.x - start.x;
+      const dy = end.y - start.y;
+      const len = Math.max(1, Math.hypot(dx, dy));
+      const ux = dx / len;
+      const uy = dy / len;
+
+      if (mode === 'segment') {
+        return { a: start, b: end };
+      }
+      if (mode === 'ray') {
+        return { a: start, b: { x: end.x + ux * extension, y: end.y + uy * extension } };
+      }
+      return {
+        a: { x: start.x - ux * extension, y: start.y - uy * extension },
+        b: { x: end.x + ux * extension, y: end.y + uy * extension },
+      };
+    };
+    const renderChoiceLine = (mode: ShapeLineMode) => {
+      const start = { x: 78, y: 82 };
+      const end = { x: 166, y: 46 };
+      const choiceEnds = getVisibleLineEnds(mode, start, end, 34);
+
+      return (
+        <svg viewBox="0 0 240 128" className="h-28 w-full">
+          <rect width="240" height="128" fill="#ffffff" />
+          <line x1={choiceEnds.a.x} y1={choiceEnds.a.y} x2={choiceEnds.b.x} y2={choiceEnds.b.y} stroke="#111827" strokeWidth="5" strokeLinecap="round" />
+          <circle cx={start.x} cy={start.y} r="7" fill="#253493" />
+          <circle cx={end.x} cy={end.y} r="7" fill="#253493" />
+        </svg>
+      );
+    };
+    const selectedLineEnds = getVisibleLineEnds(shapeDraw.mode as ShapeLineMode, selectedLineStart, selectedLineEnd, 130);
+
+    return (
+      <div className="grid h-full min-h-[20rem] w-full grid-rows-[1fr_auto] gap-4 px-6 py-5">
+        <svg viewBox="0 0 640 260" className="h-full w-full rounded-2xl bg-white" style={{ backgroundColor: '#ffffff' }}>
+          <rect width="640" height="260" fill="#ffffff" />
+          <line x1={selectedLineEnds.a.x} y1={selectedLineEnds.a.y} x2={selectedLineEnds.b.x} y2={selectedLineEnds.b.y} stroke="#111827" strokeWidth="5" strokeLinecap="round" />
+          <ShapePointView point={selectedLineStart} />
+          <ShapePointView point={selectedLineEnd} />
+        </svg>
+        <div className="grid grid-cols-3 gap-4">
+          {lineChoices.map((mode) => (
+            <button
+              key={`line-choice-${mode}`}
+              type="button"
+              onClick={() => onAnswerChange?.(SHAPE_DRAW_ANSWER_LABELS[mode])}
+              className="flex min-h-[10rem] flex-col items-center justify-center rounded-2xl border-4 border-[#cbd8ea] bg-white px-4 py-3 shadow-[0_8px_16px_rgba(15,23,42,0.1)] transition hover:-translate-y-0.5 hover:border-[#253493]"
+              style={{ backgroundColor: '#ffffff', color: '#0f172a' }}
+            >
+              {renderChoiceLine(mode)}
+              <span className="text-2xl font-black text-slate-950">{SHAPE_DRAW_ANSWER_LABELS[mode]}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  };
+  const renderAnglePartProblem = () => {
+    const asksVertex = figureVariant % 2 === 0;
+    const displayedAngleVertex: ShapePoint = asksVertex
+      ? { ...givenAngleVertex, label: '\u3134' }
+      : givenAngleVertex;
+    const displayedAngleEnds: ShapePoint[] = asksVertex
+      ? [
+          { ...givenAngle.ends[0], label: '\u3131' },
+          { ...givenAngle.ends[1], label: '\u3134' },
+        ]
+      : givenAngle.ends;
+    const getRayTipBeyondPoint = (from: ShapePoint, through: ShapePoint, extension = 38): ShapePoint => {
+      const dx = through.x - from.x;
+      const dy = through.y - from.y;
+      const len = Math.max(1, Math.hypot(dx, dy));
+
+      return {
+        ...through,
+        x: through.x + (dx / len) * extension,
+        y: through.y + (dy / len) * extension,
+      };
+    };
+    const anglePartRayTips = displayedAngleEnds.map((end) => getRayTipBeyondPoint(displayedAngleVertex, end, 58));
+    const anglePartViewPoints = [displayedAngleVertex, ...displayedAngleEnds, ...anglePartRayTips];
+    const anglePartPadding = 58;
+    const anglePartMinX = Math.min(...anglePartViewPoints.map((point) => point.x)) - anglePartPadding;
+    const anglePartMaxX = Math.max(...anglePartViewPoints.map((point) => point.x)) + anglePartPadding;
+    const anglePartMinY = Math.min(...anglePartViewPoints.map((point) => point.y)) - anglePartPadding;
+    const anglePartMaxY = Math.max(...anglePartViewPoints.map((point) => point.y)) + anglePartPadding;
+    const anglePartViewBox = `${anglePartMinX} ${anglePartMinY} ${anglePartMaxX - anglePartMinX} ${anglePartMaxY - anglePartMinY}`;
+
+    return (
+      <div className="h-full min-h-[20rem] w-full px-3 py-3">
+        <svg viewBox={anglePartViewBox} className="h-full w-full rounded-2xl bg-white" style={{ backgroundColor: '#ffffff' }}>
+          <rect x={anglePartMinX} y={anglePartMinY} width={anglePartMaxX - anglePartMinX} height={anglePartMaxY - anglePartMinY} fill="#ffffff" />
+          {anglePartRayTips.map((rayTip, index) => (
+            <g key={`angle-part-arm-${index}`}>
+              <line x1={displayedAngleVertex.x} y1={displayedAngleVertex.y} x2={rayTip.x} y2={rayTip.y} stroke="#111827" strokeWidth="4.5" strokeLinecap="round" />
+            </g>
+          ))}
+          {displayedAngleEnds.map((point) => (
+            <g key={`angle-part-end-${point.label}`}>
+              <ShapePointView point={point} />
+            </g>
+          ))}
+          <ShapePointView point={displayedAngleVertex} />
+          {asksVertex ? (
+            <circle cx={displayedAngleVertex.x} cy={displayedAngleVertex.y} r="22" fill="none" stroke="#ef4444" strokeWidth="5" strokeDasharray="7 7" />
+          ) : null}
+          {!asksVertex ? (
+            anglePartRayTips.map((rayTip, index) => (
+              <line key={`angle-part-highlight-${index}`} x1={displayedAngleVertex.x} y1={displayedAngleVertex.y} x2={rayTip.x} y2={rayTip.y} stroke="#ef4444" strokeWidth="8" strokeLinecap="round" opacity="0.18" />
+            ))
+          ) : (
+            <path
+              d={`M ${anglePartRayTips[0].x} ${anglePartRayTips[0].y} L ${displayedAngleVertex.x} ${displayedAngleVertex.y} L ${anglePartRayTips[1].x} ${anglePartRayTips[1].y}`}
+              fill="none"
+              stroke="#ef4444"
+              strokeWidth="8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity="0.16"
+            />
+          )}
+        </svg>
+      </div>
+    );
+  };
+  const renderShapeChoiceProblem = () => {
+    const shapeChoices: Array<{ mode: ShapeDrawMode; label: string; points: string }> = [
+      { mode: 'rightTriangle', label: '직각삼각형', points: '42,142 42,28 168,142' },
+      { mode: 'triangle', label: '삼각형', points: '38,142 106,22 178,142' },
+      { mode: 'rectangle', label: '직사각형', points: '24,40 186,40 186,132 24,132' },
+      { mode: 'square', label: '정사각형', points: '50,26 176,26 176,152 50,152' },
+    ];
+    const isMultiSelectShapeChoice = shapeDraw.mode === 'rectangle';
+    const selectedChoiceNumbers = new Set(
+      normalizeShapeReadAnswer(answerValue)
+        .split('')
+        .filter((value) => /^[1-4]$/.test(value)),
+    );
+    const updateShapeChoiceAnswer = (choiceNumber: number) => {
+      if (!isMultiSelectShapeChoice) {
+        onAnswerChange?.(`${choiceNumber}`);
+        return;
+      }
+
+      const choiceKey = `${choiceNumber}`;
+      const nextChoiceNumbers = new Set(selectedChoiceNumbers);
+      if (nextChoiceNumbers.has(choiceKey)) {
+        nextChoiceNumbers.delete(choiceKey);
+      } else {
+        nextChoiceNumbers.add(choiceKey);
+      }
+
+      onAnswerChange?.(
+        [...nextChoiceNumbers]
+          .sort((a, b) => Number(a) - Number(b))
+          .join(', '),
+      );
+    };
+
+    return (
+      <div className="grid h-full min-h-[20rem] w-full grid-cols-4 gap-4 px-5 py-5">
+        {shapeChoices.map((choice, index) => {
+          const choiceNumber = index + 1;
+          const isSelected = selectedChoiceNumbers.has(`${choiceNumber}`);
+
+          return (
+            <button
+              key={`shape-choice-${choice.mode}-${index}`}
+              type="button"
+              onClick={() => updateShapeChoiceAnswer(choiceNumber)}
+              className={`flex min-h-[17rem] flex-col items-center justify-between rounded-2xl border-4 px-4 py-4 shadow-[0_8px_16px_rgba(15,23,42,0.1)] transition hover:-translate-y-0.5 hover:border-[#253493] ${
+                isSelected ? 'border-[#253493] ring-4 ring-[#253493]/25' : 'border-[#cbd8ea]'
+              }`}
+              style={{ backgroundColor: isSelected ? '#eef3ff' : '#ffffff', color: '#0f172a' }}
+              aria-label={`${choiceNumber}번 도형`}
+              aria-pressed={isSelected}
+            >
+              <div className="grid h-12 w-12 place-items-center rounded-full bg-[#253493] text-2xl font-black text-white">{choiceNumber}</div>
+              <svg viewBox="0 0 210 170" className="h-48 w-full">
+                <polygon points={choice.points} fill="#ffffff" stroke="#111827" strokeWidth="4" strokeLinejoin="round" />
+              </svg>
+              <span className="text-xl font-black text-slate-500">{choiceNumber}번</span>
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
+  const renderPolygonPartsProblem = () => {
+    const targetLabel = SHAPE_DRAW_ANSWER_LABELS[shapeDraw.mode];
+    const points = shapeDraw.mode === 'rightTriangle'
+      ? '210,250 210,84 394,250'
+      : shapeDraw.mode === 'square'
+        ? '210,74 390,74 390,254 210,254'
+        : '154,88 462,88 462,252 154,252';
+    const cornerPoints = shapeDraw.mode === 'rightTriangle'
+      ? {
+          bottomLeft: { x: 210, y: 250 },
+          topLeft: { x: 210, y: 84 },
+          bottomRight: { x: 394, y: 250 },
+        }
+      : shapeDraw.mode === 'square'
+        ? {
+            topLeft: { x: 210, y: 74 },
+            topRight: { x: 390, y: 74 },
+            bottomRight: { x: 390, y: 254 },
+            bottomLeft: { x: 210, y: 254 },
+          }
+        : {
+            topLeft: { x: 154, y: 88 },
+            topRight: { x: 462, y: 88 },
+            bottomRight: { x: 462, y: 252 },
+            bottomLeft: { x: 154, y: 252 },
+          };
+    const pointLabels = shapeDraw.mode === 'rightTriangle'
+      ? [
+          { x: 188, y: 270, label: 'ㄱ' },
+          { x: 188, y: 76, label: 'ㄴ' },
+          { x: 410, y: 270, label: 'ㄷ' },
+        ]
+      : [
+          { x: shapeDraw.mode === 'square' ? 188 : 132, y: shapeDraw.mode === 'square' ? 66 : 80, label: 'ㄱ' },
+          { x: shapeDraw.mode === 'square' ? 410 : 482, y: shapeDraw.mode === 'square' ? 66 : 80, label: 'ㄴ' },
+          { x: shapeDraw.mode === 'square' ? 410 : 482, y: 272, label: 'ㄷ' },
+          { x: shapeDraw.mode === 'square' ? 188 : 132, y: 272, label: 'ㄹ' },
+        ];
+
+    return (
+      <div className="grid h-full min-h-[20rem] w-full grid-cols-[minmax(0,1fr)_16rem] gap-5 px-6 py-5">
+        <svg viewBox="0 0 640 360" className="h-full w-full rounded-2xl bg-white" style={{ backgroundColor: '#ffffff' }}>
+          <rect width="640" height="360" fill="#ffffff" />
+          <polygon points={points} fill="#ffffff" stroke="#111827" strokeWidth="4.5" strokeLinejoin="round" />
+          {shapeDraw.mode === 'rightTriangle' ? (
+            renderStaticRightAngleMarker(cornerPoints.bottomLeft, cornerPoints.topLeft, cornerPoints.bottomRight, 16, 3.8, 0)
+          ) : (
+            <>
+              {renderStaticRightAngleMarker(cornerPoints.bottomLeft, cornerPoints.topLeft, cornerPoints.bottomRight, 16, 3.8, 0)}
+              {renderStaticRightAngleMarker(cornerPoints.bottomRight, cornerPoints.bottomLeft, cornerPoints.topRight, 16, 3.8, 0)}
+              {renderStaticRightAngleMarker(cornerPoints.topRight, cornerPoints.bottomRight, cornerPoints.topLeft, 16, 3.8, 0)}
+              {renderStaticRightAngleMarker(cornerPoints.topLeft, cornerPoints.topRight, cornerPoints.bottomLeft, 16, 3.8, 0)}
+            </>
+          )}
+          {pointLabels.map((point) => (
+            <text key={`polygon-part-label-${point.label}`} x={point.x} y={point.y} className="fill-[#253493] text-3xl font-black">{point.label}</text>
+          ))}
+        </svg>
+        <div className="flex flex-col items-center justify-center rounded-2xl border-4 border-[#cbd8ea] bg-white px-5 py-6 text-center shadow-[0_8px_16px_rgba(15,23,42,0.1)]" style={{ backgroundColor: '#ffffff', color: '#0f172a' }}>
+          <div className="text-2xl font-black leading-tight text-[#253493]">{targetLabel}</div>
+          <div className="mt-5 text-6xl font-black text-slate-950">?개</div>
+          <div className="mt-5 text-xl font-black leading-snug text-slate-700">변의 수</div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="flex h-full w-full flex-col gap-3 text-slate-900">
       <h2 className="shrink-0 text-2xl font-black leading-tight sm:text-3xl">{shapeDraw.title}</h2>
       <div className="relative min-h-0 flex-1 overflow-hidden rounded-2xl border-2 border-slate-300 bg-[#f8fbff]">
-        {isRightAngleMarkProblem ? (
+        {isLineChoiceProblem ? (
+          renderLineChoiceProblem()
+        ) : isAnglePartProblem ? (
+          renderAnglePartProblem()
+        ) : isRightAngleMarkProblem ? (
           renderRightAngleMarkProblem()
         ) : isRightAngleCountProblem ? (
           renderRightAngleCountProblem()
@@ -15685,6 +16463,10 @@ function ShapeIdentifyProblemCard({
           renderClockRightAnglesProblem()
         ) : isRightTriangleClassifyProblem || isShapeClassifyProblem ? (
           renderRightTriangleClassifyProblem()
+        ) : isShapeChoiceProblem ? (
+          renderShapeChoiceProblem()
+        ) : isPolygonPartsProblem ? (
+          renderPolygonPartsProblem()
         ) : isShapeDefinition ? (
           <div className="flex h-full min-h-[20rem] w-full items-center justify-center px-8 py-8">
             <div className="w-full max-w-[58rem] rounded-[2rem] border-4 border-slate-300 bg-white px-8 py-9 text-center shadow-[0_16px_30px_rgba(15,23,42,0.16)]">
@@ -16268,6 +17050,9 @@ export default function App() {
   const [storedPlayRecords, setStoredPlayRecords] = useState<StoredPlayRecord[]>(readStoredPlayRecords);
   const [storedBattleProgress, setStoredBattleProgress] = useState<StoredBattleProgress | null>(readStoredBattleProgress);
   const [selectedLearningUnitId, setSelectedLearningUnitId] = useState<LearningUnitId | null>(null);
+  const [selectedArchiveUnitId, setSelectedArchiveUnitId] = useState<LearningUnitId>(DEFAULT_LEARNING_UNIT_ID);
+  const [selectedArchiveLevel, setSelectedArchiveLevel] = useState(1);
+  const [selectedArchiveProblemId, setSelectedArchiveProblemId] = useState<string | null>(null);
   const activeLearningUnitId = selectedLearningUnitId ?? DEFAULT_LEARNING_UNIT_ID;
   const [isEstimation, setIsEstimation] = useState(false);
   const [estimationProblem, setEstimationProblem] = useState<EstimationProblem | null>(null);
@@ -16793,6 +17578,17 @@ export default function App() {
   const selectedLearningUnit = selectedLearningUnitId
     ? LEARNING_UNITS.find((unit) => unit.id === selectedLearningUnitId) ?? null
     : null;
+  const archiveSections = useMemo(() => buildArchiveSections(), []);
+  const selectedArchiveSection =
+    archiveSections.find((section) => section.unit.id === selectedArchiveUnitId) ?? archiveSections[0];
+  const selectedArchiveLevelSection =
+    selectedArchiveSection?.levels.find((section) => section.level === selectedArchiveLevel)
+    ?? selectedArchiveSection?.levels[0]
+    ?? null;
+  const selectedArchiveProblem =
+    selectedArchiveLevelSection?.problems.find((archiveProblem) => archiveProblem.id === selectedArchiveProblemId)
+    ?? selectedArchiveLevelSection?.problems[0]
+    ?? null;
   const levelDescriptions = getLevelDescriptionsForUnit(activeLearningUnitId);
   const totalLevels = getTotalLevelsForUnit(activeLearningUnitId);
   const maxHealth = 100;
@@ -16853,6 +17649,29 @@ export default function App() {
       ? Object.fromEntries(problem.builder.slots.map((slot) => [slot.id, slot])) as Record<string, BuildSlotConfig>
       : {};
   const builderEvaluation = evaluateBuilderProblem(problem, builderSlotValues);
+
+  useEffect(() => {
+    if (!selectedArchiveSection) {
+      return;
+    }
+
+    const nextLevelSection =
+      selectedArchiveSection.levels.find((section) => section.level === selectedArchiveLevel)
+      ?? selectedArchiveSection.levels[0];
+
+    if (!nextLevelSection) {
+      return;
+    }
+
+    if (nextLevelSection.level !== selectedArchiveLevel) {
+      setSelectedArchiveLevel(nextLevelSection.level);
+      return;
+    }
+
+    if (!nextLevelSection.problems.some((archiveProblem) => archiveProblem.id === selectedArchiveProblemId)) {
+      setSelectedArchiveProblemId(nextLevelSection.problems[0]?.id ?? null);
+    }
+  }, [selectedArchiveLevel, selectedArchiveProblemId, selectedArchiveSection]);
 
   const resetSecretCodePrompt = () => {
     setIsSecretCodePromptOpen(false);
@@ -17035,6 +17854,15 @@ export default function App() {
     const identifyVariant = problem.shapeDraw?.identifyVariant;
     if (identifyVariant === 'definition') {
       return '빈칸 답 쓰기';
+    }
+    if (identifyVariant === 'shapeChoice') {
+      return '알맞은 것 모두 고르기';
+    }
+    if (identifyVariant === 'lineChoice') {
+      return '알맞은 것 고르기';
+    }
+    if (identifyVariant === 'anglePart' || identifyVariant === 'polygonParts') {
+      return '답 쓰기';
     }
     if (identifyVariant === 'rightAngleMark') {
       return '개수 쓰기';
@@ -17838,7 +18666,13 @@ export default function App() {
           setShapeDrawNotice(`${shapeReadInputPlaceholder} 후 공격해요!`);
           return;
         }
-        if (isShapeReadAnswerMissingPointNames(problem.shapeDraw.mode, displayedInputValue)) {
+        const shapeIdentifyVariant = problem.shapeDraw.identifyVariant;
+        const requiresPointNames =
+          shapeIdentifyVariant !== 'lineChoice' &&
+          shapeIdentifyVariant !== 'shapeChoice' &&
+          shapeIdentifyVariant !== 'anglePart' &&
+          shapeIdentifyVariant !== 'polygonParts';
+        if (requiresPointNames && isShapeReadAnswerMissingPointNames(problem.shapeDraw.mode, displayedInputValue)) {
           playSound('ui');
           setShapeDrawNotice('점 이름까지 함께 써 보세요.');
           return;
@@ -17847,7 +18681,11 @@ export default function App() {
           gainMultiplier: 0.9,
           detune: 10,
         });
-        resolveProblemResult(isShapeReadAnswerCorrect(displayedInputValue, problem.shapeDraw.answerToken));
+        const answerToken =
+          shapeIdentifyVariant === 'shapeChoice'
+            ? getShapeChoiceAnswerToken(problem.shapeDraw.mode)
+            : problem.shapeDraw.answerToken;
+        resolveProblemResult(isShapeReadAnswerCorrect(displayedInputValue, answerToken));
         return;
       }
       if (inputValue === SHAPE_DRAW_MIXED_TOKEN) {
@@ -18214,6 +19052,15 @@ export default function App() {
     setIsRecordModalOpen(false);
   };
 
+  const openArchive = () => {
+    warmAudio();
+    playSound('ui');
+    setIsRecordModalOpen(false);
+    setIsNamePromptOpen(false);
+    gameStateRef.current = 'archive';
+    setGameState('archive');
+  };
+
   function cancelRecordClearHold() {
     if (recordClearHoldTimeoutRef.current !== null) {
       window.clearTimeout(recordClearHoldTimeoutRef.current);
@@ -18342,6 +19189,17 @@ export default function App() {
                   <History className="h-6 w-6" />
                   나의 기록
                 </button>
+                {isDeveloperMode && (
+                  <button
+                    type="button"
+                    onPointerDown={warmAudio}
+                    onClick={openArchive}
+                    className="flex w-full items-center justify-center gap-2 rounded-full border-2 border-sky-200/60 bg-sky-500/18 px-7 py-4 text-xl font-black text-sky-50 transition hover:scale-[1.01] hover:border-sky-100 hover:bg-sky-400/25 sm:w-auto sm:min-w-[12rem] sm:px-8 sm:py-5 sm:text-2xl"
+                  >
+                    <Archive className="h-6 w-6" />
+                    아카이브
+                  </button>
+                )}
               </div>
             </motion.div>
           </div>
@@ -18510,6 +19368,136 @@ export default function App() {
               </motion.div>
             )}
           </AnimatePresence>
+        </motion.div>
+      )}
+
+      {gameState === 'archive' && selectedArchiveSection && selectedArchiveLevelSection && selectedArchiveProblem && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98, y: 12 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.24, ease: 'easeOut' }}
+          className="flex h-[calc(100svh-1rem)] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-slate-700 bg-slate-950 shadow-2xl sm:h-[calc(100svh-2rem)]"
+        >
+          <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-800 px-4 py-3">
+            <div className="min-w-0">
+              <h2 className="truncate text-xl font-black text-white sm:text-2xl">문항 아카이브</h2>
+              <div className="mt-1 truncate text-xs font-bold text-slate-400">
+                {selectedArchiveSection.unit.chapterLabel} {selectedArchiveSection.unit.title} · {selectedArchiveLevelSection.title} · {selectedArchiveProblem.label}
+              </div>
+            </div>
+            <button
+              type="button"
+              aria-label="닫기"
+              onPointerDown={warmAudio}
+              onClick={returnToStartScreen}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-700 bg-slate-900 text-slate-100 transition hover:border-slate-500 hover:bg-slate-800"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          <div className="grid min-h-0 flex-1 grid-rows-[auto_minmax(0,1fr)] lg:grid-cols-[17rem_minmax(0,1fr)] lg:grid-rows-1">
+            <aside className="flex max-h-[38svh] min-h-0 flex-col gap-3 border-b border-slate-800 p-3 lg:max-h-none lg:border-b-0 lg:border-r">
+              <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-1">
+                {archiveSections.map((section) => {
+                  const isSelected = selectedArchiveUnitId === section.unit.id;
+
+                  return (
+                    <button
+                      key={section.unit.id}
+                      type="button"
+                      onPointerDown={warmAudio}
+                      onClick={() => {
+                        playSound('ui');
+                        setSelectedArchiveUnitId(section.unit.id);
+                        setSelectedArchiveLevel(section.levels[0]?.level ?? 1);
+                        setSelectedArchiveProblemId(section.levels[0]?.problems[0]?.id ?? null);
+                      }}
+                      className={`rounded-xl border px-3 py-2.5 text-left transition ${
+                        isSelected
+                          ? 'border-sky-300 bg-sky-400/14 text-white'
+                          : 'border-slate-700 bg-slate-900 text-slate-300 hover:border-slate-500 hover:bg-slate-800'
+                      }`}
+                    >
+                      <span className="block text-xs font-black tracking-[0.16em] text-sky-200">{section.unit.chapterLabel}</span>
+                      <span className="mt-1 block truncate text-sm font-black">{section.unit.title}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="skin-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1">
+                <div className="grid grid-cols-3 gap-1.5 lg:grid-cols-2">
+                  {selectedArchiveSection.levels.map((levelSection) => (
+                    <button
+                      key={levelSection.level}
+                      type="button"
+                      onPointerDown={warmAudio}
+                      onClick={() => {
+                        playSound('ui');
+                        setSelectedArchiveLevel(levelSection.level);
+                        setSelectedArchiveProblemId(levelSection.problems[0]?.id ?? null);
+                      }}
+                      title={levelSection.title}
+                      className={`min-h-[2.75rem] rounded-lg border px-2 py-2 text-center transition ${
+                        selectedArchiveLevelSection.level === levelSection.level
+                          ? 'border-emerald-300 bg-emerald-400/14 text-white'
+                          : 'border-slate-700 bg-slate-900 text-slate-300 hover:border-slate-500 hover:bg-slate-800'
+                      }`}
+                    >
+                      <span className="text-sm font-black">{levelSection.level}단계</span>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="mt-3 space-y-1.5">
+                  {selectedArchiveLevelSection.problems.map((archiveProblem) => {
+                    const isSelectedProblem = selectedArchiveProblem.id === archiveProblem.id;
+
+                    return (
+                      <button
+                        key={archiveProblem.id}
+                        type="button"
+                        onPointerDown={warmAudio}
+                        onClick={() => {
+                          playSound('ui');
+                          setSelectedArchiveProblemId(archiveProblem.id);
+                        }}
+                        className={`flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2 text-left transition ${
+                          isSelectedProblem
+                            ? 'border-sky-300 bg-sky-400/14 text-white'
+                            : 'border-slate-700 bg-slate-900 text-slate-300 hover:border-slate-500 hover:bg-slate-800'
+                        }`}
+                      >
+                        <span className="shrink-0 text-sm font-black">{archiveProblem.label}</span>
+                        <span className="truncate text-xs font-bold text-slate-400">{archiveProblem.kind}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </aside>
+
+            <main className="min-h-0 bg-slate-900 p-3 sm:p-4">
+              <div className="flex h-full min-h-0 flex-col">
+                <div className="mb-3 flex shrink-0 items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <h3 className="truncate text-lg font-black text-white">{selectedArchiveLevelSection.title}</h3>
+                    <p className="mt-0.5 truncate text-xs font-bold text-slate-400">
+                      {selectedArchiveProblem.label} · {selectedArchiveProblem.kind}
+                    </p>
+                  </div>
+                  <span className="max-w-[45%] shrink-0 truncate rounded-lg bg-emerald-400/10 px-3 py-2 text-sm font-black text-emerald-100">
+                    답: {selectedArchiveProblem.answer}
+                  </span>
+                </div>
+
+                <div className="skin-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-xl bg-slate-800 p-2">
+                  <ArchiveProblemPreview problem={selectedArchiveProblem.problem} />
+                </div>
+              </div>
+            </main>
+          </div>
         </motion.div>
       )}
 
@@ -19052,6 +20040,7 @@ export default function App() {
                       {problem.shapeDraw.task === 'identify' ? (
                         <ShapeIdentifyProblemCard
                           shapeDraw={problem.shapeDraw}
+                          answerValue={displayedInputValue}
                           onAnswerChange={setInputValue}
                         />
                       ) : (
