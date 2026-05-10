@@ -4618,9 +4618,7 @@ function createClockReadingVisualProblem(difficulty: ClockReadingDifficulty = 3)
   const minute =
     difficulty === 1
       ? sample([0, 15, 30, 45])
-      : difficulty === 2 || difficulty === 3
-        ? randomInt(0, 11) * 5
-        : randomInt(0, 59);
+      : randomInt(0, 11) * 5;
   const second = createClockReadingSecond(difficulty);
   const editableParts = getClockReadingEditableParts(difficulty);
   const question =
@@ -10311,6 +10309,34 @@ function getClockFacePoint(cx: number, cy: number, radius: number, degrees: numb
   };
 }
 
+function getClockHandPolygonPoints(
+  cx: number,
+  cy: number,
+  degrees: number,
+  length: number,
+  width: number,
+  tailLength: number,
+) {
+  const radians = (degrees - 90) * (Math.PI / 180);
+  const dx = Math.cos(radians);
+  const dy = Math.sin(radians);
+  const px = -dy;
+  const py = dx;
+  const shoulderLength = length * 0.78;
+  const halfWidth = width / 2;
+  const baseHalfWidth = width * 0.32;
+
+  return [
+    [cx - dx * tailLength + px * baseHalfWidth, cy - dy * tailLength + py * baseHalfWidth],
+    [cx + dx * shoulderLength + px * halfWidth, cy + dy * shoulderLength + py * halfWidth],
+    [cx + dx * length, cy + dy * length],
+    [cx + dx * shoulderLength - px * halfWidth, cy + dy * shoulderLength - py * halfWidth],
+    [cx - dx * tailLength - px * baseHalfWidth, cy - dy * tailLength - py * baseHalfWidth],
+  ]
+    .map(([x, y]) => `${x},${y}`)
+    .join(' ');
+}
+
 function AnalogClockFigure({
   hour,
   minute,
@@ -10336,8 +10362,8 @@ function AnalogClockFigure({
   const hourDegrees = hourProgress * 30;
   const minuteDegrees = minuteProgress * 6;
   const secondDegrees = second * 6;
-  const hourPoint = getClockFacePoint(cx, cy, radius * 0.47, hourDegrees);
-  const minutePoint = getClockFacePoint(cx, cy, radius * 0.72, minuteDegrees);
+  const hourHandPoints = getClockHandPolygonPoints(cx, cy, hourDegrees, radius * 0.49, 16, 5);
+  const minuteHandPoints = getClockHandPolygonPoints(cx, cy, minuteDegrees, radius * 0.78, 12, 6);
   const secondPoint = getClockFacePoint(cx, cy, radius * 0.82, secondDegrees);
   const secondTailPoint = getClockFacePoint(cx, cy, radius * 0.18, secondDegrees + 180);
   const roundedHour = hour === 0 ? 12 : Math.floor(hour);
@@ -10352,7 +10378,6 @@ function AnalogClockFigure({
   const hourOpacity = activeHand === 'seconds' ? 0.78 : 1;
   const minuteOpacity = activeHand === 'seconds' ? 0.72 : 1;
   const secondOpacity = activeHand === 'minutes' ? 0.65 : 1;
-  const minuteWidth = activeHand === 'minutes' ? 8.5 : 7;
   const secondWidth = activeHand === 'seconds' ? 3.2 : 2.4;
   const handHighlightColor = activeHand === 'minutes' ? '#fecaca' : activeHand === 'seconds' ? '#cbd5e1' : '#dbeafe';
 
@@ -10403,26 +10428,8 @@ function AnalogClockFigure({
       {activeHand ? (
         <circle cx={cx} cy={cy} r="142" fill="none" stroke={handHighlightColor} strokeWidth="7" opacity="0.75" />
       ) : null}
-      <line
-        x1={cx}
-        y1={cy}
-        x2={hourPoint.x}
-        y2={hourPoint.y}
-        stroke="#23a34a"
-        strokeWidth="10"
-        strokeLinecap="round"
-        opacity={hourOpacity}
-      />
-      <line
-        x1={cx}
-        y1={cy}
-        x2={minutePoint.x}
-        y2={minutePoint.y}
-        stroke="#ef4444"
-        strokeWidth={minuteWidth}
-        strokeLinecap="round"
-        opacity={minuteOpacity}
-      />
+      <polygon points={hourHandPoints} fill="#23a34a" opacity={hourOpacity} />
+      <polygon points={minuteHandPoints} fill="#ef4444" opacity={minuteOpacity} />
       <line
         x1={secondTailPoint.x}
         y1={secondTailPoint.y}
@@ -10466,7 +10473,12 @@ function ClockReadingProblemCard({
         <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(15rem,18rem)] lg:items-center">
           <div className="overflow-hidden rounded-[1.75rem] border border-sky-200 bg-white p-3 shadow-[inset_0_2px_14px_rgba(148,163,184,0.12)] sm:p-4">
             <div className="mx-auto w-full max-w-[20rem]">
-              <AnalogClockFigure hour={clockReading.hour} minute={clockReading.minute} second={clockReading.second} />
+              <AnalogClockFigure
+                hour={clockReading.hour}
+                minute={clockReading.minute}
+                second={clockReading.second}
+                displayMode="teaching"
+              />
             </div>
           </div>
 
