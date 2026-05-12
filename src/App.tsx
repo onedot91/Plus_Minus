@@ -666,7 +666,7 @@ const RIGHT_ANGLE_MARK_ANSWER_TOKENS = [
   '11|11개',
   '7|7개',
   '9|9개',
-  '11|11개',
+  '12|12개',
   '6|6개',
   '12|12개',
   '5|5개',
@@ -679,26 +679,12 @@ const RIGHT_ANGLE_MARK_ANSWER_TOKENS = [
 ] as const;
 
 const RIGHT_ANGLE_COUNT_ANSWERS = [
-  [1, 2, 4],
-  [4, 1, 2],
-  [2, 4, 1],
-  [4, 2, 1],
-  [1, 4, 2],
-  [2, 1, 4],
   [0, 1, 4],
-  [4, 0, 2],
-  [2, 3, 4],
-  [3, 1, 0],
-  [4, 3, 1],
-  [0, 2, 3],
-  [3, 4, 0],
-  [1, 3, 2],
-  [2, 0, 4],
-  [3, 2, 0],
-  [4, 1, 3],
   [0, 4, 1],
-  [2, 4, 3],
-  [1, 0, 3],
+  [1, 0, 4],
+  [1, 4, 0],
+  [4, 0, 1],
+  [4, 1, 0],
 ] as const;
 
 const RIGHT_ANGLE_NAME_PROBLEM_VARIANTS = [
@@ -1300,10 +1286,24 @@ const getRightTriangleDefinitionAnswerToken = (figureVariant = 0) =>
 const getRightAngleMarkAnswerToken = (figureVariant = 0) =>
   RIGHT_ANGLE_MARK_ANSWER_TOKENS[figureVariant % RIGHT_ANGLE_MARK_ANSWER_TOKENS.length];
 
+const getRightAngleMarkArchiveAnswer = (figureVariant = 0) =>
+  `${RIGHT_ANGLE_MARK_ANSWER_TOKENS[figureVariant % RIGHT_ANGLE_MARK_ANSWER_TOKENS.length].split('|')[0]}개`;
+
 const getRightAngleCountAnswerToken = (figureVariant = 0) => {
   const answers = RIGHT_ANGLE_COUNT_ANSWERS[figureVariant % RIGHT_ANGLE_COUNT_ANSWERS.length];
-  return `${answers.join('')}|${answers.join(',')}|${answers.map((answer) => `${answer}개`).join('')}`;
+  return [
+    answers.join(''),
+    answers.join(','),
+    answers.map((answer) => `${answer}개`).join(''),
+    `${answers.join('')}개`,
+    `${answers.join(',')}개`,
+  ].join('|');
 };
+
+const getRightAngleCountArchiveAnswer = (figureVariant = 0) =>
+  RIGHT_ANGLE_COUNT_ANSWERS[figureVariant % RIGHT_ANGLE_COUNT_ANSWERS.length]
+    .map((answer) => `${answer}개`)
+    .join(', ');
 
 const getRightAngleNamesAnswerToken = (figureVariant = 0) =>
   RIGHT_ANGLE_NAME_PROBLEM_VARIANTS[figureVariant % RIGHT_ANGLE_NAME_PROBLEM_VARIANTS.length].answerGroups
@@ -9066,7 +9066,9 @@ function getProblemArchiveAnswer(problem: Problem) {
   }
 
   if (problem.kind === 'shapeDraw' && problem.shapeDraw) {
-    return problem.shapeDraw.task === 'draw' ? '그리기 완료' : problem.shapeDraw.answerToken;
+    return problem.shapeDraw.task === 'draw'
+      ? '그리기 완료'
+      : getShapeDrawArchiveAnswer(problem.shapeDraw);
   }
 
   if (problem.kind === 'shapeRain' && problem.shapeRain) {
@@ -9074,6 +9076,36 @@ function getProblemArchiveAnswer(problem: Problem) {
   }
 
   return `${problem.answer}${problem.answerUnit ?? ''}`;
+}
+
+function getShapeDrawArchiveAnswer(shapeDraw: ShapeDrawProblemData) {
+  if (shapeDraw.identifyVariant === 'rightAngleMark') {
+    return getRightAngleMarkArchiveAnswer(shapeDraw.figureVariant);
+  }
+
+  if (shapeDraw.identifyVariant === 'rightAngleCount') {
+    return getRightAngleCountArchiveAnswer(shapeDraw.figureVariant);
+  }
+
+  if (shapeDraw.identifyVariant === 'clockRightAngles') {
+    return '3시, 9시';
+  }
+
+  if (shapeDraw.identifyVariant === 'shapeChoice' && shapeDraw.mode === 'rectangle') {
+    return '3번, 4번';
+  }
+
+  if (shapeDraw.identifyVariant === 'rightAngleNames') {
+    return shapeDraw.answerToken
+      .split('&&')
+      .map((requiredGroup) => requiredGroup.split('|')[0])
+      .join(', ');
+  }
+
+  return shapeDraw.answerToken
+    .split('&&')
+    .map((requiredGroup) => requiredGroup.split('|')[0])
+    .join(', ');
 }
 
 function createArchiveProblemRecord(problem: Problem, id: string, label: string): ArchiveProblemRecord {
@@ -14478,17 +14510,17 @@ function ShapeDrawProblemCard({ shapeDraw, answerValue, onAnswerChange, onSubmit
   return (
     <div className="flex h-full w-full flex-col gap-2 text-slate-900">
       <h2 className="shrink-0 text-2xl font-black leading-tight sm:text-3xl">{shapeDraw.title}</h2>
-      <div className="relative min-h-0 flex-1 overflow-hidden rounded-2xl border-2 border-slate-300 bg-[#f8fbff]">
-        <div className="absolute left-1/2 top-3 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full bg-[#253493] px-3 py-2 shadow-lg">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border-2 border-slate-300 bg-[#f8fbff]">
+        <div className="relative min-h-0 flex-1">
+          <div className="absolute left-1/2 top-3 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full bg-[#253493] px-3 py-2 shadow-lg">
           <button type="button" onClick={() => { setTool('point'); setOpenToolMenu(null); }} className={`grid h-12 w-12 place-items-center rounded-full bg-pink-300 ${tool === 'point' ? 'ring-4 ring-sky-300 ring-offset-2' : ''}`} aria-label="점 도구">
             <span className="block h-4 w-4 rounded-full border-4 border-slate-900 bg-slate-500" />
           </button>
           <button type="button" onClick={() => (tool === 'line' ? setLineMode(lineMode === 'segment' ? 'line' : lineMode === 'line' ? 'ray' : 'segment') : setTool('line'))} className={`grid h-12 w-12 place-items-center rounded-full bg-cyan-100 ${tool === 'line' ? 'ring-4 ring-sky-300 ring-offset-2' : ''}`} aria-label="???占쎄뎄"><svg viewBox="0 0 48 48" className="h-10 w-10"><line x1={lineMode === 'line' ? 6 : 12} y1="34" x2={lineMode === 'line' || lineMode === 'ray' ? 42 : 36} y2="14" stroke="#f97316" strokeWidth="3.5" strokeLinecap="round" /><circle cx="14" cy="33" r="5" fill="#6b7280" stroke="#111827" strokeWidth="3" /><circle cx="34" cy="15" r="5" fill={lineMode === 'ray' ? '#6b7280' : '#f8fbff'} stroke="#2563eb" strokeWidth="3" /></svg></button>
           <button type="button" onClick={() => (tool === 'polygon' ? setPolygonSides(polygonSides === 3 ? 4 : 3) : setTool('polygon'))} className={`grid h-12 w-12 place-items-center rounded-full bg-lime-300 ${tool === 'polygon' ? 'ring-4 ring-sky-300 ring-offset-2' : ''}`} aria-label="?占쏀삎 ?占쎄뎄"><svg viewBox="0 0 48 48" className="h-10 w-10"><polygon points={polygonSides === 3 ? '12,15 36,17 24,38' : '12,13 36,13 36,37 12,37'} fill="#bbf7d0" stroke="#ef5da8" strokeWidth="3" /></svg></button>
           <button type="button" onClick={undo} disabled={history.length === 0} className="grid h-12 w-12 place-items-center rounded-full bg-yellow-300 text-[#253493] disabled:opacity-40" aria-label="?占쎈룎由ш린"><RotateCcw className="h-6 w-6" strokeWidth={3} /></button>
-        </div>
-        <button type="button" onClick={onSubmit} disabled={!answerValue} className="absolute bottom-4 right-5 z-30 flex items-center gap-2 rounded-full bg-[#ffc400] px-7 py-3 text-lg font-black text-[#273b9a] shadow-lg disabled:opacity-45"><Sword size={22} /> 공격!</button>
-        <svg ref={svgRef} viewBox="0 0 640 360" className="h-full min-h-[20rem] w-full touch-none" onPointerDown={handleDown}>
+          </div>
+          <svg ref={svgRef} viewBox="0 0 640 360" className="h-full min-h-[20rem] w-full touch-none" onPointerDown={handleDown}>
           <rect width="640" height="360" fill="#f8fbff" />
           {Array.from({ length: 11 }, (_, i) => <line key={`gx-${i}`} x1={SHAPE_ORIGIN.x + i * SHAPE_GRID} x2={SHAPE_ORIGIN.x + i * SHAPE_GRID} y1="0" y2="360" stroke="#d7dee9" />)}
           {Array.from({ length: 6 }, (_, i) => <line key={`gy-${i}`} y1={SHAPE_ORIGIN.y + i * SHAPE_GRID} y2={SHAPE_ORIGIN.y + i * SHAPE_GRID} x1="0" x2="640" stroke="#d7dee9" />)}
@@ -14498,7 +14530,11 @@ function ShapeDrawProblemCard({ shapeDraw, answerValue, onAnswerChange, onSubmit
           {lines.map((line, index) => { const ends = lineEnds(line); return <g key={`line-${index}`}><line x1={ends.a.x} y1={ends.a.y} x2={ends.b.x} y2={ends.b.y} stroke="#f97316" strokeWidth="3.4" strokeLinecap="round" /><ShapePointView point={line.start} /><ShapePointView point={line.end} /></g>; })}
           {rightAngleMarkers.map(renderRightAngleMarker)}
           {[...points, ...pendingPolygon, ...(lineStart ? [lineStart] : [])].map((point) => <g key={`point-${point.x}-${point.y}-${point.label}`}><ShapePointView point={point} /></g>)}
-        </svg>
+          </svg>
+        </div>
+        <div className="flex shrink-0 justify-end border-t-2 border-slate-200 bg-white/80 px-5 py-3">
+          <button type="button" onClick={onSubmit} disabled={!answerValue} className="flex items-center gap-2 rounded-full bg-[#ffc400] px-7 py-3 text-lg font-black text-[#273b9a] shadow-lg disabled:opacity-45"><Sword size={22} /> 공격!</button>
+        </div>
       </div>
     </div>
   );
@@ -15305,8 +15341,9 @@ function ShapeDrawProblemCardV2({
           {notice}
         </div>
       ) : null}
-      <div className="relative min-h-0 flex-1 overflow-hidden rounded-2xl border-2 border-slate-300 bg-[#f8fbff]">
-        {isGachaDrawProblem && isRouletteOverlayVisible ? (
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border-2 border-slate-300 bg-[#f8fbff]">
+        <div className="relative min-h-0 flex-1">
+          {isGachaDrawProblem && isRouletteOverlayVisible ? (
           <div className="absolute inset-0 z-40 grid place-items-center bg-slate-950/92 backdrop-blur-[2px]">
             <motion.div
               initial={{ opacity: 0, scale: 0.92, y: 10 }}
@@ -15361,8 +15398,8 @@ function ShapeDrawProblemCardV2({
               ) : null}
             </motion.div>
           </div>
-        ) : null}
-        <div className="absolute left-1/2 top-3 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full bg-[#253493] px-3 py-2 shadow-lg">
+          ) : null}
+          <div className="absolute left-1/2 top-3 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full bg-[#253493] px-3 py-2 shadow-lg">
           <button type="button" onClick={() => { playDrawSound('ui', { gainMultiplier: 0.66, detune: 12 }); setTool('point'); setOpenMenu(null); }} disabled={lineToolOnly} className={toolButtonClass(tool === 'point', 'bg-pink-300', lineToolOnly)} aria-label="점 도구">
             <span className="block h-4 w-4 rounded-full border-4 border-slate-900 bg-slate-500" />
           </button>
@@ -15393,11 +15430,8 @@ function ShapeDrawProblemCardV2({
           <button type="button" onClick={() => { setOpenMenu(null); undo(); }} disabled={history.length === 0} className="grid h-12 w-12 place-items-center rounded-full bg-yellow-300 text-[#253493] transition-opacity disabled:opacity-40" aria-label="되돌리기">
             <RotateCcw className="h-6 w-6" strokeWidth={3} />
           </button>
-        </div>
-        <button type="button" onClick={onSubmit} className="absolute bottom-4 right-5 z-30 flex items-center gap-2 rounded-full bg-emerald-500 px-7 py-3 text-lg font-black text-white shadow-lg shadow-emerald-900/25 transition hover:bg-emerald-400">
-          <Sword size={22} /> 공격!
-        </button>
-        <svg ref={svgRef} viewBox="0 0 640 360" className="h-full min-h-[20rem] w-full touch-none" onPointerDown={handleDown}>
+          </div>
+          <svg ref={svgRef} viewBox="0 0 640 360" className="h-full min-h-[20rem] w-full touch-none" onPointerDown={handleDown}>
           <rect width="640" height="360" fill="#f8fbff" />
           {Array.from({ length: 11 }, (_, i) => <line key={`gx-${i}`} x1={SHAPE_ORIGIN.x + i * SHAPE_GRID} x2={SHAPE_ORIGIN.x + i * SHAPE_GRID} y1="0" y2="360" stroke="#d7dee9" />)}
           {Array.from({ length: 6 }, (_, i) => <line key={`gy-${i}`} y1={SHAPE_ORIGIN.y + i * SHAPE_GRID} y2={SHAPE_ORIGIN.y + i * SHAPE_GRID} x1="0" x2="640" stroke="#d7dee9" />)}
@@ -15418,7 +15452,13 @@ function ShapeDrawProblemCardV2({
           {rightAngleMarkers.map(renderRightAngleMarker)}
           {presetAngleVertex ? <ShapePointView point={presetAngleVertex} /> : null}
           {[...points, ...pendingPolygon, ...(lineStart ? [lineStart] : [])].map((point) => <g key={`point-${point.x}-${point.y}-${point.label}`}><ShapePointView point={point} /></g>)}
-        </svg>
+          </svg>
+        </div>
+        <div className="flex shrink-0 justify-end border-t-2 border-slate-200 bg-white/80 px-5 py-3">
+          <button type="button" onClick={onSubmit} className="flex items-center gap-2 rounded-full bg-emerald-500 px-7 py-3 text-lg font-black text-white shadow-lg shadow-emerald-900/25 transition hover:bg-emerald-400">
+            <Sword size={22} /> 공격!
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -15926,7 +15966,7 @@ function ShapeIdentifyProblemCard({
   );
   const renderRightAngleMarkProblem = () => {
     const variantIndex = figureVariant % RIGHT_ANGLE_MARK_ANSWER_TOKENS.length;
-    const variantShapes = [
+    const legacyVariantShapes = [
       [
         <polygon key="mark-0-a" points="42,54 184,54 184,226 42,226" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
         <polygon key="mark-0-b" points="234,92 410,126 410,248 234,248" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
@@ -16005,6 +16045,47 @@ function ShapeIdentifyProblemCard({
         <polygon key="mark-13-c" points="494,230 614,230 614,100" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />,
       ],
     ][variantIndex];
+    const targetCount = Number.parseInt(RIGHT_ANGLE_MARK_ANSWER_TOKENS[variantIndex].split('|')[0], 10);
+    const clearShapeSlots = [
+      { x: 130, y: 104 },
+      { x: 320, y: 104 },
+      { x: 510, y: 104 },
+      { x: 130, y: 224 },
+      { x: 320, y: 224 },
+      { x: 510, y: 224 },
+    ];
+    type RightAngleMarkShapeKind = 'isoscelesTrapezoid' | 'rhombus' | 'rectangle' | 'square' | 'rightTriangle';
+    const fourAngleShapeKinds = Array.from({ length: Math.floor(targetCount / 4) }, (_, index) =>
+      index % 2 === 0 ? 'rectangle' as const : 'square' as const
+    );
+    const oneAngleShapeKinds = Array.from({ length: targetCount % 4 }, () => 'rightTriangle' as const);
+    const zeroAngleFillers = Array.from(
+      { length: Math.max(0, clearShapeSlots.length - fourAngleShapeKinds.length - oneAngleShapeKinds.length) },
+      (_, index) => index % 2 === 0 ? 'isoscelesTrapezoid' as const : 'rhombus' as const,
+    );
+    const clearMarkShapeKinds: RightAngleMarkShapeKind[] = [
+      ...fourAngleShapeKinds,
+      ...oneAngleShapeKinds,
+      ...zeroAngleFillers,
+    ];
+    const variantShapes = clearMarkShapeKinds.map((kind, index) => {
+      const slot = clearShapeSlots[index];
+      const key = `clear-mark-${variantIndex}-${kind}-${index}`;
+
+      if (kind === 'rectangle') {
+        return <rect key={key} x={slot.x - 58} y={slot.y - 42} width="116" height="84" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />;
+      }
+      if (kind === 'square') {
+        return <rect key={key} x={slot.x - 45} y={slot.y - 45} width="90" height="90" fill="#ffffff" stroke="#111827" strokeWidth="2.8" />;
+      }
+      if (kind === 'rightTriangle') {
+        return <polygon key={key} points={`${slot.x - 50},${slot.y + 42} ${slot.x - 50},${slot.y - 42} ${slot.x + 50},${slot.y + 42}`} fill="#ffffff" stroke="#111827" strokeWidth="2.8" />;
+      }
+      if (kind === 'rhombus') {
+        return <polygon key={key} points={`${slot.x},${slot.y - 56} ${slot.x + 42},${slot.y} ${slot.x},${slot.y + 56} ${slot.x - 42},${slot.y}`} fill="#ffffff" stroke="#111827" strokeWidth="2.8" />;
+      }
+      return <polygon key={key} points={`${slot.x - 62},${slot.y + 38} ${slot.x - 36},${slot.y - 38} ${slot.x + 36},${slot.y - 38} ${slot.x + 62},${slot.y + 38}`} fill="#ffffff" stroke="#111827" strokeWidth="2.8" />;
+    });
 
     return (
       <div className="h-full min-h-[20rem] w-full px-5 py-5">
@@ -16026,22 +16107,22 @@ function ShapeIdentifyProblemCard({
     const shapeByAnswer = {
       0: [
         <svg key="count-zero-0" viewBox="0 0 180 150" className="h-44 w-full">
-          <polygon points="48,112 98,30 150,112" fill="#fff" stroke="#111827" strokeWidth="3" />
+          <polygon points="90,10 132,75 90,140 48,75" fill="#fff" stroke="#111827" strokeWidth="3" />
         </svg>,
         <svg key="count-zero-1" viewBox="0 0 180 150" className="h-44 w-full">
-          <polygon points="44,42 144,30 132,118 30,130" fill="#fff" stroke="#111827" strokeWidth="3" />
+          <polygon points="90,12 128,74 90,138 52,74" fill="#fff" stroke="#111827" strokeWidth="3" />
         </svg>,
         <svg key="count-zero-2" viewBox="0 0 180 150" className="h-44 w-full">
-          <polygon points="54,38 142,54 126,122 34,108" fill="#fff" stroke="#111827" strokeWidth="3" />
+          <polygon points="90,8 136,76 90,142 44,76" fill="#fff" stroke="#111827" strokeWidth="3" />
         </svg>,
         <svg key="count-zero-3" viewBox="0 0 180 150" className="h-44 w-full">
-          <polygon points="48,36 138,58 156,118 34,128" fill="#fff" stroke="#111827" strokeWidth="3" />
+          <polygon points="90,16 130,72 90,134 50,72" fill="#fff" stroke="#111827" strokeWidth="3" />
         </svg>,
         <svg key="count-zero-4" viewBox="0 0 180 150" className="h-44 w-full">
-          <polygon points="92,24 154,84 118,132 28,104" fill="#fff" stroke="#111827" strokeWidth="3" />
+          <polygon points="90,10 126,78 90,140 54,78" fill="#fff" stroke="#111827" strokeWidth="3" />
         </svg>,
         <svg key="count-zero-5" viewBox="0 0 180 150" className="h-44 w-full">
-          <polygon points="34,62 120,28 156,98 78,130" fill="#fff" stroke="#111827" strokeWidth="3" />
+          <polygon points="90,14 134,76 90,136 46,76" fill="#fff" stroke="#111827" strokeWidth="3" />
         </svg>,
       ],
       1: [
