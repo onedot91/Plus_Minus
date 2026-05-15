@@ -1475,11 +1475,13 @@ interface StoredBattleProgress {
 }
 
 interface StoredPlayRecordUnitTheme {
+  sectionClassName: string;
   cardClassName: string;
   accentClassName: string;
   progressClassName: string;
   dotClassName: string;
   labelClassName: string;
+  latestRingClassName: string;
 }
 
 interface MeasurementProblemData {
@@ -2888,25 +2890,31 @@ const MAX_STORED_PLAY_RECORDS = 30;
 const RECORD_CLEAR_HOLD_DURATION_MS = 5000;
 const STORED_PLAY_RECORD_UNIT_THEMES: Record<LearningUnitId, StoredPlayRecordUnitTheme> = {
   unit1: {
-    cardClassName: 'border-sky-100/20 bg-[linear-gradient(180deg,rgba(12,26,44,0.98),rgba(8,13,26,0.98))]',
-    accentClassName: 'bg-sky-300',
-    progressClassName: 'bg-sky-300',
-    dotClassName: 'bg-sky-300',
-    labelClassName: 'text-sky-100',
+    sectionClassName: 'border-emerald-200/20 bg-emerald-400/[0.045]',
+    cardClassName: 'border-emerald-200/24 bg-[linear-gradient(180deg,rgba(10,45,31,0.98),rgba(8,13,26,0.98))]',
+    accentClassName: 'bg-emerald-300',
+    progressClassName: 'bg-emerald-300',
+    dotClassName: 'bg-emerald-300',
+    labelClassName: 'text-emerald-100',
+    latestRingClassName: 'ring-emerald-200/75',
   },
   unit2: {
-    cardClassName: 'border-cyan-100/16 bg-[linear-gradient(180deg,rgba(15,23,42,0.98),rgba(8,13,26,0.98))]',
+    sectionClassName: 'border-cyan-200/20 bg-cyan-400/[0.045]',
+    cardClassName: 'border-cyan-100/20 bg-[linear-gradient(180deg,rgba(15,23,42,0.98),rgba(8,13,26,0.98))]',
     accentClassName: 'bg-cyan-300',
     progressClassName: 'bg-cyan-300',
     dotClassName: 'bg-cyan-300',
     labelClassName: 'text-cyan-100',
+    latestRingClassName: 'ring-cyan-200/75',
   },
   unit3: {
+    sectionClassName: 'border-violet-200/22 bg-violet-400/[0.05]',
     cardClassName: 'border-violet-200/20 bg-[linear-gradient(180deg,rgba(31,25,58,0.96),rgba(12,18,34,0.98))]',
     accentClassName: 'bg-violet-300',
     progressClassName: 'bg-violet-300',
     dotClassName: 'bg-violet-300',
     labelClassName: 'text-violet-100',
+    latestRingClassName: 'ring-violet-200/75',
   },
 };
 const VICTORY_CONFETTI = [
@@ -20350,7 +20358,7 @@ export default function App() {
                             return (
                               <section
                                 key={section.unitId}
-                                className="rounded-lg border border-white/10 bg-white/[0.035] p-3 shadow-[0_10px_24px_rgba(2,8,23,0.2)]"
+                                className={`rounded-lg border p-3 shadow-[0_10px_24px_rgba(2,8,23,0.2)] ${recordUnitTheme.sectionClassName}`}
                               >
                                 <div className="flex items-center gap-3">
                                   <h3 className={`truncate text-base font-black ${recordUnitTheme.labelClassName}`}>{section.unitTitle} · {section.records.length}번</h3>
@@ -20366,7 +20374,7 @@ export default function App() {
                                         aria-label={`${formatStoredPlayRecordDate(record.playedAt)} ${record.unitTitle} ${record.level}단계${isFullClearRecord ? ' 클리어' : ''}`}
                                         title={`${formatStoredPlayRecordDate(record.playedAt)} · ${record.level}단계${isFullClearRecord ? ' 클리어' : ''}`}
                                         className={`relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border text-center shadow-[0_8px_18px_rgba(2,8,23,0.2)] sm:h-14 sm:w-14 ${
-                                          isLatestRecord ? 'ring-2 ring-cyan-200/70' : ''
+                                          isLatestRecord ? `ring-2 ${recordUnitTheme.latestRingClassName}` : ''
                                         } ${recordUnitTheme.cardClassName}`}
                                       >
                                         <div className={`absolute inset-x-0 top-0 h-1 ${recordUnitTheme.accentClassName}`} />
@@ -22131,7 +22139,7 @@ export default function App() {
                         return (
                           <section
                             key={section.unitId}
-                            className="rounded-lg border border-white/10 bg-white/[0.035] p-3 shadow-[0_10px_24px_rgba(2,8,23,0.2)]"
+                            className={`rounded-lg border p-3 shadow-[0_10px_24px_rgba(2,8,23,0.2)] ${recordUnitTheme.sectionClassName}`}
                           >
                             <div className="flex items-center gap-3">
                               <h3 className={`truncate text-base font-black ${recordUnitTheme.labelClassName}`}>{section.unitTitle} · {section.records.length}번</h3>
@@ -22147,7 +22155,7 @@ export default function App() {
                                     aria-label={`${formatStoredPlayRecordDate(record.playedAt)} ${record.unitTitle} ${record.level}단계${isFullClearRecord ? ' 클리어' : ''}`}
                                     title={`${formatStoredPlayRecordDate(record.playedAt)} · ${record.level}단계${isFullClearRecord ? ' 클리어' : ''}`}
                                     className={`relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border text-center shadow-[0_8px_18px_rgba(2,8,23,0.2)] sm:h-14 sm:w-14 ${
-                                      isLatestRecord ? 'ring-2 ring-cyan-200/70' : ''
+                                      isLatestRecord ? `ring-2 ${recordUnitTheme.latestRingClassName}` : ''
                                     } ${recordUnitTheme.cardClassName}`}
                                   >
                                     <div className={`absolute inset-x-0 top-0 h-1 ${recordUnitTheme.accentClassName}`} />
