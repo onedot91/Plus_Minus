@@ -6206,11 +6206,11 @@ function createCalculationErrorChoiceProblem(level: number): Problem {
       top: 243,
       bottom: 172,
       shownResult: 315,
-      correctReason: '4+7=11인데 십의 자리에 1을 올려주지 않아서',
+      correctReason: '십의 자리 받아올림을 백의 자리에 더하지 않아서',
       distractors: [
         '2+1=3인데 300이라고 써서',
         '200+100=300인데 30이라고 써서',
-        '3+2=5인데 일의 자리에 1을 올려주어서',
+        '일의 자리 계산에서 생긴 5를 쓰지 않아서',
       ],
     },
     {
@@ -6238,10 +6238,10 @@ function createCalculationErrorChoiceProblem(level: number): Problem {
     {
       top: 185,
       bottom: 346,
-      shownResult: 421,
-      correctReason: '5+6=11인데 십의 자리에 1을 올려주지 않아서',
+      shownResult: 431,
+      correctReason: '십의 자리 받아올림을 백의 자리에 더하지 않아서',
       distractors: [
-        '1+3=4인데 백의 자리에 4를 쓰지 않아서',
+        '백의 자리 계산을 먼저 해서',
         '8+4=12인데 십의 자리에 2를 쓰지 않아서',
         '자릿수를 오른쪽으로 한 칸 밀려 써서',
       ],
@@ -6249,11 +6249,11 @@ function createCalculationErrorChoiceProblem(level: number): Problem {
     {
       top: 527,
       bottom: 248,
-      shownResult: 665,
-      correctReason: '십의 자리 받아올림을 백의 자리에 더하지 않아서',
+      shownResult: 765,
+      correctReason: '일의 자리 받아올림을 십의 자리에 더하지 않아서',
       distractors: [
         '7+8=15인데 일의 자리에 5를 쓰지 않아서',
-        '2+4=6인데 십의 자리에 7을 써서',
+        '십의 자리 계산을 하지 않아서',
         '500+200=700인데 600이라고 써서',
       ],
     },
@@ -6268,7 +6268,7 @@ function createCalculationErrorChoiceProblem(level: number): Problem {
       distractors: [
         '1-8을 8-1로 계산해서',
         '백의 자리 계산을 하지 않아서',
-        '자릿수를 맞추지 않아서',
+        '계산 결과를 위에 써서',
       ],
     },
     {
@@ -6277,7 +6277,7 @@ function createCalculationErrorChoiceProblem(level: number): Problem {
       shownResult: 443,
       correctReason: '십의 자리에서 받아내린 뒤 백의 자리 수를 1 줄이지 않아서',
       distractors: [
-        '5-2=3인데 일의 자리에 4를 써서',
+        '일의 자리 받아내림을 하지 않아서',
         '2-8을 8-2로 계산해서',
         '700-300=400을 계산하지 않아서',
       ],
@@ -6289,29 +6289,29 @@ function createCalculationErrorChoiceProblem(level: number): Problem {
       correctReason: '작은 수에서 큰 수를 빼듯 계산해서',
       distractors: [
         '십의 자리에서 받아내림을 두 번 해서',
-        '6-2=4인데 백의 자리에 3을 써서',
+        '백의 자리 계산을 하지 않아서',
         '일의 자리 숫자를 쓰지 않아서',
       ],
     },
     {
       top: 853,
       bottom: 467,
-      shownResult: 496,
+      shownResult: 486,
       correctReason: '십의 자리에서 받아내린 뒤 백의 자리 수를 1 줄이지 않아서',
       distractors: [
         '3-7을 7-3으로 계산해서',
         '5-6을 6-5로 계산해서',
-        '자릿수를 맞추지 않아서',
+        '받아내림을 하지 않고 바로 빼서',
       ],
     },
     {
       top: 562,
       bottom: 349,
-      shownResult: 323,
+      shownResult: 223,
       correctReason: '일의 자리에서 받아내린 뒤 십의 자리 수를 1 줄이지 않아서',
       distractors: [
         '2-9를 9-2로 계산해서',
-        '5-3=2인데 백의 자리에 3을 써서',
+        '백의 자리 계산을 하지 않아서',
         '계산 결과를 위에 써서',
       ],
     },
@@ -6321,11 +6321,12 @@ function createCalculationErrorChoiceProblem(level: number): Problem {
     `unit2-calculation-error-choice-${level}`,
     level === 3 ? additionTemplates : subtractionTemplates,
   );
+  const distractorPool = Array.from(new Set([...template.distractors, ...CALCULATION_ERROR_SHARED_DISTRACTORS]));
   const options = shuffleValues([
     template.correctReason,
-    ...shuffleValues([...template.distractors, ...CALCULATION_ERROR_SHARED_DISTRACTORS]).slice(0, 4),
+    ...shuffleValues(distractorPool).slice(0, 2),
   ]);
-  const question = '보기의 계산이 틀린 이유는 무엇입니까?';
+  const question = '계산이 틀린 이유는 무엇입니까?';
 
   return {
     text: `${template.top} ${level === 3 ? '+' : '-'} ${template.bottom}`,
@@ -9763,28 +9764,38 @@ function buildArchiveSections(): ArchiveUnitSection[] {
   }
 }
 
-function getArchivePreviewFrameClass(problem: Problem) {
+function getArchivePreviewFrameClass(problem: Problem, unitId?: LearningUnitId, level?: number) {
   if (problem.kind === 'shapeDraw' || problem.kind === 'shapeRain') {
-    return 'flex flex-col overflow-hidden p-3';
+    return 'flex flex-col overflow-hidden p-3 sm:p-4 lg:p-5';
   }
 
   if (
-    problem.kind === 'measurement' ||
     problem.kind === 'distanceMap' ||
-    problem.kind === 'distanceWorksheet' ||
+    problem.kind === 'distanceWorksheet'
+  ) {
+    return 'flex flex-col overflow-y-auto p-2 sm:p-3 lg:p-3';
+  }
+
+  if (
     problem.kind === 'clockReading' ||
     problem.kind === 'timeAddition' ||
     problem.kind === 'numberLineBox' ||
     problem.kind === 'calculationErrorChoice'
   ) {
-    return 'flex flex-col overflow-hidden p-2';
+    return 'flex flex-col overflow-y-auto p-2 sm:p-3 lg:p-3';
+  }
+
+  if (problem.kind === 'measurement') {
+    return 'flex flex-col justify-center overflow-y-auto p-4 sm:p-6 lg:p-8';
   }
 
   if (problem.kind === 'equation') {
-    return 'flex flex-col items-center justify-center p-4 text-[clamp(2.25rem,9vw,4.25rem)] leading-none font-black font-mono text-slate-900';
+    return unitId === 'unit2' && level === 7
+      ? 'items-center justify-center overflow-y-auto p-4 text-center text-[clamp(3.6rem,12vw,6.8rem)] leading-tight font-black font-mono text-slate-900 sm:p-6 lg:p-8'
+      : 'flex flex-col items-center justify-center p-4 text-[clamp(3.5rem,18vw,8rem)] leading-none font-black font-mono text-slate-900 sm:p-6 lg:p-8';
   }
 
-  return 'flex flex-col justify-center overflow-hidden p-4';
+  return 'flex flex-col justify-center overflow-y-auto p-4 sm:p-6 lg:p-8';
 }
 
 function ArchiveShapeRainPreview({ shapeRain }: { shapeRain: ShapeRainProblemData }) {
@@ -9908,11 +9919,12 @@ function VerticalCalculationPreview({
   const bottomDigits = String(bottom).padStart(3, ' ');
   const resultDigits = String(result).padStart(3, ' ');
   const digitClass = condensed ? 'h-8 w-8 text-2xl' : 'h-10 w-10 text-3xl sm:h-12 sm:w-12 sm:text-4xl';
+  const symbolColorClass = 'text-[#d1d5db]';
 
   const renderDigits = (digits: string) => (
     <div className="flex justify-end gap-1">
       {digits.split('').map((digit, index) => (
-        <span key={`${digits}-${index}`} className={`grid place-items-center font-mono font-black text-slate-950 ${digitClass}`}>
+        <span key={`${digits}-${index}`} className={`grid place-items-center font-mono font-black ${symbolColorClass} ${digitClass}`}>
           {digit === ' ' ? '' : digit}
         </span>
       ))}
@@ -9920,14 +9932,14 @@ function VerticalCalculationPreview({
   );
 
   return (
-    <div className={`inline-flex flex-col rounded-2xl border-2 border-slate-300 bg-white shadow-sm ${condensed ? 'px-4 py-3' : 'px-5 py-4'}`}>
-      <div className="mb-1 inline-flex self-start rounded-md bg-slate-600 px-2 py-0.5 text-xs font-black text-white">보기</div>
+    <div className={`inline-flex flex-col rounded-2xl border-2 border-[#5f6368] bg-[#181818] shadow-sm ${condensed ? 'px-4 py-3' : 'px-5 py-4'}`}>
+      <div className="mb-1 inline-flex self-start rounded-md bg-[#2f3337] px-2 py-0.5 text-xs font-black text-[#f8fafc]">보기</div>
       {renderDigits(topDigits)}
       <div className="flex items-center justify-end gap-2">
-        <span className={`font-black text-slate-950 ${condensed ? 'text-2xl' : 'text-3xl sm:text-4xl'}`}>{op}</span>
+        <span className={`font-black ${symbolColorClass} ${condensed ? 'text-2xl' : 'text-3xl sm:text-4xl'}`}>{op}</span>
         {renderDigits(bottomDigits)}
       </div>
-      <div className="my-1 h-1 rounded-full bg-slate-800" />
+      <div className="my-1 h-1 rounded-full bg-[#d1d5db]" />
       {renderDigits(resultDigits)}
     </div>
   );
@@ -9945,15 +9957,15 @@ function CalculationErrorChoiceProblemCard({
   condensed?: boolean;
 }) {
   return (
-    <div className="mx-auto flex h-full min-h-0 w-full max-w-[58rem] flex-col gap-3 text-slate-950">
-      <div className={`shrink-0 rounded-[1.75rem] border border-slate-200 bg-slate-50 px-4 shadow-sm ${condensed ? 'py-3' : 'py-4 sm:px-6'}`}>
-        <p className={`break-keep font-black leading-tight ${condensed ? 'text-[1.45rem]' : 'text-[1.65rem] sm:text-[2.15rem]'}`}>
+    <div className="mx-auto flex h-full min-h-0 w-full max-w-[58rem] flex-col gap-3 text-[#f5f5f5]">
+      <div className={`shrink-0 rounded-[1.75rem] border border-[#5f6368] bg-[#202124] px-4 shadow-sm ${condensed ? 'py-3' : 'py-4 sm:px-6'}`}>
+        <p className={`break-keep font-black leading-tight text-[#f8fafc] ${condensed ? 'text-[1.45rem]' : 'text-[1.65rem] sm:text-[2.15rem]'}`}>
           {problemData.question}
         </p>
       </div>
 
       <div className={`grid min-h-0 flex-1 gap-3 ${condensed ? 'lg:grid-cols-[minmax(15rem,0.75fr)_minmax(0,1fr)]' : 'lg:grid-cols-[minmax(17rem,0.75fr)_minmax(0,1fr)]'}`}>
-        <div className="flex min-h-0 items-center justify-center rounded-[1.75rem] border border-slate-200 bg-slate-50/90 p-3 shadow-sm">
+        <div className="flex min-h-0 items-center justify-center rounded-[1.75rem] border border-[#5f6368] bg-[#202124] p-3 shadow-sm">
           <VerticalCalculationPreview
             top={problemData.top}
             bottom={problemData.bottom}
@@ -9975,16 +9987,16 @@ function CalculationErrorChoiceProblemCard({
                 onClick={() => onAnswerChange(optionNumber)}
                 className={`flex min-h-0 items-center gap-3 rounded-[1.25rem] border px-3 py-2 text-left shadow-sm transition ${
                   isSelected
-                    ? 'border-emerald-400 bg-emerald-50 ring-2 ring-emerald-300'
-                    : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+                    ? 'border-[#1ed760] bg-[#163d2a] ring-2 ring-[#1ed760]/55'
+                    : 'border-[#5f6368] bg-[#181818] hover:border-[#8a8f95] hover:bg-[#242424]'
                 }`}
               >
                 <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-full text-lg font-black ${
-                  isSelected ? 'bg-emerald-500 text-slate-950' : 'bg-slate-900 text-white'
+                  isSelected ? 'bg-[#1ed760] text-[#06130b]' : 'bg-[#2f3337] text-[#f8fafc]'
                 }`}>
                   {optionNumber}
                 </span>
-                <span className={`break-keep font-black leading-snug tracking-[-0.01em] ${condensed ? 'text-[1rem] sm:text-[1.15rem]' : 'text-[1.05rem] sm:text-[1.35rem]'}`}>
+                <span className={`break-keep font-black leading-snug text-[#f3f4f6] ${condensed ? 'text-[1rem] sm:text-[1.15rem]' : 'text-[1.05rem] sm:text-[1.35rem]'}`}>
                   {option}
                 </span>
               </button>
@@ -10110,11 +10122,20 @@ function VerticalBlankProblemCard({
   );
 }
 
-function ArchiveProblemPreview({ problem }: { problem: Problem }) {
+function ArchiveProblemPreview({
+  problem,
+  unitId,
+  level,
+}: {
+  problem: Problem;
+  unitId?: LearningUnitId;
+  level?: number;
+}) {
   const emptyClockAnswer = { hours: '', minutes: '', seconds: '' };
+  const shouldRenderHorizontalEquation = unitId === 'unit2' && level === 7 && problem.kind === 'equation';
 
   return (
-    <div className={`archive-preview-frame flex h-[28rem] min-h-0 rounded-2xl border-4 border-slate-200 bg-white shadow-inner ${getArchivePreviewFrameClass(problem)}`}>
+    <div className={`archive-preview-frame flex h-full min-h-[28rem] rounded-3xl border-8 border-slate-200 bg-white shadow-inner ${getArchivePreviewFrameClass(problem, unitId, level)}`}>
       {problem.kind === 'shapeRain' && problem.shapeRain ? (
         <ArchiveShapeRainPreview shapeRain={problem.shapeRain} />
       ) : problem.kind === 'shapeDraw' && problem.shapeDraw ? (
@@ -10168,6 +10189,10 @@ function ArchiveProblemPreview({ problem }: { problem: Problem }) {
         <ArchiveStoryPreview problem={problem} />
       ) : problem.kind === 'builder' && problem.builder ? (
         <ArchiveBuilderPreview builder={problem.builder} />
+      ) : shouldRenderHorizontalEquation ? (
+        <div className="flex w-full items-center justify-center text-center">
+          <span>{problem.text}</span>
+        </div>
       ) : problem.kind === 'equation' ? (
         <>
           <div className="flex flex-col items-end">
@@ -20563,7 +20588,11 @@ export default function App() {
                 </div>
 
                 <div className="skin-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-xl bg-slate-800 p-2">
-                  <ArchiveProblemPreview problem={selectedArchiveProblem.problem} />
+                  <ArchiveProblemPreview
+                    problem={selectedArchiveProblem.problem}
+                    unitId={selectedArchiveSection.unit.id}
+                    level={selectedArchiveLevelSection.level}
+                  />
                 </div>
               </div>
             </main>
