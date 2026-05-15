@@ -1,50 +1,50 @@
-﻿import React, { useState, useEffect, useRef, useEffectEvent, useMemo } from 'react';
+﻿import React, { Suspense, lazy, useState, useEffect, useRef, useEffectEvent, useMemo } from 'react';
 import { Sword, Heart, RotateCcw, Play, Sparkles, Star, ChevronDown, Check, History, Lock, X, Crown, Archive } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { VisualCalculator, type VisualControlSound } from './components/VisualCalculator';
+import type { VisualControlSound } from './components/VisualCalculator';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import startHeroImage from './assets/start-hero-math-adventure.png';
-import readingActivityWarningImage from './assets/reading-activity-warning.png';
-import stage1DefeatSceneImage from './assets/stage1-defeat-scene-cutout.png';
+import startHeroImage from './assets/start-hero-math-adventure.webp';
+import readingActivityWarningImage from './assets/reading-activity-warning.webp';
+import stage1DefeatSceneImage from './assets/stage1-defeat-scene-cutout.webp';
 import stage1ChurusigiDefeatSceneImage from './assets/stage1-churusigi-defeat-scene.jpeg';
 import stage2DefeatSceneImage from './assets/stage2-defeat-scene.jpeg';
 import stage2JjangpalDefeatSceneImage from './assets/stage2-jjangpal-defeat-scene.jpeg';
-import stage3DefeatSceneImage from './assets/stage3-defeat-scene-cutout.png';
-import stage3GamjaanigumaDefeatSceneImage from './assets/stage3-gamjaaniguma-defeat-scene-cutout.png';
-import stage4DefeatSceneImage from './assets/stage4-defeat-scene-cutout.png';
-import stage4BaekgeurigoaDefeatSceneImage from './assets/stage4-baekgeurigoa-defeat-scene-cutout.png';
-import stage5DefeatSceneImage from './assets/stage5-defeat-scene-cutout.png';
-import stage5JurdiDefeatSceneImage from './assets/stage5-jurdi-defeat-scene-cutout.png';
-import stage6DefeatSceneImage from './assets/stage6-defeat-scene-cutout.png';
+import stage3DefeatSceneImage from './assets/stage3-defeat-scene-cutout.webp';
+import stage3GamjaanigumaDefeatSceneImage from './assets/stage3-gamjaaniguma-defeat-scene-cutout.webp';
+import stage4DefeatSceneImage from './assets/stage4-defeat-scene-cutout.webp';
+import stage4BaekgeurigoaDefeatSceneImage from './assets/stage4-baekgeurigoa-defeat-scene-cutout.webp';
+import stage5DefeatSceneImage from './assets/stage5-defeat-scene-cutout.webp';
+import stage5JurdiDefeatSceneImage from './assets/stage5-jurdi-defeat-scene-cutout.webp';
+import stage6DefeatSceneImage from './assets/stage6-defeat-scene-cutout.webp';
 import stage6AnheunhanDefeatSceneImage from './assets/stage6-anheunhan-defeat-scene.jpeg';
-import stage7DefeatSceneImage from './assets/stage7-defeat-scene-cutout.png';
-import stage7ArnyaDefeatSceneImage from './assets/stage7-arnya-defeat-scene-cutout.png';
-import stage8DefeatSceneImage from './assets/stage8-defeat-scene-cutout.png';
-import stage9DefeatSceneImage from './assets/stage9-defeat-scene-cutout.png';
+import stage7DefeatSceneImage from './assets/stage7-defeat-scene-cutout.webp';
+import stage7ArnyaDefeatSceneImage from './assets/stage7-arnya-defeat-scene-cutout.webp';
+import stage8DefeatSceneImage from './assets/stage8-defeat-scene-cutout.webp';
+import stage9DefeatSceneImage from './assets/stage9-defeat-scene-cutout.webp';
 import playerAttackImage from './assets/player-attack.png';
 import playerBabyPotatoAttackImage from './assets/player-baby-potato-attack.png';
 import playerBabyPotatoDefaultImage from './assets/player-baby-potato-default.png';
 import playerBabyPotatoHitImage from './assets/player-baby-potato-hit.png';
 import playerDefaultImage from './assets/player-default.png';
 import playerHitImage from './assets/player-hit.png';
-import playerChampionAttackImage from './assets/player-champion-attack.png';
-import playerChampionDefaultImage from './assets/player-champion-default.png';
-import playerChampionHitImage from './assets/player-champion-hit.png';
-import playerWizardAttackImage from './assets/player-wizard-attack.png';
-import playerWizardDefaultImage from './assets/player-wizard-default.png';
-import playerWizardHitImage from './assets/player-wizard-hit.png';
-import playerCapeAttackImage from './assets/player-cape-attack.png';
-import playerCapeDefaultImage from './assets/player-cape-default.png';
-import playerCapeHitImage from './assets/player-cape-hit.png';
-import playerCatpajamaAttackImage from './assets/player-catpajama-attack.png';
-import playerCatpajamaDefaultImage from './assets/player-catpajama-default.png';
-import playerCatpajamaHitImage from './assets/player-catpajama-hit.png';
-import playerCatAttackImage from './assets/player-cat-attack.png';
-import playerCatDefaultImage from './assets/player-cat-default.png';
+import playerChampionAttackImage from './assets/player-champion-attack.webp';
+import playerChampionDefaultImage from './assets/player-champion-default.webp';
+import playerChampionHitImage from './assets/player-champion-hit.webp';
+import playerWizardAttackImage from './assets/player-wizard-attack.webp';
+import playerWizardDefaultImage from './assets/player-wizard-default.webp';
+import playerWizardHitImage from './assets/player-wizard-hit.webp';
+import playerCapeAttackImage from './assets/player-cape-attack.webp';
+import playerCapeDefaultImage from './assets/player-cape-default.webp';
+import playerCapeHitImage from './assets/player-cape-hit.webp';
+import playerCatpajamaAttackImage from './assets/player-catpajama-attack.webp';
+import playerCatpajamaDefaultImage from './assets/player-catpajama-default.webp';
+import playerCatpajamaHitImage from './assets/player-catpajama-hit.webp';
+import playerCatAttackImage from './assets/player-cat-attack.webp';
+import playerCatDefaultImage from './assets/player-cat-default.webp';
 import playerCatHitImage from './assets/player-cat-hit.png';
 import playerChefAttackImage from './assets/player-chef-attack.png';
 import playerChefDefaultImage from './assets/player-chef-default.png';
-import playerChefHitImage from './assets/player-chef-hit.png';
+import playerChefHitImage from './assets/player-chef-hit.webp';
 import playerDetectiveAttackImage from './assets/player-detective-attack.png';
 import playerDetectiveDefaultImage from './assets/player-detective-default.png';
 import playerDetectiveHitImage from './assets/player-detective-hit.png';
@@ -54,15 +54,15 @@ import playerDuckHitImage from './assets/player-duck-hit.png';
 import playerEraserAttackImage from './assets/player-eraser-attack.png';
 import playerEraserDefaultImage from './assets/player-eraser-default.png';
 import playerEraserHitImage from './assets/player-eraser-hit.png';
-import playerFairyAttackImage from './assets/player-fairy-attack.png';
+import playerFairyAttackImage from './assets/player-fairy-attack.webp';
 import playerFairyDefaultImage from './assets/player-fairy-default.png';
-import playerFairyHitImage from './assets/player-fairy-hit.png';
+import playerFairyHitImage from './assets/player-fairy-hit.webp';
 import playerFoxAttackImage from './assets/player-fox-attack.png';
 import playerFoxDefaultImage from './assets/player-fox-default.png';
 import playerFoxHitImage from './assets/player-fox-hit.png';
-import playerFirefighterAttackImage from './assets/player-firefighter-attack.png';
+import playerFirefighterAttackImage from './assets/player-firefighter-attack.webp';
 import playerFirefighterDefaultImage from './assets/player-firefighter-default.png';
-import playerFirefighterHitImage from './assets/player-firefighter-hit.png';
+import playerFirefighterHitImage from './assets/player-firefighter-hit.webp';
 import playerFishAttackImage from './assets/player-fish-attack.png';
 import playerFishDefaultImage from './assets/player-fish-default.png';
 import playerFishHitImage from './assets/player-fish-hit.png';
@@ -72,12 +72,12 @@ import playerGhostHitImage from './assets/player-ghost-hit.png';
 import playerGogumaAttackImage from './assets/player-goguma-attack.png';
 import playerGogumaDefaultImage from './assets/player-goguma-default.png';
 import playerGogumaHitImage from './assets/player-goguma-hit.png';
-import playerGumihoAttackImage from './assets/player-gumiho-attack.png';
-import playerGumihoDefaultImage from './assets/player-gumiho-default.png';
+import playerGumihoAttackImage from './assets/player-gumiho-attack.webp';
+import playerGumihoDefaultImage from './assets/player-gumiho-default.webp';
 import playerGumihoHitImage from './assets/player-gumiho-hit.png';
-import playerHeartwizardAttackImage from './assets/player-heartwizard-attack.png';
-import playerHeartwizardDefaultImage from './assets/player-heartwizard-default.png';
-import playerHeartwizardHitImage from './assets/player-heartwizard-hit.png';
+import playerHeartwizardAttackImage from './assets/player-heartwizard-attack.webp';
+import playerHeartwizardDefaultImage from './assets/player-heartwizard-default.webp';
+import playerHeartwizardHitImage from './assets/player-heartwizard-hit.webp';
 import playerHoneyAttackImage from './assets/player-honey-attack.png';
 import playerHoneyDefaultImage from './assets/player-honey-default.png';
 import playerHoneyHitImage from './assets/player-honey-hit.png';
@@ -87,9 +87,9 @@ import playerHamsterHitImage from './assets/player-hamster-hit.png';
 import playerKnightAttackImage from './assets/player-knight-attack.png';
 import playerKnightDefaultImage from './assets/player-knight-default.png';
 import playerKnightHitImage from './assets/player-knight-hit.png';
-import playerPatissierAttackImage from './assets/player-patissier-attack.png';
+import playerPatissierAttackImage from './assets/player-patissier-attack.webp';
 import playerPatissierDefaultImage from './assets/player-patissier-default.png';
-import playerPatissierHitImage from './assets/player-patissier-hit.png';
+import playerPatissierHitImage from './assets/player-patissier-hit.webp';
 import playerPrincessAttackImage from './assets/player-princess-attack.png';
 import playerPrincessDefaultImage from './assets/player-princess-default.png';
 import playerPrincessHitImage from './assets/player-princess-hit.png';
@@ -98,13 +98,13 @@ import playerPizzaDefaultImage from './assets/player-pizza-default.png';
 import playerPizzaHitImage from './assets/player-pizza-hit.png';
 import playerPirateAttackImage from './assets/player-pirate-attack.png';
 import playerPirateDefaultImage from './assets/player-pirate-default.png';
-import playerPirateHitImage from './assets/player-pirate-hit.png';
+import playerPirateHitImage from './assets/player-pirate-hit.webp';
 import playerPoliceAttackImage from './assets/player-police-attack.png';
 import playerPoliceDefaultImage from './assets/player-police-default.png';
 import playerPoliceHitImage from './assets/player-police-hit.png';
-import playerRainbowartistAttackImage from './assets/player-rainbowartist-attack.png';
-import playerRainbowartistDefaultImage from './assets/player-rainbowartist-default.png';
-import playerRainbowartistHitImage from './assets/player-rainbowartist-hit.png';
+import playerRainbowartistAttackImage from './assets/player-rainbowartist-attack.webp';
+import playerRainbowartistDefaultImage from './assets/player-rainbowartist-default.webp';
+import playerRainbowartistHitImage from './assets/player-rainbowartist-hit.webp';
 import playerRibbonAttackImage from './assets/player-ribbon-attack.png';
 import playerRibbonDefaultImage from './assets/player-ribbon-default.png';
 import playerRibbonHitImage from './assets/player-ribbon-hit.png';
@@ -144,24 +144,24 @@ import playerDiverHitImage from './assets/player-diver-hit.png';
 import playerWingAttackImage from './assets/player-wing-attack.png';
 import playerWingDefaultImage from './assets/player-wing-default.png';
 import playerWingHitImage from './assets/player-wing-hit.png';
-import playerScientistAttackImage from './assets/player-scientist-attack.png';
-import playerScientistDefaultImage from './assets/player-scientist-default.png';
-import playerScientistHitImage from './assets/player-scientist-hit.png';
-import playerRainbowDyeAttackImage from './assets/player-rainbow-dye-attack.png';
-import playerRainbowDyeDefaultImage from './assets/player-rainbow-dye-default.png';
-import playerRainbowDyeHitImage from './assets/player-rainbow-dye-hit.png';
-import playerTaegeukgiAttackImage from './assets/player-taegeukgi-attack.png';
-import playerTaegeukgiDefaultImage from './assets/player-taegeukgi-default.png';
-import playerTaegeukgiHitImage from './assets/player-taegeukgi-hit.png';
-import playerTireAttackImage from './assets/player-tire-attack.png';
-import playerTireDefaultImage from './assets/player-tire-default.png';
-import playerTireHitImage from './assets/player-tire-hit.png';
-import playerBaldAttackImage from './assets/player-bald-attack.png';
+import playerScientistAttackImage from './assets/player-scientist-attack.webp';
+import playerScientistDefaultImage from './assets/player-scientist-default.webp';
+import playerScientistHitImage from './assets/player-scientist-hit.webp';
+import playerRainbowDyeAttackImage from './assets/player-rainbow-dye-attack.webp';
+import playerRainbowDyeDefaultImage from './assets/player-rainbow-dye-default.webp';
+import playerRainbowDyeHitImage from './assets/player-rainbow-dye-hit.webp';
+import playerTaegeukgiAttackImage from './assets/player-taegeukgi-attack.webp';
+import playerTaegeukgiDefaultImage from './assets/player-taegeukgi-default.webp';
+import playerTaegeukgiHitImage from './assets/player-taegeukgi-hit.webp';
+import playerTireAttackImage from './assets/player-tire-attack.webp';
+import playerTireDefaultImage from './assets/player-tire-default.webp';
+import playerTireHitImage from './assets/player-tire-hit.webp';
+import playerBaldAttackImage from './assets/player-bald-attack.webp';
 import playerBaldDefaultImage from './assets/player-bald-default.png';
-import playerBaldHitImage from './assets/player-bald-hit.png';
-import playerMohawkAttackImage from './assets/player-mohawk-attack.png';
+import playerBaldHitImage from './assets/player-bald-hit.webp';
+import playerMohawkAttackImage from './assets/player-mohawk-attack.webp';
 import playerMohawkDefaultImage from './assets/player-mohawk-default.png';
-import playerMohawkHitImage from './assets/player-mohawk-hit.png';
+import playerMohawkHitImage from './assets/player-mohawk-hit.webp';
 import playerTigerAttackImage from './assets/player-tiger-attack.png';
 import playerTigerDefaultImage from './assets/player-tiger-default.png';
 import playerTigerHitImage from './assets/player-tiger-hit.png';
@@ -205,122 +205,122 @@ import playerRobotAttackImage from './assets/player-robot-attack.png';
 import playerRobotDefaultImage from './assets/player-robot-default.png';
 import playerRobotHitImage from './assets/player-robot-hit.png';
 import opponentLevel1AttackImage from './assets/opponent-level1-attack.png';
-import opponentLevel1ChurusigiAttackImage from './assets/opponent-level1-churusigi-attack-cutout.png';
+import opponentLevel1ChurusigiAttackImage from './assets/opponent-level1-churusigi-attack-cutout.webp';
 import opponentLevel1DefaultImage from './assets/opponent-level1-default.png';
-import opponentLevel1ChurusigiDefaultImage from './assets/opponent-level1-churusigi-default-cutout.png';
+import opponentLevel1ChurusigiDefaultImage from './assets/opponent-level1-churusigi-default-cutout.webp';
 import opponentLevel1HitImage from './assets/opponent-level1-hit.png';
-import opponentLevel1ChurusigiHitImage from './assets/opponent-level1-churusigi-hit-cutout.png';
+import opponentLevel1ChurusigiHitImage from './assets/opponent-level1-churusigi-hit-cutout.webp';
 import opponentLevel2AttackImage from './assets/opponent-level2-attack.png';
-import opponentLevel2JjangpalAttackImage from './assets/opponent-level2-jjangpal-attack-cutout.png';
+import opponentLevel2JjangpalAttackImage from './assets/opponent-level2-jjangpal-attack-cutout.webp';
 import opponentLevel2DefaultImage from './assets/opponent-level2-default.png';
-import opponentLevel2JjangpalDefaultImage from './assets/opponent-level2-jjangpal-default-cutout.png';
+import opponentLevel2JjangpalDefaultImage from './assets/opponent-level2-jjangpal-default-cutout.webp';
 import opponentLevel2HitImage from './assets/opponent-level2-hit.png';
-import opponentLevel2JjangpalHitImage from './assets/opponent-level2-jjangpal-hit-cutout.png';
+import opponentLevel2JjangpalHitImage from './assets/opponent-level2-jjangpal-hit-cutout.webp';
 import opponentLevel3AttackImage from './assets/opponent-level3-attack.png';
-import opponentLevel3GamjaanigumaAttackImage from './assets/opponent-level3-gamjaaniguma-attack-cutout.png';
+import opponentLevel3GamjaanigumaAttackImage from './assets/opponent-level3-gamjaaniguma-attack-cutout.webp';
 import opponentLevel3DefaultImage from './assets/opponent-level3-default.png';
-import opponentLevel3GamjaanigumaDefaultImage from './assets/opponent-level3-gamjaaniguma-default-cutout.png';
+import opponentLevel3GamjaanigumaDefaultImage from './assets/opponent-level3-gamjaaniguma-default-cutout.webp';
 import opponentLevel3HitImage from './assets/opponent-level3-hit.png';
-import opponentLevel3GamjaanigumaHitImage from './assets/opponent-level3-gamjaaniguma-hit-cutout.png';
+import opponentLevel3GamjaanigumaHitImage from './assets/opponent-level3-gamjaaniguma-hit-cutout.webp';
 import opponentLevel4AttackImage from './assets/opponent-level4-attack.png';
-import opponentLevel4BaekgeurigoaAttackImage from './assets/opponent-level4-baekgeurigoa-attack-cutout.png';
+import opponentLevel4BaekgeurigoaAttackImage from './assets/opponent-level4-baekgeurigoa-attack-cutout.webp';
 import opponentLevel4DefaultImage from './assets/opponent-level4-default.png';
-import opponentLevel4BaekgeurigoaDefaultImage from './assets/opponent-level4-baekgeurigoa-default-cutout.png';
+import opponentLevel4BaekgeurigoaDefaultImage from './assets/opponent-level4-baekgeurigoa-default-cutout.webp';
 import opponentLevel4HitImage from './assets/opponent-level4-hit.png';
-import opponentLevel4BaekgeurigoaHitImage from './assets/opponent-level4-baekgeurigoa-hit-cutout.png';
+import opponentLevel4BaekgeurigoaHitImage from './assets/opponent-level4-baekgeurigoa-hit-cutout.webp';
 import opponentLevel5AttackImage from './assets/opponent-level5-attack.png';
-import opponentLevel5JurdiAttackImage from './assets/opponent-level5-jurdi-attack-cutout.png';
+import opponentLevel5JurdiAttackImage from './assets/opponent-level5-jurdi-attack-cutout.webp';
 import opponentLevel5DefaultImage from './assets/opponent-level5-default.png';
-import opponentLevel5JurdiDefaultImage from './assets/opponent-level5-jurdi-default-cutout.png';
+import opponentLevel5JurdiDefaultImage from './assets/opponent-level5-jurdi-default-cutout.webp';
 import opponentLevel5HitImage from './assets/opponent-level5-hit.png';
-import opponentLevel5JurdiHitImage from './assets/opponent-level5-jurdi-hit-cutout.png';
+import opponentLevel5JurdiHitImage from './assets/opponent-level5-jurdi-hit-cutout.webp';
 import opponentLevel6AttackImage from './assets/opponent-level6-attack.png';
-import opponentLevel6AnheunhanAttackImage from './assets/opponent-level6-anheunhan-attack-cutout.png';
+import opponentLevel6AnheunhanAttackImage from './assets/opponent-level6-anheunhan-attack-cutout.webp';
 import opponentLevel6DefaultImage from './assets/opponent-level6-default.png';
-import opponentLevel6AnheunhanDefaultImage from './assets/opponent-level6-anheunhan-default-cutout.png';
+import opponentLevel6AnheunhanDefaultImage from './assets/opponent-level6-anheunhan-default-cutout.webp';
 import opponentLevel6HitImage from './assets/opponent-level6-hit.png';
-import opponentLevel6AnheunhanHitImage from './assets/opponent-level6-anheunhan-hit-cutout.png';
+import opponentLevel6AnheunhanHitImage from './assets/opponent-level6-anheunhan-hit-cutout.webp';
 import opponentLevel7AttackImage from './assets/opponent-level7-attack.png';
-import opponentLevel7ArnyaAttackImage from './assets/opponent-level7-arnya-attack-cutout.png';
+import opponentLevel7ArnyaAttackImage from './assets/opponent-level7-arnya-attack-cutout.webp';
 import opponentLevel7DefaultImage from './assets/opponent-level7-default.png';
-import opponentLevel7ArnyaDefaultImage from './assets/opponent-level7-arnya-default-cutout.png';
+import opponentLevel7ArnyaDefaultImage from './assets/opponent-level7-arnya-default-cutout.webp';
 import opponentLevel7HitImage from './assets/opponent-level7-hit.png';
-import opponentLevel7ArnyaHitImage from './assets/opponent-level7-arnya-hit-cutout.png';
+import opponentLevel7ArnyaHitImage from './assets/opponent-level7-arnya-hit-cutout.webp';
 import opponentLevel8AttackImage from './assets/opponent-level8-attack.png';
 import opponentLevel8DefaultImage from './assets/opponent-level8-default.png';
 import opponentLevel8HitImage from './assets/opponent-level8-hit.png';
-import unit1Level1OlrapoAttackImage from './assets/unit1-level1-olrapo-attack.png';
-import unit1Level1OlrapoDefaultImage from './assets/unit1-level1-olrapo-default.png';
+import unit1Level1OlrapoAttackImage from './assets/unit1-level1-olrapo-attack.webp';
+import unit1Level1OlrapoDefaultImage from './assets/unit1-level1-olrapo-default.webp';
 import unit1Level1OlrapoDefeatSceneImage from './assets/unit1-level1-olrapo-defeat-scene.jpeg';
-import unit1Level1OlrapoHitImage from './assets/unit1-level1-olrapo-hit.png';
-import unit1Level2MarimarioAttackImage from './assets/unit1-level2-marimario-attack.png';
-import unit1Level2MarimarioDefaultImage from './assets/unit1-level2-marimario-default.png';
+import unit1Level1OlrapoHitImage from './assets/unit1-level1-olrapo-hit.webp';
+import unit1Level2MarimarioAttackImage from './assets/unit1-level2-marimario-attack.webp';
+import unit1Level2MarimarioDefaultImage from './assets/unit1-level2-marimario-default.webp';
 import unit1Level2MarimarioDefeatSceneImage from './assets/unit1-level2-marimario-defeat-scene.jpeg';
-import unit1Level2MarimarioHitImage from './assets/unit1-level2-marimario-hit.png';
-import unit1Level3HoppangboyAttackImage from './assets/unit1-level3-hoppangboy-attack.png';
-import unit1Level3HoppangboyDefaultImage from './assets/unit1-level3-hoppangboy-default.png';
+import unit1Level2MarimarioHitImage from './assets/unit1-level2-marimario-hit.webp';
+import unit1Level3HoppangboyAttackImage from './assets/unit1-level3-hoppangboy-attack.webp';
+import unit1Level3HoppangboyDefaultImage from './assets/unit1-level3-hoppangboy-default.webp';
 import unit1Level3HoppangboyDefeatSceneImage from './assets/unit1-level3-hoppangboy-defeat-scene.jpeg';
-import unit1Level3HoppangboyHitImage from './assets/unit1-level3-hoppangboy-hit.png';
-import unit1Level4DogPigToastAttackImage from './assets/unit1-level4-dog-pig-toast-attack.png';
-import unit1Level4DogPigToastDefaultImage from './assets/unit1-level4-dog-pig-toast-default.png';
+import unit1Level3HoppangboyHitImage from './assets/unit1-level3-hoppangboy-hit.webp';
+import unit1Level4DogPigToastAttackImage from './assets/unit1-level4-dog-pig-toast-attack.webp';
+import unit1Level4DogPigToastDefaultImage from './assets/unit1-level4-dog-pig-toast-default.webp';
 import unit1Level4DogPigToastDefeatSceneImage from './assets/unit1-level4-dog-pig-toast-defeat-scene.jpeg';
-import unit1Level4DogPigToastHitImage from './assets/unit1-level4-dog-pig-toast-hit.png';
-import unit1Level5PenguinsuAttackImage from './assets/unit1-level5-penguinsu-attack.png';
-import unit1Level5PenguinsuDefaultImage from './assets/unit1-level5-penguinsu-default.png';
+import unit1Level4DogPigToastHitImage from './assets/unit1-level4-dog-pig-toast-hit.webp';
+import unit1Level5PenguinsuAttackImage from './assets/unit1-level5-penguinsu-attack.webp';
+import unit1Level5PenguinsuDefaultImage from './assets/unit1-level5-penguinsu-default.webp';
 import unit1Level5PenguinsuDefeatSceneImage from './assets/unit1-level5-penguinsu-defeat-scene.jpeg';
-import unit1Level5PenguinsuHitImage from './assets/unit1-level5-penguinsu-hit.png';
-import unit1Level6MetamonAttackImage from './assets/unit1-level6-metamon-attack.png';
-import unit1Level6MetamonDefaultImage from './assets/unit1-level6-metamon-default.png';
+import unit1Level5PenguinsuHitImage from './assets/unit1-level5-penguinsu-hit.webp';
+import unit1Level6MetamonAttackImage from './assets/unit1-level6-metamon-attack.webp';
+import unit1Level6MetamonDefaultImage from './assets/unit1-level6-metamon-default.webp';
 import unit1Level6MetamonDefeatSceneImage from './assets/unit1-level6-metamon-defeat-scene.jpeg';
-import unit1Level6MetamonHitImage from './assets/unit1-level6-metamon-hit.png';
-import unit1Level6MetamonTransformImage from './assets/unit1-level6-metamon-transform.png';
-import unit1Level7MetagomaAttackImage from './assets/unit1-level7-metagoma-attack.png';
-import unit1Level7MetagomaDefaultImage from './assets/unit1-level7-metagoma-default.png';
+import unit1Level6MetamonHitImage from './assets/unit1-level6-metamon-hit.webp';
+import unit1Level6MetamonTransformImage from './assets/unit1-level6-metamon-transform.webp';
+import unit1Level7MetagomaAttackImage from './assets/unit1-level7-metagoma-attack.webp';
+import unit1Level7MetagomaDefaultImage from './assets/unit1-level7-metagoma-default.webp';
 import unit1Level7MetagomaDefeatSceneImage from './assets/unit1-level7-metagoma-defeat-scene.jpeg';
-import unit1Level7MetagomaHitImage from './assets/unit1-level7-metagoma-hit.png';
+import unit1Level7MetagomaHitImage from './assets/unit1-level7-metagoma-hit.webp';
 import unit1Level8CaterpillarAttackImage from './assets/unit1-level8-caterpillar-attack.png';
 import unit1Level8CaterpillarDefaultImage from './assets/unit1-level8-caterpillar-default.png';
-import unit1Level8CaterpillarDefeatSceneImage from './assets/unit1-level8-caterpillar-defeat-scene.png';
+import unit1Level8CaterpillarDefeatSceneImage from './assets/unit1-level8-caterpillar-defeat-scene.webp';
 import unit1Level8CaterpillarHitImage from './assets/unit1-level8-caterpillar-hit.png';
 import opponentLevel9AttackImage from './assets/opponent-level9-attack.png';
 import opponentLevel9DefaultImage from './assets/opponent-level9-default.png';
 import opponentLevel9HitImage from './assets/opponent-level9-hit.png';
 import unit1Level9ButterflyAttackImage from './assets/unit1-level9-butterfly-attack.png';
 import unit1Level9ButterflyDefaultImage from './assets/unit1-level9-butterfly-default.png';
-import unit1Level9ButterflyDefeatSceneImage from './assets/unit1-level9-butterfly-defeat-scene.png';
+import unit1Level9ButterflyDefeatSceneImage from './assets/unit1-level9-butterfly-defeat-scene.webp';
 import unit1Level9ButterflyHitImage from './assets/unit1-level9-butterfly-hit.png';
-import unit3Level1YorsiAttackImage from './assets/unit3-level1-yorsi-attack.png';
-import unit3Level1YorsiDefaultImage from './assets/unit3-level1-yorsi-default.png';
-import unit3Level1YorsiDefeatSceneImage from './assets/unit3-level1-yorsi-defeat-scene.png';
-import unit3Level1YorsiHitImage from './assets/unit3-level1-yorsi-hit.png';
-import unit3Level2JjeojjeomiAttackImage from './assets/unit3-level2-jjeojjeomi-attack.png';
-import unit3Level2JjeojjeomiDefaultImage from './assets/unit3-level2-jjeojjeomi-default.png';
-import unit3Level2JjeojjeomiDefeatSceneImage from './assets/unit3-level2-jjeojjeomi-defeat-scene.png';
-import unit3Level2JjeojjeomiHitImage from './assets/unit3-level2-jjeojjeomi-hit.png';
-import unit3Level3BbangAttackImage from './assets/unit3-level3-bbang-attack.png';
-import unit3Level3BbangDefaultImage from './assets/unit3-level3-bbang-default.png';
-import unit3Level3BbangDefeatSceneImage from './assets/unit3-level3-bbang-defeat-scene.png';
-import unit3Level3BbangHitImage from './assets/unit3-level3-bbang-hit.png';
-import unit3Level4HeartpingAttackImage from './assets/unit3-level4-heartping-attack.png';
-import unit3Level4HeartpingDefaultImage from './assets/unit3-level4-heartping-default.png';
-import unit3Level4HeartpingDefeatSceneImage from './assets/unit3-level4-heartping-defeat-scene.png';
-import unit3Level4HeartpingHitImage from './assets/unit3-level4-heartping-hit.png';
-import unit3Level5TraleroAttackImage from './assets/unit3-level5-tralero-attack.png';
-import unit3Level5TraleroDefaultImage from './assets/unit3-level5-tralero-default.png';
-import unit3Level5TraleroDefeatSceneImage from './assets/unit3-level5-tralero-defeat-scene.png';
-import unit3Level5TraleroHitImage from './assets/unit3-level5-tralero-hit.png';
-import unit3Level6DeongdeongiDetectiveAttackImage from './assets/unit3-level6-deongdeongi-detective-attack.png';
-import unit3Level6DeongdeongiDetectiveDefaultImage from './assets/unit3-level6-deongdeongi-detective-default.png';
-import unit3Level6DeongdeongiDetectiveDefeatSceneImage from './assets/unit3-level6-deongdeongi-detective-defeat-scene.png';
-import unit3Level6DeongdeongiDetectiveHitImage from './assets/unit3-level6-deongdeongi-detective-hit.png';
-import unit3Level7MochiengelAttackImage from './assets/unit3-level7-mochiengel-attack.png';
-import unit3Level7MochiengelDefaultImage from './assets/unit3-level7-mochiengel-default.png';
-import unit3Level7MochiengelDefeatSceneImage from './assets/unit3-level7-mochiengel-defeat-scene.png';
-import unit3Level7MochiengelHitImage from './assets/unit3-level7-mochiengel-hit.png';
-import unit3Level8LabulabuAttackImage from './assets/unit3-level8-labulabu-attack.png';
-import unit3Level8LabulabuDefaultImage from './assets/unit3-level8-labulabu-default.png';
-import unit3Level8LabulabuDefeatSceneImage from './assets/unit3-level8-labulabu-defeat-scene.png';
-import unit3Level8LabulabuHitImage from './assets/unit3-level8-labulabu-hit.png';
+import unit3Level1YorsiAttackImage from './assets/unit3-level1-yorsi-attack.webp';
+import unit3Level1YorsiDefaultImage from './assets/unit3-level1-yorsi-default.webp';
+import unit3Level1YorsiDefeatSceneImage from './assets/unit3-level1-yorsi-defeat-scene.webp';
+import unit3Level1YorsiHitImage from './assets/unit3-level1-yorsi-hit.webp';
+import unit3Level2JjeojjeomiAttackImage from './assets/unit3-level2-jjeojjeomi-attack.webp';
+import unit3Level2JjeojjeomiDefaultImage from './assets/unit3-level2-jjeojjeomi-default.webp';
+import unit3Level2JjeojjeomiDefeatSceneImage from './assets/unit3-level2-jjeojjeomi-defeat-scene.webp';
+import unit3Level2JjeojjeomiHitImage from './assets/unit3-level2-jjeojjeomi-hit.webp';
+import unit3Level3BbangAttackImage from './assets/unit3-level3-bbang-attack.webp';
+import unit3Level3BbangDefaultImage from './assets/unit3-level3-bbang-default.webp';
+import unit3Level3BbangDefeatSceneImage from './assets/unit3-level3-bbang-defeat-scene.webp';
+import unit3Level3BbangHitImage from './assets/unit3-level3-bbang-hit.webp';
+import unit3Level4HeartpingAttackImage from './assets/unit3-level4-heartping-attack.webp';
+import unit3Level4HeartpingDefaultImage from './assets/unit3-level4-heartping-default.webp';
+import unit3Level4HeartpingDefeatSceneImage from './assets/unit3-level4-heartping-defeat-scene.webp';
+import unit3Level4HeartpingHitImage from './assets/unit3-level4-heartping-hit.webp';
+import unit3Level5TraleroAttackImage from './assets/unit3-level5-tralero-attack.webp';
+import unit3Level5TraleroDefaultImage from './assets/unit3-level5-tralero-default.webp';
+import unit3Level5TraleroDefeatSceneImage from './assets/unit3-level5-tralero-defeat-scene.webp';
+import unit3Level5TraleroHitImage from './assets/unit3-level5-tralero-hit.webp';
+import unit3Level6DeongdeongiDetectiveAttackImage from './assets/unit3-level6-deongdeongi-detective-attack.webp';
+import unit3Level6DeongdeongiDetectiveDefaultImage from './assets/unit3-level6-deongdeongi-detective-default.webp';
+import unit3Level6DeongdeongiDetectiveDefeatSceneImage from './assets/unit3-level6-deongdeongi-detective-defeat-scene.webp';
+import unit3Level6DeongdeongiDetectiveHitImage from './assets/unit3-level6-deongdeongi-detective-hit.webp';
+import unit3Level7MochiengelAttackImage from './assets/unit3-level7-mochiengel-attack.webp';
+import unit3Level7MochiengelDefaultImage from './assets/unit3-level7-mochiengel-default.webp';
+import unit3Level7MochiengelDefeatSceneImage from './assets/unit3-level7-mochiengel-defeat-scene.webp';
+import unit3Level7MochiengelHitImage from './assets/unit3-level7-mochiengel-hit.webp';
+import unit3Level8LabulabuAttackImage from './assets/unit3-level8-labulabu-attack.webp';
+import unit3Level8LabulabuDefaultImage from './assets/unit3-level8-labulabu-default.webp';
+import unit3Level8LabulabuDefeatSceneImage from './assets/unit3-level8-labulabu-defeat-scene.webp';
+import unit3Level8LabulabuHitImage from './assets/unit3-level8-labulabu-hit.webp';
 import unit3Level9GimgangrimAttackImage from './assets/unit3-level9-gimgangrim-attack.jpeg';
 import unit3Level9GimgangrimDefaultImage from './assets/unit3-level9-gimgangrim-default.jpeg';
 import unit3Level9GimgangrimDefeatSceneImage from './assets/unit3-level9-gimgangrim-defeat-scene.jpeg';
@@ -338,6 +338,12 @@ import unit3Level12AkmagomaDefaultImage from './assets/unit3-level12-akmagoma-de
 import unit3Level12AkmagomaDefeatSceneImage from './assets/unit3-level12-akmagoma-defeat-scene.jpeg';
 import unit3Level12AkmagomaHitImage from './assets/unit3-level12-akmagoma-hit.jpeg';
 import { installReadingActivityBlocker } from './readingActivityBlocker';
+
+const VisualCalculator = lazy(() =>
+  import('./components/VisualCalculator').then((module) => ({
+    default: module.VisualCalculator,
+  })),
+);
 
 installReadingActivityBlocker();
 
@@ -16897,7 +16903,7 @@ function ShapeIdentifyProblemCard({
                 }
               `}</style>
               <foreignObject x="205" y="64" width="230" height="230" style={{ overflow: 'visible' }}>
-                <div xmlns="http://www.w3.org/1999/xhtml" className="fold-scene">
+                <div className="fold-scene">
                   <div className="fold-sheet">
                     <div className="fold-top-half" />
                     <div className="fold-panel fold-bottom-half">
@@ -20070,11 +20076,19 @@ export default function App() {
                     </div>
                   )}
                 >
-                  <VisualCalculator
-                    problemText={hintProblemText}
-                    onControlSound={playVisualControlSound}
-                    condensed={isCompactBattleViewport}
-                  />
+                  <Suspense
+                    fallback={
+                      <div className="flex min-h-0 flex-1 items-center justify-center rounded-3xl bg-sky-50 p-6 text-center text-lg font-black text-sky-800">
+                        힌트를 준비하고 있어요.
+                      </div>
+                    }
+                  >
+                    <VisualCalculator
+                      problemText={hintProblemText}
+                      onControlSound={playVisualControlSound}
+                      condensed={isCompactBattleViewport}
+                    />
+                  </Suspense>
                 </ErrorBoundary>
               ) : (
                 <motion.div

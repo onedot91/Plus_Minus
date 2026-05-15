@@ -1,13 +1,13 @@
 import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
-import { ErrorBoundary } from './components/ErrorBoundary.tsx';
+import {ErrorBoundary} from './components/ErrorBoundary.tsx';
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary
-      fallbackRender={({ error, resetError }) => (
+      fallbackRender={({error, resetError}) => (
         <div className="flex min-h-[100svh] items-center justify-center bg-slate-950 p-4 text-white">
           <div className="w-full max-w-xl rounded-[2rem] border border-rose-400/30 bg-slate-900 p-6 text-center shadow-[0_24px_80px_rgba(15,23,42,0.45)] sm:p-8">
             <h1 className="text-3xl font-black text-white sm:text-4xl">문제가 발생했어요</h1>

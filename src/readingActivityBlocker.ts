@@ -4,7 +4,7 @@ const READING_ACTIVITY_BLOCK_WINDOWS = [
 
 const BLOCKER_ELEMENT_ID = 'reading-activity-blocker';
 const BLOCKER_STYLE_ID = 'reading-activity-blocker-style';
-const BLOCKER_IMAGE_SRC = '/reading-activity-warning.png';
+const BLOCKER_IMAGE_SRC = '/reading-activity-warning.webp';
 
 type ReadingActivityBlockerWindow = Window & {
   __readingActivityBlockerCleanup?: () => void;
