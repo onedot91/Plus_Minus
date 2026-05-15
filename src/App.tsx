@@ -394,7 +394,7 @@ type BattleDifficulty = 'easy' | 'normal' | 'hard';
 
 type LearningUnitId = 'unit1' | 'unit2' | 'unit3';
 
-type ProblemKind = 'equation' | 'story' | 'builder' | 'measurement' | 'distanceMap' | 'distanceWorksheet' | 'clockReading' | 'timeAddition' | 'shapeDraw' | 'shapeRain';
+type ProblemKind = 'equation' | 'story' | 'builder' | 'verticalBlank' | 'measurement' | 'distanceMap' | 'distanceWorksheet' | 'clockReading' | 'timeAddition' | 'shapeDraw' | 'shapeRain' | 'numberLineBox' | 'calculationErrorChoice';
 type MeasurementObjectKind =
   | 'seed'
   | 'rice'
@@ -433,6 +433,27 @@ interface BuilderTemplate extends BuilderProblemData {
   templateId: string;
 }
 
+interface VerticalBlankProblemData {
+  title: string;
+  instruction: string;
+  helperText: string;
+  op: '+' | '-';
+  topTemplate: string;
+  bottomTemplate: string;
+  resultTemplate: string;
+  slots: BuildSlotConfig[];
+  answers: Record<string, string>;
+}
+
+interface CalculationErrorChoiceProblemData {
+  question: string;
+  op: '+' | '-';
+  top: number;
+  bottom: number;
+  shownResult: number;
+  options: string[];
+}
+
 interface Problem {
   text: string;
   prompt: string;
@@ -442,6 +463,8 @@ interface Problem {
   requiresUnitSelection?: boolean;
   storyTable?: StoryPromptTableData;
   builder?: BuilderProblemData;
+  verticalBlank?: VerticalBlankProblemData;
+  calculationErrorChoice?: CalculationErrorChoiceProblemData;
   measurement?: MeasurementProblemData;
   distanceMap?: DistanceMapProblemData;
   distanceWorksheet?: DistanceWorksheetProblemData;
@@ -449,6 +472,7 @@ interface Problem {
   timeAddition?: TimeAdditionProblemData;
   shapeDraw?: ShapeDrawProblemData;
   shapeRain?: ShapeRainProblemData;
+  numberLineBox?: NumberLineBoxProblemData;
 }
 
 interface EstimationProblem {
@@ -1497,6 +1521,15 @@ interface StoryPromptTableData {
   rows: Array<{
     cells: string[];
   }>;
+}
+
+interface NumberLineBoxProblemData {
+  instruction: string;
+  operation: '+' | '-';
+  total: number;
+  leftPart: number;
+  rightPart: number;
+  answerPosition: 'total' | 'leftPart';
 }
 
 interface TimeAdditionProblemData {
@@ -4206,6 +4239,17 @@ function createBuilderSlot(id: string, label: string, min: number, max: number):
   };
 }
 
+function createVerticalBlankSlot(id: string, label: string, answer: string, min = 0, max = 9): BuildSlotConfig {
+  const digit = Number(answer);
+  return createBuilderSlot(id, label, Math.min(min, digit), Math.max(max, digit));
+}
+
+function replaceDigitWithSlot(value: number, index: number, slotId: string) {
+  const digits = String(value).split('');
+  digits[index] = `[${slotId}]`;
+  return digits.join('');
+}
+
 const previousBuilderTemplateIdByLevel: Partial<Record<number, string>> = {};
 
 function pickBuilderTemplate(level: number, templates: BuilderTemplate[]) {
@@ -6031,6 +6075,274 @@ function createPromptProblem(
   };
 }
 
+interface Unit2TableStoryProblemTemplate {
+  prompt: string;
+  answer: number;
+  answerUnit?: string;
+  table: StoryPromptTableData;
+}
+
+function createUnit2TableStoryProblem(level: number): Problem {
+  const level8TableProblems: Unit2TableStoryProblemTemplate[] = [
+    {
+      prompt: '공은지가 3일 동안 줄넘기를 한 횟수를 기록했습니다.\n줄넘기를 가장 많이 한 날의 횟수와 가장 적게 한 날의 횟수의 차를 구해 보세요.',
+      answer: 159,
+      table: {
+        headers: ['', '첫째 날', '둘째 날', '셋째 날'],
+        rows: [{ cells: ['횟수(번)', '547', '706', '654'] }],
+      },
+    },
+    {
+      prompt: '민준이가 3일 동안 책을 읽은 쪽수를 기록했습니다.\n가장 많이 읽은 날과 가장 적게 읽은 날의 쪽수 차를 구해 보세요.',
+      answer: 176,
+      table: {
+        headers: ['', '월요일', '화요일', '수요일'],
+        rows: [{ cells: ['쪽수(쪽)', '328', '504', '417'] }],
+      },
+    },
+    {
+      prompt: '세 반이 모은 우유갑 수를 표로 나타냈습니다.\n가장 많이 모은 반과 가장 적게 모은 반의 차를 구해 보세요.',
+      answer: 198,
+      table: {
+        headers: ['', '1반', '2반', '3반'],
+        rows: [{ cells: ['우유갑(개)', '642', '759', '561'] }],
+      },
+    },
+    {
+      prompt: '지아가 3번의 연습에서 받은 점수를 기록했습니다.\n가장 높은 점수와 가장 낮은 점수의 차를 구해 보세요.',
+      answer: 247,
+      table: {
+        headers: ['', '첫 번째', '두 번째', '세 번째'],
+        rows: [{ cells: ['점수(점)', '689', '812', '565'] }],
+      },
+    },
+    {
+      prompt: '세 가게에서 하루 동안 판 빵의 수를 조사했습니다.\n가장 많이 판 가게와 가장 적게 판 가게의 차를 구해 보세요.',
+      answer: 268,
+      table: {
+        headers: ['', '하늘빵집', '햇살빵집', '별빛빵집'],
+        rows: [{ cells: ['빵(개)', '735', '467', '618'] }],
+      },
+    },
+  ];
+
+  const level9TableProblems: Unit2TableStoryProblemTemplate[] = [
+    {
+      prompt: '영지는 유달산과 청계산에 다녀왔습니다.\n영지가 올라갔던 산의 높이를 모두 더하면 얼마나 될지 구해 보세요.',
+      answer: 843,
+      answerUnit: 'm',
+      table: {
+        headers: ['', '축령산', '유달산', '청계산', '팔봉산'],
+        rows: [{ cells: ['산의 높이(m)', '879', '228', '615', '302'] }],
+      },
+    },
+    {
+      prompt: '서준이는 토요일과 일요일에 각각 다른 도서관에 갔습니다.\n중앙도서관과 푸른도서관의 책 수를 모두 더하면 몇 권인지 구해 보세요.',
+      answer: 1338,
+      answerUnit: '권',
+      table: {
+        headers: ['', '중앙도서관', '햇살도서관', '푸른도서관', '별빛도서관'],
+        rows: [{ cells: ['책 수(권)', '746', '538', '592', '407'] }],
+      },
+    },
+    {
+      prompt: '체육대회에서 청팀과 백팀이 공 넣기를 했습니다.\n청팀과 백팀이 넣은 공의 수를 모두 더해 보세요.',
+      answer: 1075,
+      answerUnit: '개',
+      table: {
+        headers: ['', '청팀', '백팀', '홍팀', '초록팀'],
+        rows: [{ cells: ['공 수(개)', '486', '589', '347', '438'] }],
+      },
+    },
+    {
+      prompt: '수아네 학교에서 학년별로 모은 병뚜껑 수를 조사했습니다.\n3학년과 4학년이 모은 병뚜껑 수를 모두 더해 보세요.',
+      answer: 1286,
+      answerUnit: '개',
+      table: {
+        headers: ['', '1학년', '2학년', '3학년', '4학년'],
+        rows: [{ cells: ['병뚜껑(개)', '529', '604', '735', '551'] }],
+      },
+    },
+    {
+      prompt: '네 마을의 인구를 표로 나타냈습니다.\n꽃마을과 강마을의 인구를 모두 더해 보세요.',
+      answer: 1608,
+      answerUnit: '명',
+      table: {
+        headers: ['', '꽃마을', '별마을', '강마을', '숲마을'],
+        rows: [{ cells: ['인구(명)', '879', '642', '729', '518'] }],
+      },
+    },
+  ];
+
+  const problem = sample(level === 8 ? level8TableProblems : level9TableProblems);
+
+  return createPromptProblem(
+    problem.prompt,
+    problem.answer,
+    problem.answerUnit,
+    {
+      storyTable: problem.table,
+    },
+  );
+}
+
+interface CalculationErrorChoiceTemplate {
+  top: number;
+  bottom: number;
+  shownResult: number;
+  correctReason: string;
+  distractors: string[];
+}
+
+const CALCULATION_ERROR_SHARED_DISTRACTORS = [
+  '자릿수를 맞추지 않아서',
+  '계산 결과를 반대로 써서',
+  '일의 자리부터 계산하지 않아서',
+];
+
+function createCalculationErrorChoiceProblem(level: number): Problem {
+  const additionTemplates: CalculationErrorChoiceTemplate[] = [
+    {
+      top: 243,
+      bottom: 172,
+      shownResult: 315,
+      correctReason: '4+7=11인데 십의 자리에 1을 올려주지 않아서',
+      distractors: [
+        '2+1=3인데 300이라고 써서',
+        '200+100=300인데 30이라고 써서',
+        '3+2=5인데 일의 자리에 1을 올려주어서',
+      ],
+    },
+    {
+      top: 356,
+      bottom: 278,
+      shownResult: 534,
+      correctReason: '십의 자리 계산에서 생긴 1을 백의 자리에 올려주지 않아서',
+      distractors: [
+        '6+8=14인데 일의 자리에 4를 쓰지 않아서',
+        '5+7=12인데 십의 자리에 2를 쓰지 않아서',
+        '300+200=500인데 50이라고 써서',
+      ],
+    },
+    {
+      top: 468,
+      bottom: 257,
+      shownResult: 615,
+      correctReason: '받아올림을 하지 않고 각 자리의 일의 자리만 써서',
+      distractors: [
+        '8+7=15인데 십의 자리에 5를 올려주어서',
+        '6+5=11인데 일의 자리에 0을 써서',
+        '400+200=600을 계산하지 않아서',
+      ],
+    },
+    {
+      top: 185,
+      bottom: 346,
+      shownResult: 421,
+      correctReason: '5+6=11인데 십의 자리에 1을 올려주지 않아서',
+      distractors: [
+        '1+3=4인데 백의 자리에 4를 쓰지 않아서',
+        '8+4=12인데 십의 자리에 2를 쓰지 않아서',
+        '자릿수를 오른쪽으로 한 칸 밀려 써서',
+      ],
+    },
+    {
+      top: 527,
+      bottom: 248,
+      shownResult: 665,
+      correctReason: '십의 자리 받아올림을 백의 자리에 더하지 않아서',
+      distractors: [
+        '7+8=15인데 일의 자리에 5를 쓰지 않아서',
+        '2+4=6인데 십의 자리에 7을 써서',
+        '500+200=700인데 600이라고 써서',
+      ],
+    },
+  ];
+
+  const subtractionTemplates: CalculationErrorChoiceTemplate[] = [
+    {
+      top: 431,
+      bottom: 218,
+      shownResult: 223,
+      correctReason: '일의 자리에서 받아내린 뒤 십의 자리 수를 1 줄이지 않아서',
+      distractors: [
+        '1-8을 8-1로 계산해서',
+        '백의 자리 계산을 하지 않아서',
+        '자릿수를 맞추지 않아서',
+      ],
+    },
+    {
+      top: 725,
+      bottom: 382,
+      shownResult: 443,
+      correctReason: '십의 자리에서 받아내린 뒤 백의 자리 수를 1 줄이지 않아서',
+      distractors: [
+        '5-2=3인데 일의 자리에 4를 써서',
+        '2-8을 8-2로 계산해서',
+        '700-300=400을 계산하지 않아서',
+      ],
+    },
+    {
+      top: 614,
+      bottom: 278,
+      shownResult: 464,
+      correctReason: '작은 수에서 큰 수를 빼듯 계산해서',
+      distractors: [
+        '십의 자리에서 받아내림을 두 번 해서',
+        '6-2=4인데 백의 자리에 3을 써서',
+        '일의 자리 숫자를 쓰지 않아서',
+      ],
+    },
+    {
+      top: 853,
+      bottom: 467,
+      shownResult: 496,
+      correctReason: '십의 자리에서 받아내린 뒤 백의 자리 수를 1 줄이지 않아서',
+      distractors: [
+        '3-7을 7-3으로 계산해서',
+        '5-6을 6-5로 계산해서',
+        '자릿수를 맞추지 않아서',
+      ],
+    },
+    {
+      top: 562,
+      bottom: 349,
+      shownResult: 323,
+      correctReason: '일의 자리에서 받아내린 뒤 십의 자리 수를 1 줄이지 않아서',
+      distractors: [
+        '2-9를 9-2로 계산해서',
+        '5-3=2인데 백의 자리에 3을 써서',
+        '계산 결과를 위에 써서',
+      ],
+    },
+  ];
+
+  const template = sampleAvoidingImmediateRepeat(
+    `unit2-calculation-error-choice-${level}`,
+    level === 3 ? additionTemplates : subtractionTemplates,
+  );
+  const options = shuffleValues([
+    template.correctReason,
+    ...shuffleValues([...template.distractors, ...CALCULATION_ERROR_SHARED_DISTRACTORS]).slice(0, 4),
+  ]);
+  const question = '보기의 계산이 틀린 이유는 무엇입니까?';
+
+  return {
+    text: `${template.top} ${level === 3 ? '+' : '-'} ${template.bottom}`,
+    prompt: buildNumberedOptionsPrompt(question, options),
+    answer: options.indexOf(template.correctReason) + 1,
+    kind: 'calculationErrorChoice',
+    calculationErrorChoice: {
+      question,
+      op: level === 3 ? '+' : '-',
+      top: template.top,
+      bottom: template.bottom,
+      shownResult: template.shownResult,
+      options,
+    },
+  };
+}
+
 function createMeasurementProblem({
   title,
   question,
@@ -7547,6 +7859,109 @@ function isFinalBuilderTurn(level: number, opponentHP: number) {
   return level <= 6 && opponentHP <= FINAL_BUILDER_HP;
 }
 
+function createVerticalBlankProblem(level: number): Problem {
+  let baseProblem: Problem | null = null;
+  let expression: ReturnType<typeof parseProblemExpression> = null;
+
+  for (let attempt = 0; attempt < 300; attempt += 1) {
+    const candidate = generateRegularProblem(level);
+    const candidateExpression = parseProblemExpression(candidate.text);
+
+    if (!candidateExpression) {
+      continue;
+    }
+
+    const isUsableAddition = candidateExpression.op === '+' && candidate.answer >= 100 && candidate.answer <= 999;
+    const isUsableSubtraction = candidateExpression.op === '-' && candidate.answer >= 100;
+
+    if (isUsableAddition || isUsableSubtraction) {
+      baseProblem = candidate;
+      expression = candidateExpression;
+      break;
+    }
+  }
+
+  if (!baseProblem || !expression) {
+    return createBuilderProblem(level);
+  }
+
+  const left = expression.left;
+  const right = expression.right;
+  const result = baseProblem.answer;
+  const title = '알맞은 수 넣기';
+  const instruction = '빈칸에 알맞은 숫자를 넣어 세로셈을 완성하세요.';
+
+  if (expression.op === '+') {
+    const rightDigits = String(right);
+    const resultDigits = String(result);
+    const rightTensIndex = Math.max(0, rightDigits.length - 2);
+    const resultHundredsIndex = Math.max(0, resultDigits.length - 3);
+    const bottomAnswer = rightDigits[rightTensIndex] ?? '0';
+    const resultAnswer = resultDigits[resultHundredsIndex] ?? '0';
+    const verticalBlank: VerticalBlankProblemData = {
+      title,
+      instruction,
+      helperText: '덧셈 결과가 맞도록 빈칸 숫자를 찾아보세요.',
+      op: '+',
+      topTemplate: String(left),
+      bottomTemplate: replaceDigitWithSlot(right, rightTensIndex, 'a'),
+      resultTemplate: replaceDigitWithSlot(result, resultHundredsIndex, 'b'),
+      slots: [
+        createVerticalBlankSlot('a', '아랫수의 십의 자리', bottomAnswer),
+        createVerticalBlankSlot('b', '계산 결과의 백의 자리', resultAnswer),
+      ],
+      answers: {
+        a: bottomAnswer,
+        b: resultAnswer,
+      },
+    };
+
+    return {
+      text: `${left} + ${right}`,
+      prompt: instruction,
+      answer: result,
+      kind: 'verticalBlank',
+      verticalBlank,
+    };
+  }
+
+  const leftDigits = String(left);
+  const rightDigits = String(right);
+  const leftTensIndex = Math.max(0, leftDigits.length - 2);
+  const rightHundredsIndex = Math.max(0, rightDigits.length - 3);
+  const topAnswer = leftDigits[leftTensIndex] ?? '0';
+  const bottomAnswer = rightDigits[rightHundredsIndex] ?? '0';
+  const verticalBlank: VerticalBlankProblemData = {
+    title,
+    instruction,
+    helperText: '뺄셈 결과가 맞도록 빈칸 숫자를 찾아보세요.',
+    op: '-',
+    topTemplate: replaceDigitWithSlot(left, leftTensIndex, 'a'),
+    bottomTemplate: replaceDigitWithSlot(right, rightHundredsIndex, 'b'),
+    resultTemplate: String(result),
+    slots: [
+      createVerticalBlankSlot('a', '윗수의 십의 자리', topAnswer),
+      createVerticalBlankSlot('b', '아랫수의 백의 자리', bottomAnswer, 1, 9),
+    ],
+    answers: {
+      a: topAnswer,
+      b: bottomAnswer,
+    },
+  };
+
+  return {
+    text: `${left} - ${right}`,
+    prompt: instruction,
+    answer: result,
+    kind: 'verticalBlank',
+    verticalBlank,
+  };
+}
+
+function createUnit2FinalProblem(level: number) {
+  return Math.random() < 0.5 ? createVerticalBlankProblem(level) : createBuilderProblem(level);
+}
+
 function canOfferEstimation(unitId: LearningUnitId, opponentHP: number) {
   return unitId === 'unit2' && opponentHP > ESTIMATION_SAFE_HP;
 }
@@ -8362,6 +8777,119 @@ function generateRegularProblem(level: number, options: RegularProblemOptions = 
   return createEquationProblem(a, b, op, answer);
 }
 
+function createNumberLineBoxProblem(level: number): Problem {
+  const baseProblem = generateRegularProblem(level);
+  const expression = parseProblemExpression(baseProblem.text);
+
+  if (!expression) {
+    return baseProblem;
+  }
+
+  const numberLineBox: NumberLineBoxProblemData =
+    expression.op === '+'
+      ? {
+          instruction: '수직선을 보고 □ 안에 알맞은 수를 써 넣으세요.',
+          operation: '+',
+          total: baseProblem.answer,
+          leftPart: expression.left,
+          rightPart: expression.right,
+          answerPosition: 'total',
+        }
+      : {
+          instruction: '수직선을 보고 □ 안에 알맞은 수를 써 넣으세요.',
+          operation: '-',
+          total: expression.left,
+          leftPart: baseProblem.answer,
+          rightPart: expression.right,
+          answerPosition: 'leftPart',
+        };
+
+  return {
+    text: baseProblem.text,
+    prompt: numberLineBox.instruction,
+    answer: baseProblem.answer,
+    kind: 'numberLineBox',
+    numberLineBox,
+  };
+}
+
+function shouldUseUnit2NumberLineBoxProblem(level: number, opponentHP: number) {
+  if (level < 1 || level > 7 || level === 3 || level === 4) {
+    return false;
+  }
+
+  return opponentHP === getUnit2NumberLineOpponentHP(level);
+}
+
+const unit2NumberLineOpponentHPByLevel = new Map<number, 75 | 50>();
+const unit2TableStoryOpponentHPByLevel = new Map<number, 75 | 50>();
+const unit2CalculationErrorChoiceOpponentHPByLevel = new Map<number, 75 | 50>();
+
+function getUnit2NumberLineOpponentHP(level: number): 75 | 50 {
+  const existingOpponentHP = unit2NumberLineOpponentHPByLevel.get(level);
+  if (existingOpponentHP) {
+    return existingOpponentHP;
+  }
+
+  const nextOpponentHP = Math.random() < 0.5 ? 75 : 50;
+  unit2NumberLineOpponentHPByLevel.set(level, nextOpponentHP);
+  return nextOpponentHP;
+}
+
+function shouldUseUnit2TableStoryProblem(level: number, opponentHP: number) {
+  if (level !== 8 && level !== 9) {
+    return false;
+  }
+
+  return opponentHP === getUnit2TableStoryOpponentHP(level);
+}
+
+function getUnit2TableStoryOpponentHP(level: number): 75 | 50 {
+  const existingOpponentHP = unit2TableStoryOpponentHPByLevel.get(level);
+  if (existingOpponentHP) {
+    return existingOpponentHP;
+  }
+
+  const nextOpponentHP = Math.random() < 0.5 ? 75 : 50;
+  unit2TableStoryOpponentHPByLevel.set(level, nextOpponentHP);
+  return nextOpponentHP;
+}
+
+function shouldUseUnit2CalculationErrorChoiceProblem(level: number, opponentHP: number) {
+  if (level !== 3 && level !== 4) {
+    return false;
+  }
+
+  return opponentHP === getUnit2CalculationErrorChoiceOpponentHP(level);
+}
+
+function getUnit2CalculationErrorChoiceOpponentHP(level: number): 75 | 50 {
+  const existingOpponentHP = unit2CalculationErrorChoiceOpponentHPByLevel.get(level);
+  if (existingOpponentHP) {
+    return existingOpponentHP;
+  }
+
+  const nextOpponentHP = Math.random() < 0.5 ? 75 : 50;
+  unit2CalculationErrorChoiceOpponentHPByLevel.set(level, nextOpponentHP);
+  return nextOpponentHP;
+}
+
+function generateUnit2Problem(level: number, opponentHP: number): Problem {
+  if (shouldUseUnit2CalculationErrorChoiceProblem(level, opponentHP)) {
+    return createCalculationErrorChoiceProblem(level);
+  }
+
+  if (!isFinalBuilderTurn(level, opponentHP) && shouldUseUnit2NumberLineBoxProblem(level, opponentHP)) {
+    return createNumberLineBoxProblem(level);
+  }
+
+  if (shouldUseUnit2TableStoryProblem(level, opponentHP)) {
+    return createUnit2TableStoryProblem(level);
+  }
+
+  return isFinalBuilderTurn(level, opponentHP) ? createUnit2FinalProblem(level) : generateRegularProblem(level);
+}
+
 function createShapeDrawProblem(
   mode: ShapeDrawMode,
   title: string,
@@ -8952,7 +9480,7 @@ function getProblemForTurn(unitId: LearningUnitId, level: number, opponentHP: nu
     return generateUnit3Problem(level, opponentHP, problemSequence);
   }
 
-  return isFinalBuilderTurn(level, opponentHP) ? createBuilderProblem(level) : generateRegularProblem(level);
+  return generateUnit2Problem(level, opponentHP);
 }
 
 function fillBuilderTemplate(template: string, slotValues: Record<string, string>, emptyValue = '') {
@@ -9006,7 +9534,10 @@ function getUnit1ArchiveEntries(level: number) {
 function getProblemKindLabel(problem: Problem) {
   if (problem.kind === 'equation') return '계산';
   if (problem.kind === 'story') return '문장제';
+  if (problem.kind === 'calculationErrorChoice') return '틀린 이유 찾기';
+  if (problem.kind === 'numberLineBox') return '수직선 빈칸';
   if (problem.kind === 'builder') return '문제 만들기';
+  if (problem.kind === 'verticalBlank') return '알맞은 수 넣기';
   if (problem.kind === 'measurement') return '길이 재기';
   if (problem.kind === 'distanceWorksheet') return '거리 지도';
   if (problem.kind === 'clockReading') return '시각 읽기';
@@ -9025,6 +9556,13 @@ function getProblemArchiveQuestion(problem: Problem) {
     const top = fillBuilderTemplate(problem.builder.topTemplate, {}, '□');
     const bottom = fillBuilderTemplate(problem.builder.bottomTemplate, {}, '□');
     return `${problem.builder.instruction}\n${top} ${problem.builder.op} ${bottom}`;
+  }
+
+  if (problem.kind === 'verticalBlank' && problem.verticalBlank) {
+    const top = fillBuilderTemplate(problem.verticalBlank.topTemplate, {}, '□');
+    const bottom = fillBuilderTemplate(problem.verticalBlank.bottomTemplate, {}, '□');
+    const result = fillBuilderTemplate(problem.verticalBlank.resultTemplate, {}, '□');
+    return `${problem.verticalBlank.instruction}\n${top} ${problem.verticalBlank.op} ${bottom} = ${result}`;
   }
 
   if (problem.kind === 'measurement' && problem.measurement) {
@@ -9051,12 +9589,24 @@ function getProblemArchiveQuestion(problem: Problem) {
     return `${problem.shapeRain.title}\n${problem.prompt}`;
   }
 
+  if (problem.kind === 'numberLineBox' && problem.numberLineBox) {
+    return `${problem.numberLineBox.instruction}\n${problem.text}`;
+  }
+
+  if (problem.kind === 'calculationErrorChoice' && problem.calculationErrorChoice) {
+    return `${problem.calculationErrorChoice.question}\n${problem.text} = ${problem.calculationErrorChoice.shownResult}`;
+  }
+
   return problem.prompt || problem.text;
 }
 
 function getProblemArchiveAnswer(problem: Problem) {
   if (problem.kind === 'builder') {
     return '조건을 만족하는 수';
+  }
+
+  if (problem.kind === 'verticalBlank' && problem.verticalBlank) {
+    return problem.verticalBlank.slots.map((slot) => `${slot.label}: ${problem.verticalBlank?.answers[slot.id]}`).join(', ');
   }
 
   if (problem.kind === 'distanceWorksheet' && problem.distanceWorksheet) {
@@ -9079,6 +9629,10 @@ function getProblemArchiveAnswer(problem: Problem) {
 
   if (problem.kind === 'shapeRain' && problem.shapeRain) {
     return `${problem.shapeRain.targetCount}개 방어`;
+  }
+
+  if (problem.kind === 'calculationErrorChoice' && problem.calculationErrorChoice) {
+    return `${problem.answer}번: ${problem.calculationErrorChoice.options[problem.answer - 1]}`;
   }
 
   return `${problem.answer}${problem.answerUnit ?? ''}`;
@@ -9219,7 +9773,9 @@ function getArchivePreviewFrameClass(problem: Problem) {
     problem.kind === 'distanceMap' ||
     problem.kind === 'distanceWorksheet' ||
     problem.kind === 'clockReading' ||
-    problem.kind === 'timeAddition'
+    problem.kind === 'timeAddition' ||
+    problem.kind === 'numberLineBox' ||
+    problem.kind === 'calculationErrorChoice'
   ) {
     return 'flex flex-col overflow-hidden p-2';
   }
@@ -9311,7 +9867,7 @@ function ArchiveStoryPreview({ problem }: { problem: Problem }) {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-[52rem] flex-col text-left text-slate-900">
+    <div className="mx-auto flex w-full max-w-[52rem] flex-col gap-3 text-left text-slate-900">
       <div className="rounded-[2rem] border border-slate-200 bg-slate-50/85 px-5 py-4 shadow-sm">
         <div className="flex flex-col gap-3">
           {getStoryPromptLines(problem.prompt).map((line, index, lines) => (
@@ -9328,6 +9884,114 @@ function ArchiveStoryPreview({ problem }: { problem: Problem }) {
           ))}
         </div>
       </div>
+      {problem.storyTable ? (
+        <StoryPromptTableCard table={problem.storyTable} condensed dense />
+      ) : null}
+    </div>
+  );
+}
+
+function VerticalCalculationPreview({
+  top,
+  bottom,
+  op,
+  result,
+  condensed = false,
+}: {
+  top: number;
+  bottom: number;
+  op: '+' | '-';
+  result: number;
+  condensed?: boolean;
+}) {
+  const topDigits = String(top).padStart(3, ' ');
+  const bottomDigits = String(bottom).padStart(3, ' ');
+  const resultDigits = String(result).padStart(3, ' ');
+  const digitClass = condensed ? 'h-8 w-8 text-2xl' : 'h-10 w-10 text-3xl sm:h-12 sm:w-12 sm:text-4xl';
+
+  const renderDigits = (digits: string) => (
+    <div className="flex justify-end gap-1">
+      {digits.split('').map((digit, index) => (
+        <span key={`${digits}-${index}`} className={`grid place-items-center font-mono font-black text-slate-950 ${digitClass}`}>
+          {digit === ' ' ? '' : digit}
+        </span>
+      ))}
+    </div>
+  );
+
+  return (
+    <div className={`inline-flex flex-col rounded-2xl border-2 border-slate-300 bg-white shadow-sm ${condensed ? 'px-4 py-3' : 'px-5 py-4'}`}>
+      <div className="mb-1 inline-flex self-start rounded-md bg-slate-600 px-2 py-0.5 text-xs font-black text-white">보기</div>
+      {renderDigits(topDigits)}
+      <div className="flex items-center justify-end gap-2">
+        <span className={`font-black text-slate-950 ${condensed ? 'text-2xl' : 'text-3xl sm:text-4xl'}`}>{op}</span>
+        {renderDigits(bottomDigits)}
+      </div>
+      <div className="my-1 h-1 rounded-full bg-slate-800" />
+      {renderDigits(resultDigits)}
+    </div>
+  );
+}
+
+function CalculationErrorChoiceProblemCard({
+  problemData,
+  answerValue,
+  onAnswerChange,
+  condensed = false,
+}: {
+  problemData: CalculationErrorChoiceProblemData;
+  answerValue: string;
+  onAnswerChange: (value: string) => void;
+  condensed?: boolean;
+}) {
+  return (
+    <div className="mx-auto flex h-full min-h-0 w-full max-w-[58rem] flex-col gap-3 text-slate-950">
+      <div className={`shrink-0 rounded-[1.75rem] border border-slate-200 bg-slate-50 px-4 shadow-sm ${condensed ? 'py-3' : 'py-4 sm:px-6'}`}>
+        <p className={`break-keep font-black leading-tight ${condensed ? 'text-[1.45rem]' : 'text-[1.65rem] sm:text-[2.15rem]'}`}>
+          {problemData.question}
+        </p>
+      </div>
+
+      <div className={`grid min-h-0 flex-1 gap-3 ${condensed ? 'lg:grid-cols-[minmax(15rem,0.75fr)_minmax(0,1fr)]' : 'lg:grid-cols-[minmax(17rem,0.75fr)_minmax(0,1fr)]'}`}>
+        <div className="flex min-h-0 items-center justify-center rounded-[1.75rem] border border-slate-200 bg-slate-50/90 p-3 shadow-sm">
+          <VerticalCalculationPreview
+            top={problemData.top}
+            bottom={problemData.bottom}
+            op={problemData.op}
+            result={problemData.shownResult}
+            condensed={condensed}
+          />
+        </div>
+
+        <div className="grid min-h-0 gap-2" style={{ gridTemplateRows: `repeat(${problemData.options.length}, minmax(0, 1fr))` }}>
+          {problemData.options.map((option, index) => {
+            const optionNumber = String(index + 1);
+            const isSelected = answerValue === optionNumber;
+
+            return (
+              <button
+                key={`${option}-${index}`}
+                type="button"
+                onClick={() => onAnswerChange(optionNumber)}
+                className={`flex min-h-0 items-center gap-3 rounded-[1.25rem] border px-3 py-2 text-left shadow-sm transition ${
+                  isSelected
+                    ? 'border-emerald-400 bg-emerald-50 ring-2 ring-emerald-300'
+                    : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+                }`}
+              >
+                <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-full text-lg font-black ${
+                  isSelected ? 'bg-emerald-500 text-slate-950' : 'bg-slate-900 text-white'
+                }`}>
+                  {optionNumber}
+                </span>
+                <span className={`break-keep font-black leading-snug tracking-[-0.01em] ${condensed ? 'text-[1rem] sm:text-[1.15rem]' : 'text-[1.05rem] sm:text-[1.35rem]'}`}>
+                  {option}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
@@ -9338,8 +10002,7 @@ function ArchiveBuilderPreview({ builder }: { builder: BuilderProblemData }) {
   return (
     <div className="flex h-full w-full flex-col gap-3 text-left text-slate-900">
       <div>
-        <h2 className="text-2xl font-black text-slate-900">{builder.title}</h2>
-        <p className="mt-1 break-keep text-lg font-bold leading-[1.4] text-slate-700">{builder.instruction}</p>
+        <h2 className="text-xl font-black text-slate-900">{builder.title}</h2>
       </div>
       <div className="grid flex-1 gap-3 lg:grid-cols-[minmax(0,1fr)_190px]">
         <div className="rounded-[28px] border-4 border-slate-200 bg-slate-50 p-5">
@@ -9350,7 +10013,7 @@ function ArchiveBuilderPreview({ builder }: { builder: BuilderProblemData }) {
                 <span className="text-5xl font-black text-slate-500">{builder.op}</span>
                 <BuilderNumberRow template={builder.bottomTemplate} slotsById={slotsById} slotValues={{}} onSlotChange={() => undefined} />
               </div>
-              <div className="h-2 w-full rounded-full bg-slate-900" />
+              <div className="h-3 w-full rounded-full border border-neutral-500 bg-neutral-500" />
             </div>
           </div>
         </div>
@@ -9360,6 +10023,84 @@ function ArchiveBuilderPreview({ builder }: { builder: BuilderProblemData }) {
               <div key={slot.id} className="rounded-2xl border border-sky-200 bg-white px-3 py-3">
                 <div className="text-xs font-black text-slate-500">{slot.label}</div>
                 <div className="mt-1 text-2xl font-black text-sky-700">{formatDigitChoices(slot.digits)}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VerticalBlankProblemCard({
+  verticalBlank,
+  slotValues,
+  onSlotChange,
+  condensed = false,
+}: {
+  verticalBlank: VerticalBlankProblemData;
+  slotValues: Record<string, string>;
+  onSlotChange: (slotId: string, nextValue: string) => void;
+  condensed?: boolean;
+}) {
+  const slotsById = Object.fromEntries(verticalBlank.slots.map((slot) => [slot.id, slot])) as Record<string, BuildSlotConfig>;
+
+  return (
+    <div className="flex h-full w-full flex-col gap-3 text-left text-slate-100 sm:gap-4">
+      <div>
+        <h2 className={`font-black leading-tight text-white ${condensed ? 'text-xl' : 'text-2xl sm:text-3xl md:text-[2.6rem]'}`}>
+          {verticalBlank.title}
+        </h2>
+      </div>
+
+      <div className="grid min-h-0 flex-1 gap-4 xl:grid-cols-[minmax(0,1fr)_220px]">
+        <div className="rounded-[34px] border-4 border-neutral-500 bg-neutral-900 p-4 shadow-inner sm:p-5 md:p-6">
+          <div className="flex h-full items-center justify-end">
+            <div className="inline-flex flex-col items-end gap-3 sm:gap-4">
+              <BuilderNumberRow
+                template={verticalBlank.topTemplate}
+                slotsById={slotsById}
+                slotValues={slotValues}
+                onSlotChange={onSlotChange}
+                filledSlotClassName="text-red-500 caret-red-500"
+                filledSlotColor="#ef4444"
+                emptySlotClassName="text-red-500 placeholder:text-red-500 caret-red-500"
+                fixedTokenClassName="flex h-14 w-14 items-center justify-center border-0 bg-transparent text-3xl font-black text-white sm:h-20 sm:w-20 sm:text-5xl md:h-24 md:w-24 md:text-6xl"
+              />
+              <div className="flex items-center justify-end gap-3 sm:gap-5">
+                <span className="text-4xl font-black text-slate-300 sm:text-5xl md:text-6xl">{verticalBlank.op}</span>
+                <BuilderNumberRow
+                  template={verticalBlank.bottomTemplate}
+                  slotsById={slotsById}
+                  slotValues={slotValues}
+                  onSlotChange={onSlotChange}
+                  filledSlotClassName="text-red-500 caret-red-500"
+                  filledSlotColor="#ef4444"
+                  emptySlotClassName="text-red-500 placeholder:text-red-500 caret-red-500"
+                  fixedTokenClassName="flex h-14 w-14 items-center justify-center border-0 bg-transparent text-3xl font-black text-white sm:h-20 sm:w-20 sm:text-5xl md:h-24 md:w-24 md:text-6xl"
+                />
+              </div>
+              <div className="h-3 w-full rounded-full border border-neutral-500 bg-neutral-500" />
+              <BuilderNumberRow
+                template={verticalBlank.resultTemplate}
+                slotsById={slotsById}
+                slotValues={slotValues}
+                onSlotChange={onSlotChange}
+                filledSlotClassName="text-red-500 caret-red-500"
+                filledSlotColor="#ef4444"
+                emptySlotClassName="text-red-500 placeholder:text-red-500 caret-red-500"
+                fixedTokenClassName="flex h-14 w-14 items-center justify-center border-0 bg-transparent text-3xl font-black text-white sm:h-20 sm:w-20 sm:text-5xl md:h-24 md:w-24 md:text-6xl"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-[30px] border border-neutral-600 bg-neutral-900 p-4 md:p-5">
+          <div className="flex flex-col gap-3">
+            {verticalBlank.slots.map((slot) => (
+              <div key={slot.id} className="rounded-2xl border border-neutral-600 bg-neutral-950/30 px-4 py-4">
+                <div className="text-sm font-black text-slate-300">{slot.label}</div>
+                <div className="mt-1 text-2xl font-black text-red-500 sm:text-3xl">{formatDigitChoices(slot.digits)}</div>
               </div>
             ))}
           </div>
@@ -9412,6 +10153,17 @@ function ArchiveProblemPreview({ problem }: { problem: Problem }) {
           condensed
           showAnswerFields={problem.timeAddition.mode !== 'story'}
         />
+      ) : problem.kind === 'numberLineBox' && problem.numberLineBox ? (
+        <NumberLineBoxProblemCard numberLineBox={problem.numberLineBox} condensed />
+      ) : problem.kind === 'calculationErrorChoice' && problem.calculationErrorChoice ? (
+        <CalculationErrorChoiceProblemCard
+          problemData={problem.calculationErrorChoice}
+          answerValue=""
+          onAnswerChange={() => undefined}
+          condensed
+        />
+      ) : problem.kind === 'verticalBlank' && problem.verticalBlank ? (
+        <VerticalBlankProblemCard verticalBlank={problem.verticalBlank} slotValues={{}} onSlotChange={() => undefined} condensed />
       ) : problem.kind === 'story' ? (
         <ArchiveStoryPreview problem={problem} />
       ) : problem.kind === 'builder' && problem.builder ? (
@@ -9490,6 +10242,31 @@ function evaluateBuilderProblem(problem: Problem, slotValues: Record<string, str
     status: 'ready' as const,
     text: `${left} ${problem.builder.op} ${right}`,
     answer: problem.builder.op === '+' ? left + right : left - right,
+  };
+}
+
+function evaluateVerticalBlankProblem(problem: Problem, slotValues: Record<string, string>) {
+  if (problem.kind !== 'verticalBlank' || !problem.verticalBlank) {
+    return null;
+  }
+
+  for (const slot of problem.verticalBlank.slots) {
+    const value = slotValues[slot.id];
+
+    if (!value) {
+      return { status: 'incomplete' as const, message: '빈칸에 숫자를 넣어주세요.' };
+    }
+
+    if (!slot.digits.includes(value)) {
+      return { status: 'invalid' as const, message: '제시된 범위 안의 숫자만 넣을 수 있어요.' };
+    }
+  }
+
+  const isCorrect = problem.verticalBlank.slots.every((slot) => slotValues[slot.id] === problem.verticalBlank?.answers[slot.id]);
+
+  return {
+    status: isCorrect ? 'ready' as const : 'invalid' as const,
+    message: isCorrect ? '세로셈이 완성되었어요.' : '빈칸 숫자를 다시 확인해 주세요.',
   };
 }
 
@@ -9594,11 +10371,19 @@ function BuilderNumberRow({
   slotsById,
   slotValues,
   onSlotChange,
+  filledSlotClassName = 'text-red-500 caret-red-500',
+  filledSlotColor = '#ef4444',
+  emptySlotClassName = 'text-slate-400 placeholder:text-slate-400 caret-slate-400',
+  fixedTokenClassName = 'flex h-14 w-14 items-center justify-center rounded-[22px] border-0 bg-slate-50 text-3xl font-black text-slate-900 sm:h-20 sm:w-20 sm:rounded-[28px] sm:text-5xl md:h-24 md:w-24 md:text-6xl',
 }: {
   template: string;
   slotsById: Record<string, BuildSlotConfig>;
   slotValues: Record<string, string>;
   onSlotChange: (slotId: string, nextValue: string) => void;
+  filledSlotClassName?: string;
+  filledSlotColor?: string;
+  emptySlotClassName?: string;
+  fixedTokenClassName?: string;
 }) {
   const tokens = template.match(/\[[a-z]+\]|./g) ?? [];
 
@@ -9633,7 +10418,13 @@ function BuilderNumberRow({
               onChange={(event) => onSlotChange(slotId, event.target.value)}
               placeholder="?"
               aria-label={slot.label}
-              className="h-14 w-14 rounded-[22px] border-4 border-sky-200 bg-sky-50 text-center text-3xl font-black text-sky-700 outline-none transition focus:border-sky-500 sm:h-20 sm:w-20 sm:rounded-[28px] sm:text-5xl md:h-24 md:w-24 md:text-6xl"
+              className={`h-14 w-14 appearance-none rounded-[8px] border-4 border-neutral-500 bg-sky-50 text-center text-3xl font-black outline-none transition focus:border-neutral-400 sm:h-20 sm:w-20 sm:rounded-[10px] sm:text-5xl md:h-24 md:w-24 md:rounded-[12px] md:text-6xl ${
+                slotValues[slotId] ? filledSlotClassName : emptySlotClassName
+              }`}
+              style={{
+                borderRadius: '12px',
+                ...(slotValues[slotId] ? { color: filledSlotColor, caretColor: filledSlotColor } : {}),
+              }}
               title={`${slot.label}: ${formatDigitChoices(slot.digits)} 중에서 넣기`}
             />
           );
@@ -9642,7 +10433,7 @@ function BuilderNumberRow({
         return (
           <span
             key={`${token}-${index}`}
-            className="flex h-14 w-14 items-center justify-center rounded-[22px] border-4 border-slate-200 bg-slate-50 text-3xl font-black text-slate-900 sm:h-20 sm:w-20 sm:rounded-[28px] sm:text-5xl md:h-24 md:w-24 md:text-6xl"
+            className={fixedTokenClassName}
           >
             {token}
           </span>
@@ -11982,6 +12773,127 @@ function StoryPromptTableCard({
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+function NumberLineBoxProblemCard({
+  numberLineBox,
+  condensed = false,
+}: {
+  numberLineBox: NumberLineBoxProblemData;
+  condensed?: boolean;
+}) {
+  const { instruction, operation, total, leftPart, rightPart, answerPosition } = numberLineBox;
+  const isAdditionNumberLine = operation === '+';
+  const lineStartX = 70;
+  const lineEndX = 610;
+  const lineY = 142;
+  const lineLength = lineEndX - lineStartX;
+  const proportionalMiddleX = lineStartX + lineLength * (leftPart / total);
+  const middleX = Math.min(lineEndX - 80, Math.max(lineStartX + 80, proportionalMiddleX));
+  const topLabelX = (lineStartX + lineEndX) / 2;
+  const topCurveY = 74;
+  const bottomCurveY = 190;
+  const leftLabelX = (lineStartX + middleX) / 2;
+  const rightLabelX = (middleX + lineEndX) / 2;
+  const leftBlankX = Math.max(lineStartX + 24, leftLabelX - 52);
+  const topBlankX = topLabelX - 48;
+  const textClassName = condensed
+    ? 'text-[1.05rem] leading-[1.45] sm:text-[1.25rem]'
+    : 'text-[1.25rem] leading-[1.55] sm:text-[1.65rem] md:text-[2rem]';
+
+  return (
+    <div className="mx-auto flex h-full w-full max-w-[54rem] flex-col justify-center gap-4 text-slate-900 sm:gap-6">
+      <div className="rounded-[2rem] border border-slate-200 bg-slate-50/90 px-5 py-4 shadow-sm sm:px-7 sm:py-5">
+        <p className={`break-keep font-black tracking-[-0.01em] ${textClassName}`}>
+          {instruction}
+        </p>
+      </div>
+
+      <div className="rounded-[2rem] border border-slate-200 bg-white px-3 py-4 shadow-sm sm:px-5 sm:py-6">
+        <svg
+          viewBox="0 0 680 270"
+          role="img"
+          aria-label={
+            isAdditionNumberLine
+              ? `${leftPart}와 ${rightPart}를 더한 값을 구하는 수직선`
+              : `${total}에서 ${rightPart}를 빼고 남은 수를 구하는 수직선`
+          }
+          className="h-auto w-full"
+        >
+          <defs>
+            <filter id="number-line-label-shadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="3" stdDeviation="2.5" floodColor="#020617" floodOpacity="0.85" />
+            </filter>
+            <marker id="number-line-arrow-end" markerWidth="8" markerHeight="8" refX="6.8" refY="4" orient="auto" markerUnits="strokeWidth">
+              <path d="M1 1 L7 4 L1 7 Z" fill="#dbeafe" stroke="#334155" strokeWidth="0.65" />
+            </marker>
+          </defs>
+          <line x1={lineStartX} y1={lineY} x2={lineEndX} y2={lineY} stroke="#020617" strokeWidth="7" strokeLinecap="round" opacity="0.55" />
+          <line x1={lineStartX} y1={lineY} x2={lineEndX} y2={lineY} stroke="#f8fafc" strokeWidth="4.5" strokeLinecap="round" />
+          <line x1={lineStartX} y1="118" x2={lineStartX} y2="166" stroke="#f8fafc" strokeWidth="4" strokeLinecap="round" />
+          <line x1={middleX} y1="118" x2={middleX} y2="166" stroke="#f8fafc" strokeWidth="4" strokeLinecap="round" />
+          <line x1={lineEndX} y1="118" x2={lineEndX} y2="166" stroke="#f8fafc" strokeWidth="4" strokeLinecap="round" />
+          <circle cx={lineStartX} cy={lineY} r="4.5" fill="#f8fafc" />
+          <circle cx={middleX} cy={lineY} r="7" fill="#dbeafe" stroke="#334155" strokeWidth="2.5" />
+          <circle cx={lineEndX} cy={lineY} r="4.5" fill="#f8fafc" />
+
+          <path
+            d={`M${lineStartX} ${lineY} C226 ${topCurveY}, 454 ${topCurveY}, ${lineEndX} ${lineY}`}
+            fill="none"
+            stroke="#93a4bd"
+            strokeWidth="2.75"
+            strokeDasharray="7 9"
+            strokeLinecap="round"
+            opacity="0.82"
+            markerEnd="url(#number-line-arrow-end)"
+          />
+          {answerPosition === 'total' ? (
+            <rect x={topBlankX} y="46" width="96" height="46" rx="7" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="3" filter="url(#number-line-label-shadow)" />
+          ) : (
+            <text x={topLabelX} y="66" textAnchor="middle" fill="#ffffff" stroke="#111827" strokeWidth="1.5" paintOrder="stroke" fontSize="36" fontWeight="900" filter="url(#number-line-label-shadow)">
+              {total}
+            </text>
+          )}
+
+          <path
+            d={`M${lineStartX} ${lineY} C${lineStartX + (middleX - lineStartX) * 0.25} 178, ${lineStartX + (middleX - lineStartX) * 0.75} 178, ${middleX} ${lineY}`}
+            fill="none"
+            stroke="#93a4bd"
+            strokeWidth="2.75"
+            strokeDasharray="7 9"
+            strokeLinecap="round"
+            opacity="0.82"
+            markerEnd={isAdditionNumberLine ? 'url(#number-line-arrow-end)' : undefined}
+          />
+          {answerPosition === 'leftPart' ? (
+            <rect x={leftBlankX} y="207" width="104" height="46" rx="7" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="3" filter="url(#number-line-label-shadow)" />
+          ) : (
+            <text x={leftLabelX} y="235" textAnchor="middle" fill="#ffffff" stroke="#111827" strokeWidth="1.5" paintOrder="stroke" fontSize="36" fontWeight="900" filter="url(#number-line-label-shadow)">
+              {leftPart}
+            </text>
+          )}
+
+          <path
+            d={
+              isAdditionNumberLine
+                ? `M${middleX} ${lineY} C${middleX + (lineEndX - middleX) * 0.25} ${bottomCurveY}, ${middleX + (lineEndX - middleX) * 0.75} ${bottomCurveY}, ${lineEndX} ${lineY}`
+                : `M${lineEndX} ${lineY} C${middleX + (lineEndX - middleX) * 0.75} ${bottomCurveY}, ${middleX + (lineEndX - middleX) * 0.25} ${bottomCurveY}, ${middleX} ${lineY}`
+            }
+            fill="none"
+            stroke="#93a4bd"
+            strokeWidth="2.75"
+            strokeDasharray="7 9"
+            strokeLinecap="round"
+            opacity="0.82"
+            markerEnd="url(#number-line-arrow-end)"
+          />
+          <text x={rightLabelX} y="229" textAnchor="middle" fill="#ffffff" stroke="#111827" strokeWidth="1.5" paintOrder="stroke" fontSize="36" fontWeight="900" filter="url(#number-line-label-shadow)">
+            {rightPart}
+          </text>
+        </svg>
+      </div>
     </div>
   );
 }
@@ -17700,7 +18612,12 @@ export default function App() {
   const [showHint, setShowHint] = useState(false);
   const isSpecialChallengeActive = isEstimation || isUnitSelectionChallenge;
   const isFinalUnit2LevelProblem = activeLearningUnitId === 'unit2' && opponentHP <= FINAL_BUILDER_HP;
-  const canUseHint = activeLearningUnitId === 'unit2' && level <= 7 && !isFinalUnit2LevelProblem;
+  const canUseHint =
+    activeLearningUnitId === 'unit2' &&
+    level <= 7 &&
+    !isFinalUnit2LevelProblem &&
+    problem.kind !== 'numberLineBox' &&
+    problem.kind !== 'calculationErrorChoice';
   const isHintForced = canUseHint && opponentHP > 50;
   const shouldRenderHorizontalEquation = activeLearningUnitId === 'unit2' && level === 7 && !isHintForced && problem.kind === 'equation';
   const isResultScreen = gameState === 'win' || gameState === 'lose';
@@ -17748,6 +18665,7 @@ export default function App() {
       ? Object.fromEntries(problem.builder.slots.map((slot) => [slot.id, slot])) as Record<string, BuildSlotConfig>
       : {};
   const builderEvaluation = evaluateBuilderProblem(problem, builderSlotValues);
+  const verticalBlankEvaluation = evaluateVerticalBlankProblem(problem, builderSlotValues);
 
   useEffect(() => {
     if (!selectedArchiveSection) {
@@ -17892,6 +18810,8 @@ export default function App() {
       ? builderEvaluation?.status === 'ready'
         ? builderEvaluation.text
         : null
+      : problem.kind === 'numberLineBox'
+        ? null
       : problem.text;
   const isInternalShapeAnswerToken =
     inputValue === SHAPE_CLASSIFY_CORRECT_TOKEN ||
@@ -17998,8 +18918,12 @@ export default function App() {
   const normalizedDistanceWorksheetInput = currentDistanceWorksheetPrompt
     ? normalizeDistanceWorksheetAnswer(normalizedInputValue, currentDistanceWorksheetPrompt.kind)
     : '';
-  const selectedAnswerUnit = problem.kind === 'builder' ? null : problem.answerUnit ?? null;
-  const requiresUnitSelection = problem.kind !== 'builder' && problem.requiresUnitSelection === true && selectedAnswerUnit !== null;
+  const selectedAnswerUnit = problem.kind === 'builder' || problem.kind === 'verticalBlank' ? null : problem.answerUnit ?? null;
+  const requiresUnitSelection =
+    problem.kind !== 'builder' &&
+    problem.kind !== 'verticalBlank' &&
+    problem.requiresUnitSelection === true &&
+    selectedAnswerUnit !== null;
   const answerUnitOptions = requiresUnitSelection && selectedAnswerUnit ? getAnswerUnitOptions(selectedAnswerUnit) : [];
   const hasValidUnitInput = requiresUnitSelection ? normalizedUnitInputValue.length > 0 : true;
   const hasValidAnswerInput = normalizedInputValue.length > 0 && !Number.isNaN(parsedInputAnswer) && hasValidUnitInput;
@@ -18021,6 +18945,8 @@ export default function App() {
       ? Boolean(hasValidDistanceWorksheetInput)
       : problem.kind === 'builder'
       ? hasValidAnswerInput && builderEvaluation?.status === 'ready'
+      : problem.kind === 'verticalBlank'
+      ? verticalBlankEvaluation?.status === 'ready'
       : hasValidAnswerInput;
   const storyPromptSections = problem.kind === 'story' ? splitStoryPromptSections(problem.prompt) : null;
   const hasNumberedStoryOptions = Boolean(storyPromptSections && storyPromptSections.optionLines.length >= 2);
@@ -18107,6 +19033,23 @@ export default function App() {
   }, [problem, isHintForced]);
 
   useEffect(() => {
+    if (
+      activeLearningUnitId === 'unit2' &&
+      shouldUseUnit2NumberLineBoxProblem(level, opponentHP) &&
+      problem.kind !== 'numberLineBox' &&
+      !isEstimation &&
+      !isUnitSelectionChallenge
+    ) {
+      setProblemWithCoachmark(createNumberLineBoxProblem(level), level, {
+        opponentHP,
+        recordInDeveloperHistory: false,
+      });
+      setInputValue('');
+      setUnitInputValue('');
+    }
+  }, [activeLearningUnitId, level, opponentHP, problem.kind, isEstimation, isUnitSelectionChallenge]);
+
+  useEffect(() => {
     setShapeDrawNotice('');
   }, [problem]);
 
@@ -18174,6 +19117,11 @@ export default function App() {
       return;
     }
 
+    if (problem.kind === 'verticalBlank' && problem.verticalBlank) {
+      setBuilderSlotValues(Object.fromEntries(problem.verticalBlank.slots.map((slot) => [slot.id, ''])));
+      return;
+    }
+
     setBuilderSlotValues({});
   }, [problem]);
 
@@ -18237,7 +19185,7 @@ export default function App() {
       level,
       playerHP,
       opponentHP,
-      problem: problem.kind === 'builder' ? null : problem,
+      problem: problem.kind === 'builder' || problem.kind === 'verticalBlank' ? null : problem,
       problemCoachmark,
       unit1ProblemSequence: { ...unit1ProblemSequenceRef.current },
       unit3ProblemSequence: { ...unit3ProblemSequenceRef.current },
@@ -18363,9 +19311,15 @@ export default function App() {
   };
 
   const handleBuilderSlotChange = (slotId: string, nextValue: string) => {
-    if (problem.kind !== 'builder' || !problem.builder) return;
+    if (
+      (problem.kind !== 'builder' || !problem.builder) &&
+      (problem.kind !== 'verticalBlank' || !problem.verticalBlank)
+    ) {
+      return;
+    }
 
-    const slot = problem.builder.slots.find((item) => item.id === slotId);
+    const slots = problem.kind === 'builder' ? problem.builder.slots : problem.verticalBlank.slots;
+    const slot = slots.find((item) => item.id === slotId);
     if (!slot) return;
 
     const sanitized = nextValue.replace(/\D/g, '').slice(-1);
@@ -18867,6 +19821,21 @@ export default function App() {
       return;
     }
 
+    if (problem.kind === 'verticalBlank' && problem.verticalBlank) {
+      if (!verticalBlankEvaluation || verticalBlankEvaluation.status === 'incomplete' || verticalBlankEvaluation.status === 'invalid') {
+        playSound('ui');
+        updateMessage(verticalBlankEvaluation?.message ?? '빈칸에 숫자를 넣어주세요.');
+        return;
+      }
+
+      playSound('submit', {
+        gainMultiplier: 0.84,
+        detune: -4,
+      });
+      resolveProblemResult(true);
+      return;
+    }
+
     if (!hasValidAnswerInput) {
       playSound('ui');
       updateMessage(requiresUnitSelection ? '숫자를 쓰고 단위 버튼도 골라야 공격할 수 있어!' : '정답을 입력해야 공격할 수 있어!');
@@ -19026,7 +19995,9 @@ export default function App() {
     }
 
     const restoredProblem =
-      progress.problem && progress.problem.kind !== 'builder'
+      progress.unitId === 'unit2' && shouldUseUnit2NumberLineBoxProblem(progress.level, progress.opponentHP)
+        ? getProblemForTurn(progress.unitId, progress.level, progress.opponentHP)
+      : progress.problem && progress.problem.kind !== 'builder' && progress.problem.kind !== 'verticalBlank'
         ? progress.problem
         : getProblemForTurn(
             progress.unitId,
@@ -20198,6 +21169,18 @@ export default function App() {
                     condensed={isCompactBattleViewport}
                     showAnswerFields={!usesBattleStructuredTimeInput}
                   />
+                ) : problem.kind === 'numberLineBox' && problem.numberLineBox ? (
+                  <NumberLineBoxProblemCard
+                    numberLineBox={problem.numberLineBox}
+                    condensed={isCompactBattleViewport}
+                  />
+                ) : problem.kind === 'calculationErrorChoice' && problem.calculationErrorChoice ? (
+                  <CalculationErrorChoiceProblemCard
+                    problemData={problem.calculationErrorChoice}
+                    answerValue={inputValue}
+                    onAnswerChange={setInputValue}
+                    condensed={isCompactBattleViewport}
+                  />
                 ) : problem.kind === 'story' ? (
                   hasNumberedStoryOptions && storyPromptSections ? (
                     problem.storyTable ? (
@@ -20325,47 +21308,60 @@ export default function App() {
                         const storyLines = getStoryPromptLines(problem.prompt);
 
                         return (
-                          <div
-                            className={`rounded-[2rem] border border-slate-200 bg-slate-50/85 shadow-sm ${
-                              isCompactBattleViewport
-                                ? 'px-4 py-3 sm:px-5 sm:py-4'
-                                : 'px-4 py-4 sm:px-6 sm:py-5 md:px-8 md:py-7'
-                            }`}
-                          >
-                            <div className={`flex flex-col ${isCompactBattleViewport ? 'gap-3' : 'gap-4 sm:gap-5'}`}>
-                              {storyLines.map((line, index) => {
-                                const isQuestionLine = storyLines.length === 1 || index === storyLines.length - 1;
+                          <>
+                            <div
+                              className={`rounded-[2rem] border border-slate-200 bg-slate-50/85 shadow-sm ${
+                                isCompactBattleViewport
+                                  ? 'px-4 py-3 sm:px-5 sm:py-4'
+                                  : 'px-4 py-4 sm:px-6 sm:py-5 md:px-8 md:py-7'
+                              }`}
+                            >
+                              <div className={`flex flex-col ${isCompactBattleViewport ? 'gap-3' : 'gap-4 sm:gap-5'}`}>
+                                {storyLines.map((line, index) => {
+                                  const isQuestionLine = storyLines.length === 1 || index === storyLines.length - 1;
 
-                                return (
-                                  <p
-                                    key={`${line}-${index}`}
-                                    className={`break-keep tracking-[-0.01em] ${
-                                      isQuestionLine
-                                        ? isCompactBattleViewport
-                                          ? 'text-[1.2rem] font-black leading-[1.45] text-slate-900 sm:text-[1.5rem] lg:text-[1.9rem]'
-                                          : 'text-[1.3rem] font-black leading-[1.55] text-slate-900 sm:text-[1.75rem] md:text-[2.45rem]'
-                                        : isCompactBattleViewport
-                                          ? 'text-[1rem] font-bold leading-[1.58] text-slate-700 sm:text-[1.15rem] lg:text-[1.45rem]'
-                                          : 'text-[1.1rem] font-bold leading-[1.72] text-slate-700 sm:text-[1.45rem] md:text-[2rem]'
-                                    }`}
-                                  >
-                                    {renderPromptWithHighlight(line, shouldHighlightPromptNumbers)}
-                                  </p>
-                                );
-                              })}
+                                  return (
+                                    <p
+                                      key={`${line}-${index}`}
+                                      className={`break-keep tracking-[-0.01em] ${
+                                        isQuestionLine
+                                          ? isCompactBattleViewport
+                                            ? 'text-[1.2rem] font-black leading-[1.45] text-slate-900 sm:text-[1.5rem] lg:text-[1.9rem]'
+                                            : 'text-[1.3rem] font-black leading-[1.55] text-slate-900 sm:text-[1.75rem] md:text-[2.45rem]'
+                                          : isCompactBattleViewport
+                                            ? 'text-[1rem] font-bold leading-[1.58] text-slate-700 sm:text-[1.15rem] lg:text-[1.45rem]'
+                                            : 'text-[1.1rem] font-bold leading-[1.72] text-slate-700 sm:text-[1.45rem] md:text-[2rem]'
+                                      }`}
+                                    >
+                                      {renderPromptWithHighlight(line, shouldHighlightPromptNumbers)}
+                                    </p>
+                                  );
+                                })}
+                              </div>
                             </div>
-                          </div>
+                            {problem.storyTable ? (
+                              <StoryPromptTableCard
+                                table={problem.storyTable}
+                                condensed={isCompactBattleViewport}
+                                dense={isCompactBattleViewport}
+                              />
+                            ) : null}
+                          </>
                         );
                       })()}
                     </div>
                   )
+                ) : problem.kind === 'verticalBlank' && problem.verticalBlank ? (
+                  <VerticalBlankProblemCard
+                    verticalBlank={problem.verticalBlank}
+                    slotValues={builderSlotValues}
+                    onSlotChange={handleBuilderSlotChange}
+                    condensed={isCompactBattleViewport}
+                  />
                 ) : problem.kind === 'builder' && problem.builder ? (
                   <div className="flex h-full w-full flex-col gap-3 text-left text-slate-900 sm:gap-4">
                     <div>
-                      <h2 className="text-2xl font-black text-slate-900 sm:text-3xl md:text-[3.5rem]">{problem.builder.title}</h2>
-                      <p className="mt-2 break-keep text-lg font-bold leading-[1.45] text-slate-700 sm:text-[1.35rem] md:text-[1.9rem]">
-                        {problem.builder.instruction}
-                      </p>
+                      <h2 className="text-2xl font-black text-slate-900 sm:text-3xl md:text-[2.6rem]">{problem.builder.title}</h2>
                     </div>
 
                     <div className="grid flex-1 gap-4 xl:grid-cols-[minmax(0,1fr)_220px]">
@@ -20377,17 +21373,21 @@ export default function App() {
                               slotsById={builderSlotsById}
                               slotValues={builderSlotValues}
                               onSlotChange={handleBuilderSlotChange}
+                              filledSlotClassName="text-emerald-400 caret-emerald-400"
+                              filledSlotColor="#22c55e"
                             />
                             <div className="flex items-center justify-end gap-3 sm:gap-5">
                               <span className="text-4xl font-black text-slate-500 sm:text-5xl md:text-7xl">{problem.builder.op}</span>
                               <BuilderNumberRow
                                 template={problem.builder.bottomTemplate}
-                                slotsById={builderSlotsById}
-                                slotValues={builderSlotValues}
-                                onSlotChange={handleBuilderSlotChange}
-                              />
+                              slotsById={builderSlotsById}
+                              slotValues={builderSlotValues}
+                              onSlotChange={handleBuilderSlotChange}
+                              filledSlotClassName="text-emerald-400 caret-emerald-400"
+                              filledSlotColor="#22c55e"
+                            />
                             </div>
-                            <div className="h-2 w-full rounded-full bg-slate-900" />
+                            <div className="h-3 w-full rounded-full border border-neutral-500 bg-neutral-500" />
                           </div>
                         </div>
                       </div>
@@ -20436,7 +21436,7 @@ export default function App() {
                     canSubmit={canAttemptAttack}
                     condensed={isCompactBattleViewport}
                   />
-                ) : isStructuredTimeAnswerProblem || isShapeDragClassifyProblem ? (
+                ) : isStructuredTimeAnswerProblem || isShapeDragClassifyProblem || problem.kind === 'verticalBlank' ? (
                   <button
                     type="button"
                     disabled={!canAttemptAttack}
