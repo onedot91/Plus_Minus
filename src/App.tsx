@@ -3,7 +3,7 @@ import { Sword, Heart, RotateCcw, Play, Sparkles, Star, ChevronDown, Check, Hist
 import { motion, AnimatePresence } from 'motion/react';
 import type { VisualControlSound } from './components/VisualCalculator';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import startHeroImage from './assets/start-hero-math-adventure.webp';
+import startHeroImage from './assets/start-hero-math-adventure.png';
 import readingActivityWarningImage from './assets/reading-activity-warning.webp';
 import stage1DefeatSceneImage from './assets/stage1-defeat-scene-cutout.webp';
 import stage1ChurusigiDefeatSceneImage from './assets/stage1-churusigi-defeat-scene.jpeg';
