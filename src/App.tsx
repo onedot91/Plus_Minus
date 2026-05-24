@@ -1930,9 +1930,9 @@ type CompatibleWindow = Window & typeof globalThis & {
 };
 
 const LAYER_GAIN_BOOST = 1.8;
-const MASTER_EFFECT_GAIN = 2.2;
+const MASTER_EFFECT_GAIN = 1.9;
 const POST_COMPRESSOR_GAIN = 3.2;
-const AUDIO_ENGINE_VERSION = 4;
+const AUDIO_ENGINE_VERSION = 5;
 
 const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
   start: {
