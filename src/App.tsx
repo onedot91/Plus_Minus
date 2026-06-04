@@ -1928,6 +1928,10 @@ type SoundEffectName =
   | 'tick'
   | 'ui'
   | 'submit'
+  | 'unit6Correct'
+  | 'unit6Wrong'
+  | 'unit6Impact'
+  | 'unit6Submit'
   | 'dangerPulse'
   | 'hintStep'
   | 'hintCarry'
@@ -2001,7 +2005,7 @@ type CompatibleWindow = Window & typeof globalThis & {
 const LAYER_GAIN_BOOST = 1.8;
 const MASTER_EFFECT_GAIN = 1.9;
 const POST_COMPRESSOR_GAIN = 3.2;
-const AUDIO_ENGINE_VERSION = 5;
+const AUDIO_ENGINE_VERSION = 6;
 
 const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
   start: {
@@ -2094,6 +2098,42 @@ const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
       { kind: 'noise', duration: 0.018, gain: 0.0022, attack: 0.001, release: 0.012, filter: { type: 'highpass', frequency: 2800, sweepTo: 6800, q: 0.8 }, reverbSend: 0.01 },
       { kind: 'oscillator', wave: 'triangle', frequency: 460, glideTo: 620, duration: 0.045, gain: 0.005, attack: 0.001, release: 0.024, filter: { type: 'lowpass', frequency: 2200, sweepTo: 1400, q: 0.8 }, pan: -0.03 },
       { kind: 'oscillator', wave: 'sine', startAt: 0.006, frequency: 700, glideTo: 880, duration: 0.05, gain: 0.0048, attack: 0.001, release: 0.03, reverbSend: 0.015, pan: 0.03 },
+    ],
+  },
+  unit6Submit: {
+    output: 0.42,
+    layers: [
+      { kind: 'noise', duration: 0.028, gain: 0.0026, attack: 0.001, release: 0.018, filter: { type: 'highpass', frequency: 3600, sweepTo: 8200, q: 0.8 }, reverbSend: 0.015, panJitter: 0.1 },
+      { kind: 'oscillator', wave: 'triangle', frequency: 392, glideTo: 587.33, duration: 0.052, gain: 0.0065, attack: 0.001, release: 0.032, filter: { type: 'lowpass', frequency: 2600, sweepTo: 1700, q: 0.8 }, pan: -0.06 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.012, frequency: 783.99, glideTo: 1174.66, duration: 0.06, gain: 0.0058, attack: 0.001, release: 0.038, delaySend: 0.018, reverbSend: 0.028, pan: 0.07 },
+    ],
+  },
+  unit6Correct: {
+    output: 0.66,
+    layers: [
+      { kind: 'noise', duration: 0.11, gain: 0.0055, attack: 0.001, release: 0.08, filter: { type: 'highpass', frequency: 4200, sweepTo: 9800, q: 0.8 }, delaySend: 0.035, reverbSend: 0.12, panJitter: 0.18 },
+      { kind: 'oscillator', wave: 'triangle', frequency: 523.25, glideTo: 783.99, duration: 0.095, gain: 0.018, attack: 0.0015, release: 0.062, filter: { type: 'lowpass', frequency: 4800, sweepTo: 3200, q: 0.8 }, delaySend: 0.035, reverbSend: 0.08, pan: -0.16, panJitter: 0.06 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.038, frequency: 659.25, glideTo: 987.77, duration: 0.12, gain: 0.016, attack: 0.0015, release: 0.082, delaySend: 0.045, reverbSend: 0.1, pan: 0.12, panJitter: 0.05 },
+      { kind: 'oscillator', wave: 'triangle', startAt: 0.082, frequency: 1046.5, glideTo: 1567.98, duration: 0.14, gain: 0.014, attack: 0.002, release: 0.1, filter: { type: 'bandpass', frequency: 2600, sweepTo: 3400, q: 1.4 }, delaySend: 0.055, reverbSend: 0.12, pan: 0.04 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.142, frequency: 2093, duration: 0.11, gain: 0.006, attack: 0.001, release: 0.07, reverbSend: 0.16, pan: 0.2 },
+    ],
+  },
+  unit6Wrong: {
+    output: 0.56,
+    layers: [
+      { kind: 'noise', duration: 0.12, gain: 0.005, attack: 0.001, release: 0.09, filter: { type: 'bandpass', frequency: 1800, sweepTo: 540, q: 1.3 }, reverbSend: 0.05, panJitter: 0.12 },
+      { kind: 'oscillator', wave: 'triangle', frequency: 392, glideTo: 261.63, duration: 0.14, gain: 0.014, attack: 0.002, release: 0.09, filter: { type: 'lowpass', frequency: 1600, sweepTo: 620, q: 0.8 }, pan: -0.12 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.018, frequency: 329.63, glideTo: 220, duration: 0.18, gain: 0.014, attack: 0.002, release: 0.12, filter: { type: 'bandpass', frequency: 720, sweepTo: 360, q: 1.6 }, delaySend: 0.02, reverbSend: 0.06, pan: 0.08 },
+      { kind: 'oscillator', wave: 'triangle', startAt: 0.12, frequency: 196, glideTo: 174.61, duration: 0.12, gain: 0.008, attack: 0.002, release: 0.08, filter: { type: 'lowpass', frequency: 540, sweepTo: 260, q: 0.8 }, reverbSend: 0.08 },
+    ],
+  },
+  unit6Impact: {
+    output: 0.7,
+    layers: [
+      { kind: 'noise', duration: 0.07, gain: 0.012, attack: 0.001, release: 0.048, filter: { type: 'bandpass', frequency: 2100, sweepTo: 740, q: 1.1 }, reverbSend: 0.035, panJitter: 0.2 },
+      { kind: 'oscillator', wave: 'triangle', frequency: 220, glideTo: 146.83, duration: 0.1, gain: 0.017, attack: 0.001, release: 0.065, filter: { type: 'lowpass', frequency: 1500, sweepTo: 440, q: 0.85 }, pan: -0.09 },
+      { kind: 'oscillator', wave: 'sine', startAt: 0.008, frequency: 110, glideTo: 73.42, duration: 0.16, gain: 0.024, attack: 0.001, release: 0.11, filter: { type: 'lowpass', frequency: 720, sweepTo: 180, q: 0.8 }, reverbSend: 0.035 },
+      { kind: 'oscillator', wave: 'square', startAt: 0.018, frequency: 1320, glideTo: 880, duration: 0.036, gain: 0.0035, attack: 0.001, release: 0.024, filter: { type: 'lowpass', frequency: 3200, sweepTo: 1800, q: 0.8 }, pan: 0.18 },
     ],
   },
   dangerPulse: {
@@ -13297,7 +13337,6 @@ function EqualPartitionCirclePointCard({
   const oppositeIndexDistance = boardPoints.length / 2;
   const hasWrongSegment = lines.some(({ startIndex, endIndex }) => Math.abs(startIndex - endIndex) !== oppositeIndexDistance);
   const circleColor = equalPartition.options[0]?.color ?? '#a855f7';
-  const validEndIndex = lineStartIndex === null ? null : (lineStartIndex + oppositeIndexDistance) % boardPoints.length;
   const targetLineCount = targetCount === 4 ? 2 : 1;
 
   useEffect(() => {
@@ -13425,17 +13464,12 @@ function EqualPartitionCirclePointCard({
               : hasWrongSegment
                 ? '다시 나누기'
                 : lineStartIndex !== null
-                  ? '끝 점 선택'
+                  ? '점을 하나 더 선택'
                   : '점을 선택'}
           </span>
           <span className="rounded-full bg-white/95 px-3 py-1.5 text-xs font-black text-slate-700 shadow-sm sm:text-sm">
             선 {Math.min(lines.length, targetLineCount)} / {targetLineCount}
           </span>
-          {lineStartIndex !== null ? (
-            <span className="rounded-full bg-amber-100 px-3 py-1.5 text-xs font-black text-amber-950 shadow-sm sm:text-sm">
-              맞은편 점
-            </span>
-          ) : null}
         </div>
 
         <svg ref={svgRef} viewBox="0 0 640 360" className="relative z-0 h-full min-h-[20rem] w-full touch-none" aria-label={equalPartition.instruction} onPointerDown={handlePointerDown}>
@@ -13472,20 +13506,6 @@ function EqualPartitionCirclePointCard({
             );
           })}
           {lineStartIndex !== null ? (
-            <>
-            {validEndIndex !== null ? (
-              <line
-                x1={boardPoints[lineStartIndex].x}
-                y1={boardPoints[lineStartIndex].y}
-                x2={boardPoints[validEndIndex].x}
-                y2={boardPoints[validEndIndex].y}
-                stroke="#f59e0b"
-                strokeWidth="5"
-                strokeDasharray="10 10"
-                strokeLinecap="round"
-                opacity="0.72"
-              />
-            ) : null}
             <circle
               cx={boardPoints[lineStartIndex].x}
               cy={boardPoints[lineStartIndex].y}
@@ -13494,16 +13514,15 @@ function EqualPartitionCirclePointCard({
               stroke="#0f172a"
               strokeWidth="3"
             />
-            </>
           ) : null}
           {boardPoints.map((point) => (
             <circle
               key={`${boardShape}-divide-point-${point.index}`}
               cx={point.x}
               cy={point.y}
-              r={lineStartIndex !== null && point.index === validEndIndex ? 13 : 6}
-              fill={lineStartIndex !== null && point.index === validEndIndex ? '#fbbf24' : '#27212f'}
-              stroke={lineStartIndex !== null && point.index === validEndIndex ? '#0f172a' : 'none'}
+              r="6"
+              fill="#27212f"
+              stroke="none"
               strokeWidth="3"
             />
           ))}
@@ -15736,8 +15755,8 @@ function FractionIntroProblemCard({
                 <span>조각입니다.</span>
               </p>
 
-              <div className={`grid gap-3 border-t-4 border-slate-200 pt-4 font-black leading-snug text-slate-950 ${condensed ? 'text-base' : 'text-lg sm:text-xl'}`}>
-                <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-3 rounded-2xl bg-slate-50 px-3 py-3">
+              <div className={`border-t-4 border-slate-200 pt-4 font-black leading-snug text-slate-950 ${condensed ? 'text-base' : 'text-lg sm:text-xl'}`}>
+                <p className="flex items-center justify-center gap-x-3 overflow-x-auto rounded-2xl bg-amber-50 px-3 py-3 whitespace-nowrap">
                   <span>분수로 쓰면</span>
                   <FractionStackInput
                     numerator={getKeyValueAnswer(answerValue, 'fractionNumerator')}
@@ -15748,8 +15767,6 @@ function FractionIntroProblemCard({
                     allowHangul
                   />
                   <span>입니다.</span>
-                </p>
-                <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-3 rounded-2xl bg-amber-50 px-3 py-3">
                   <span>{fractionIntro.denominator}을</span>
                   <FractionBlankInput value={getKeyValueAnswer(answerValue, 'readDenominator')} onChange={(value) => setTextAnswer('readDenominator', value)} ariaLabel="읽기 분모" compact allowHangul inputKind="word" />
                   <span>라고 읽고, {fractionIntro.numerator}를</span>
@@ -16479,7 +16496,6 @@ function FractionIntroProblemCard({
 
         {fractionIntro.activity === 'pictureToFraction' ? (
           <div className="grid gap-3">
-            <ProblemHint>분자: 색칠 / 분모: 전체</ProblemHint>
             <div className="flex items-center justify-center">
             <PictureToFractionAnswerBuilder
               numerator={getKeyValueAnswer(answerValue, 'fractionNumerator')}
@@ -24715,6 +24731,34 @@ export default function App() {
     window.setTimeout(() => playSound(effectName, options), delayMs);
   };
 
+  const triggerUnit6Sound = (kind: 'correct' | 'wrong' | 'hit', options: { soft?: boolean } = {}) => {
+    if (activeLearningUnitId !== 'unit6') {
+      return;
+    }
+
+    const softMultiplier = options.soft ? 0.72 : 1;
+
+    if (kind === 'correct') {
+      playSound('unit6Submit', { gainMultiplier: 0.58 * softMultiplier, detune: level * 5 });
+      queueSound('unit6Correct', 55, {
+        gainMultiplier: (0.86 + level * 0.018) * softMultiplier,
+        detune: Math.min(level * 9, 72),
+      });
+    } else if (kind === 'wrong') {
+      playSound('unit6Submit', { gainMultiplier: 0.5 * softMultiplier, detune: -10 });
+      queueSound('unit6Wrong', 45, {
+        gainMultiplier: (0.78 + level * 0.012) * softMultiplier,
+        detune: -Math.min(level * 7, 52),
+      });
+    } else {
+      playSound('unit6Impact', {
+        gainMultiplier: (0.88 + level * 0.016) * softMultiplier,
+        detune: Math.min(level * 7, 64),
+        noisePlaybackRateMultiplier: 1 + level * 0.008,
+      });
+    }
+  };
+
   const selectPlayerSkin = (skinId: PlayerSkinId) => {
     const nextSkin = PLAYER_SKINS.find((skin) => skin.id === skinId);
     if (!nextSkin || (!isDeveloperMode && !isPlayerSkinUnlocked(nextSkin, unlockedPlayerSkinIds))) {
@@ -26113,6 +26157,7 @@ export default function App() {
     const runId = currentPlayRunIdRef.current;
 
     if (isCorrect) {
+      triggerUnit6Sound('correct');
       playSound('correct', {
         gainMultiplier: 1 + level * 0.018,
         detune: Math.min(level * 7, 55),
@@ -26121,6 +26166,7 @@ export default function App() {
       scheduleBattleTimeout(() => {
         setIsAttacking(false);
         setIsOpponentHit(true);
+        triggerUnit6Sound('hit');
         playSound('enemyHit', {
           gainMultiplier: 1.06 + level * 0.02,
           detune: Math.min(level * 10, 80),
@@ -26177,6 +26223,7 @@ export default function App() {
         }
       }, ATTACK_POSE_DURATION_MS, runId);
     } else {
+      triggerUnit6Sound('wrong');
       playSound('wrong', {
         gainMultiplier: previewRemainingHP(playerHP, regularHitDamage) <= 30 ? 1.06 : 1,
         detune: -24,
@@ -26185,6 +26232,7 @@ export default function App() {
       scheduleBattleTimeout(() => {
         setIsOpponentAttacking(false);
         setIsPlayerHit(true);
+        triggerUnit6Sound('wrong', { soft: true });
         playSound('playerHit', {
           gainMultiplier: previewRemainingHP(playerHP, regularHitDamage) <= 30 ? 1.1 : 1.03,
           detune: -Math.min(level * 10, 70),
@@ -26223,6 +26271,7 @@ export default function App() {
     setInputValue(selectedAnswerValue);
 
     if (oxResult.isCorrect) {
+      triggerUnit6Sound('correct', { soft: !oxResult.isComplete });
       playSound('submit', {
         gainMultiplier: 0.9,
         detune: 10,
@@ -26235,6 +26284,7 @@ export default function App() {
       scheduleBattleTimeout(() => {
         setIsAttacking(false);
         setIsOpponentHit(true);
+        triggerUnit6Sound('hit', { soft: !oxResult.isComplete });
         playSound('enemyHit', {
           gainMultiplier: 1.02 + level * 0.012,
           detune: Math.min(level * 8, 64),
@@ -26266,6 +26316,7 @@ export default function App() {
       return;
     }
 
+    triggerUnit6Sound('wrong');
     playSound('submit', {
       gainMultiplier: 0.9,
       detune: 10,
@@ -26278,6 +26329,7 @@ export default function App() {
     scheduleBattleTimeout(() => {
       setIsOpponentAttacking(false);
       setIsPlayerHit(true);
+      triggerUnit6Sound('wrong', { soft: true });
       playSound('playerHit', {
         gainMultiplier: previewRemainingHP(playerHP, oxHitDamage) <= 30 ? 1.08 : 0.98,
         detune: -Math.min(level * 8, 56),
