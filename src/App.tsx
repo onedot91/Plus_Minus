@@ -22831,10 +22831,12 @@ function ShapeIdentifyProblemCard({
   shapeDraw,
   answerValue = '',
   onAnswerChange,
+  condensed = false,
 }: {
   shapeDraw: ShapeDrawProblemData;
   answerValue?: string;
   onAnswerChange?: (value: string) => void;
+  condensed?: boolean;
 }) {
   const figureVariant = shapeDraw.figureVariant ?? 0;
   const [classifiedTriangleZones, setClassifiedTriangleZones] = useState<Record<number, string | null>>({});
@@ -23668,7 +23670,7 @@ function ShapeIdentifyProblemCard({
       const choiceEnds = getVisibleLineEnds(mode, start, end, 34);
 
       return (
-        <svg viewBox="0 0 240 128" className="h-28 w-full">
+        <svg viewBox="0 0 240 128" className={`${condensed ? 'h-20' : 'h-28'} w-full`}>
           <rect width="240" height="128" fill="#ffffff" />
           <line x1={choiceEnds.a.x} y1={choiceEnds.a.y} x2={choiceEnds.b.x} y2={choiceEnds.b.y} stroke="#111827" strokeWidth="5" strokeLinecap="round" />
           <circle cx={start.x} cy={start.y} r="7" fill="#253493" />
@@ -23679,7 +23681,7 @@ function ShapeIdentifyProblemCard({
     const selectedLineEnds = getVisibleLineEnds(shapeDraw.mode as ShapeLineMode, selectedLineStart, selectedLineEnd, 130);
 
     return (
-      <div className="grid h-full min-h-[20rem] w-full grid-rows-[1fr_auto] gap-4 px-6 py-5">
+      <div className={`grid h-full min-h-0 w-full grid-rows-[minmax(0,1fr)_auto] ${condensed ? 'gap-3 px-4 py-3' : 'gap-4 px-6 py-5'}`}>
         <svg viewBox="0 0 640 260" className="h-full w-full rounded-2xl bg-white" style={{ backgroundColor: '#ffffff' }}>
           <rect width="640" height="260" fill="#ffffff" />
           <line x1={selectedLineEnds.a.x} y1={selectedLineEnds.a.y} x2={selectedLineEnds.b.x} y2={selectedLineEnds.b.y} stroke="#111827" strokeWidth="5" strokeLinecap="round" />
@@ -23692,11 +23694,11 @@ function ShapeIdentifyProblemCard({
               key={`line-choice-${mode}`}
               type="button"
               onClick={() => onAnswerChange?.(SHAPE_DRAW_ANSWER_LABELS[mode])}
-              className="flex min-h-[10rem] flex-col items-center justify-center rounded-2xl border-4 border-[#cbd8ea] bg-white px-4 py-3 shadow-[0_8px_16px_rgba(15,23,42,0.1)] transition hover:-translate-y-0.5 hover:border-[#253493]"
+              className={`flex flex-col items-center justify-center rounded-2xl border-4 border-[#cbd8ea] bg-white shadow-[0_8px_16px_rgba(15,23,42,0.1)] transition hover:-translate-y-0.5 hover:border-[#253493] ${condensed ? 'min-h-[7rem] px-3 py-2' : 'min-h-[10rem] px-4 py-3'}`}
               style={{ backgroundColor: '#ffffff', color: '#0f172a' }}
             >
               {renderChoiceLine(mode)}
-              <span className="text-2xl font-black text-slate-950">{SHAPE_DRAW_ANSWER_LABELS[mode]}</span>
+              <span className={`${condensed ? 'text-xl' : 'text-2xl'} font-black text-slate-950`}>{SHAPE_DRAW_ANSWER_LABELS[mode]}</span>
             </button>
           ))}
         </div>
@@ -23902,8 +23904,8 @@ function ShapeIdentifyProblemCard({
   };
 
   return (
-    <div className="flex h-full w-full flex-col gap-3 text-slate-900">
-      <h2 className="shrink-0 text-2xl font-black leading-tight sm:text-3xl">{shapeDraw.title}</h2>
+    <div className={`flex h-full w-full flex-col text-slate-900 ${condensed ? 'gap-2' : 'gap-3'}`}>
+      <h2 className={`shrink-0 font-black leading-tight ${condensed ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-3xl'}`}>{shapeDraw.title}</h2>
       <div className="relative min-h-0 flex-1 overflow-hidden rounded-2xl border-2 border-slate-300 bg-[#f8fbff]">
         {isLineChoiceProblem ? (
           renderLineChoiceProblem()
@@ -25530,9 +25532,10 @@ export default function App() {
     ? filteredNumberedStoryIntroLines[filteredNumberedStoryIntroLines.length - 1] ?? ''
     : '';
   const shouldHighlightPromptNumbers = !(activeLearningUnitId === 'unit3' && level === 8);
+  const shouldUseCompactUnit1ShapeViewport = activeLearningUnitId === 'unit1' && problem.kind === 'shapeDraw';
   const shouldUseCompactUnit3Viewport = activeLearningUnitId === 'unit3' && level >= 8 && !isStoryTimeAdditionProblem;
   const isCompactBattleViewport =
-    isShortViewport || shouldUseCompactUnit3Viewport || hasNumberedStoryOptions;
+    isShortViewport || shouldUseCompactUnit1ShapeViewport || shouldUseCompactUnit3Viewport || hasNumberedStoryOptions;
   const numberedStoryOptionCount = storyPromptSections?.optionLines.length ?? 0;
   const isDenseNumberedStoryLayout = Boolean(
     isCompactBattleViewport && problem.kind === 'story' && problem.storyTable && numberedStoryOptionCount >= 4,
@@ -27980,6 +27983,7 @@ export default function App() {
                           shapeDraw={problem.shapeDraw}
                           answerValue={displayedInputValue}
                           onAnswerChange={setInputValue}
+                          condensed={isCompactBattleViewport}
                         />
                       ) : (
                         <ShapeDrawProblemCardV2
