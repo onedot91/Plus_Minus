@@ -22822,11 +22822,6 @@ function ShapeDrawProblemCardV2({
           {[...points, ...pendingPolygon, ...(lineStart ? [lineStart] : [])].map((point) => <g key={`point-${point.x}-${point.y}-${point.label}`}><ShapePointView point={point} /></g>)}
           </svg>
         </div>
-        <div className="flex shrink-0 justify-end border-t-2 border-slate-200 bg-white/80 px-5 py-3">
-          <button type="button" onClick={onSubmit} className="flex items-center gap-2 rounded-full bg-emerald-500 px-7 py-3 text-lg font-black text-white shadow-lg shadow-emerald-900/25 transition hover:bg-emerald-400">
-            <Sword size={22} /> 공격!
-          </button>
-        </div>
       </div>
     </div>
   );
@@ -28310,7 +28305,6 @@ export default function App() {
 
             {!isSpecialChallengeActive &&
               problem.kind !== 'shapeRain' &&
-              (problem.kind !== 'shapeDraw' || isShapeReadProblem) &&
               !(problem.kind === 'equalPartition' && (problem.equalPartition?.activity === 'classify' || problem.equalPartition?.activity === 'countPieces')) && (
               <div className={`shrink-0 flex flex-col ${battleInputResponsiveClass}`}>
                 {usesBattleStructuredTimeInput ? (
@@ -28323,6 +28317,7 @@ export default function App() {
                     condensed={isCompactBattleViewport}
                   />
                 ) : isStructuredTimeAnswerProblem ||
+                  (problem.kind === 'shapeDraw' && !isShapeReadProblem) ||
                   isShapeDragClassifyProblem ||
                   problem.kind === 'verticalBlank' ||
                   (problem.kind === 'equalPartition' && problem.equalPartition?.activity !== 'classify') ||
