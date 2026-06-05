@@ -2982,7 +2982,7 @@ export const VisualCalculator: React.FC<VisualCalculatorProps> = ({
       </div>
 
       <LayoutGroup id="visual-calculator-blocks">
-        <div className="flex min-h-0 flex-1 flex-col gap-3 xl:hidden">
+        <div className="flex min-h-0 flex-1 flex-col gap-3 lg:hidden">
           <CompactProblemBoard n1={n1} n2={n2} op={op} step={step} />
 
           {transfer ? <CompactTransferBanner transfer={transfer} /> : null}
@@ -2997,7 +2997,7 @@ export const VisualCalculator: React.FC<VisualCalculatorProps> = ({
           </div>
         </div>
 
-        <div className={`hidden min-h-0 flex-1 xl:flex ${condensed ? 'gap-2' : 'gap-3'}`}>
+        <div className={`hidden min-h-0 flex-1 lg:flex ${condensed ? 'gap-2' : 'gap-3'}`}>
           <SimpleFormulaPanel n1={n1} n2={n2} op={op} compactLayout={desktopCompactLayout} />
 
           <div className="relative min-h-0 flex-1">
