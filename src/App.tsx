@@ -204,6 +204,66 @@ import playerNinjaHitImage from './assets/player-ninja-hit.png';
 import playerRobotAttackImage from './assets/player-robot-attack.png';
 import playerRobotDefaultImage from './assets/player-robot-default.png';
 import playerRobotHitImage from './assets/player-robot-hit.png';
+import playerFractionPicnicAttackImage from './assets/player-fraction-picnic-attack.png';
+import playerFractionPicnicDefaultImage from './assets/player-fraction-picnic-default.png';
+import playerFractionPicnicHitImage from './assets/player-fraction-picnic-hit.png';
+import playerDecimalBeadsAttackImage from './assets/player-decimal-beads-attack.png';
+import playerDecimalBeadsDefaultImage from './assets/player-decimal-beads-default.png';
+import playerDecimalBeadsHitImage from './assets/player-decimal-beads-hit.png';
+import playerBlackCatAttackImage from './assets/player-black-cat-attack.png';
+import playerBlackCatDefaultImage from './assets/player-black-cat-default.png';
+import playerBlackCatHitImage from './assets/player-black-cat-hit.png';
+import playerDumplingAttackImage from './assets/player-dumpling-attack.png';
+import playerDumplingDefaultImage from './assets/player-dumpling-default.png';
+import playerDumplingHitImage from './assets/player-dumpling-hit.png';
+import playerTearyCatAttackImage from './assets/player-teary-cat-attack.png';
+import playerTearyCatDefaultImage from './assets/player-teary-cat-default.png';
+import playerTearyCatHitImage from './assets/player-teary-cat-hit.png';
+import playerSproutSuitAttackImage from './assets/player-sprout-suit-attack.png';
+import playerSproutSuitDefaultImage from './assets/player-sprout-suit-default.png';
+import playerSproutSuitHitImage from './assets/player-sprout-suit-hit.png';
+import playerWeirdGomaAttackImage from './assets/player-weird-goma-attack.png';
+import playerWeirdGomaDefaultImage from './assets/player-weird-goma-default.png';
+import playerWeirdGomaHitImage from './assets/player-weird-goma-hit.png';
+import playerWaterHyacinthAttackImage from './assets/player-water-hyacinth-attack.png';
+import playerWaterHyacinthDefaultImage from './assets/player-water-hyacinth-default.png';
+import playerWaterHyacinthHitImage from './assets/player-water-hyacinth-hit.png';
+import playerAloeAttackImage from './assets/player-aloe-attack.png';
+import playerAloeDefaultImage from './assets/player-aloe-default.png';
+import playerAloeHitImage from './assets/player-aloe-hit.png';
+import playerCockleburAttackImage from './assets/player-cocklebur-attack.png';
+import playerCockleburDefaultImage from './assets/player-cocklebur-default.png';
+import playerCockleburHitImage from './assets/player-cocklebur-hit.png';
+import playerSproutHelmetAttackImage from './assets/player-sprout-helmet-attack.png';
+import playerSproutHelmetDefaultImage from './assets/player-sprout-helmet-default.png';
+import playerSproutHelmetHitImage from './assets/player-sprout-helmet-hit.png';
+import playerDragonAttackImage from './assets/player-dragon-attack.png';
+import playerDragonDefaultImage from './assets/player-dragon-default.png';
+import playerDragonHitImage from './assets/player-dragon-hit.png';
+import playerKangarooAttackImage from './assets/player-kangaroo-attack.png';
+import playerKangarooDefaultImage from './assets/player-kangaroo-default.png';
+import playerKangarooHitImage from './assets/player-kangaroo-hit.png';
+import playerChickAttackImage from './assets/player-chick-attack.png';
+import playerChickDefaultImage from './assets/player-chick-default.png';
+import playerChickHitImage from './assets/player-chick-hit.png';
+import playerRainbowBearAttackImage from './assets/player-rainbow-bear-attack.png';
+import playerRainbowBearDefaultImage from './assets/player-rainbow-bear-default.png';
+import playerRainbowBearHitImage from './assets/player-rainbow-bear-hit.png';
+import playerOctopusAttackImage from './assets/player-octopus-attack.png';
+import playerOctopusDefaultImage from './assets/player-octopus-default.png';
+import playerOctopusHitImage from './assets/player-octopus-hit.png';
+import playerSquidAttackImage from './assets/player-squid-attack.png';
+import playerSquidDefaultImage from './assets/player-squid-default.png';
+import playerSquidHitImage from './assets/player-squid-hit.png';
+import playerAlienGlassesAttackImage from './assets/player-alien-glasses-attack.png';
+import playerAlienGlassesDefaultImage from './assets/player-alien-glasses-default.png';
+import playerAlienGlassesHitImage from './assets/player-alien-glasses-hit.png';
+import playerTimelineAttackImage from './assets/player-timeline-attack.png';
+import playerTimelineDefaultImage from './assets/player-timeline-default.png';
+import playerTimelineHitImage from './assets/player-timeline-hit.png';
+import playerVillageTeacherAttackImage from './assets/player-village-teacher-attack.png';
+import playerVillageTeacherDefaultImage from './assets/player-village-teacher-default.png';
+import playerVillageTeacherHitImage from './assets/player-village-teacher-hit.png';
 import opponentLevel1AttackImage from './assets/opponent-level1-attack.png';
 import opponentLevel1ChurusigiAttackImage from './assets/opponent-level1-churusigi-attack-cutout.webp';
 import opponentLevel1DefaultImage from './assets/opponent-level1-default.png';
@@ -1724,7 +1784,7 @@ interface CharacterSpriteSet {
   hit: string;
 }
 
-type PlayerSkinId = 'default' | 'champion' | 'wizard' | 'cape' | 'detective' | 'knight' | 'space' | 'chef' | 'pirate' | 'firefighter' | 'fairy' | 'patissier' | 'catpajama' | 'rainbowartist' | 'heartwizard' | 'eraser' | 'safety' | 'duck' | 'wolf' | 'fox' | 'ribbon' | 'babo' | 'student' | 'fish' | 'hamster' | 'pizza' | 'ghost' | 'police' | 'spain' | 'goguma' | 'baby-potato' | 'tornadopotato' | 'smart' | 'honey' | 'tiger' | 'gumiho' | 'cat' | 'princess' | 'teacher' | 'clock' | 'mom' | 'thief' | 'diver' | 'wing' | 'scientist' | 'rainbow-dye' | 'taegeukgi' | 'tire' | 'bald' | 'mohawk' | 'soccer-player' | 'baseball-player' | 'basketball-player' | 'taekwondo' | 'swimmer' | 'gardener' | 'musician' | 'doctor' | 'pilot' | 'ninja' | 'robot';
+type PlayerSkinId = 'default' | 'champion' | 'wizard' | 'cape' | 'detective' | 'knight' | 'space' | 'chef' | 'pirate' | 'firefighter' | 'fairy' | 'patissier' | 'catpajama' | 'rainbowartist' | 'heartwizard' | 'eraser' | 'safety' | 'duck' | 'wolf' | 'fox' | 'ribbon' | 'babo' | 'student' | 'fish' | 'hamster' | 'pizza' | 'ghost' | 'police' | 'spain' | 'goguma' | 'baby-potato' | 'tornadopotato' | 'smart' | 'honey' | 'tiger' | 'gumiho' | 'cat' | 'princess' | 'teacher' | 'clock' | 'mom' | 'thief' | 'diver' | 'wing' | 'scientist' | 'rainbow-dye' | 'taegeukgi' | 'tire' | 'bald' | 'mohawk' | 'soccer-player' | 'baseball-player' | 'basketball-player' | 'taekwondo' | 'swimmer' | 'gardener' | 'musician' | 'doctor' | 'pilot' | 'ninja' | 'robot' | 'fraction-picnic' | 'decimal-beads' | 'black-cat' | 'dumpling' | 'teary-cat' | 'sprout-suit' | 'weird-goma' | 'water-hyacinth' | 'aloe' | 'cocklebur' | 'sprout-helmet' | 'dragon' | 'kangaroo' | 'chick' | 'rainbow-bear' | 'octopus' | 'squid' | 'alien-glasses' | 'timeline' | 'village-teacher';
 
 interface PlayerSkinConfig {
   id: PlayerSkinId;
@@ -3487,6 +3547,106 @@ const ROBOT_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
   default: playerRobotDefaultImage,
   hit: playerRobotHitImage,
 };
+const FRACTION_PICNIC_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerFractionPicnicAttackImage,
+  default: playerFractionPicnicDefaultImage,
+  hit: playerFractionPicnicHitImage,
+};
+const DECIMAL_BEADS_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerDecimalBeadsAttackImage,
+  default: playerDecimalBeadsDefaultImage,
+  hit: playerDecimalBeadsHitImage,
+};
+const BLACK_CAT_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerBlackCatAttackImage,
+  default: playerBlackCatDefaultImage,
+  hit: playerBlackCatHitImage,
+};
+const DUMPLING_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerDumplingAttackImage,
+  default: playerDumplingDefaultImage,
+  hit: playerDumplingHitImage,
+};
+const TEARY_CAT_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerTearyCatAttackImage,
+  default: playerTearyCatDefaultImage,
+  hit: playerTearyCatHitImage,
+};
+const SPROUT_SUIT_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerSproutSuitAttackImage,
+  default: playerSproutSuitDefaultImage,
+  hit: playerSproutSuitHitImage,
+};
+const WEIRD_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerWeirdGomaAttackImage,
+  default: playerWeirdGomaDefaultImage,
+  hit: playerWeirdGomaHitImage,
+};
+const WATER_HYACINTH_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerWaterHyacinthAttackImage,
+  default: playerWaterHyacinthDefaultImage,
+  hit: playerWaterHyacinthHitImage,
+};
+const ALOE_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerAloeAttackImage,
+  default: playerAloeDefaultImage,
+  hit: playerAloeHitImage,
+};
+const COCKLEBUR_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerCockleburAttackImage,
+  default: playerCockleburDefaultImage,
+  hit: playerCockleburHitImage,
+};
+const SPROUT_HELMET_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerSproutHelmetAttackImage,
+  default: playerSproutHelmetDefaultImage,
+  hit: playerSproutHelmetHitImage,
+};
+const DRAGON_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerDragonAttackImage,
+  default: playerDragonDefaultImage,
+  hit: playerDragonHitImage,
+};
+const KANGAROO_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerKangarooAttackImage,
+  default: playerKangarooDefaultImage,
+  hit: playerKangarooHitImage,
+};
+const CHICK_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerChickAttackImage,
+  default: playerChickDefaultImage,
+  hit: playerChickHitImage,
+};
+const RAINBOW_BEAR_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerRainbowBearAttackImage,
+  default: playerRainbowBearDefaultImage,
+  hit: playerRainbowBearHitImage,
+};
+const OCTOPUS_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerOctopusAttackImage,
+  default: playerOctopusDefaultImage,
+  hit: playerOctopusHitImage,
+};
+const SQUID_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerSquidAttackImage,
+  default: playerSquidDefaultImage,
+  hit: playerSquidHitImage,
+};
+const ALIEN_GLASSES_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerAlienGlassesAttackImage,
+  default: playerAlienGlassesDefaultImage,
+  hit: playerAlienGlassesHitImage,
+};
+const TIMELINE_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerTimelineAttackImage,
+  default: playerTimelineDefaultImage,
+  hit: playerTimelineHitImage,
+};
+const VILLAGE_TEACHER_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerVillageTeacherAttackImage,
+  default: playerVillageTeacherDefaultImage,
+  hit: playerVillageTeacherHitImage,
+};
 const PLAYER_SKINS: PlayerSkinConfig[] = [
   {
     id: 'default',
@@ -3914,6 +4074,146 @@ const PLAYER_SKINS: PlayerSkinConfig[] = [
     spriteSet: ROBOT_GOMA_PLAYER_SPRITES,
     isReward: true,
   },
+  {
+    id: 'fraction-picnic',
+    label: '분수 고마',
+    badge: '랜덤 보상',
+    spriteSet: FRACTION_PICNIC_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'decimal-beads',
+    label: '구슬 고마',
+    badge: '랜덤 보상',
+    spriteSet: DECIMAL_BEADS_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'black-cat',
+    label: '검은 고양이 고마',
+    badge: '랜덤 보상',
+    spriteSet: BLACK_CAT_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'dumpling',
+    label: '굴인형 고마',
+    badge: '랜덤 보상',
+    spriteSet: DUMPLING_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'teary-cat',
+    label: '눈물 고양이 고마',
+    badge: '랜덤 보상',
+    spriteSet: TEARY_CAT_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'sprout-suit',
+    label: '새싹 고마',
+    badge: '랜덤 보상',
+    spriteSet: SPROUT_SUIT_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'weird-goma',
+    label: '이상한 고마',
+    badge: '랜덤 보상',
+    spriteSet: WEIRD_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'water-hyacinth',
+    label: '부레옥잠 고마',
+    badge: '랜덤 보상',
+    spriteSet: WATER_HYACINTH_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'aloe',
+    label: '알로에 고마',
+    badge: '랜덤 보상',
+    spriteSet: ALOE_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'cocklebur',
+    label: '도꼬마리 열매 고마',
+    badge: '랜덤 보상',
+    spriteSet: COCKLEBUR_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'sprout-helmet',
+    label: '떡잎 고마',
+    badge: '랜덤 보상',
+    spriteSet: SPROUT_HELMET_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'dragon',
+    label: '종이드래곤 고마',
+    badge: '랜덤 보상',
+    spriteSet: DRAGON_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'kangaroo',
+    label: '캥거루 고마',
+    badge: '랜덤 보상',
+    spriteSet: KANGAROO_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'chick',
+    label: '병아리 고마',
+    badge: '랜덤 보상',
+    spriteSet: CHICK_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'rainbow-bear',
+    label: '무지개 고마',
+    badge: '랜덤 보상',
+    spriteSet: RAINBOW_BEAR_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'octopus',
+    label: '문어 고마',
+    badge: '랜덤 보상',
+    spriteSet: OCTOPUS_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'squid',
+    label: '오징어 고마',
+    badge: '랜덤 보상',
+    spriteSet: SQUID_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'alien-glasses',
+    label: '외계인 안경 고마',
+    badge: '랜덤 보상',
+    spriteSet: ALIEN_GLASSES_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'timeline',
+    label: '연표 고마',
+    badge: '랜덤 보상',
+    spriteSet: TIMELINE_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'village-teacher',
+    label: '훈장님 고마',
+    badge: '랜덤 보상',
+    spriteSet: VILLAGE_TEACHER_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
 ];
 const PLAYER_SKIN_IDS = new Set<PlayerSkinId>(PLAYER_SKINS.map((skin) => skin.id));
 const REWARD_PLAYER_SKINS = PLAYER_SKINS.filter((skin) => skin.isReward);
@@ -3921,7 +4221,7 @@ const REWARD_PLAYER_SKINS_BY_UNIT: Record<LearningUnitId, PlayerSkinConfig[]> = 
   unit1: REWARD_PLAYER_SKINS.slice(0, 20),
   unit2: REWARD_PLAYER_SKINS.slice(20, 40),
   unit3: REWARD_PLAYER_SKINS.slice(40, 60),
-  unit6: [],
+  unit6: REWARD_PLAYER_SKINS.slice(60),
 };
 
 function isPlayerSkinUnlocked(skin: PlayerSkinConfig, unlockedSkinIds: PlayerSkinId[]) {
@@ -4371,7 +4671,7 @@ const LEARNING_UNITS: LearningUnitConfig[] = [
     isAvailable: true,
   },
 ];
-const IN_PROGRESS_LEARNING_UNIT_IDS = new Set<LearningUnitId>(['unit6']);
+const IN_PROGRESS_LEARNING_UNIT_IDS = new Set<LearningUnitId>();
 const isLearningUnitInProgress = (unitId: LearningUnitId) => IN_PROGRESS_LEARNING_UNIT_IDS.has(unitId);
 const canEnterLearningUnit = (unit: LearningUnitConfig, isDeveloperMode: boolean) =>
   unit.isAvailable && (isDeveloperMode || !isLearningUnitInProgress(unit.id));
@@ -25399,6 +25699,16 @@ export default function App() {
   const selectedPlayerSkin = PLAYER_SKINS.find((skin) => skin.id === selectedPlayerSkinId) ?? PLAYER_SKINS[0];
   const playerSpriteSet = selectedPlayerSkin.spriteSet;
   const availablePlayerSkins = PLAYER_SKINS.filter((skin) => isDeveloperMode || isPlayerSkinUnlocked(skin, unlockedPlayerSkinIds));
+  const sortedPlayerSkinsForPicker = [...PLAYER_SKINS].sort((leftSkin, rightSkin) => {
+    const isLeftSkinUnlocked = isDeveloperMode || isPlayerSkinUnlocked(leftSkin, unlockedPlayerSkinIds);
+    const isRightSkinUnlocked = isDeveloperMode || isPlayerSkinUnlocked(rightSkin, unlockedPlayerSkinIds);
+
+    if (isLeftSkinUnlocked === isRightSkinUnlocked) {
+      return 0;
+    }
+
+    return isLeftSkinUnlocked ? -1 : 1;
+  });
   const playerCharacterImage = isPlayerHit
     ? playerSpriteSet.hit
     : isAttacking
@@ -25488,7 +25798,7 @@ export default function App() {
   const rewardSlotMachineItems = pendingRewardSkin
     ? [...rewardRouletteSkins, ...rewardRouletteSkins, ...rewardRouletteSkins, pendingRewardSkin]
     : rewardRouletteSkins;
-  const rewardSlotMachineStopY = -Math.max(0, rewardSlotMachineItems.length - 1) * 128;
+  const rewardSlotMachineStopY = -Math.max(0, rewardSlotMachineItems.length - 1) * 96;
   const visibleStoredPlayRecords = storedPlayRecords.slice(0, 30);
   const hasStoredPlayRecords = visibleStoredPlayRecords.length > 0;
   const visibleStoredPlayRecordSections = visibleStoredPlayRecords.reduce<Array<{
@@ -27928,7 +28238,7 @@ export default function App() {
                           >
                             <div className="skin-scrollbar mt-2 max-h-[18.5rem] overflow-y-auto overscroll-contain rounded-[0.95rem] border border-slate-700 bg-slate-950/35 p-2 pr-1 [scrollbar-gutter:stable]">
                               <div className="grid grid-cols-[repeat(auto-fill,minmax(5.8rem,1fr))] gap-2 sm:grid-cols-[repeat(auto-fill,minmax(6.4rem,1fr))]">
-                              {PLAYER_SKINS.map((skin) => {
+                              {sortedPlayerSkinsForPicker.map((skin) => {
                                 const isSkinUnlocked = isDeveloperMode || isPlayerSkinUnlocked(skin, unlockedPlayerSkinIds);
                                 const isSelectedSkin = selectedPlayerSkinId === skin.id;
                                 const displaySkinLabel = isSkinUnlocked ? skin.label : '비공개';
@@ -29176,7 +29486,7 @@ export default function App() {
         <motion.div
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
-          className={`relative flex w-full max-w-xl max-h-[calc(100svh-1rem)] flex-col justify-center overflow-x-hidden overflow-y-auto rounded-[2.5rem] border-4 p-4 text-center shadow-2xl sm:max-w-2xl sm:p-6 lg:p-8 ${
+          className={`relative flex w-full max-w-xl max-h-[calc(100svh-1rem)] flex-col justify-center overflow-x-hidden overflow-y-auto rounded-[2.25rem] border-4 p-3 text-center shadow-2xl sm:max-w-2xl sm:p-4 lg:p-5 ${
             isWinResult
               ? 'border-yellow-200/35 bg-[radial-gradient(circle_at_top,rgba(250,204,21,0.18),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(34,211,238,0.08),transparent_30%),linear-gradient(180deg,rgba(49,46,129,0.92),rgba(30,41,59,0.98))] shadow-[0_40px_120px_rgba(245,158,11,0.3)]'
               : 'border-slate-600 bg-slate-800'
@@ -29186,12 +29496,12 @@ export default function App() {
             <>
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.16),transparent_24%),radial-gradient(circle_at_50%_32%,rgba(250,204,21,0.22),transparent_28%)]" />
               <motion.div
-                className="pointer-events-none absolute left-1/2 top-8 h-72 w-72 -translate-x-1/2 rounded-full bg-[conic-gradient(from_0deg,rgba(250,204,21,0),rgba(253,224,71,0.55),rgba(250,204,21,0),rgba(244,114,182,0.35),rgba(250,204,21,0))] blur-[2px]"
+                className="pointer-events-none absolute left-1/2 top-6 h-56 w-56 -translate-x-1/2 rounded-full bg-[conic-gradient(from_0deg,rgba(250,204,21,0),rgba(253,224,71,0.55),rgba(250,204,21,0),rgba(244,114,182,0.35),rgba(250,204,21,0))] blur-[2px] sm:h-64 sm:w-64"
                 animate={{ rotate: 360 }}
                 transition={{ repeat: Infinity, duration: 16, ease: 'linear' }}
               />
               <motion.div
-                className="pointer-events-none absolute left-1/2 top-10 h-64 w-64 -translate-x-1/2 rounded-full border border-yellow-100/30"
+                className="pointer-events-none absolute left-1/2 top-8 h-48 w-48 -translate-x-1/2 rounded-full border border-yellow-100/30 sm:h-56 sm:w-56"
                 animate={{ scale: [1, 1.08, 1], opacity: [0.5, 0.9, 0.5] }}
                 transition={{ repeat: Infinity, duration: 3.6, ease: 'easeInOut' }}
               />
@@ -29224,8 +29534,8 @@ export default function App() {
           )}
 
           {gameState === 'win' ? (
-            <div className="relative mb-3 sm:mb-4">
-              <div className="relative mx-auto mb-3 flex h-28 w-28 items-center justify-center sm:h-36 sm:w-36 lg:h-40 lg:w-40">
+            <div className="relative mb-2 sm:mb-3">
+              <div className="relative mx-auto mb-2 flex h-20 w-20 items-center justify-center sm:h-24 sm:w-24 lg:h-28 lg:w-28">
                 <motion.div
                   className="absolute inset-0 rounded-full bg-yellow-300/25 blur-3xl"
                   animate={{ scale: [1, 1.18, 1], opacity: [0.55, 0.95, 0.55] }}
@@ -29240,7 +29550,7 @@ export default function App() {
                   animate={{ rotate: [0, -10, 12, -8, 0], scale: [1, 1.12, 1] }}
                   transition={{ repeat: Infinity, duration: 3.2, ease: 'easeInOut' }}
                 >
-                  <Star className="h-20 w-20 fill-current text-yellow-300 drop-shadow-[0_0_35px_rgba(253,224,71,0.75)] sm:h-24 sm:w-24 lg:h-28 lg:w-28" />
+                  <Star className="h-14 w-14 fill-current text-yellow-300 drop-shadow-[0_0_35px_rgba(253,224,71,0.75)] sm:h-16 sm:w-16 lg:h-20 lg:w-20" />
                 </motion.div>
               </div>
               <motion.p
@@ -29251,7 +29561,7 @@ export default function App() {
                 CHAMPION
               </motion.p>
               <motion.h1
-                className="text-[clamp(3.5rem,12vw,5.8rem)] font-black leading-none tracking-[-0.08em] text-transparent bg-[linear-gradient(180deg,#fef9c3_0%,#facc15_36%,#fb7185_100%)] bg-clip-text"
+                className="text-[clamp(2.75rem,9vw,4.7rem)] font-black leading-none tracking-[-0.08em] text-transparent bg-[linear-gradient(180deg,#fef9c3_0%,#facc15_36%,#fb7185_100%)] bg-clip-text"
                 style={{ textShadow: '0 18px 40px rgba(251,191,36,0.22)' }}
                 animate={{ scale: [1, 1.04, 1], y: [0, -4, 0] }}
                 transition={{ repeat: Infinity, duration: 2.7, ease: 'easeInOut' }}
@@ -29299,7 +29609,7 @@ export default function App() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -10, scale: 0.98 }}
                 transition={{ duration: 0.28, ease: 'easeOut' }}
-                className="relative mb-4 overflow-hidden rounded-[1.75rem] border border-yellow-100/35 bg-[radial-gradient(circle_at_50%_0%,rgba(253,224,71,0.26),transparent_30%),radial-gradient(circle_at_16%_72%,rgba(45,212,191,0.15),transparent_26%),linear-gradient(180deg,rgba(15,23,42,0.9),rgba(8,13,26,0.96))] px-4 py-5 shadow-[0_24px_80px_rgba(250,204,21,0.18),inset_0_1px_0_rgba(255,255,255,0.16)] sm:px-6"
+                className="relative mb-3 overflow-hidden rounded-[1.5rem] border border-yellow-100/35 bg-[radial-gradient(circle_at_50%_0%,rgba(253,224,71,0.26),transparent_30%),radial-gradient(circle_at_16%_72%,rgba(45,212,191,0.15),transparent_26%),linear-gradient(180deg,rgba(15,23,42,0.9),rgba(8,13,26,0.96))] px-3 py-3 shadow-[0_24px_80px_rgba(250,204,21,0.18),inset_0_1px_0_rgba(255,255,255,0.16)] sm:px-4"
               >
                 <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-yellow-100/60 to-transparent" />
                 <div className="pointer-events-none absolute -left-16 top-1/2 h-28 w-28 -translate-y-1/2 rounded-full bg-emerald-300/10 blur-2xl" />
@@ -29307,11 +29617,11 @@ export default function App() {
                 <div className="relative mx-auto flex max-w-[34rem] flex-col items-center">
                   <div className="relative w-full">
                     <div className="pointer-events-none absolute left-1/2 top-[-0.2rem] z-30 h-0 w-0 -translate-x-1/2 border-x-[0.85rem] border-t-[1.35rem] border-x-transparent border-t-yellow-200 drop-shadow-[0_0_18px_rgba(253,224,71,0.9)]" />
-                    <div className="relative overflow-hidden rounded-[1.45rem] border border-yellow-100/35 bg-[linear-gradient(180deg,rgba(2,6,23,0.98),rgba(15,23,42,0.94))] p-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08),0_20px_54px_rgba(2,8,23,0.42)]">
-                      <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-14 bg-gradient-to-b from-slate-950 via-slate-950/70 to-transparent" />
-                      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-14 bg-gradient-to-t from-slate-950 via-slate-950/70 to-transparent" />
-                      <div className="pointer-events-none absolute inset-x-3 top-1/2 z-20 h-[8rem] -translate-y-1/2 rounded-[1.1rem] border border-yellow-100/45 bg-yellow-100/8 shadow-[0_0_40px_rgba(250,204,21,0.22),inset_0_1px_0_rgba(255,255,255,0.18)]" />
-                      <div className="relative mx-auto h-[8rem] max-w-[28rem] overflow-hidden">
+                    <div className="relative overflow-hidden rounded-[1.25rem] border border-yellow-100/35 bg-[linear-gradient(180deg,rgba(2,6,23,0.98),rgba(15,23,42,0.94))] p-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08),0_20px_54px_rgba(2,8,23,0.42)]">
+                      <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-10 bg-gradient-to-b from-slate-950 via-slate-950/70 to-transparent" />
+                      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-10 bg-gradient-to-t from-slate-950 via-slate-950/70 to-transparent" />
+                      <div className="pointer-events-none absolute inset-x-3 top-1/2 z-20 h-[6rem] -translate-y-1/2 rounded-[1rem] border border-yellow-100/45 bg-yellow-100/8 shadow-[0_0_40px_rgba(250,204,21,0.22),inset_0_1px_0_rgba(255,255,255,0.18)]" />
+                      <div className="relative mx-auto h-[6rem] max-w-[28rem] overflow-hidden">
                         <motion.div
                           key={rewardRouletteSpinKey}
                           className="flex flex-col items-stretch"
@@ -29322,19 +29632,19 @@ export default function App() {
                           {rewardSlotMachineItems.map((skin, slotIndex) => (
                             <div
                               key={`${skin.id}-${slotIndex}`}
-                              className="flex h-[8rem] items-center justify-center gap-5 px-3"
+                              className="flex h-[6rem] items-center justify-center gap-4 px-3"
                             >
-                              <span className="flex h-24 w-24 shrink-0 items-center justify-center rounded-[1.1rem] border border-white/18 bg-slate-950/72 shadow-[0_10px_24px_rgba(2,8,23,0.32),inset_0_1px_0_rgba(255,255,255,0.08)]">
+                              <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1rem] border border-white/18 bg-slate-950/72 shadow-[0_10px_24px_rgba(2,8,23,0.32),inset_0_1px_0_rgba(255,255,255,0.08)] sm:h-20 sm:w-20">
                                 <img
                                   src={skin.spriteSet.default}
                                   alt={`${skin.label} 슬롯 후보`}
-                                  className="h-20 w-auto object-contain drop-shadow-[0_8px_12px_rgba(2,8,23,0.42)]"
+                                  className="h-14 w-auto object-contain drop-shadow-[0_8px_12px_rgba(2,8,23,0.42)] sm:h-16"
                                   draggable={false}
                                 />
                               </span>
                               <span className="min-w-0 text-left">
                                 <span className="block text-xs font-black tracking-[0.22em] text-emerald-200/85">보상 스킨</span>
-                                <span className="mt-1 block truncate text-2xl font-black leading-tight text-white sm:text-3xl">
+                                <span className="mt-1 block truncate text-xl font-black leading-tight text-white sm:text-2xl">
                                   {skin.label}
                                 </span>
                               </span>
@@ -29343,7 +29653,7 @@ export default function App() {
                         </motion.div>
                       </div>
                     </div>
-                    <div className="mt-3 flex items-center justify-center gap-2">
+                    <div className="mt-2 flex items-center justify-center gap-2">
                       {[0, 1, 2].map((dotIndex) => (
                         <motion.span
                           key={dotIndex}
@@ -29355,7 +29665,7 @@ export default function App() {
                     </div>
                   </div>
                   <motion.div
-                    className="mt-3 min-h-[1.75rem] text-center"
+                    className="mt-2 min-h-[1.5rem] text-center"
                     animate={rewardRoulettePhase === 'revealed' ? { y: [6, 0], opacity: [0, 1] } : { opacity: 1 }}
                     transition={{ duration: 0.34, ease: 'easeOut' }}
                   >
@@ -29397,12 +29707,12 @@ export default function App() {
             </div>
           )}
           <div className="mx-auto flex w-full flex-col gap-2 sm:w-auto sm:min-w-[18rem]">
-            <button onPointerDown={warmAudio} onClick={openRecordModal} className={`flex w-full items-center justify-center gap-3 rounded-full px-6 py-3 text-lg font-black transition-all sm:text-xl lg:gap-4 lg:px-10 lg:py-4 lg:text-2xl ${
+            <button onPointerDown={warmAudio} onClick={openRecordModal} className={`flex w-full items-center justify-center gap-3 rounded-full px-6 py-2.5 text-lg font-black transition-all sm:text-xl lg:gap-4 lg:px-10 lg:py-3 lg:text-2xl ${
               isWinResult
                 ? 'bg-[linear-gradient(90deg,#facc15_0%,#34d399_100%)] text-slate-950 shadow-[0_18px_40px_rgba(250,204,21,0.28)] hover:scale-[1.01] hover:brightness-105'
                 : 'bg-emerald-500 text-slate-950 hover:bg-emerald-400'
             }`}><History size={28} /> 기록 보기</button>
-            <button onPointerDown={warmAudio} onClick={returnToStartScreen} className={`flex w-full items-center justify-center gap-3 rounded-full px-6 py-3 text-lg font-black text-white transition-all sm:text-xl lg:gap-4 lg:px-10 lg:py-4 lg:text-2xl ${
+            <button onPointerDown={warmAudio} onClick={returnToStartScreen} className={`flex w-full items-center justify-center gap-3 rounded-full px-6 py-2.5 text-lg font-black text-white transition-all sm:text-xl lg:gap-4 lg:px-10 lg:py-3 lg:text-2xl ${
               isWinResult
                 ? 'border border-white/15 bg-white/14 backdrop-blur-sm hover:bg-white/20'
                 : 'bg-slate-600 hover:bg-slate-500'
