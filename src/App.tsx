@@ -321,6 +321,38 @@ import unit3Level8LabulabuAttackImage from './assets/unit3-level8-labulabu-attac
 import unit3Level8LabulabuDefaultImage from './assets/unit3-level8-labulabu-default.webp';
 import unit3Level8LabulabuDefeatSceneImage from './assets/unit3-level8-labulabu-defeat-scene.webp';
 import unit3Level8LabulabuHitImage from './assets/unit3-level8-labulabu-hit.webp';
+import unit6Level1RedStickerAttackImage from './assets/unit6-level1-red-sticker-attack.webp';
+import unit6Level1RedStickerDefaultImage from './assets/unit6-level1-red-sticker-default.webp';
+import unit6Level1RedStickerDefeatSceneImage from './assets/unit6-level1-red-sticker-defeat-scene.webp';
+import unit6Level1RedStickerHitImage from './assets/unit6-level1-red-sticker-hit.webp';
+import unit6Level2FrogStickerAttackImage from './assets/unit6-level2-frog-sticker-attack.webp';
+import unit6Level2FrogStickerDefaultImage from './assets/unit6-level2-frog-sticker-default.webp';
+import unit6Level2FrogStickerDefeatSceneImage from './assets/unit6-level2-frog-sticker-defeat-scene.webp';
+import unit6Level2FrogStickerHitImage from './assets/unit6-level2-frog-sticker-hit.webp';
+import unit6Level3LuchadorStickerAttackImage from './assets/unit6-level3-luchador-sticker-attack.webp';
+import unit6Level3LuchadorStickerDefaultImage from './assets/unit6-level3-luchador-sticker-default.webp';
+import unit6Level3LuchadorStickerDefeatSceneImage from './assets/unit6-level3-luchador-sticker-defeat-scene.webp';
+import unit6Level3LuchadorStickerHitImage from './assets/unit6-level3-luchador-sticker-hit.webp';
+import unit6Level4PinkBeaverStickerAttackImage from './assets/unit6-level4-pink-beaver-sticker-attack.webp';
+import unit6Level4PinkBeaverStickerDefaultImage from './assets/unit6-level4-pink-beaver-sticker-default.webp';
+import unit6Level4PinkBeaverStickerDefeatSceneImage from './assets/unit6-level4-pink-beaver-sticker-defeat-scene.webp';
+import unit6Level4PinkBeaverStickerHitImage from './assets/unit6-level4-pink-beaver-sticker-hit.webp';
+import unit6Level5RaccoonStickerAttackImage from './assets/unit6-level5-raccoon-sticker-attack.webp';
+import unit6Level5RaccoonStickerDefaultImage from './assets/unit6-level5-raccoon-sticker-default.webp';
+import unit6Level5RaccoonStickerDefeatSceneImage from './assets/unit6-level5-raccoon-sticker-defeat-scene.webp';
+import unit6Level5RaccoonStickerHitImage from './assets/unit6-level5-raccoon-sticker-hit.webp';
+import unit6Level6CreeperStickerAttackImage from './assets/unit6-level6-creeper-sticker-attack.webp';
+import unit6Level6CreeperStickerDefaultImage from './assets/unit6-level6-creeper-sticker-default.webp';
+import unit6Level6CreeperStickerDefeatSceneImage from './assets/unit6-level6-creeper-sticker-defeat-scene.webp';
+import unit6Level6CreeperStickerHitImage from './assets/unit6-level6-creeper-sticker-hit.webp';
+import unit6Level7YolkStickerAttackImage from './assets/unit6-level7-yolk-sticker-attack.webp';
+import unit6Level7YolkStickerDefaultImage from './assets/unit6-level7-yolk-sticker-default.webp';
+import unit6Level7YolkStickerDefeatSceneImage from './assets/unit6-level7-yolk-sticker-defeat-scene.webp';
+import unit6Level7YolkStickerHitImage from './assets/unit6-level7-yolk-sticker-hit.webp';
+import unit6Level8IdolStickerAttackImage from './assets/unit6-level8-idol-sticker-attack.webp';
+import unit6Level8IdolStickerDefaultImage from './assets/unit6-level8-idol-sticker-default.webp';
+import unit6Level8IdolStickerDefeatSceneImage from './assets/unit6-level8-idol-sticker-defeat-scene.webp';
+import unit6Level8IdolStickerHitImage from './assets/unit6-level8-idol-sticker-hit.webp';
 import unit3Level9GimgangrimAttackImage from './assets/unit3-level9-gimgangrim-attack.jpeg';
 import unit3Level9GimgangrimDefaultImage from './assets/unit3-level9-gimgangrim-default.jpeg';
 import unit3Level9GimgangrimDefeatSceneImage from './assets/unit3-level9-gimgangrim-defeat-scene.jpeg';
@@ -2864,6 +2896,80 @@ const UNIT3_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
     removeDefeatSceneBlackBackground: true,
   },
 };
+const UNIT6_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
+  1: {
+    name: '어몽어몽',
+    spriteSet: {
+      attack: unit6Level1RedStickerAttackImage,
+      default: unit6Level1RedStickerDefaultImage,
+      hit: unit6Level1RedStickerHitImage,
+    },
+    defeatSceneImage: unit6Level1RedStickerDefeatSceneImage,
+  },
+  2: {
+    name: '케로케로',
+    spriteSet: {
+      attack: unit6Level2FrogStickerAttackImage,
+      default: unit6Level2FrogStickerDefaultImage,
+      hit: unit6Level2FrogStickerHitImage,
+    },
+    defeatSceneImage: unit6Level2FrogStickerDefeatSceneImage,
+  },
+  3: {
+    name: '엘프리몽',
+    spriteSet: {
+      attack: unit6Level3LuchadorStickerAttackImage,
+      default: unit6Level3LuchadorStickerDefaultImage,
+      hit: unit6Level3LuchadorStickerHitImage,
+    },
+    defeatSceneImage: unit6Level3LuchadorStickerDefeatSceneImage,
+  },
+  4: {
+    name: '루우피',
+    spriteSet: {
+      attack: unit6Level4PinkBeaverStickerAttackImage,
+      default: unit6Level4PinkBeaverStickerDefaultImage,
+      hit: unit6Level4PinkBeaverStickerHitImage,
+    },
+    defeatSceneImage: unit6Level4PinkBeaverStickerDefeatSceneImage,
+  },
+  5: {
+    name: '너굴너굴',
+    spriteSet: {
+      attack: unit6Level5RaccoonStickerAttackImage,
+      default: unit6Level5RaccoonStickerDefaultImage,
+      hit: unit6Level5RaccoonStickerHitImage,
+    },
+    defeatSceneImage: unit6Level5RaccoonStickerDefeatSceneImage,
+  },
+  6: {
+    name: '크리펑',
+    spriteSet: {
+      attack: unit6Level6CreeperStickerAttackImage,
+      default: unit6Level6CreeperStickerDefaultImage,
+      hit: unit6Level6CreeperStickerHitImage,
+    },
+    defeatSceneImage: unit6Level6CreeperStickerDefeatSceneImage,
+  },
+  7: {
+    name: '노른자',
+    spriteSet: {
+      attack: unit6Level7YolkStickerAttackImage,
+      default: unit6Level7YolkStickerDefaultImage,
+      hit: unit6Level7YolkStickerHitImage,
+    },
+    defeatSceneImage: unit6Level7YolkStickerDefeatSceneImage,
+  },
+  8: {
+    name: '루비',
+    spriteSet: {
+      attack: unit6Level8IdolStickerAttackImage,
+      default: unit6Level8IdolStickerDefaultImage,
+      hit: unit6Level8IdolStickerHitImage,
+    },
+    defeatSceneImage: unit6Level8IdolStickerDefeatSceneImage,
+  },
+};
 const LEVEL_OPPONENT_SPRITES: Partial<Record<number, CharacterSpriteSet>> = {
   1: {
     attack: opponentLevel1AttackImage,
@@ -4352,6 +4458,10 @@ function getConfiguredOpponentForUnit(
 
   if (unitId === 'unit3') {
     return UNIT3_LEVEL_OPPONENTS[level] ?? null;
+  }
+
+  if (unitId === 'unit6') {
+    return UNIT6_LEVEL_OPPONENTS[level] ?? null;
   }
 
   return getSpecialOpponentConfig(level, selections);
@@ -10830,7 +10940,7 @@ const UNIT6_LEVEL7_PROBLEMS: FractionIntroProblemData[] = [
   },
   {
     activity: 'decimalLengthMeasure',
-    title: '길이를 재어 소수로 나타내 보세요.',
+    title: 'cm와 mm를 소수 cm로 바꾸세요.',
     shape: 'diamond',
     denominator: 10,
     numerator: 56,
@@ -10840,33 +10950,33 @@ const UNIT6_LEVEL7_PROBLEMS: FractionIntroProblemData[] = [
   },
   {
     activity: 'decimalLengthMeasure',
-    title: '길이를 재어 소수로 나타내 보세요.',
+    title: 'cm와 mm를 소수 cm로 바꾸세요.',
     shape: 'diamond',
     denominator: 10,
     numerator: 37,
     answerToken: 'cm=3;mm=7;decimal=3.7',
     color: '#fb7185',
-    meta: { objectKind: 'pencil', objectLabel: '연필', startMm: '10', lengthMm: '37', rulerCm: '8' },
+    meta: { objectKind: 'pencil', objectLabel: '연필', startMm: '0', lengthMm: '37', rulerCm: '8' },
   },
   {
     activity: 'decimalLengthMeasure',
-    title: '길이를 재어 소수로 나타내 보세요.',
+    title: 'cm와 mm를 소수 cm로 바꾸세요.',
     shape: 'diamond',
     denominator: 10,
     numerator: 48,
     answerToken: 'cm=4;mm=8;decimal=4.8',
     color: '#fb7185',
-    meta: { objectKind: 'crayon', objectLabel: '크레용', startMm: '20', lengthMm: '48', rulerCm: '9' },
+    meta: { objectKind: 'crayon', objectLabel: '크레용', startMm: '0', lengthMm: '48', rulerCm: '9' },
   },
   {
     activity: 'decimalLengthMeasure',
-    title: '길이를 재어 소수로 나타내 보세요.',
+    title: 'cm와 mm를 소수 cm로 바꾸세요.',
     shape: 'diamond',
     denominator: 10,
     numerator: 62,
     answerToken: 'cm=6;mm=2;decimal=6.2',
     color: '#fb7185',
-    meta: { objectKind: 'eraser', objectLabel: '지우개', startMm: '5', lengthMm: '62', rulerCm: '9' },
+    meta: { objectKind: 'eraser', objectLabel: '지우개', startMm: '0', lengthMm: '62', rulerCm: '9' },
   },
   {
     activity: 'decimalTenthCountLarge',
@@ -10910,7 +11020,7 @@ const UNIT6_LEVEL7_PROBLEMS: FractionIntroProblemData[] = [
   },
   {
     activity: 'decimalMixedNumberLine',
-    title: '자연수 부분과 소수 부분을 나누어 수직선에 나타내 보세요.',
+    title: '수직선상에서 소수를 알아봅시다.',
     shape: 'diamond',
     denominator: 10,
     numerator: 27,
@@ -10919,7 +11029,7 @@ const UNIT6_LEVEL7_PROBLEMS: FractionIntroProblemData[] = [
   },
   {
     activity: 'decimalMixedNumberLine',
-    title: '자연수 부분과 소수 부분을 나누어 수직선에 나타내 보세요.',
+    title: '수직선상에서 소수를 알아봅시다.',
     shape: 'diamond',
     denominator: 10,
     numerator: 16,
@@ -10928,7 +11038,7 @@ const UNIT6_LEVEL7_PROBLEMS: FractionIntroProblemData[] = [
   },
   {
     activity: 'decimalMixedNumberLine',
-    title: '자연수 부분과 소수 부분을 나누어 수직선에 나타내 보세요.',
+    title: '수직선상에서 소수를 알아봅시다.',
     shape: 'diamond',
     denominator: 10,
     numerator: 28,
@@ -10937,7 +11047,7 @@ const UNIT6_LEVEL7_PROBLEMS: FractionIntroProblemData[] = [
   },
   {
     activity: 'decimalMixedNumberLine',
-    title: '자연수 부분과 소수 부분을 나누어 수직선에 나타내 보세요.',
+    title: '수직선상에서 소수를 알아봅시다.',
     shape: 'diamond',
     denominator: 10,
     numerator: 14,
@@ -11095,7 +11205,7 @@ const UNIT6_LEVEL8_PROBLEMS: FractionIntroProblemData[] = [
     numerator: 104,
     answerToken: 'name=민수',
     color: '#fb7185',
-    meta: { distance: '50', person1: '민수', time1: '10.4', person2: '시현', time2: '11.2' },
+    meta: { target: '50 m', person1: '민수', time1: '10.4', person2: '시현', time2: '11.2', actionConnective: '달렸고', actionFinal: '달렸습니다', rule: '달리기 기록은 시간이 더 짧을수록 더 빠릅니다.' },
   },
   {
     activity: 'decimalCompareStory',
@@ -11105,7 +11215,7 @@ const UNIT6_LEVEL8_PROBLEMS: FractionIntroProblemData[] = [
     numerator: 98,
     answerToken: 'name=지아',
     color: '#fb7185',
-    meta: { distance: '50', person1: '지아', time1: '9.8', person2: '태오', time2: '10.1' },
+    meta: { target: '25 m 수영', person1: '지아', time1: '9.8', person2: '태오', time2: '10.1', actionConnective: '마쳤고', actionFinal: '마쳤습니다', rule: '수영 기록은 시간이 더 짧을수록 더 빠릅니다.' },
   },
   {
     activity: 'decimalCompareStory',
@@ -11115,7 +11225,7 @@ const UNIT6_LEVEL8_PROBLEMS: FractionIntroProblemData[] = [
     numerator: 123,
     answerToken: 'name=은서',
     color: '#fb7185',
-    meta: { distance: '100', person1: '도현', time1: '12.7', person2: '은서', time2: '12.3' },
+    meta: { target: '퍼즐 한 개', person1: '도현', time1: '12.7', person2: '은서', time2: '12.3', actionConnective: '완성했고', actionFinal: '완성했습니다', rule: '퍼즐 완성 기록은 시간이 더 짧을수록 더 빠릅니다.' },
   },
   {
     activity: 'decimalCompareStory',
@@ -11125,12 +11235,26 @@ const UNIT6_LEVEL8_PROBLEMS: FractionIntroProblemData[] = [
     numerator: 116,
     answerToken: 'name=유나',
     color: '#fb7185',
-    meta: { distance: '100', person1: '서준', time1: '11.9', person2: '유나', time2: '11.6' },
+    meta: { target: '미로 탈출', person1: '서준', time1: '11.9', person2: '유나', time2: '11.6', actionConnective: '끝냈고', actionFinal: '끝냈습니다', rule: '미로 탈출 기록은 시간이 더 짧을수록 더 빠릅니다.' },
   },
 ];
 
 const UNIT6_VARIANT_COLORS = ['#38bdf8', '#84cc16', '#f97316', '#a855f7', '#fb7185', '#f59e0b', '#22c55e', '#0ea5e9'];
 const UNIT6_UNIT_CONVERSION_VARIANTS = ['grid', 'table', 'strip'] as const;
+const UNIT6_FRACTION_STORY_ITEM_COLORS: Record<string, string> = {
+  사과: '#ef4444',
+  피자: '#f97316',
+  케이크: '#f472b6',
+  초콜릿: '#92400e',
+  귤: '#f59e0b',
+  샌드위치: '#fbbf24',
+  떡: '#f8fafc',
+  김밥: '#22c55e',
+};
+
+function getUnit6FractionStoryColor(itemLabel: string, fallbackColor: string) {
+  return UNIT6_FRACTION_STORY_ITEM_COLORS[itemLabel] ?? fallbackColor;
+}
 
 function makeUnit6FractionProblem(
   activity: FractionIntroActivity,
@@ -11596,14 +11720,14 @@ appendUnit6FractionVariants(UNIT6_LEVEL7_PROBLEMS, 'decimalNumberLine', [11, 13,
   makeUnit6FractionProblem('decimalNumberLine', '소수를 수직선에 나타내 보세요.', 10, value, `position=${formatTenth(value)}`, { shape: 'diamond' })
 ));
 appendUnit6FractionVariants(UNIT6_LEVEL7_PROBLEMS, 'decimalLengthMeasure', [
-  ['chalk', '분필', 15, 43, 8],
-  ['paperClip', '클립', 30, 25, 7],
-  ['stick', '막대', 8, 74, 10],
-  ['toothpick', '이쑤시개', 12, 51, 9],
-].map(([objectKind, objectLabel, startMm, lengthMm, rulerCm]) =>
-  makeUnit6FractionProblem('decimalLengthMeasure', '길이를 재어 소수로 나타내 보세요.', 10, Number(lengthMm), `cm=${Math.floor(Number(lengthMm) / 10)};mm=${Number(lengthMm) % 10};decimal=${(Number(lengthMm) / 10).toFixed(1)}`, {
+  ['chalk', '분필', 43, 8],
+  ['paperClip', '클립', 25, 7],
+  ['stick', '막대', 74, 10],
+  ['toothpick', '이쑤시개', 51, 9],
+].map(([objectKind, objectLabel, lengthMm, rulerCm]) =>
+  makeUnit6FractionProblem('decimalLengthMeasure', 'cm와 mm를 소수 cm로 바꾸세요.', 10, Number(lengthMm), `cm=${Math.floor(Number(lengthMm) / 10)};mm=${Number(lengthMm) % 10};decimal=${(Number(lengthMm) / 10).toFixed(1)}`, {
     shape: 'diamond',
-    meta: { objectKind: String(objectKind), objectLabel: String(objectLabel), startMm: String(startMm), lengthMm: String(lengthMm), rulerCm: String(rulerCm) },
+    meta: { objectKind: String(objectKind), objectLabel: String(objectLabel), startMm: '0', lengthMm: String(lengthMm), rulerCm: String(rulerCm) },
   })
 ));
 appendUnit6FractionVariants(UNIT6_LEVEL7_PROBLEMS, 'decimalTenthCountLarge', [
@@ -11618,7 +11742,7 @@ appendUnit6FractionVariants(UNIT6_LEVEL7_PROBLEMS, 'decimalTenthCountLarge', [
   })
 ));
 appendUnit6FractionVariants(UNIT6_LEVEL7_PROBLEMS, 'decimalMixedNumberLine', [23, 11, 29, 25].map((value) =>
-  makeUnit6FractionProblem('decimalMixedNumberLine', '자연수 부분과 소수 부분을 나누어 수직선에 나타내 보세요.', 10, value, `whole=${Math.floor(value / 10)};decimal=0.${value % 10};number=${formatTenth(value)}`, { shape: 'diamond' })
+  makeUnit6FractionProblem('decimalMixedNumberLine', '수직선상에서 소수를 알아봅시다.', 10, value, `whole=${Math.floor(value / 10)};decimal=0.${value % 10};number=${formatTenth(value)}`, { shape: 'diamond' })
 ));
 
 appendUnit6FractionVariants(UNIT6_LEVEL8_PROBLEMS, 'decimalShadeCompare', [
@@ -11655,14 +11779,14 @@ appendUnit6FractionVariants(UNIT6_LEVEL8_PROBLEMS, 'decimalRepresentationChoice'
   })
 ));
 appendUnit6FractionVariants(UNIT6_LEVEL8_PROBLEMS, 'decimalCompareStory', [
-  ['80', '가온', 13.4, '로아', 13.1],
-  ['60', '윤재', 9.7, '서연', 9.4],
-  ['100', '태린', 15.2, '민규', 14.9],
-  ['50', '하준', 8.6, '예나', 8.9],
-].map(([distance, person1, time1, person2, time2]) =>
+  { target: '80 m 자전거 타기', person1: '가온', time1: 13.4, person2: '로아', time2: 13.1, actionConnective: '마쳤고', actionFinal: '마쳤습니다', rule: '자전거 타기 기록은 시간이 더 짧을수록 더 빠릅니다.' },
+  { target: '블록 탑 쌓기', person1: '윤재', time1: 9.7, person2: '서연', time2: 9.4, actionConnective: '끝냈고', actionFinal: '끝냈습니다', rule: '블록 탑 쌓기는 시간이 더 짧을수록 더 빠르게 한 것입니다.' },
+  { target: '100 m 달리기', person1: '태린', time1: 15.2, person2: '민규', time2: 14.9, actionConnective: '마쳤고', actionFinal: '마쳤습니다', rule: '달리기 기록은 시간이 더 짧을수록 더 빠릅니다.' },
+  { target: '그림 카드 찾기', person1: '하준', time1: 8.6, person2: '예나', time2: 8.9, actionConnective: '끝냈고', actionFinal: '끝냈습니다', rule: '카드 찾기는 시간이 더 짧을수록 더 빠르게 한 것입니다.' },
+].map(({ target, person1, time1, person2, time2, actionConnective, actionFinal, rule }) =>
   makeUnit6FractionProblem('decimalCompareStory', '이야기를 읽고 더 빠른 사람을 써 보세요.', 10, Math.round(Math.min(Number(time1), Number(time2)) * 10), `name=${Number(time1) <= Number(time2) ? person1 : person2}`, {
     shape: 'diamond',
-    meta: { distance: String(distance), person1: String(person1), time1: String(time1), person2: String(person2), time2: String(time2) },
+    meta: { target, person1, time1: String(time1), person2, time2: String(time2), actionConnective, actionFinal, rule },
   })
 ));
 
@@ -11825,12 +11949,26 @@ function normalizeFractionIntroAnswer(value: string) {
 }
 
 function getFractionIntroRequiredKeys(problem: FractionIntroProblemData) {
+  if (problem.activity === 'unitConversionDecimal') {
+    const questions = getUnitConversionDecimalQuestions(problem);
+    const state = parseUnitConversionDecimalState('', questions.length);
+    return [questions[state.currentIndex]?.key ?? 'mmAcm'];
+  }
+
   if (problem.activity === 'fractionToPicture' || problem.activity === 'completeWhole') {
     return ['paint'];
   }
 
   if (problem.activity === 'unitFractionCountMixed') {
     return ['aNumerator', 'aDenominator'];
+  }
+
+  if (problem.activity === 'decimalLengthMeasure') {
+    return ['cm', 'mm', 'decimal'];
+  }
+
+  if (problem.activity === 'decimalMixedNumberLine') {
+    return ['whole', 'decimal'];
   }
 
   if (problem.activity === 'divideShadeFraction') {
@@ -11843,6 +11981,102 @@ function getFractionIntroRequiredKeys(problem: FractionIntroProblemData) {
 function getFractionIntroPaintSelection(value: string) {
   const rawPaint = getKeyValueAnswer(value, 'paint');
   return rawPaint ? rawPaint.split(',').filter(Boolean) : [];
+}
+
+const UNIT_CONVERSION_DECIMAL_COMPLETE_ANSWER = 'unitConversionDecimalComplete';
+const UNIT_CONVERSION_DECIMAL_STREAK_TARGET = 3;
+
+type UnitConversionDecimalQuestion = {
+  key: 'mmAcm' | 'mmBcm' | 'cmAmm' | 'cmBmm';
+  left: string;
+  unit: 'cm' | 'mm';
+  text: boolean;
+  label: string;
+};
+
+function getUnitConversionDecimalQuestions(problem: FractionIntroProblemData): UnitConversionDecimalQuestion[] {
+  const meta = problem.meta ?? {};
+  const mmA = meta.mmA ?? '3';
+  const mmB = meta.mmB ?? '9';
+  const cmA = meta.cmA ?? '0.5';
+  const cmB = meta.cmB ?? '0.7';
+
+  return [
+    { key: 'mmAcm', left: `${mmA} mm`, unit: 'cm', text: true, label: '밀리미터를 센티미터로' },
+    { key: 'mmBcm', left: `${mmB} mm`, unit: 'cm', text: true, label: '밀리미터를 센티미터로' },
+    { key: 'cmAmm', left: `${cmA} cm`, unit: 'mm', text: false, label: '센티미터를 밀리미터로' },
+    { key: 'cmBmm', left: `${cmB} cm`, unit: 'mm', text: false, label: '센티미터를 밀리미터로' },
+  ];
+}
+
+function parseUnitConversionDecimalState(answerValue: string, questionCount: number) {
+  if (answerValue === UNIT_CONVERSION_DECIMAL_COMPLETE_ANSWER) {
+    return {
+      currentIndex: 0,
+      streak: UNIT_CONVERSION_DECIMAL_STREAK_TARGET,
+      currentAnswer: '',
+      lastResult: 'correct' as const,
+      isComplete: true,
+    };
+  }
+
+  const [, rawIndex, rawStreak, rawResult, rawAnswer] = answerValue.split(':');
+  const parsedIndex = Number.parseInt(rawIndex ?? '', 10);
+  const parsedStreak = Number.parseInt(rawStreak ?? '', 10);
+
+  return {
+    currentIndex: Number.isFinite(parsedIndex) && questionCount > 0 ? parsedIndex % questionCount : 0,
+    streak: Number.isFinite(parsedStreak) ? Math.min(Math.max(parsedStreak, 0), UNIT_CONVERSION_DECIMAL_STREAK_TARGET) : 0,
+    currentAnswer: rawAnswer ? decodeURIComponent(rawAnswer) : '',
+    lastResult: rawResult === 'correct' || rawResult === 'wrong' ? rawResult : null,
+    isComplete: false,
+  };
+}
+
+function setUnitConversionDecimalCurrentAnswer(answerValue: string, questionCount: number, nextAnswer: string) {
+  const state = parseUnitConversionDecimalState(answerValue, questionCount);
+  if (state.isComplete) {
+    return answerValue;
+  }
+
+  return `ucd:${state.currentIndex}:${state.streak}:${state.lastResult ?? 'none'}:${encodeURIComponent(nextAnswer.trim())}`;
+}
+
+function resolveUnitConversionDecimalAnswer(answerValue: string, problem: FractionIntroProblemData) {
+  const questions = getUnitConversionDecimalQuestions(problem);
+  const state = parseUnitConversionDecimalState(answerValue, questions.length);
+  const currentQuestion = questions[state.currentIndex];
+  if (!currentQuestion || state.isComplete || state.currentAnswer.trim().length === 0) {
+    return {
+      answerValue,
+      isCorrect: false,
+      isComplete: state.isComplete,
+      streak: state.streak,
+      hasAnswer: state.currentAnswer.trim().length > 0,
+    };
+  }
+
+  const expectedEntries = parseKeyValueAnswer(problem.answerToken);
+  const expectedAnswer = expectedEntries[currentQuestion.key] ?? '';
+  const isCorrect = normalizeFractionIntroAnswer(`answer=${state.currentAnswer}`) === normalizeFractionIntroAnswer(`answer=${expectedAnswer}`);
+  const nextStreak = isCorrect ? state.streak + 1 : 0;
+  if (nextStreak >= UNIT_CONVERSION_DECIMAL_STREAK_TARGET) {
+    return {
+      answerValue: UNIT_CONVERSION_DECIMAL_COMPLETE_ANSWER,
+      isCorrect,
+      isComplete: true,
+      streak: nextStreak,
+      hasAnswer: true,
+    };
+  }
+
+  return {
+    answerValue: `ucd:${(state.currentIndex + 1) % questions.length}:${nextStreak}:${isCorrect ? 'correct' : 'wrong'}:`,
+    isCorrect,
+    isComplete: false,
+    streak: nextStreak,
+    hasAnswer: true,
+  };
 }
 
 function getCompleteWholeGridGeometry(problem: FractionIntroProblemData) {
@@ -11921,6 +12155,11 @@ function areCompleteWholeCellsConnected(cellIds: string[]) {
 }
 
 function isFractionIntroAnswerReady(value: string, problem: FractionIntroProblemData) {
+  if (problem.activity === 'unitConversionDecimal') {
+    return parseUnitConversionDecimalState(value, getUnitConversionDecimalQuestions(problem).length).currentAnswer.trim().length > 0 ||
+      value === UNIT_CONVERSION_DECIMAL_COMPLETE_ANSWER;
+  }
+
   if (problem.activity === 'fractionToPicture') {
     return getFractionIntroPaintSelection(value).length > 0;
   }
@@ -11946,6 +12185,10 @@ function isFractionIntroAnswerReady(value: string, problem: FractionIntroProblem
 }
 
 function isFractionIntroAnswerCorrect(value: string, problem: FractionIntroProblemData) {
+  if (problem.activity === 'unitConversionDecimal') {
+    return value === UNIT_CONVERSION_DECIMAL_COMPLETE_ANSWER;
+  }
+
   if (problem.activity === 'fractionToPicture') {
     return getFractionIntroPaintSelection(value).length === problem.numerator;
   }
@@ -11993,6 +12236,24 @@ function isFractionIntroAnswerCorrect(value: string, problem: FractionIntroProbl
       currentEntries.aDenominator === expectedDenominator;
   }
 
+  if (problem.activity === 'decimalLengthMeasure') {
+    const expectedEntries = parseKeyValueAnswer(problem.answerToken);
+    const currentEntries = parseKeyValueAnswer(value);
+    return ['cm', 'mm', 'decimal'].every((key) =>
+      normalizeFractionIntroAnswer(`${key}=${currentEntries[key] ?? ''}`) ===
+      normalizeFractionIntroAnswer(`${key}=${expectedEntries[key] ?? ''}`)
+    );
+  }
+
+  if (problem.activity === 'decimalMixedNumberLine') {
+    const expectedEntries = parseKeyValueAnswer(problem.answerToken);
+    const currentEntries = parseKeyValueAnswer(value);
+    return ['whole', 'decimal'].every((key) =>
+      normalizeFractionIntroAnswer(`${key}=${currentEntries[key] ?? ''}`) ===
+      normalizeFractionIntroAnswer(`${key}=${expectedEntries[key] ?? ''}`)
+    );
+  }
+
   return normalizeFractionIntroAnswer(value) === normalizeFractionIntroAnswer(problem.answerToken);
 }
 
@@ -12029,13 +12290,13 @@ function getCompactFractionIntroTitle(data: FractionIntroProblemData) {
     unitConversionDecimal: 'cm와 mm의 관계를 이용해 길이를 바꾸세요.',
     decimalTenthCount: '0.1의 개수를 이용해 소수를 나타내세요.',
     decimalNumberLine: '소수를 수직선에 나타내세요.',
-    decimalLengthMeasure: '길이를 재어 소수로 나타내세요.',
+    decimalLengthMeasure: 'cm와 mm를 소수 cm로 바꾸세요.',
     decimalTenthCountLarge: '0.1의 개수를 이용해 여러 소수를 나타내세요.',
-    decimalMixedNumberLine: '자연수 부분과 소수 부분을 나누어 나타내세요.',
+    decimalMixedNumberLine: '수직선상에서 소수를 알아봅시다.',
     decimalShadeCompare: '소수만큼 색칠하고 크기를 비교하세요.',
     decimalNumberLineCompare: '수직선에서 두 소수의 크기를 비교하세요.',
     decimalRepresentationChoice: '여러 표현 중 가장 작은 수를 고르세요.',
-    decimalCompareStory: '달리기 기록을 보고 더 빠른 사람을 쓰세요.',
+    decimalCompareStory: '기록을 보고 더 빠른 사람을 쓰세요.',
   };
   return titleByActivity[data.activity] ?? data.title;
 }
@@ -12412,6 +12673,32 @@ function createArchiveProblemRecord(problem: Problem, id: string, label: string)
     question: getProblemArchiveQuestion(problem),
     answer: getProblemArchiveAnswer(problem),
   };
+}
+
+function ArchiveProblemAnswer({
+  problem,
+  unitId,
+  answer,
+}: {
+  problem: Problem;
+  unitId: LearningUnitId;
+  answer: string;
+}) {
+  if (unitId === 'unit6' && problem.kind === 'fractionIntro' && problem.fractionIntro) {
+    if (problem.fractionIntro.activity === 'fractionToPicture') {
+      return <span>{answer}</span>;
+    }
+
+    return (
+      <FractionInline
+        numerator={problem.fractionIntro.numerator}
+        denominator={problem.fractionIntro.denominator}
+        className="text-base text-emerald-100"
+      />
+    );
+  }
+
+  return <span>{answer}</span>;
 }
 
 function getArchiveProblemsForLevel(unitId: LearningUnitId, level: number) {
@@ -14195,8 +14482,8 @@ function EqualPartitionPartWholeCard({
   const focus = equalPartition.meta?.focus === 'whole' ? 'whole' : 'part';
   const choiceClassName = (choice: 'part' | 'whole') => `flex min-h-[7rem] flex-1 items-center justify-center rounded-[1.3rem] border-4 px-5 py-4 text-center font-black transition ${
     answerValue === choice
-      ? 'border-emerald-300 bg-emerald-500 text-slate-950 shadow-[0_0_0_5px_rgba(16,185,129,0.28),0_16px_30px_rgba(16,185,129,0.22)]'
-      : 'border-slate-400 bg-white text-slate-950 shadow-sm hover:border-emerald-300 hover:bg-emerald-50'
+      ? 'border-amber-200 bg-amber-300 text-slate-950 shadow-[0_0_0_5px_rgba(251,191,36,0.24),0_16px_30px_rgba(251,191,36,0.2)]'
+      : 'border-amber-300 bg-slate-900 text-amber-100 shadow-sm hover:border-amber-200 hover:bg-slate-800'
   }`;
 
   return (
@@ -14510,7 +14797,10 @@ function FractionBlankInput({
   onChange,
   ariaLabel,
   compact = false,
+  numberSize = 'default',
+  accent = 'default',
   text = false,
+  textSize = 'default',
   allowHangul = false,
   fractionSlot = false,
   fractionSlotSize = 'large',
@@ -14520,10 +14810,13 @@ function FractionBlankInput({
   onChange: (value: string) => void;
   ariaLabel: string;
   compact?: boolean;
+  numberSize?: 'default' | 'balanced';
+  accent?: 'default' | 'orange' | 'purple';
   text?: boolean;
+  textSize?: 'default' | 'narrow' | 'compact' | 'short' | 'decimal';
   allowHangul?: boolean;
   fractionSlot?: boolean;
-  fractionSlotSize?: 'small' | 'medium' | 'large' | 'xlarge';
+  fractionSlotSize?: 'small' | 'medium' | 'display' | 'large' | 'xlarge';
   inputKind?: 'number' | 'word';
 }) {
   const fractionSlotClass =
@@ -14531,25 +14824,43 @@ function FractionBlankInput({
       ? 'h-8 w-10 text-base'
       : fractionSlotSize === 'medium'
         ? 'h-9 w-12 text-lg'
+        : fractionSlotSize === 'display'
+          ? 'h-14 w-[4.5rem] text-3xl'
         : fractionSlotSize === 'xlarge'
           ? 'h-24 w-32 text-6xl'
         : 'h-20 w-24 text-5xl';
   const acceptsText = text || allowHangul;
   const isWordInput = inputKind === 'word';
   const sizeClass = text
-    ? 'h-16 w-44 max-w-full text-3xl'
+    ? textSize === 'narrow'
+      ? 'h-14 w-28 max-w-full text-2xl sm:w-32 sm:text-3xl'
+      : textSize === 'compact'
+        ? 'h-14 w-24 max-w-full text-2xl sm:w-28 sm:text-3xl'
+        : textSize === 'short'
+          ? 'h-16 w-36 max-w-full text-3xl'
+          : textSize === 'decimal'
+            ? 'h-16 w-24 max-w-full text-3xl'
+      : 'h-16 w-44 max-w-full text-3xl'
     : fractionSlot
       ? fractionSlotClass
       : compact
         ? isWordInput
           ? 'h-10 w-[4.5rem] text-lg'
+          : numberSize === 'balanced'
+            ? 'h-14 w-20 text-3xl'
           : 'h-11 w-14 text-xl'
         : isWordInput
           ? 'h-16 w-40 text-3xl'
           : 'h-16 w-20 text-3xl';
-  const toneClass = isWordInput
+  const accentClass =
+    accent === 'orange'
+      ? 'rounded-xl border-orange-400 bg-orange-50 text-slate-950 focus:border-orange-500 focus:ring-orange-200'
+      : accent === 'purple'
+        ? 'rounded-xl border-violet-400 bg-violet-50 text-slate-950 focus:border-violet-500 focus:ring-violet-200'
+        : null;
+  const toneClass = accentClass ?? (isWordInput
     ? 'rounded-xl border-amber-400 bg-amber-50 text-slate-950 focus:border-amber-500 focus:ring-amber-200'
-    : 'rounded-xl border-sky-500 bg-white text-slate-950 focus:border-emerald-500 focus:ring-emerald-200';
+    : 'rounded-xl border-sky-500 bg-white text-slate-950 focus:border-emerald-500 focus:ring-emerald-200');
 
   return (
     <input
@@ -14576,14 +14887,14 @@ function FractionStackInput({
   denominator: string;
   onNumeratorChange: (value: string) => void;
   onDenominatorChange: (value: string) => void;
-  size?: 'small' | 'medium' | 'large' | 'xlarge';
+  size?: 'small' | 'medium' | 'display' | 'large' | 'xlarge';
   allowHangul?: boolean;
 }) {
   return (
-    <span className="inline-grid align-middle">
+    <span className={`${size === 'small' ? 'gap-1' : size === 'medium' ? 'gap-1.5' : size === 'display' ? 'gap-2' : size === 'xlarge' ? 'gap-3' : 'gap-2.5'} inline-grid align-middle`}>
       <FractionBlankInput value={numerator} onChange={onNumeratorChange} ariaLabel="분자 입력" fractionSlot fractionSlotSize={size} allowHangul={allowHangul} />
       <span
-        className={`${size === 'small' ? 'my-0.5 h-1' : size === 'medium' ? 'my-1 h-1.5' : size === 'xlarge' ? 'my-2.5 h-3' : 'my-2 h-2.5'} block w-full rounded-full border-2 border-slate-950 bg-white shadow-[0_0_0_2px_rgba(255,255,255,0.9)]`}
+        className={`${size === 'small' ? 'h-1' : size === 'medium' ? 'h-1.5' : size === 'display' ? 'h-2' : size === 'xlarge' ? 'h-3' : 'h-2.5'} block w-full rounded-full border-2 border-slate-950 bg-white shadow-[0_0_0_2px_rgba(255,255,255,0.9)]`}
         aria-hidden="true"
       />
       <FractionBlankInput value={denominator} onChange={onDenominatorChange} ariaLabel="분모 입력" fractionSlot fractionSlotSize={size} allowHangul={allowHangul} />
@@ -14964,14 +15275,21 @@ function FractionBarModel({
   color: string;
 }) {
   return (
-    <div className="grid h-16 w-full border-2 border-slate-600 bg-white" style={{ gridTemplateColumns: `repeat(${denominator}, minmax(0, 1fr))` }}>
-      {Array.from({ length: denominator }, (_, index) => (
-        <div
-          key={index}
-          className="border-r border-dashed border-slate-500 last:border-r-0"
-          style={{ backgroundColor: index < numerator ? `${color}55` : '#ffffff' }}
-        />
-      ))}
+    <div className="grid h-16 w-full overflow-hidden rounded-xl border-4 border-slate-300 bg-slate-50 shadow-[0_10px_22px_rgba(15,23,42,0.12)]" style={{ gridTemplateColumns: `repeat(${denominator}, minmax(0, 1fr))` }}>
+      {Array.from({ length: denominator }, (_, index) => {
+        const isShaded = index < numerator;
+        return (
+          <div
+            key={index}
+            className={`border-r-2 last:border-r-0 ${isShaded ? 'border-sky-100/80' : 'border-slate-300'}`}
+            style={{
+              background: isShaded
+                ? `linear-gradient(180deg, ${color} 0%, #0ea5e9 100%)`
+                : 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)',
+            }}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -15004,7 +15322,7 @@ function FractionInline({
   return (
     <span className={`inline-grid align-middle text-center font-black leading-none ${className}`}>
       <span>{numerator}</span>
-      <span className="my-1 h-1.5 min-w-10 rounded-full border border-slate-950 bg-white shadow-[0_0_0_1px_rgba(255,255,255,0.85)]" />
+      <span className="mx-auto my-1.5 h-2 w-full min-w-8 max-w-12 rounded-full border border-slate-500 bg-white shadow-[0_0_0_1px_rgba(255,255,255,0.9)]" />
       <span>{denominator}</span>
     </span>
   );
@@ -15014,16 +15332,21 @@ function CompareSymbolChoice({
   value,
   onChange,
   ariaLabel,
+  compact = false,
 }: {
   value: string;
   onChange: (value: string) => void;
   ariaLabel: string;
+  compact?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const symbols = ['>', '=', '<'];
+  const shellSizeClass = compact ? 'h-12 w-12' : 'h-16 w-16';
+  const optionSizeClass = compact ? 'h-10 w-10 text-2xl' : 'h-12 w-12 text-3xl';
+  const buttonSizeClass = compact ? 'h-12 w-12 text-3xl' : 'h-16 w-16 text-4xl';
 
   return (
-    <div className="relative inline-flex h-16 w-16 items-center justify-center" aria-label={ariaLabel}>
+    <div className={`relative inline-flex ${shellSizeClass} items-center justify-center`} aria-label={ariaLabel}>
       <AnimatePresence>
         {isOpen ? (
           <motion.div
@@ -15032,7 +15355,7 @@ function CompareSymbolChoice({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.92 }}
             transition={{ duration: 0.16, ease: 'easeOut' }}
-            className="absolute bottom-full left-1/2 z-30 mb-3 flex -translate-x-1/2 items-center gap-2 rounded-full border-4 border-slate-300 bg-white px-2 py-2 shadow-[0_12px_28px_rgba(15,23,42,0.22)]"
+            className="absolute bottom-full left-1/2 z-30 mb-3 flex -translate-x-1/2 items-center gap-2 rounded-full border-4 border-slate-300 bg-white px-2 py-2"
           >
             {symbols.map((symbol) => (
               <button
@@ -15042,10 +15365,10 @@ function CompareSymbolChoice({
                   onChange(symbol);
                   setIsOpen(false);
                 }}
-                className={`flex h-12 w-12 items-center justify-center rounded-full border-4 text-3xl font-black transition ${
+                className={`flex ${optionSizeClass} items-center justify-center rounded-full border-4 font-black transition ${
                   value === symbol
-                    ? 'border-emerald-500 bg-emerald-100 text-emerald-800 shadow-sm'
-                    : 'border-slate-400 bg-white text-slate-950 shadow-sm hover:border-slate-600'
+                    ? 'border-sky-400 bg-slate-950 text-white shadow-[0_0_0_4px_rgba(14,165,233,0.18)]'
+                    : 'border-slate-400 bg-white text-slate-950 hover:border-slate-600'
                 }`}
                 aria-label={`${ariaLabel} ${symbol} 선택`}
               >
@@ -15057,22 +15380,20 @@ function CompareSymbolChoice({
       </AnimatePresence>
 
       {isOpen ? (
-        <button
-          type="button"
+        <div
           onClick={() => setIsOpen(false)}
           className="fixed inset-0 z-20 cursor-default bg-transparent"
-          aria-label="비교 기호 선택 닫기"
-          tabIndex={-1}
+          aria-hidden="true"
         />
       ) : null}
 
       <button
         type="button"
         onClick={() => setIsOpen((current) => !current)}
-        className={`relative z-30 flex h-16 w-16 items-center justify-center rounded-full border-4 text-4xl font-black transition ${
+        className={`relative z-30 flex ${buttonSizeClass} items-center justify-center rounded-full border-4 font-black transition ${
           value
-            ? 'border-emerald-500 bg-emerald-100 text-emerald-800 shadow-sm'
-            : 'border-slate-500 bg-white text-slate-400 shadow-sm hover:border-slate-700 hover:text-slate-700'
+            ? 'border-sky-400 bg-slate-950 text-white shadow-[0_0_0_5px_rgba(14,165,233,0.18),0_8px_18px_rgba(2,8,23,0.36)]'
+            : 'border-slate-500 bg-white text-slate-400 hover:border-slate-700 hover:text-slate-700'
         }`}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
@@ -15088,18 +15409,23 @@ function FractionCompareBar({
   numerator,
   denominator,
   color,
+  compact = false,
 }: {
   numerator: number;
   denominator: number;
   color: string;
+  compact?: boolean;
 }) {
   return (
-    <div className="grid h-14 min-w-0 flex-1 overflow-hidden rounded-xl border-4 border-slate-600 bg-white shadow-sm" style={{ gridTemplateColumns: `repeat(${denominator}, minmax(0, 1fr))` }}>
+    <div className={`grid ${compact ? 'h-12' : 'h-16'} min-w-0 flex-1 overflow-hidden rounded-md border-4 border-slate-600 bg-white shadow-[0_6px_14px_rgba(0,0,0,0.24)]`} style={{ gridTemplateColumns: `repeat(${denominator}, minmax(0, 1fr))` }}>
       {Array.from({ length: denominator }, (_, index) => (
         <div
           key={index}
-          className="border-r-2 border-dashed border-slate-500 last:border-r-0"
-          style={{ backgroundColor: index < numerator ? color : '#ffffff' }}
+          className="border-r-2 border-slate-500/70 last:border-r-0"
+          style={{
+            backgroundColor: index < numerator ? color : '#ffffff',
+            boxShadow: index < numerator ? 'inset 0 1px 0 rgba(255,255,255,0.28)' : 'inset 0 1px 0 rgba(255,255,255,0.7)',
+          }}
         />
       ))}
     </div>
@@ -15112,16 +15438,18 @@ function SelectableFractionBar({
   color,
   onChange,
   ariaLabel,
+  compact = false,
 }: {
   denominator: number;
   selectedCount: number;
   color: string;
   onChange: (count: number) => void;
   ariaLabel: string;
+  compact?: boolean;
 }) {
   const shouldReduceMotion = useReducedMotion();
   return (
-    <div className="grid h-16 min-w-0 flex-1 overflow-hidden rounded-xl border-4 border-slate-600 bg-white shadow-sm" style={{ gridTemplateColumns: `repeat(${denominator}, minmax(0, 1fr))` }} aria-label={ariaLabel}>
+    <div className={`grid ${compact ? 'h-12' : 'h-16'} min-w-0 flex-1 overflow-hidden rounded-md border-4 border-slate-600 bg-white shadow-[0_6px_14px_rgba(0,0,0,0.24)]`} style={{ gridTemplateColumns: `repeat(${denominator}, minmax(0, 1fr))` }} aria-label={ariaLabel}>
       {Array.from({ length: denominator }, (_, index) => {
         const isSelected = index < selectedCount;
         return (
@@ -15129,8 +15457,12 @@ function SelectableFractionBar({
             key={index}
             type="button"
             onClick={() => onChange(index + 1)}
-            className="border-r-2 border-dashed border-slate-500 transition last:border-r-0 hover:brightness-95"
-            style={{ backgroundColor: isSelected ? color : '#ffffff' }}
+            className="border-r-2 border-slate-500/70 transition last:border-r-0 hover:brightness-95"
+            style={{
+              backgroundColor: isSelected ? color : '#ffffff',
+              borderRadius: 0,
+              boxShadow: isSelected ? 'inset 0 1px 0 rgba(255,255,255,0.28)' : 'inset 0 1px 0 rgba(255,255,255,0.7)',
+            }}
             aria-label={`${index + 1}개까지 색칠`}
             initial={false}
             animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scaleY: isSelected ? 1 : 0.985 }}
@@ -15148,57 +15480,61 @@ function DecimalNumberLine({
   max = 3,
   onSelect,
   showParts = false,
+  compact = false,
+  dense = false,
 }: {
   value?: number;
   max?: number;
   onSelect?: (value: number) => void;
   showParts?: boolean;
+  compact?: boolean;
+  dense?: boolean;
 }) {
   const shouldReduceMotion = useReducedMotion();
-  const width = 680;
-  const startX = 44;
-  const endX = 636;
-  const y = showParts ? 82 : 72;
+  const width = 760;
+  const startX = 46;
+  const endX = 714;
+  const y = showParts ? (compact ? 66 : 82) : dense ? 46 : compact ? 52 : 62;
   const span = endX - startX;
   const valueX = value === undefined ? null : startX + (value / max) * span;
   const wholePart = value === undefined ? 0 : Math.floor(value);
   const decimalPart = value === undefined ? 0 : Number((value - wholePart).toFixed(1));
   const wholeX = startX + (wholePart / max) * span;
   const tickCount = max * 10 + 1;
-  const svgHeight = showParts ? 190 : 130;
+  const svgHeight = showParts ? (compact ? 165 : 205) : dense ? 112 : compact ? 140 : 160;
+  const markerLineTopY = showParts ? y - 52 : dense ? y - 36 : y - 44;
+  const markerValueY = showParts ? (compact ? y - 34 : y - 42) : dense ? y - 44 : y - 54;
+  const wholeLabelY = showParts ? (compact ? y + 58 : y + 64) : dense ? y + 56 : compact ? y + 66 : y + 68;
 
   return (
-    <div className={`relative h-full w-full ${showParts ? 'min-h-[12rem]' : 'min-h-[8rem]'}`}>
-      <svg viewBox={`0 0 680 ${svgHeight}`} className="h-full w-full" aria-hidden="true">
-        <rect x="10" y="8" width="660" height={svgHeight - 16} rx="22" fill="#111827" stroke="#475569" strokeWidth="3" />
+    <div className={`relative h-full w-full ${showParts ? (compact ? 'min-h-[9.5rem]' : 'min-h-[13rem]') : dense ? 'min-h-[6.75rem]' : compact ? 'min-h-[8.25rem]' : 'min-h-[10rem]'}`}>
+      <svg viewBox={`0 0 ${width} ${svgHeight}`} className="h-full w-full" aria-hidden="true">
+        <rect x="10" y="8" width={width - 20} height={svgHeight - 16} rx="22" fill="#0f172a" stroke="#64748b" strokeWidth="4" />
+        <line x1={startX} y1={y} x2={endX} y2={y} stroke="#cbd5e1" strokeWidth="7" strokeLinecap="round" opacity="0.95" />
         {showParts && valueX !== null ? (
           <g>
-            <rect x={startX} y="30" width={Math.max(0, wholeX - startX)} height="34" rx="14" fill="#10b981" opacity="0.22" />
-            <rect x={wholeX} y="30" width={Math.max(0, valueX - wholeX)} height="34" rx="14" fill="#38bdf8" opacity="0.26" />
-            <text x={(startX + wholeX) / 2} y="53" textAnchor="middle" fill="#d1fae5" className="text-base font-black">
-              자연수 부분 {wholePart}
-            </text>
-            <text x={(wholeX + valueX) / 2} y="53" textAnchor="middle" fill="#e0f2fe" className="text-base font-black">
-              소수 부분 {decimalPart.toFixed(1)}
-            </text>
-          </g>
-        ) : null}
-        <line x1={startX} y1={y} x2={endX} y2={y} stroke="#94a3b8" strokeWidth="5" strokeLinecap="round" />
-        {showParts && valueX !== null ? (
-          <g>
-            <line x1={startX} y1={y} x2={wholeX} y2={y} stroke="#22c55e" strokeWidth="8" strokeLinecap="round" />
-            <line x1={wholeX} y1={y} x2={valueX} y2={y} stroke="#0ea5e9" strokeWidth="8" strokeLinecap="round" />
+            <line x1={startX} y1={y} x2={wholeX} y2={y} stroke="#fb923c" strokeWidth="8" strokeLinecap="round" />
+            <line x1={wholeX} y1={y} x2={valueX} y2={y} stroke="#a78bfa" strokeWidth="8" strokeLinecap="round" />
             <line x1={wholeX} y1={y - 30} x2={wholeX} y2={y + 30} stroke="#f8fafc" strokeWidth="4" strokeLinecap="round" />
           </g>
         ) : null}
         {Array.from({ length: tickCount }, (_, index) => {
           const x = startX + (index / (max * 10)) * span;
           const isWhole = index % 10 === 0;
+          const isHalf = index % 5 === 0;
           return (
             <g key={index}>
-              <line x1={x} y1={isWhole ? y - 24 : y - 13} x2={x} y2={isWhole ? y + 24 : y + 13} stroke={isWhole ? '#e2e8f0' : '#64748b'} strokeWidth={isWhole ? 4 : 2.5} strokeLinecap="round" />
+              <line
+                x1={x}
+                y1={isWhole ? y - 28 : isHalf ? y - 20 : y - 14}
+                x2={x}
+                y2={isWhole ? y + 28 : isHalf ? y + 20 : y + 14}
+                stroke={isWhole ? '#f8fafc' : isHalf ? '#cbd5e1' : '#94a3b8'}
+                strokeWidth={isWhole ? 5 : isHalf ? 3.2 : 2.4}
+                strokeLinecap="round"
+              />
               {isWhole ? (
-                <text x={x} y={y + 54} textAnchor="middle" fill="#f8fafc" className="text-3xl font-black">
+                <text x={x} y={wholeLabelY} textAnchor="middle" fill="#f8fafc" className="text-3xl font-black">
                   {index / 10}
                 </text>
               ) : null}
@@ -15215,8 +15551,8 @@ function DecimalNumberLine({
           >
             {showParts ? (
               <>
-                <line x1={valueX} y1="140" x2={valueX} y2={y + 28} stroke="#f472b6" strokeWidth="5" strokeLinecap="round" />
-                <polygon points={`${valueX - 13},${y + 26} ${valueX + 13},${y + 26} ${valueX},${y + 6}`} fill="#f472b6" />
+                <line x1={valueX} y1={markerLineTopY} x2={valueX} y2={y - 20} stroke="#f472b6" strokeWidth="5" strokeLinecap="round" />
+                <polygon points={`${valueX - 13},${y - 18} ${valueX + 13},${y - 18} ${valueX},${y + 2}`} fill="#f472b6" />
               </>
             ) : (
               <>
@@ -15225,9 +15561,22 @@ function DecimalNumberLine({
               </>
             )}
             {showParts ? (
-              <text x={valueX} y="156" textAnchor="middle" fill="#fbbf24" className="text-4xl font-black">
-                {value.toFixed(1)}
-              </text>
+              <>
+                <rect
+                  x={valueX - 31}
+                  y={markerValueY - 27}
+                  width="62"
+                  height="36"
+                  rx="14"
+                  fill="#111827"
+                  stroke="#f472b6"
+                  strokeWidth="3"
+                  filter="drop-shadow(0 4px 8px rgba(0,0,0,0.35))"
+                />
+                <text x={valueX} y={markerValueY} textAnchor="middle" fill="#fbbf24" className={compact ? 'text-3xl font-black' : 'text-4xl font-black'}>
+                  {value.toFixed(1)}
+                </text>
+              </>
             ) : null}
           </motion.g>
         ) : null}
@@ -15237,18 +15586,13 @@ function DecimalNumberLine({
           {Array.from({ length: tickCount }, (_, index) => {
             const tickValue = index / 10;
             const leftPercent = ((startX + (index / (max * 10)) * span) / width) * 100;
-            const isSelected = value !== undefined && Math.abs(value - tickValue) < 0.001;
             return (
               <button
                 key={index}
                 type="button"
                 onClick={() => onSelect(tickValue)}
                 aria-label={`${tickValue.toFixed(1)} 선택`}
-                className={`absolute top-[2.15rem] h-14 w-8 -translate-x-1/2 rounded-full border-2 transition ${
-                  isSelected
-                    ? 'border-pink-500 bg-pink-200/55 shadow-[0_0_0_4px_rgba(236,72,153,0.18)]'
-                    : 'border-transparent bg-transparent hover:border-pink-300 hover:bg-pink-100/40'
-                }`}
+                className="absolute top-5 h-20 w-9 -translate-x-1/2 appearance-none rounded-full border-0 bg-transparent p-0 opacity-0 outline-none shadow-none ring-0 hover:bg-transparent focus:bg-transparent focus:outline-none focus:ring-0"
                 style={{ left: `${leftPercent}%` }}
               />
             );
@@ -15259,12 +15603,8 @@ function DecimalNumberLine({
   );
 }
 
-function ProblemHint({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="rounded-2xl border-4 border-sky-200 bg-sky-50 px-4 py-3 text-center text-lg font-black leading-snug text-sky-950 shadow-sm">
-      {children}
-    </div>
-  );
+function ProblemHint({ children: _children }: { children: React.ReactNode }) {
+  return null;
 }
 
 function isMeasurementObjectKind(value: string): value is MeasurementObjectKind {
@@ -15290,17 +15630,19 @@ function DecimalRulerFigure({ problem }: { problem: FractionIntroProblemData }) 
   const objectLabel = problem.meta?.objectLabel ?? '리본';
   const startMm = Number(problem.meta?.startMm) || 0;
   const lengthMm = Number(problem.meta?.lengthMm) || problem.numerator;
-  const rulerCm = Number(problem.meta?.rulerCm) || 10;
+  const rulerCm = Math.max(3, Math.ceil(lengthMm / 10));
   const svgWidth = 820;
-  const svgHeight = 330;
-  const rulerX = 98;
-  const rulerY = 178;
-  const rulerWidth = 624;
+  const svgHeight = 238;
+  const rulerX = 74;
+  const rulerY = 140;
+  const rulerZeroX = 98;
+  const rulerScaleWidth = 624;
+  const rulerEndPadding = 34;
+  const rulerWidth = rulerZeroX - rulerX + rulerScaleWidth + rulerEndPadding;
   const rulerHeight = 78;
-  const millimeterWidth = rulerWidth / (rulerCm * 10);
-  const startX = rulerX + startMm * millimeterWidth;
-  const endX = startX + lengthMm * millimeterWidth;
-  const labelY = rulerY + rulerHeight + 48;
+  const millimeterWidth = rulerScaleWidth / (rulerCm * 10);
+  const objectStartX = rulerZeroX;
+  const objectEndX = objectStartX + lengthMm * millimeterWidth;
   const rulerPath = [
     `M ${rulerX + 12} ${rulerY}`,
     `H ${rulerX + rulerWidth - 12}`,
@@ -15334,15 +15676,15 @@ function DecimalRulerFigure({ problem }: { problem: FractionIntroProblemData }) 
         </clipPath>
       </defs>
       <rect x="10" y="10" width={svgWidth - 20} height={svgHeight - 20} rx="30" fill={`url(#${backgroundFillId})`} stroke="#cbd5e1" strokeWidth="3" />
-      <rect x={rulerX - 34} y="42" width={rulerWidth + 68} height="104" rx="26" fill="#ffffff" stroke="#cfe0ee" strokeWidth="2.4" />
-      <rect x={startX} y="73" width={Math.max(6, endX - startX)} height="30" rx="15" fill="#f9a8d4" opacity="0.34" />
-      <line x1={startX} y1="52" x2={startX} y2={rulerY - 14} stroke="#ec4899" strokeWidth="4" strokeDasharray="8 8" strokeLinecap="round" />
-      <line x1={endX} y1="52" x2={endX} y2={rulerY - 14} stroke="#ec4899" strokeWidth="4" strokeDasharray="8 8" strokeLinecap="round" />
+      <rect x={rulerX - 34} y="34" width={rulerWidth + 68} height="88" rx="24" fill="#ffffff" stroke="#cfe0ee" strokeWidth="2.4" />
+      <rect x={objectStartX} y="61" width={Math.max(6, objectEndX - objectStartX)} height="26" rx="13" fill="#f9a8d4" opacity="0.34" />
+      <line x1={objectStartX} y1="40" x2={objectStartX} y2={rulerY - 10} stroke="#ec4899" strokeWidth="5" strokeLinecap="round" />
+      <line x1={objectEndX} y1="40" x2={objectEndX} y2={rulerY - 10} stroke="#ec4899" strokeWidth="5" strokeLinecap="round" />
       <MeasurementObjectIllustration
         kind={objectKind}
         label={objectLabel}
-        x={startX}
-        y={70}
+        x={objectStartX}
+        y={58}
         width={lengthMm * millimeterWidth}
       />
       <path d={rulerPath} fill={`url(#${rulerFillId})`} stroke="#5f84a3" strokeWidth="4" vectorEffect="non-scaling-stroke" />
@@ -15350,7 +15692,7 @@ function DecimalRulerFigure({ problem }: { problem: FractionIntroProblemData }) 
         {Array.from({ length: rulerCm }, (_, centimeter) => (
           <rect
             key={`ruler-band-${centimeter}`}
-            x={rulerX + centimeter * 10 * millimeterWidth}
+            x={rulerZeroX + centimeter * 10 * millimeterWidth}
             y={rulerY + 2}
             width={10 * millimeterWidth}
             height={rulerHeight - 6}
@@ -15358,9 +15700,9 @@ function DecimalRulerFigure({ problem }: { problem: FractionIntroProblemData }) 
           />
         ))}
       </g>
-      <line x1={startX} y1={rulerY + 6} x2={endX} y2={rulerY + 6} stroke="#ec4899" strokeWidth="7" strokeLinecap="round" opacity="0.76" />
+      <line x1={objectStartX} y1={rulerY + 6} x2={objectEndX} y2={rulerY + 6} stroke="#ec4899" strokeWidth="7" strokeLinecap="butt" opacity="0.9" />
       {Array.from({ length: rulerCm * 10 + 1 }, (_, index) => {
-        const x = rulerX + index * millimeterWidth;
+        const x = rulerZeroX + index * millimeterWidth;
         const isCm = index % 10 === 0;
         const isHalf = index % 5 === 0;
         const tickHeight = isCm ? 42 : isHalf ? 30 : 18;
@@ -15394,7 +15736,6 @@ function DecimalRulerFigure({ problem }: { problem: FractionIntroProblemData }) 
           </g>
         );
       })}
-      <text x={(startX + endX) / 2} y={labelY} textAnchor="middle" fontSize="34" fontWeight="900" fill="#0f172a">{objectLabel}</text>
     </svg>
   );
 }
@@ -15481,10 +15822,15 @@ function CompleteWholeGridFigure({
     const column = Number(columnText);
     return { row, column };
   });
-  const givenMinRow = Math.min(...givenPositions.map((position) => position.row));
-  const givenMaxRow = Math.max(...givenPositions.map((position) => position.row));
-  const givenMinColumn = Math.min(...givenPositions.map((position) => position.column));
-  const givenMaxColumn = Math.max(...givenPositions.map((position) => position.column));
+  const labelPosition = givenPositions[Math.floor((givenPositions.length - 1) / 2)] ?? givenPositions[0];
+  const givenCenterRow = labelPosition.row + 0.5;
+  const givenCenterColumn = labelPosition.column + 0.5;
+  const givenPerimeterEdges = givenPositions.flatMap(({ row, column }) => ([
+    { key: `${row}-${column}-top`, side: 'top', row, column, visible: !givenCellSet.has(`cw:${row - 1}:${column}`) },
+    { key: `${row}-${column}-right`, side: 'right', row, column, visible: !givenCellSet.has(`cw:${row}:${column + 1}`) },
+    { key: `${row}-${column}-bottom`, side: 'bottom', row, column, visible: !givenCellSet.has(`cw:${row + 1}:${column}`) },
+    { key: `${row}-${column}-left`, side: 'left', row, column, visible: !givenCellSet.has(`cw:${row}:${column - 1}`) },
+  ].filter((edge) => edge.visible)));
 
   return (
     <div className="flex min-h-0 h-full w-full items-center justify-center">
@@ -15507,7 +15853,7 @@ function CompleteWholeGridFigure({
             return (
               <div
                 key={cellId}
-                className="relative z-10 h-full w-full border-[3px] border-pink-500 shadow-[inset_0_0_0_2px_rgba(255,255,255,0.72)]"
+                className="relative z-10 h-full w-full border border-slate-300"
                 style={{ backgroundColor: givenColor }}
                 aria-label="주어진 부분"
               />
@@ -15530,20 +15876,46 @@ function CompleteWholeGridFigure({
             />
           );
         })}
+        <svg
+          viewBox={`0 0 ${geometry.gridColumns} ${geometry.gridRows}`}
+          preserveAspectRatio="none"
+          className="pointer-events-none absolute inset-0 z-20 h-full w-full overflow-visible"
+          aria-hidden="true"
+        >
+          {givenPerimeterEdges.map((edge) => {
+            const x1 = edge.side === 'right' ? edge.column + 1 : edge.column;
+            const y1 = edge.side === 'bottom' ? edge.row + 1 : edge.row;
+            const x2 = edge.side === 'left' || edge.side === 'right' ? x1 : edge.column + 1;
+            const y2 = edge.side === 'top' || edge.side === 'bottom' ? y1 : edge.row + 1;
+            return (
+              <line
+                key={edge.key}
+                x1={x1}
+                y1={y1}
+                x2={x2}
+                y2={y2}
+                stroke="#db2777"
+                strokeWidth="6"
+                strokeLinecap="square"
+                vectorEffect="non-scaling-stroke"
+                style={{ filter: 'drop-shadow(0 0 8px rgba(219, 39, 119, 0.4))' }}
+              />
+            );
+          })}
+        </svg>
         <div
-          className="pointer-events-none absolute z-20 grid place-items-center"
+          className="pointer-events-none absolute z-30 grid place-items-center"
           style={{
-            left: `${(givenMinColumn / geometry.gridColumns) * 100}%`,
-            top: `${(givenMinRow / geometry.gridRows) * 100}%`,
-            width: `${((givenMaxColumn - givenMinColumn + 1) / geometry.gridColumns) * 100}%`,
-            height: `${((givenMaxRow - givenMinRow + 1) / geometry.gridRows) * 100}%`,
+            left: `${(givenCenterColumn / geometry.gridColumns) * 100}%`,
+            top: `${(givenCenterRow / geometry.gridRows) * 100}%`,
+            transform: 'translate(-50%, -50%)',
           }}
 	        >
 		          <div
 		            className="grid min-h-0 min-w-0 place-items-center text-center text-slate-950"
 		            style={{
-		              width: 'min(88%, 4.4rem)',
-		              fontSize: condensed ? 'clamp(1.08rem, 2.65vh, 1.55rem)' : 'clamp(1.25rem, 3.1vh, 1.95rem)',
+		              width: condensed ? '3rem' : '3.4rem',
+		              fontSize: condensed ? 'clamp(0.98rem, 2.35vh, 1.35rem)' : 'clamp(1.08rem, 2.7vh, 1.65rem)',
 		            }}
 		          >
 		            <div className="grid w-full place-items-center px-1.5 py-1 leading-none">
@@ -15601,6 +15973,8 @@ function FractionIntroProblemCard({
   const fractionStoryGreeting = getMetaText('greeting', '가영아.');
   const fractionStorySentence = getMetaText('sentence', '피자 2조각을 먹고 나머지는 냉장고에 넣어.');
   const fractionStoryItemLabel = getMetaText('itemLabel', '전체');
+  const fractionStoryColor = getUnit6FractionStoryColor(fractionStoryItemLabel, fractionIntro.color);
+  const unitFractionCountModelColor = '#38bdf8';
   const unitFractionTermExamples = [
     getMetaNumber('exampleA', 2),
     getMetaNumber('exampleB', 3),
@@ -15619,6 +15993,10 @@ function FractionIntroProblemCard({
   const conversionCmA = getMetaText('cmA', '0.5');
   const conversionCmB = getMetaText('cmB', '0.7');
   const unitConversionVariant = getMetaText('variant', 'grid');
+  const unitConversionDecimalQuestions = getUnitConversionDecimalQuestions(fractionIntro);
+  const unitConversionDecimalState = parseUnitConversionDecimalState(answerValue, unitConversionDecimalQuestions.length);
+  const currentUnitConversionDecimalQuestion =
+    unitConversionDecimalQuestions[unitConversionDecimalState.currentIndex] ?? unitConversionDecimalQuestions[0];
   const decimalTenthValueA = getMetaText('decimalA', '0.4');
   const decimalTenthTargetCountA = getMetaText('targetCountA', '8');
   const largeTenthSourceCount = getMetaText('sourceCount', '48');
@@ -15641,11 +16019,14 @@ function FractionIntroProblemCard({
     decimalRepresentationChoices,
     fractionIntro.answerToken,
   );
-  const decimalStoryDistance = getMetaText('distance', '50');
+  const decimalStoryTarget = getMetaText('target', getMetaText('distance', '50 m'));
+  const decimalStoryTargetParticle = getKoreanParticle(decimalStoryTarget, '을', '를');
   const decimalStoryPerson1 = getMetaText('person1', '민수');
   const decimalStoryPerson2 = getMetaText('person2', '시현');
   const decimalStoryTime1 = getMetaText('time1', '10.4');
   const decimalStoryTime2 = getMetaText('time2', '11.2');
+  const decimalStoryActionConnective = getMetaText('actionConnective', '달렸고');
+  const decimalStoryActionFinal = getMetaText('actionFinal', '달렸습니다');
   const selectedPieces = getFractionIntroPaintSelection(answerValue);
 	  const completeWholeGridGeometry = getCompleteWholeGridGeometry(fractionIntro);
 	  const completeWholeSelectablePieces = selectedPieces.filter((pieceId) => !completeWholeGridGeometry.givenCells.includes(pieceId));
@@ -15667,6 +16048,9 @@ function FractionIntroProblemCard({
   const fractionIntroLabelTextClass = condensed ? 'text-xl' : 'text-2xl';
   const fractionIntroStackInputSize = condensed ? 'small' : 'large';
   const divideShadeFractionStackInputSize = condensed ? 'medium' : 'xlarge';
+  const isFractionWordsIntroComplete =
+    getKeyValueAnswer(answerValue, 'denominator').trim().length > 0 &&
+    getKeyValueAnswer(answerValue, 'numerator').trim().length > 0;
   const togglePiece = (pieceId: string) => {
     let selectablePieces = selectedPieces;
     if (fractionIntro.activity === 'completeWhole') {
@@ -15705,36 +16089,40 @@ function FractionIntroProblemCard({
         {fractionIntro.activity === 'shadedUnshadedFractions' ? (
           <div className={`col-span-full grid min-h-0 lg:grid-cols-[minmax(10rem,18rem)_minmax(0,1fr)] lg:items-center ${condensed ? 'gap-3' : 'gap-6'}`}>
             <div className="grid gap-3">
-              <div className={`mx-auto flex w-full max-w-[22rem] items-center justify-center ${fractionIntroFigureHeightClass}`}>
+              <div className={`mx-auto flex w-full max-w-[22rem] scale-105 items-center justify-center ${fractionIntroFigureHeightClass}`}>
                 <FractionIntroSvg problem={fractionIntro} />
               </div>
             </div>
-            <div className={`grid ${condensed ? 'gap-2' : 'gap-4'}`}>
-              <div className={`grid rounded-2xl border-4 border-slate-300 bg-white sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center ${condensed ? 'gap-2 p-3' : 'gap-3 p-4'}`}>
+            <div className={`grid ${condensed ? 'gap-2' : 'gap-6'}`}>
+              <div className={`grid rounded-2xl border-4 border-slate-300 bg-white sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center ${condensed ? 'gap-x-4 gap-y-2 px-4 py-2.5' : 'gap-6 px-7 py-6'}`}>
                 <span
-                  className={`${condensed ? 'h-9 w-9' : 'h-12 w-12'} rounded-xl border-4 border-slate-600`}
-                  style={{ backgroundColor: fractionIntro.color === '#84cc16' ? '#a3e635' : fractionIntro.color }}
+                  className={`${condensed ? 'h-10 w-10' : 'h-16 w-16'} rounded-xl border-4 border-slate-600`}
+                  style={{ backgroundColor: fractionIntro.color === '#84cc16' ? '#a3e635' : fractionIntro.color, transform: 'scale(1.05)' }}
                   aria-hidden="true"
                 />
-                <span className={`break-keep font-black text-slate-950 ${fractionIntroLabelTextClass}`}>색칠한 부분</span>
-                <FractionStackInput
-                  numerator={getKeyValueAnswer(answerValue, 'shadedNumerator')}
-                  denominator={getKeyValueAnswer(answerValue, 'shadedDenominator')}
-                  onNumeratorChange={(value) => setAnswer('shadedNumerator', value)}
-                  onDenominatorChange={(value) => setAnswer('shadedDenominator', value)}
-                  size={fractionIntroStackInputSize}
-                />
+                <span className={`break-keep font-black text-slate-950 ${condensed ? 'text-2xl' : 'text-3xl sm:text-4xl'}`} style={{ transform: 'scale(1.05)', transformOrigin: 'left center' }}>색칠한 부분</span>
+                <span className="inline-flex" style={{ transform: 'scale(1.05)', transformOrigin: 'right center' }}>
+                  <FractionStackInput
+                    numerator={getKeyValueAnswer(answerValue, 'shadedNumerator')}
+                    denominator={getKeyValueAnswer(answerValue, 'shadedDenominator')}
+                    onNumeratorChange={(value) => setAnswer('shadedNumerator', value)}
+                    onDenominatorChange={(value) => setAnswer('shadedDenominator', value)}
+                    size={condensed ? 'small' : 'xlarge'}
+                  />
+                </span>
               </div>
-              <div className={`grid rounded-2xl border-4 border-slate-300 bg-white sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center ${condensed ? 'gap-2 p-3' : 'gap-3 p-4'}`}>
-                <span className={`${condensed ? 'h-9 w-9' : 'h-12 w-12'} rounded-xl border-4 border-slate-600 bg-white`} aria-hidden="true" />
-                <span className={`break-keep font-black text-slate-950 ${fractionIntroLabelTextClass}`}>색칠하지 않은 부분</span>
-                <FractionStackInput
-                  numerator={getKeyValueAnswer(answerValue, 'unshadedNumerator')}
-                  denominator={getKeyValueAnswer(answerValue, 'unshadedDenominator')}
-                  onNumeratorChange={(value) => setAnswer('unshadedNumerator', value)}
-                  onDenominatorChange={(value) => setAnswer('unshadedDenominator', value)}
-                  size={fractionIntroStackInputSize}
-                />
+              <div className={`grid rounded-2xl border-4 border-slate-300 bg-white sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center ${condensed ? 'gap-x-4 gap-y-2 px-4 py-2.5' : 'gap-6 px-7 py-6'}`}>
+                <span className={`${condensed ? 'h-10 w-10' : 'h-16 w-16'} rounded-xl border-4 border-slate-600 bg-white`} style={{ transform: 'scale(1.05)' }} aria-hidden="true" />
+                <span className={`break-keep font-black text-slate-950 ${condensed ? 'text-2xl' : 'text-3xl sm:text-4xl'}`} style={{ transform: 'scale(1.05)', transformOrigin: 'left center' }}>색칠하지 않은 부분</span>
+                <span className="inline-flex" style={{ transform: 'scale(1.05)', transformOrigin: 'right center' }}>
+                  <FractionStackInput
+                    numerator={getKeyValueAnswer(answerValue, 'unshadedNumerator')}
+                    denominator={getKeyValueAnswer(answerValue, 'unshadedDenominator')}
+                    onNumeratorChange={(value) => setAnswer('unshadedNumerator', value)}
+                    onDenominatorChange={(value) => setAnswer('unshadedDenominator', value)}
+                    size={condensed ? 'small' : 'xlarge'}
+                  />
+                </span>
               </div>
             </div>
           </div>
@@ -15755,25 +16143,35 @@ function FractionIntroProblemCard({
                 <span>조각입니다.</span>
               </p>
 
-              <div className={`border-t-4 border-slate-200 pt-4 font-black leading-snug text-slate-950 ${condensed ? 'text-base' : 'text-lg sm:text-xl'}`}>
-                <p className="flex items-center justify-center gap-x-3 overflow-x-auto rounded-2xl bg-amber-50 px-3 py-3 whitespace-nowrap">
-                  <span>분수로 쓰면</span>
-                  <FractionStackInput
-                    numerator={getKeyValueAnswer(answerValue, 'fractionNumerator')}
-                    denominator={getKeyValueAnswer(answerValue, 'fractionDenominator')}
-                    onNumeratorChange={(value) => setTextAnswer('fractionNumerator', value)}
-                    onDenominatorChange={(value) => setTextAnswer('fractionDenominator', value)}
-                    size="medium"
-                    allowHangul
-                  />
-                  <span>입니다.</span>
-                  <span>{fractionIntro.denominator}을</span>
-                  <FractionBlankInput value={getKeyValueAnswer(answerValue, 'readDenominator')} onChange={(value) => setTextAnswer('readDenominator', value)} ariaLabel="읽기 분모" compact allowHangul inputKind="word" />
-                  <span>라고 읽고, {fractionIntro.numerator}를</span>
-                  <FractionBlankInput value={getKeyValueAnswer(answerValue, 'readNumerator')} onChange={(value) => setTextAnswer('readNumerator', value)} ariaLabel="읽기 분자" compact allowHangul inputKind="word" />
-                  <span>라고 읽습니다.</span>
-                </p>
-              </div>
+              <AnimatePresence>
+                {isFractionWordsIntroComplete ? (
+                  <motion.div
+                    initial={shouldReduceMotion ? false : { opacity: 0, y: 12, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                    transition={{ duration: 0.18, ease: 'easeOut' }}
+                    className={`border-t-4 border-slate-200 pt-4 font-black leading-snug text-slate-950 ${condensed ? 'text-base' : 'text-lg sm:text-xl'}`}
+                  >
+                    <p className="flex items-center justify-center gap-x-3 overflow-x-auto rounded-2xl bg-amber-50 px-3 py-3 whitespace-nowrap">
+                      <span>분수로 쓰면</span>
+                      <FractionStackInput
+                        numerator={getKeyValueAnswer(answerValue, 'fractionNumerator')}
+                        denominator={getKeyValueAnswer(answerValue, 'fractionDenominator')}
+                        onNumeratorChange={(value) => setTextAnswer('fractionNumerator', value)}
+                        onDenominatorChange={(value) => setTextAnswer('fractionDenominator', value)}
+                        size="medium"
+                        allowHangul
+                      />
+                      <span>입니다.</span>
+                      <span>{fractionIntro.denominator}을</span>
+                      <FractionBlankInput value={getKeyValueAnswer(answerValue, 'readDenominator')} onChange={(value) => setTextAnswer('readDenominator', value)} ariaLabel="읽기 분모" compact allowHangul inputKind="word" />
+                      <span>라고 읽고, {fractionIntro.numerator}를</span>
+                      <FractionBlankInput value={getKeyValueAnswer(answerValue, 'readNumerator')} onChange={(value) => setTextAnswer('readNumerator', value)} ariaLabel="읽기 분자" compact allowHangul inputKind="word" />
+                      <span>라고 읽습니다.</span>
+                    </p>
+                  </motion.div>
+                ) : null}
+              </AnimatePresence>
             </div>
           </div>
         ) : null}
@@ -15829,7 +16227,7 @@ function FractionIntroProblemCard({
                 <FractionStoryWholeSvg
                   denominator={fractionIntro.denominator}
                   numerator={fractionIntro.numerator}
-                  color={fractionIntro.color}
+                  color={fractionStoryColor}
                 />
               </div>
               <p className="text-center text-xl font-black text-slate-950">{fractionStoryItemLabel}</p>
@@ -15849,23 +16247,24 @@ function FractionIntroProblemCard({
 
         {fractionIntro.activity === 'unitFractionTerm' ? (
           <div className="col-span-full flex min-h-0 flex-col justify-center gap-4 rounded-2xl border-4 border-slate-300 bg-white px-6 py-8">
-            <p className={`break-keep font-black leading-[1.9] text-slate-950 ${condensed ? 'text-2xl' : 'text-3xl sm:text-4xl'}`}>
-              {' '}
+            <p className={`flex flex-wrap items-center justify-center gap-x-3 gap-y-4 break-keep text-center font-black leading-[1.65] text-slate-950 ${condensed ? 'text-2xl' : 'text-3xl sm:text-4xl'}`}>
+              <span>분수 중에서</span>
               {unitFractionTermExamples.map((denominator, index) => (
                 <React.Fragment key={denominator}>
-                  <span className="inline-grid align-middle text-center">
+                  <span className="inline-grid align-middle text-center leading-none">
                     <span>1</span><span className="my-1 h-1 w-11 rounded-full border border-slate-950 bg-white shadow-[0_0_0_1px_rgba(255,255,255,0.85)]" /><span>{denominator}</span>
                   </span>
-                  {index < unitFractionTermExamples.length - 1 ? ', ' : ''}
+                  {index < unitFractionTermExamples.length - 1 ? <span>,</span> : null}
                 </React.Fragment>
               ))}
-              :{' '}
+              <span>과 같이 분자가 1인 분수를</span>
               <FractionBlankInput
                 value={getKeyValueAnswer(answerValue, 'term')}
                 onChange={(value) => setTextAnswer('term', value)}
                 ariaLabel="분자가 1인 분수의 이름"
                 text
               />
+              <span>라고 합니다.</span>
             </p>
           </div>
         ) : null}
@@ -15885,22 +16284,22 @@ function FractionIntroProblemCard({
         ) : null}
 
         {fractionIntro.activity === 'unitFractionCountModel' ? (
-          <div className={`col-span-full flex min-h-0 flex-col justify-center ${condensed ? 'gap-5' : 'gap-8'}`}>
-            <div className={`grid min-w-0 items-center ${condensed ? 'grid-cols-[6.75rem_minmax(0,1fr)] gap-3' : 'grid-cols-[8rem_minmax(0,1fr)] gap-5'}`}>
-              <div className={`inline-grid w-full max-w-[7.25rem] justify-self-center rounded-lg border-4 border-slate-300 bg-white px-3 py-2 text-center font-black leading-none text-slate-950 shadow-sm ${condensed ? 'text-3xl' : 'text-4xl'}`}>
+          <div className={`col-span-full flex min-h-0 flex-col justify-center ${condensed ? 'gap-4' : 'gap-6'}`}>
+            <div className={`grid min-w-0 items-center rounded-2xl border-4 border-sky-200 bg-slate-50 shadow-[0_12px_28px_rgba(15,23,42,0.14)] ${condensed ? 'grid-cols-[5.75rem_minmax(0,1fr)] gap-3 px-4 py-4' : 'grid-cols-[7rem_minmax(0,1fr)] gap-5 px-5 py-5'}`}>
+              <div className={`inline-grid w-full max-w-[6.5rem] justify-self-center rounded-xl border-4 border-sky-300 bg-slate-950 px-3 py-2 text-center font-black leading-none text-white shadow-[0_8px_18px_rgba(14,165,233,0.18)] ${condensed ? 'text-3xl' : 'text-4xl'}`}>
                 <span>{fractionIntro.numerator}</span>
-                <span className="my-2 h-2 w-full rounded-full border border-slate-950 bg-white shadow-[0_0_0_2px_rgba(255,255,255,0.9)]" />
+                <span className="my-2.5 h-2.5 w-full rounded-full bg-sky-100 shadow-[0_0_0_2px_rgba(255,255,255,0.3)]" />
                 <span>{fractionIntro.denominator}</span>
               </div>
-              <FractionBarModel numerator={fractionIntro.numerator} denominator={fractionIntro.denominator} color={fractionIntro.color} />
+              <FractionBarModel numerator={fractionIntro.numerator} denominator={fractionIntro.denominator} color={unitFractionCountModelColor} />
             </div>
-            <p className={`flex flex-wrap items-center gap-x-3 gap-y-3 break-keep font-black leading-tight text-slate-950 ${condensed ? 'text-2xl' : 'text-3xl sm:text-4xl'}`}>
+            <p className={`flex flex-wrap items-center justify-center gap-x-3 gap-y-3 break-keep rounded-2xl border-4 border-sky-200 bg-sky-50 px-5 py-4 text-center font-black leading-tight text-slate-950 shadow-[0_10px_24px_rgba(15,23,42,0.12)] ${condensed ? 'text-2xl' : 'text-3xl sm:text-4xl'}`}>
               <FractionInline numerator={fractionIntro.numerator} denominator={fractionIntro.denominator} className={condensed ? 'text-3xl' : 'text-4xl'} />
               <span>은</span>
               <FractionInline numerator={1} denominator={fractionIntro.denominator} className={condensed ? 'text-3xl' : 'text-4xl'} />
               <span>이</span>
               <FractionBlankInput value={getKeyValueAnswer(answerValue, 'count')} onChange={(value) => setAnswer('count', value)} ariaLabel="단위분수 개수" compact />
-              <span>개</span>
+              <span>개입니다.</span>
             </p>
           </div>
         ) : null}
@@ -15920,95 +16319,93 @@ function FractionIntroProblemCard({
         ) : null}
 
         {fractionIntro.activity === 'sameDenominatorCompare' ? (
-          <div className="col-span-full grid gap-6">
+          <div className={`col-span-full grid ${condensed ? 'gap-3' : 'gap-6'}`}>
             <ProblemHint>
               분모 같음: 분자 비교
             </ProblemHint>
-            <div className="grid gap-5 rounded-2xl border-4 border-slate-300 bg-white p-5">
-              <div className="grid grid-cols-[5rem_minmax(0,1fr)] items-center gap-4">
-                <FractionInline numerator={sameDenominatorLeftCount} denominator={fractionIntro.denominator} className="rounded-lg border-4 border-slate-300 bg-white px-3 py-2 text-3xl text-slate-950 shadow-sm" />
-                <FractionCompareBar numerator={sameDenominatorLeftCount} denominator={fractionIntro.denominator} color="#fde68a" />
+            <div className={`grid rounded-2xl border-4 border-slate-300 bg-white ${condensed ? 'gap-3 p-3' : 'gap-5 p-5'}`}>
+              <div className="grid min-w-0 items-center">
+                <FractionCompareBar numerator={sameDenominatorLeftCount} denominator={fractionIntro.denominator} color="#fde68a" compact={condensed} />
               </div>
-              <div className="grid grid-cols-[5rem_minmax(0,1fr)] items-center gap-4">
-                <FractionInline numerator={sameDenominatorRightCount} denominator={fractionIntro.denominator} className="rounded-lg border-4 border-slate-300 bg-white px-3 py-2 text-3xl text-slate-950 shadow-sm" />
-                <FractionCompareBar numerator={sameDenominatorRightCount} denominator={fractionIntro.denominator} color="#fde68a" />
+              <div className="grid min-w-0 items-center">
+                <FractionCompareBar numerator={sameDenominatorRightCount} denominator={fractionIntro.denominator} color="#fde68a" compact={condensed} />
               </div>
             </div>
-            <div className="grid gap-4 rounded-2xl border-4 border-slate-300 bg-white p-5 text-2xl font-black text-slate-950">
-              <div className="flex flex-wrap items-center gap-3">
-                <FractionInline numerator={sameDenominatorLeftCount} denominator={fractionIntro.denominator} className="text-3xl" />
+            <div className={`grid rounded-2xl border-4 border-slate-300 bg-white font-black text-slate-950 ${condensed ? 'gap-2 p-3 text-xl' : 'gap-4 p-5 text-2xl'}`}>
+              <div className={`flex flex-wrap items-center ${condensed ? 'gap-2' : 'gap-3'}`}>
+                <FractionInline numerator={sameDenominatorLeftCount} denominator={fractionIntro.denominator} className={condensed ? 'text-2xl' : 'text-3xl'} />
                 <span>는</span>
-                <FractionInline numerator={1} denominator={fractionIntro.denominator} className="text-3xl" />
+                <FractionInline numerator={1} denominator={fractionIntro.denominator} className={condensed ? 'text-2xl' : 'text-3xl'} />
                 <span>이</span>
                 <FractionBlankInput value={getKeyValueAnswer(answerValue, 'aCount')} onChange={(value) => setAnswer('aCount', value)} ariaLabel="4/7의 단위분수 개수" compact />
                 <span>개,</span>
-                <FractionInline numerator={sameDenominatorRightCount} denominator={fractionIntro.denominator} className="text-3xl" />
+                <FractionInline numerator={sameDenominatorRightCount} denominator={fractionIntro.denominator} className={condensed ? 'text-2xl' : 'text-3xl'} />
                 <span>은</span>
-                <FractionInline numerator={1} denominator={fractionIntro.denominator} className="text-3xl" />
+                <FractionInline numerator={1} denominator={fractionIntro.denominator} className={condensed ? 'text-2xl' : 'text-3xl'} />
                 <span>이</span>
                 <FractionBlankInput value={getKeyValueAnswer(answerValue, 'bCount')} onChange={(value) => setAnswer('bCount', value)} ariaLabel="6/7의 단위분수 개수" compact />
                 <span>개</span>
               </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <FractionInline numerator={sameDenominatorLeftCount} denominator={fractionIntro.denominator} className="text-3xl" />
-                <CompareSymbolChoice value={getKeyValueAnswer(answerValue, 'symbol')} onChange={(value) => setTextAnswer('symbol', value)} ariaLabel="분모가 같은 분수 비교 기호" />
-                <FractionInline numerator={sameDenominatorRightCount} denominator={fractionIntro.denominator} className="text-3xl" />
+              <div className={`flex flex-wrap items-center ${condensed ? 'gap-2' : 'gap-3'}`}>
+                <FractionInline numerator={sameDenominatorLeftCount} denominator={fractionIntro.denominator} className={condensed ? 'text-2xl' : 'text-3xl'} />
+                <CompareSymbolChoice value={getKeyValueAnswer(answerValue, 'symbol')} onChange={(value) => setTextAnswer('symbol', value)} ariaLabel="분모가 같은 분수 비교 기호" compact={condensed} />
+                <FractionInline numerator={sameDenominatorRightCount} denominator={fractionIntro.denominator} className={condensed ? 'text-2xl' : 'text-3xl'} />
               </div>
             </div>
           </div>
         ) : null}
 
         {fractionIntro.activity === 'unitFractionCompare' ? (
-          <div className="col-span-full grid gap-6">
+          <div className={`col-span-full grid ${condensed ? 'gap-3' : 'gap-6'}`}>
             <ProblemHint>
               단위분수: 분모가 클수록 작음
             </ProblemHint>
-            <div className="grid gap-5 rounded-2xl border-4 border-slate-300 bg-white p-5">
-              <div className="grid grid-cols-[5rem_minmax(0,1fr)] items-center gap-4">
-                <FractionInline numerator={1} denominator={unitFractionLeftDenominator} className="rounded-lg border-4 border-slate-300 bg-white px-3 py-2 text-3xl text-slate-950 shadow-sm" />
-                <FractionCompareBar numerator={1} denominator={unitFractionLeftDenominator} color="#bae6fd" />
+            <div className={`grid rounded-2xl border-4 border-slate-300 bg-white ${condensed ? 'gap-3 p-3' : 'gap-5 p-5'}`}>
+              <div className={`grid items-center ${condensed ? 'grid-cols-[4.5rem_minmax(0,1fr)] gap-3' : 'grid-cols-[5rem_minmax(0,1fr)] gap-4'}`}>
+                <FractionInline numerator={1} denominator={unitFractionLeftDenominator} className={`rounded-lg border-4 border-slate-300 bg-white py-2 text-slate-950 shadow-sm ${condensed ? 'px-2 text-2xl' : 'px-3 text-3xl'}`} />
+                <FractionCompareBar numerator={1} denominator={unitFractionLeftDenominator} color="#bae6fd" compact={condensed} />
               </div>
-              <div className="grid grid-cols-[5rem_minmax(0,1fr)] items-center gap-4">
-                <FractionInline numerator={1} denominator={unitFractionRightDenominator} className="rounded-lg border-4 border-slate-300 bg-white px-3 py-2 text-3xl text-slate-950 shadow-sm" />
-                <FractionCompareBar numerator={1} denominator={unitFractionRightDenominator} color="#bae6fd" />
+              <div className={`grid items-center ${condensed ? 'grid-cols-[4.5rem_minmax(0,1fr)] gap-3' : 'grid-cols-[5rem_minmax(0,1fr)] gap-4'}`}>
+                <FractionInline numerator={1} denominator={unitFractionRightDenominator} className={`rounded-lg border-4 border-slate-300 bg-white py-2 text-slate-950 shadow-sm ${condensed ? 'px-2 text-2xl' : 'px-3 text-3xl'}`} />
+                <FractionCompareBar numerator={1} denominator={unitFractionRightDenominator} color="#bae6fd" compact={condensed} />
               </div>
             </div>
-            <div className="flex flex-wrap items-center justify-center gap-4 rounded-2xl border-4 border-slate-300 bg-white p-5 text-slate-950">
-              <FractionInline numerator={1} denominator={unitFractionLeftDenominator} className="text-4xl" />
-              <CompareSymbolChoice value={getKeyValueAnswer(answerValue, 'symbol')} onChange={(value) => setTextAnswer('symbol', value)} ariaLabel="단위분수 비교 기호" />
-              <FractionInline numerator={1} denominator={unitFractionRightDenominator} className="text-4xl" />
+            <div className={`flex flex-wrap items-center justify-center rounded-2xl border-4 border-slate-300 bg-white text-slate-950 ${condensed ? 'gap-3 p-3' : 'gap-4 p-5'}`}>
+              <FractionInline numerator={1} denominator={unitFractionLeftDenominator} className={condensed ? 'text-3xl' : 'text-4xl'} />
+              <CompareSymbolChoice value={getKeyValueAnswer(answerValue, 'symbol')} onChange={(value) => setTextAnswer('symbol', value)} ariaLabel="단위분수 비교 기호" compact={condensed} />
+              <FractionInline numerator={1} denominator={unitFractionRightDenominator} className={condensed ? 'text-3xl' : 'text-4xl'} />
             </div>
           </div>
         ) : null}
 
         {fractionIntro.activity === 'shadeAndCompare' ? (
-          <div className="col-span-full grid gap-6">
-            <div className="grid gap-4 rounded-2xl border-4 border-slate-300 bg-white p-5">
-              <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-center">
-                <div className="flex min-w-0 items-center gap-3">
-                  <FractionInline numerator={shadeLeftNumerator} denominator={shadeLeftDenominator} className="text-3xl text-slate-950" />
-                  <SelectableFractionBar denominator={shadeLeftDenominator} selectedCount={Number(getKeyValueAnswer(answerValue, 'leftPaint')) || 0} color="#fda4af" onChange={(value) => setAnswer('leftPaint', String(value))} ariaLabel="왼쪽 분수 색칠" />
+          <div className={`col-span-full grid ${condensed ? 'gap-3' : 'gap-6'}`}>
+            <div className={`grid rounded-2xl border-4 border-slate-300 bg-white ${condensed ? 'gap-3 p-3' : 'gap-4 p-5'}`}>
+              <div className={`grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-center ${condensed ? 'gap-2' : 'gap-3'}`}>
+                <div className={`flex min-w-0 items-center ${condensed ? 'gap-2' : 'gap-3'}`}>
+                  <FractionInline numerator={shadeLeftNumerator} denominator={shadeLeftDenominator} className={`${condensed ? 'text-2xl' : 'text-3xl'} text-slate-950`} />
+                  <SelectableFractionBar denominator={shadeLeftDenominator} selectedCount={Number(getKeyValueAnswer(answerValue, 'leftPaint')) || 0} color="#fda4af" onChange={(value) => setAnswer('leftPaint', String(value))} ariaLabel="왼쪽 분수 색칠" compact={condensed} />
                 </div>
-                <CompareSymbolChoice value={getKeyValueAnswer(answerValue, 'leftSymbol')} onChange={(value) => setTextAnswer('leftSymbol', value)} ariaLabel="분수 비교 기호" />
-                <div className="flex min-w-0 items-center gap-3">
-                  <FractionInline numerator={shadeRightNumerator} denominator={shadeRightDenominator} className="text-3xl text-slate-950" />
-                  <SelectableFractionBar denominator={shadeRightDenominator} selectedCount={Number(getKeyValueAnswer(answerValue, 'rightPaint')) || 0} color="#fda4af" onChange={(value) => setAnswer('rightPaint', String(value))} ariaLabel="오른쪽 분수 색칠" />
+                <CompareSymbolChoice value={getKeyValueAnswer(answerValue, 'leftSymbol')} onChange={(value) => setTextAnswer('leftSymbol', value)} ariaLabel="분수 비교 기호" compact={condensed} />
+                <div className={`flex min-w-0 items-center ${condensed ? 'gap-2' : 'gap-3'}`}>
+                  <FractionInline numerator={shadeRightNumerator} denominator={shadeRightDenominator} className={`${condensed ? 'text-2xl' : 'text-3xl'} text-slate-950`} />
+                  <SelectableFractionBar denominator={shadeRightDenominator} selectedCount={Number(getKeyValueAnswer(answerValue, 'rightPaint')) || 0} color="#fda4af" onChange={(value) => setAnswer('rightPaint', String(value))} ariaLabel="오른쪽 분수 색칠" compact={condensed} />
                 </div>
               </div>
             </div>
-            <div className="grid gap-4 rounded-2xl border-4 border-slate-300 bg-white p-5">
+            <div className={`grid rounded-2xl border-4 border-slate-300 bg-white ${condensed ? 'gap-3 p-3' : 'gap-4 p-5'}`}>
               <ProblemHint>
                 한 칸 크기 비교
               </ProblemHint>
-              <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-center">
-                <div className="flex min-w-0 items-center gap-3">
-                  <FractionInline numerator={1} denominator={shadeUnitLeftDenominator} className="text-3xl text-slate-950" />
-                  <SelectableFractionBar denominator={shadeUnitLeftDenominator} selectedCount={Number(getKeyValueAnswer(answerValue, 'unitLeftPaint')) || 0} color="#fde68a" onChange={(value) => setAnswer('unitLeftPaint', String(value))} ariaLabel="왼쪽 단위분수 색칠" />
+              <div className={`grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-center ${condensed ? 'gap-2' : 'gap-3'}`}>
+                <div className={`flex min-w-0 items-center ${condensed ? 'gap-2' : 'gap-3'}`}>
+                  <FractionInline numerator={1} denominator={shadeUnitLeftDenominator} className={`${condensed ? 'text-2xl' : 'text-3xl'} text-slate-950`} />
+                  <SelectableFractionBar denominator={shadeUnitLeftDenominator} selectedCount={Number(getKeyValueAnswer(answerValue, 'unitLeftPaint')) || 0} color="#fde68a" onChange={(value) => setAnswer('unitLeftPaint', String(value))} ariaLabel="왼쪽 단위분수 색칠" compact={condensed} />
                 </div>
-                <CompareSymbolChoice value={getKeyValueAnswer(answerValue, 'unitSymbol')} onChange={(value) => setTextAnswer('unitSymbol', value)} ariaLabel="단위분수 비교 기호" />
-                <div className="flex min-w-0 items-center gap-3">
-                  <FractionInline numerator={1} denominator={shadeUnitRightDenominator} className="text-3xl text-slate-950" />
-                  <SelectableFractionBar denominator={shadeUnitRightDenominator} selectedCount={Number(getKeyValueAnswer(answerValue, 'unitRightPaint')) || 0} color="#fde68a" onChange={(value) => setAnswer('unitRightPaint', String(value))} ariaLabel="오른쪽 단위분수 색칠" />
+                <CompareSymbolChoice value={getKeyValueAnswer(answerValue, 'unitSymbol')} onChange={(value) => setTextAnswer('unitSymbol', value)} ariaLabel="단위분수 비교 기호" compact={condensed} />
+                <div className={`flex min-w-0 items-center ${condensed ? 'gap-2' : 'gap-3'}`}>
+                  <FractionInline numerator={1} denominator={shadeUnitRightDenominator} className={`${condensed ? 'text-2xl' : 'text-3xl'} text-slate-950`} />
+                  <SelectableFractionBar denominator={shadeUnitRightDenominator} selectedCount={Number(getKeyValueAnswer(answerValue, 'unitRightPaint')) || 0} color="#fde68a" onChange={(value) => setAnswer('unitRightPaint', String(value))} ariaLabel="오른쪽 단위분수 색칠" compact={condensed} />
                 </div>
               </div>
             </div>
@@ -16016,30 +16413,39 @@ function FractionIntroProblemCard({
         ) : null}
 
         {fractionIntro.activity === 'fractionCompareStory' ? (
-          <div className="col-span-full grid gap-6">
-            <div className="grid gap-3 rounded-2xl border-4 border-slate-300 bg-white p-5">
-              <ProblemHint>{storyItem}: 막대 길이 비교</ProblemHint>
-              <div className="grid gap-3 md:grid-cols-3">
+          <div className={`col-span-full grid ${condensed ? 'gap-3' : 'gap-6'}`}>
+            <div className={`grid rounded-2xl border-4 border-slate-300 bg-white text-center font-black text-slate-950 ${condensed ? 'gap-3 px-4 py-4' : 'gap-5 px-6 py-7'}`}>
+              <p className={`break-keep leading-snug ${condensed ? 'text-2xl' : 'text-4xl'}`}>
+                세 친구가 {storyItem}를 나누어 가졌습니다.
+              </p>
+              <div className={`grid ${condensed ? 'gap-2 md:grid-cols-3' : 'gap-3 md:grid-cols-3'}`}>
                 {[
                   { person: storyPerson1, numerator: storyNumerator1, denominator: storyDenominator1 },
                   { person: storyPerson2, numerator: storyNumerator2, denominator: storyDenominator2 },
                   { person: storyPerson3, numerator: storyNumerator3, denominator: storyDenominator3 },
                 ].map((entry) => (
-                  <div key={entry.person} className="grid gap-3 rounded-2xl border-4 border-slate-200 bg-slate-50 p-4">
-                    <div className="text-center text-2xl font-black text-slate-950">{entry.person}</div>
-                    <FractionInline numerator={entry.numerator} denominator={entry.denominator} className="mx-auto text-4xl text-slate-950" />
-                    <FractionCompareBar numerator={entry.numerator} denominator={entry.denominator} color="#bfdbfe" />
-                  </div>
+                  <p
+                    key={`${entry.person}-${entry.numerator}-${entry.denominator}`}
+                    className={`flex items-center justify-center gap-2 rounded-xl border-2 border-slate-500 bg-slate-950/35 px-3 leading-none text-white ${condensed ? 'py-2 text-xl' : 'py-3 text-3xl'}`}
+                  >
+                    <span className="shrink-0">{entry.person}</span>
+                    <span className="shrink-0 text-slate-300">:</span>
+                    <FractionInline
+                      numerator={entry.numerator}
+                      denominator={entry.denominator}
+                      className={condensed ? 'text-2xl' : 'text-4xl'}
+                    />
+                  </p>
                 ))}
               </div>
             </div>
-            <div className="flex flex-wrap items-center justify-center gap-3 rounded-2xl border-4 border-slate-300 bg-white p-5 text-2xl font-black text-slate-950">
+            <div className={`flex flex-nowrap items-center justify-center gap-2 overflow-x-auto rounded-2xl border-4 border-slate-300 bg-white font-black text-slate-950 whitespace-nowrap ${condensed ? 'px-3 py-3 text-xl' : 'px-4 py-5 text-2xl'}`}>
               <span>큰 순서</span>
-              <FractionBlankInput value={getKeyValueAnswer(answerValue, 'first')} onChange={(value) => setTextAnswer('first', value)} ariaLabel="첫 번째 이름" text />
+              <FractionBlankInput value={getKeyValueAnswer(answerValue, 'first')} onChange={(value) => setTextAnswer('first', value)} ariaLabel="첫 번째 이름" text textSize="narrow" />
               <span>,</span>
-              <FractionBlankInput value={getKeyValueAnswer(answerValue, 'second')} onChange={(value) => setTextAnswer('second', value)} ariaLabel="두 번째 이름" text />
+              <FractionBlankInput value={getKeyValueAnswer(answerValue, 'second')} onChange={(value) => setTextAnswer('second', value)} ariaLabel="두 번째 이름" text textSize="narrow" />
               <span>,</span>
-              <FractionBlankInput value={getKeyValueAnswer(answerValue, 'third')} onChange={(value) => setTextAnswer('third', value)} ariaLabel="세 번째 이름" text />
+              <FractionBlankInput value={getKeyValueAnswer(answerValue, 'third')} onChange={(value) => setTextAnswer('third', value)} ariaLabel="세 번째 이름" text textSize="narrow" />
             </div>
           </div>
         ) : null}
@@ -16055,16 +16461,14 @@ function FractionIntroProblemCard({
                 <div className="grid gap-4">
                   {decimalPromiseMode === 'decimalToFraction' ? (
                     <>
-                      <p className="break-keep leading-[1.7]">
-                        0.1 = 한 칸
-                      </p>
-                      <div className="flex flex-wrap items-center gap-3">
+                      <div className="flex flex-wrap items-center gap-4 text-4xl">
                         <span>0.1 =</span>
                         <FractionStackInput
                           numerator={getKeyValueAnswer(answerValue, 'fractionNumerator')}
                           denominator={getKeyValueAnswer(answerValue, 'fractionDenominator')}
                           onNumeratorChange={(value) => setAnswer('fractionNumerator', value)}
                           onDenominatorChange={(value) => setAnswer('fractionDenominator', value)}
+                          size="display"
                         />
                       </div>
                     </>
@@ -16099,22 +16503,26 @@ function FractionIntroProblemCard({
                 <FractionIntroSvg problem={fractionIntro} />
               </div>
             </div>
-            <div className="overflow-hidden rounded-2xl border-4 border-slate-300 bg-white shadow-sm">
-              <div className="grid grid-cols-2 bg-slate-100 text-center text-3xl font-black">
-                <div className="border-r-4 border-slate-300 p-4 text-slate-950">분수</div>
-                <div className="p-4 text-slate-950">소수</div>
+            <div className="overflow-hidden rounded-2xl border-4 border-slate-500 bg-[#101317] shadow-[0_14px_30px_rgba(0,0,0,0.28)]">
+              <div className="grid grid-cols-2 bg-[#0f766e] text-center text-3xl font-black text-white">
+                <div className="border-r-4 border-[#134e4a] p-4">분수</div>
+                <div className="p-4">소수</div>
               </div>
-              <div className="grid grid-cols-2 items-center text-center">
-                <div className="flex justify-center border-r-4 border-slate-300 p-6">
-                  <FractionStackInput
-                    numerator={getKeyValueAnswer(answerValue, 'fractionNumerator')}
-                    denominator={getKeyValueAnswer(answerValue, 'fractionDenominator')}
-                    onNumeratorChange={(value) => setAnswer('fractionNumerator', value)}
-                    onDenominatorChange={(value) => setAnswer('fractionDenominator', value)}
-                  />
+              <div className="grid grid-cols-2 items-stretch text-center">
+                <div className="flex min-h-[15rem] min-w-0 items-center justify-center overflow-hidden border-r-4 border-slate-600 bg-[#181818] p-4">
+                  <div className="max-w-full rounded-2xl border-2 border-sky-400/60 bg-[#0b1220] p-3 shadow-[0_10px_22px_rgba(0,0,0,0.3)]">
+                    <FractionStackInput
+                      numerator={getKeyValueAnswer(answerValue, 'fractionNumerator')}
+                      denominator={getKeyValueAnswer(answerValue, 'fractionDenominator')}
+                      onNumeratorChange={(value) => setAnswer('fractionNumerator', value)}
+                      onDenominatorChange={(value) => setAnswer('fractionDenominator', value)}
+                    />
+                  </div>
                 </div>
-                <div className="flex justify-center p-6">
-                  <FractionBlankInput value={getKeyValueAnswer(answerValue, 'decimal')} onChange={(value) => setTextAnswer('decimal', value)} ariaLabel="색칠한 부분의 소수" text />
+                <div className="flex min-h-[15rem] min-w-0 items-center justify-center overflow-hidden bg-[#181818] p-4">
+                  <div className="max-w-full rounded-2xl border-2 border-sky-400/60 bg-[#0b1220] p-3 shadow-[0_10px_22px_rgba(0,0,0,0.3)]">
+                    <FractionBlankInput value={getKeyValueAnswer(answerValue, 'decimal')} onChange={(value) => setTextAnswer('decimal', value)} ariaLabel="색칠한 부분의 소수" text textSize="decimal" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -16122,123 +16530,49 @@ function FractionIntroProblemCard({
         ) : null}
 
         {fractionIntro.activity === 'unitConversionDecimal' ? (
-          unitConversionVariant === 'table' ? (
-            <div className="col-span-full grid gap-3">
-            <ProblemHint>1 cm = 10 mm</ProblemHint>
-            <div className="overflow-hidden rounded-2xl border-4 border-slate-300 bg-white text-2xl font-black text-slate-950 shadow-sm">
-              <div className="grid grid-cols-[1fr_auto_1fr] bg-slate-100 text-center">
-                <div className="p-4">길이</div>
-                <div className="border-x-4 border-slate-300 p-4">=</div>
-                <div className="p-4">바꾼 길이</div>
-              </div>
-              {[
-                { left: `${conversionMmA} mm`, key: 'mmAcm', unit: 'cm', text: true, label: '밀리미터를 센티미터로' },
-                { left: `${conversionMmB} mm`, key: 'mmBcm', unit: 'cm', text: true, label: '밀리미터를 센티미터로' },
-                { left: `${conversionCmA} cm`, key: 'cmAmm', unit: 'mm', text: false, label: '센티미터를 밀리미터로' },
-                { left: `${conversionCmB} cm`, key: 'cmBmm', unit: 'mm', text: false, label: '센티미터를 밀리미터로' },
-              ].map((row) => (
-                <div key={row.key} className="grid grid-cols-[1fr_auto_1fr] items-center border-t-4 border-slate-200 text-center">
-                  <div className="p-4">{row.left}</div>
-                  <div className="border-x-4 border-slate-200 p-4">=</div>
-                  <div className="flex items-center justify-center gap-3 p-4">
-                    <FractionBlankInput
-                      value={getKeyValueAnswer(answerValue, row.key)}
-                      onChange={(value) => row.text ? setTextAnswer(row.key, value) : setAnswer(row.key, value)}
-                      ariaLabel={row.label}
-                      text={row.text}
-                      compact={!row.text}
-                    />
-                    <span>{row.unit}</span>
-                  </div>
-                </div>
-              ))}
+          <div className="col-span-full relative grid min-h-[18rem] place-items-center rounded-2xl border-4 border-slate-500 bg-[#202020] px-5 py-8 text-3xl font-black text-white shadow-[0_12px_24px_rgba(0,0,0,0.24)]">
+            <span className="absolute right-5 top-5 rounded-full border-4 border-emerald-400 bg-slate-950 px-5 py-1 text-2xl text-emerald-200">
+              {unitConversionDecimalState.streak} / {UNIT_CONVERSION_DECIMAL_STREAK_TARGET}
+            </span>
+            <div className="flex flex-nowrap items-center justify-center gap-4 whitespace-nowrap text-4xl leading-none">
+              <span>{currentUnitConversionDecimalQuestion.left}</span>
+              <span>=</span>
+              <FractionBlankInput
+                value={unitConversionDecimalState.currentAnswer}
+                onChange={(value) => onAnswerChange(setUnitConversionDecimalCurrentAnswer(answerValue, unitConversionDecimalQuestions.length, value))}
+                ariaLabel={currentUnitConversionDecimalQuestion.label}
+                text={currentUnitConversionDecimalQuestion.text}
+                textSize={currentUnitConversionDecimalQuestion.text ? 'decimal' : 'default'}
+              />
+              <span>{currentUnitConversionDecimalQuestion.unit}</span>
             </div>
-            </div>
-          ) : unitConversionVariant === 'strip' ? (
-            <div className="col-span-full grid gap-4 rounded-2xl border-4 border-slate-300 bg-white p-5 text-2xl font-black text-slate-950">
-              <ProblemHint>1 mm = 0.1 cm</ProblemHint>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="rounded-2xl border-4 border-sky-200 bg-sky-50 p-5">
-                  <p className="mb-3 text-sky-900">mm -&gt; cm</p>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <span>{conversionMmA} mm</span><span>=</span>
-                    <FractionBlankInput value={getKeyValueAnswer(answerValue, 'mmAcm')} onChange={(value) => setTextAnswer('mmAcm', value)} ariaLabel="밀리미터를 센티미터로" text />
-                    <span>cm</span>
-                  </div>
-                  <div className="mt-4 flex flex-wrap items-center gap-3">
-                    <span>{conversionMmB} mm</span><span>=</span>
-                    <FractionBlankInput value={getKeyValueAnswer(answerValue, 'mmBcm')} onChange={(value) => setTextAnswer('mmBcm', value)} ariaLabel="밀리미터를 센티미터로" text />
-                    <span>cm</span>
-                  </div>
-                </div>
-                <div className="rounded-2xl border-4 border-emerald-200 bg-emerald-50 p-5">
-                  <p className="mb-3 text-emerald-900">cm -&gt; mm</p>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <span>{conversionCmA} cm</span><span>=</span>
-                    <FractionBlankInput value={getKeyValueAnswer(answerValue, 'cmAmm')} onChange={(value) => setAnswer('cmAmm', value)} ariaLabel="센티미터를 밀리미터로" compact />
-                    <span>mm</span>
-                  </div>
-                  <div className="mt-4 flex flex-wrap items-center gap-3">
-                    <span>{conversionCmB} cm</span><span>=</span>
-                    <FractionBlankInput value={getKeyValueAnswer(answerValue, 'cmBmm')} onChange={(value) => setAnswer('cmBmm', value)} ariaLabel="센티미터를 밀리미터로" compact />
-                    <span>mm</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="col-span-full grid gap-6 rounded-2xl border-4 border-slate-300 bg-white p-6 text-3xl font-black text-slate-950 sm:grid-cols-2">
-              <div className="sm:col-span-2">
-                <ProblemHint>1 cm = 10 mm</ProblemHint>
-              </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <span>{conversionMmA} mm =</span>
-                <FractionBlankInput value={getKeyValueAnswer(answerValue, 'mmAcm')} onChange={(value) => setTextAnswer('mmAcm', value)} ariaLabel="밀리미터를 센티미터로" text />
-                <span>cm</span>
-              </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <span>{conversionMmB} mm =</span>
-                <FractionBlankInput value={getKeyValueAnswer(answerValue, 'mmBcm')} onChange={(value) => setTextAnswer('mmBcm', value)} ariaLabel="밀리미터를 센티미터로" text />
-                <span>cm</span>
-              </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <span>{conversionCmA} cm =</span>
-                <FractionBlankInput value={getKeyValueAnswer(answerValue, 'cmAmm')} onChange={(value) => setAnswer('cmAmm', value)} ariaLabel="센티미터를 밀리미터로" compact />
-                <span>mm</span>
-              </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <span>{conversionCmB} cm =</span>
-                <FractionBlankInput value={getKeyValueAnswer(answerValue, 'cmBmm')} onChange={(value) => setAnswer('cmBmm', value)} ariaLabel="센티미터를 밀리미터로" compact />
-                <span>mm</span>
-              </div>
-            </div>
-          )
+          </div>
         ) : null}
 
         {fractionIntro.activity === 'decimalTenthCount' ? (
-          <div className="col-span-full grid gap-5 rounded-2xl border-4 border-slate-300 bg-white p-5 text-3xl font-black text-slate-950 sm:p-6">
-            <div className="rounded-2xl border-4 border-slate-200 bg-slate-50 px-5 py-4 shadow-sm">
-              <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-4 leading-tight">
+          <div className="col-span-full grid gap-5 rounded-2xl border-4 border-slate-500 bg-[#171717] p-5 text-3xl font-black text-white shadow-[0_16px_32px_rgba(0,0,0,0.28)] sm:p-6">
+            <div className="rounded-xl border-4 border-slate-500 bg-[#202020] px-5 py-5 shadow-[0_10px_22px_rgba(0,0,0,0.24)]">
+              <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-4 leading-tight">
                 <span>{decimalTenthValueA}는 0.1이</span>
-                <FractionBlankInput value={getKeyValueAnswer(answerValue, 'countA')} onChange={(value) => setAnswer('countA', value)} ariaLabel="소수의 0.1 개수" compact />
+                <FractionBlankInput value={getKeyValueAnswer(answerValue, 'countA')} onChange={(value) => setAnswer('countA', value)} ariaLabel="소수의 0.1 개수" />
                 <span>개</span>
               </div>
             </div>
-            <div className="rounded-2xl border-4 border-slate-200 bg-slate-50 px-5 py-4 shadow-sm">
-              <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-4 leading-tight">
+            <div className="rounded-xl border-4 border-slate-500 bg-[#202020] px-5 py-5 shadow-[0_10px_22px_rgba(0,0,0,0.24)]">
+              <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-4 leading-tight">
                 <span>0.1이 {decimalTenthTargetCountA}개이면</span>
-                <FractionBlankInput value={getKeyValueAnswer(answerValue, 'decimalA')} onChange={(value) => setTextAnswer('decimalA', value)} ariaLabel="0.1이 여러 개인 소수" text />
+                <FractionBlankInput value={getKeyValueAnswer(answerValue, 'decimalA')} onChange={(value) => setTextAnswer('decimalA', value)} ariaLabel="0.1이 여러 개인 소수" text textSize="decimal" />
               </div>
             </div>
           </div>
         ) : null}
 
         {fractionIntro.activity === 'decimalNumberLine' ? (
-          <div className="col-span-full grid gap-6">
+          <div className="col-span-full">
             <div className="grid gap-5 rounded-2xl border-4 border-slate-300 bg-white p-5">
-              <div className="grid gap-4 lg:grid-cols-[auto_minmax(0,1fr)] lg:items-center">
-                <span className="rounded-xl border-4 border-slate-300 bg-white px-6 py-3 text-4xl font-black text-slate-950 shadow-sm">{decimalNumberLineValue.toFixed(1)}</span>
-                <div className="min-w-[18rem] flex-1">
+              <div className="grid gap-5">
+                <span className="mx-auto rounded-xl border-4 border-slate-300 bg-white px-8 py-3 text-5xl font-black text-slate-950 shadow-sm">{decimalNumberLineValue.toFixed(1)}</span>
+                <div className="min-w-[18rem]">
                   <DecimalNumberLine
                     value={selectedDecimalNumberLineValue}
                     max={2}
@@ -16247,29 +16581,26 @@ function FractionIntroProblemCard({
                 </div>
               </div>
             </div>
-            <div className="flex flex-wrap items-center justify-center gap-3 rounded-2xl border-4 border-slate-300 bg-white p-5 text-2xl font-black text-slate-950">
-              <span>{decimalNumberLineValue.toFixed(1)} 눈금</span>
-            </div>
           </div>
         ) : null}
 
         {fractionIntro.activity === 'decimalLengthMeasure' ? (
-          <div className="col-span-full grid gap-5">
-            <div className="mx-auto h-[min(21rem,48vh)] w-full max-w-[52rem] overflow-hidden rounded-[1.75rem] border-4 border-sky-100 bg-sky-50 p-2 shadow-[0_14px_30px_rgba(15,23,42,0.22)] sm:p-3">
+          <div className="col-span-full grid gap-3">
+            <div className="mx-auto h-[min(15.5rem,36vh)] w-full max-w-[52rem] overflow-hidden rounded-[1.35rem] border-4 border-sky-100 bg-sky-50 p-1.5 shadow-[0_12px_24px_rgba(15,23,42,0.2)] sm:p-2">
               <DecimalRulerFigure problem={fractionIntro} />
             </div>
-            <div className="mx-auto flex w-full max-w-[46rem] flex-wrap items-center justify-center gap-x-4 gap-y-3 rounded-[1.5rem] border-4 border-sky-200 bg-white px-4 py-5 text-3xl font-black leading-tight text-slate-950 shadow-sm sm:px-6">
+            <div className="mx-auto flex w-full max-w-[46rem] flex-nowrap items-center justify-center gap-x-4 overflow-x-auto rounded-[1.5rem] border-4 border-sky-200 bg-white px-4 py-5 text-3xl font-black leading-tight text-slate-950 shadow-sm whitespace-nowrap sm:px-6">
               <div className="flex items-center gap-2">
-                <FractionBlankInput value={getKeyValueAnswer(answerValue, 'cm')} onChange={(value) => setAnswer('cm', value)} ariaLabel="센티미터" compact />
+                <FractionBlankInput value={getKeyValueAnswer(answerValue, 'cm')} onChange={(value) => setAnswer('cm', value)} ariaLabel="센티미터" compact numberSize="balanced" />
                 <span>cm</span>
               </div>
               <div className="flex items-center gap-2">
-                <FractionBlankInput value={getKeyValueAnswer(answerValue, 'mm')} onChange={(value) => setAnswer('mm', value)} ariaLabel="밀리미터" compact />
+                <FractionBlankInput value={getKeyValueAnswer(answerValue, 'mm')} onChange={(value) => setAnswer('mm', value)} ariaLabel="밀리미터" compact numberSize="balanced" />
                 <span>mm</span>
               </div>
               <span className="text-sky-700">=</span>
               <div className="flex items-center gap-2">
-                <FractionBlankInput value={getKeyValueAnswer(answerValue, 'decimal')} onChange={(value) => setTextAnswer('decimal', value)} ariaLabel="소수 센티미터" text />
+                <FractionBlankInput value={getKeyValueAnswer(answerValue, 'decimal')} onChange={(value) => setTextAnswer('decimal', value)} ariaLabel="소수 센티미터" text textSize="decimal" />
                 <span>cm</span>
               </div>
             </div>
@@ -16283,105 +16614,108 @@ function FractionIntroProblemCard({
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <span>0.1이 {largeTenthSourceCount}개이면</span>
-              <FractionBlankInput value={getKeyValueAnswer(answerValue, 'decimalFromCount')} onChange={(value) => setTextAnswer('decimalFromCount', value)} ariaLabel="0.1이 여러 개인 소수" text />
+              <FractionBlankInput value={getKeyValueAnswer(answerValue, 'decimalFromCount')} onChange={(value) => setTextAnswer('decimalFromCount', value)} ariaLabel="0.1이 여러 개인 소수" text textSize="decimal" />
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <span>0.1이</span>
-              <FractionBlankInput value={getKeyValueAnswer(answerValue, 'countFromDecimalA')} onChange={(value) => setAnswer('countFromDecimalA', value)} ariaLabel="소수의 0.1 개수" compact />
+              <FractionBlankInput value={getKeyValueAnswer(answerValue, 'countFromDecimalA')} onChange={(value) => setAnswer('countFromDecimalA', value)} ariaLabel="소수의 0.1 개수" compact numberSize="balanced" />
               <span>개 = {largeTenthTargetDecimal}</span>
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <span>{largeTenthDecimalA}는 0.1이</span>
-              <FractionBlankInput value={getKeyValueAnswer(answerValue, 'countA')} onChange={(value) => setAnswer('countA', value)} ariaLabel="소수의 0.1 개수" compact />
+              <FractionBlankInput value={getKeyValueAnswer(answerValue, 'countA')} onChange={(value) => setAnswer('countA', value)} ariaLabel="소수의 0.1 개수" compact numberSize="balanced" />
               <span>개</span>
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <span>{largeTenthDecimalB}는 0.1이</span>
-              <FractionBlankInput value={getKeyValueAnswer(answerValue, 'countB')} onChange={(value) => setAnswer('countB', value)} ariaLabel="소수의 0.1 개수" compact />
+              <FractionBlankInput value={getKeyValueAnswer(answerValue, 'countB')} onChange={(value) => setAnswer('countB', value)} ariaLabel="소수의 0.1 개수" compact numberSize="balanced" />
               <span>개</span>
             </div>
           </div>
         ) : null}
 
         {fractionIntro.activity === 'decimalMixedNumberLine' ? (
-          <div className="col-span-full grid gap-6">
-            <div className="grid gap-3 rounded-2xl border-4 border-slate-300 bg-white p-5">
-              <div className="min-h-[13rem]">
-                <DecimalNumberLine value={decimalMixedNumberLineValue} max={3} showParts />
+          <div className="col-span-full grid gap-3">
+            <div className="grid gap-2 rounded-2xl border-4 border-slate-300 bg-white p-3">
+              <div className="min-h-[9rem]">
+                <DecimalNumberLine value={decimalMixedNumberLineValue} max={3} showParts compact />
               </div>
             </div>
-            <div className="flex flex-wrap items-center justify-center gap-3 rounded-2xl border-4 border-slate-300 bg-white p-5 text-3xl font-black text-slate-950">
+            <div className="flex flex-wrap items-center justify-center gap-2 rounded-2xl border-4 border-slate-300 bg-white px-4 py-3 text-3xl font-black text-slate-950">
               <span>{decimalMixedNumberLineValue.toFixed(1)}은</span>
-              <FractionBlankInput value={getKeyValueAnswer(answerValue, 'whole')} onChange={(value) => setAnswer('whole', value)} ariaLabel="자연수 부분" compact />
+              <FractionBlankInput value={getKeyValueAnswer(answerValue, 'whole')} onChange={(value) => setAnswer('whole', value)} ariaLabel="앞의 수" compact numberSize="balanced" accent="orange" />
               <span>와</span>
-              <FractionBlankInput value={getKeyValueAnswer(answerValue, 'decimal')} onChange={(value) => setTextAnswer('decimal', value)} ariaLabel="소수 부분" text />
+              <FractionBlankInput value={getKeyValueAnswer(answerValue, 'decimal')} onChange={(value) => setTextAnswer('decimal', value)} ariaLabel="남은 수" text textSize="decimal" accent="purple" />
               <span>합친 수</span>
-            </div>
-            <div className="flex flex-wrap items-center justify-center gap-3 rounded-2xl border-4 border-slate-300 bg-white p-5 text-3xl font-black text-slate-950">
-              <span>수직선의 수</span>
-              <FractionBlankInput value={getKeyValueAnswer(answerValue, 'number')} onChange={(value) => setTextAnswer('number', value)} ariaLabel="수직선의 수" text />
             </div>
           </div>
         ) : null}
 
         {fractionIntro.activity === 'decimalShadeCompare' ? (
-          <div className="col-span-full grid gap-6">
-            <div className="grid gap-4 rounded-2xl border-4 border-slate-300 bg-white p-5">
-              <div className="grid gap-4 lg:grid-cols-[auto_minmax(0,1fr)] lg:items-center">
-                <span className="justify-self-start rounded-xl border-4 border-slate-300 bg-white px-6 py-3 text-4xl font-black text-slate-950 shadow-sm">{decimalShadeLeftValue}</span>
+          <div className="col-span-full grid gap-3">
+            <div className="grid gap-3 rounded-2xl border-4 border-slate-300 bg-white p-3">
+              <div className="grid gap-3 lg:grid-cols-[6.25rem_minmax(0,1fr)] lg:items-center">
+                <span className="justify-self-start rounded-xl border-4 border-slate-300 bg-white px-4 py-2 text-3xl font-black text-slate-950 shadow-sm">{decimalShadeLeftValue}</span>
                 <SelectableFractionBar
                   denominator={10}
                   selectedCount={Number(getKeyValueAnswer(answerValue, 'leftCount')) || 0}
                   color="#fcd34d"
                   onChange={(value) => setAnswer('leftCount', String(value))}
                   ariaLabel="왼쪽 소수만큼 색칠"
+                  compact
                 />
               </div>
-              <div className="grid gap-4 lg:grid-cols-[auto_minmax(0,1fr)] lg:items-center">
-                <span className="justify-self-start rounded-xl border-4 border-slate-300 bg-white px-6 py-3 text-4xl font-black text-slate-950 shadow-sm">{decimalShadeRightValue}</span>
+              <div className="grid gap-3 lg:grid-cols-[6.25rem_minmax(0,1fr)] lg:items-center">
+                <span className="justify-self-start rounded-xl border-4 border-slate-300 bg-white px-4 py-2 text-3xl font-black text-slate-950 shadow-sm">{decimalShadeRightValue}</span>
                 <SelectableFractionBar
                   denominator={10}
                   selectedCount={Number(getKeyValueAnswer(answerValue, 'rightCount')) || 0}
                   color="#fcd34d"
                   onChange={(value) => setAnswer('rightCount', String(value))}
                   ariaLabel="오른쪽 소수만큼 색칠"
+                  compact
                 />
               </div>
             </div>
-            <div className="flex flex-wrap items-center justify-center gap-3 rounded-2xl border-4 border-slate-300 bg-white p-5 text-3xl font-black text-slate-950">
-              <span>{decimalShadeLeftValue}은 0.1이</span>
-              <FractionBlankInput value={getKeyValueAnswer(answerValue, 'leftCount')} onChange={(value) => setAnswer('leftCount', value)} ariaLabel="왼쪽 소수의 0.1 개수" compact />
-              <span>개, {decimalShadeRightValue}은 0.1이</span>
-              <FractionBlankInput value={getKeyValueAnswer(answerValue, 'rightCount')} onChange={(value) => setAnswer('rightCount', value)} ariaLabel="오른쪽 소수의 0.1 개수" compact />
-              <span>개:</span>
-              <FractionBlankInput value={getKeyValueAnswer(answerValue, 'larger')} onChange={(value) => setTextAnswer('larger', value)} ariaLabel="더 큰 소수" text />
-              <span>은/는</span>
-              <FractionBlankInput value={getKeyValueAnswer(answerValue, 'smaller')} onChange={(value) => setTextAnswer('smaller', value)} ariaLabel="더 작은 소수" text />
-              <span>&gt;</span>
+            <div className="grid gap-3 rounded-2xl border-4 border-slate-300 bg-white px-4 py-3 text-2xl font-black leading-snug text-slate-950 xl:text-3xl">
+              <div className="flex flex-nowrap items-center justify-center gap-x-3 overflow-x-auto whitespace-nowrap">
+                <span>{decimalShadeLeftValue}은 0.1이</span>
+                <FractionBlankInput value={getKeyValueAnswer(answerValue, 'leftCount')} onChange={(value) => setAnswer('leftCount', value)} ariaLabel="왼쪽 소수의 0.1 개수" compact numberSize="balanced" />
+                <span>개, {decimalShadeRightValue}은 0.1이</span>
+                <FractionBlankInput value={getKeyValueAnswer(answerValue, 'rightCount')} onChange={(value) => setAnswer('rightCount', value)} ariaLabel="오른쪽 소수의 0.1 개수" compact numberSize="balanced" />
+                <span>개입니다.</span>
+              </div>
+              <div className="flex flex-nowrap items-center justify-center gap-x-3 overflow-x-auto whitespace-nowrap">
+                <span>그래서</span>
+                <FractionBlankInput value={getKeyValueAnswer(answerValue, 'larger')} onChange={(value) => setTextAnswer('larger', value)} ariaLabel="더 큰 소수" text textSize="decimal" />
+                <span>은/는</span>
+                <FractionBlankInput value={getKeyValueAnswer(answerValue, 'smaller')} onChange={(value) => setTextAnswer('smaller', value)} ariaLabel="더 작은 소수" text textSize="decimal" />
+                <span>보다 큽니다.</span>
+              </div>
             </div>
           </div>
         ) : null}
 
         {fractionIntro.activity === 'decimalNumberLineCompare' ? (
-          <div className="col-span-full grid gap-6">
+          <div className="col-span-full grid gap-2">
             <ProblemHint>오른쪽이 큼</ProblemHint>
-            <div className="grid gap-4 rounded-2xl border-4 border-slate-300 bg-white p-5">
-              <div className="flex flex-wrap items-center gap-4">
-                <span className="rounded-xl border-4 border-slate-300 bg-white px-6 py-3 text-4xl font-black text-slate-950 shadow-sm">{decimalNumberLineCompareLeft.toFixed(1)}</span>
+            <div className="grid gap-2 rounded-2xl border-4 border-slate-300 bg-white p-2 sm:p-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-xl border-4 border-slate-300 bg-white px-3 py-1 text-3xl font-black text-slate-950 shadow-sm">{decimalNumberLineCompareLeft.toFixed(1)}</span>
                 <div className="min-w-[18rem] flex-1">
-                  <DecimalNumberLine value={decimalNumberLineCompareLeft} max={decimalNumberLineCompareMax} />
+                  <DecimalNumberLine value={decimalNumberLineCompareLeft} max={decimalNumberLineCompareMax} compact dense />
                 </div>
               </div>
-              <div className="flex flex-wrap items-center gap-4">
-                <span className="rounded-xl border-4 border-slate-300 bg-white px-6 py-3 text-4xl font-black text-slate-950 shadow-sm">{decimalNumberLineCompareRight.toFixed(1)}</span>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-xl border-4 border-slate-300 bg-white px-3 py-1 text-3xl font-black text-slate-950 shadow-sm">{decimalNumberLineCompareRight.toFixed(1)}</span>
                 <div className="min-w-[18rem] flex-1">
-                  <DecimalNumberLine value={decimalNumberLineCompareRight} max={decimalNumberLineCompareMax} />
+                  <DecimalNumberLine value={decimalNumberLineCompareRight} max={decimalNumberLineCompareMax} compact dense />
                 </div>
               </div>
             </div>
-            <div className="flex flex-wrap items-center justify-center gap-4 rounded-2xl border-4 border-slate-300 bg-white p-5 text-4xl font-black text-slate-950">
+            <div className="flex flex-wrap items-center justify-center gap-2 rounded-2xl border-4 border-slate-300 bg-white px-4 py-2 text-3xl font-black text-slate-950">
               <span>{decimalNumberLineCompareLeft.toFixed(1)}</span>
-              <CompareSymbolChoice value={getKeyValueAnswer(answerValue, 'symbol')} onChange={(value) => setTextAnswer('symbol', value)} ariaLabel="소수 비교 기호" />
+              <CompareSymbolChoice value={getKeyValueAnswer(answerValue, 'symbol')} onChange={(value) => setTextAnswer('symbol', value)} ariaLabel="소수 비교 기호" compact />
               <span>{decimalNumberLineCompareRight.toFixed(1)}</span>
             </div>
           </div>
@@ -16408,9 +16742,6 @@ function FractionIntroProblemCard({
                       <span>{option.label}</span>
                       <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-4 text-2xl ${isSelected ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-400 bg-white text-transparent'}`}>O</span>
                     </span>
-                    <span className="rounded-xl bg-slate-100 px-3 py-2 text-lg font-black text-slate-700">
-                      {getDecimalChoiceExplanation(option)}
-                    </span>
                   </button>
                 );
               })}
@@ -16419,25 +16750,13 @@ function FractionIntroProblemCard({
         ) : null}
 
         {fractionIntro.activity === 'decimalCompareStory' ? (
-          <div className="col-span-full grid gap-6">
-            <div className="grid gap-4 rounded-2xl border-4 border-slate-300 bg-white p-6 text-3xl font-black leading-[1.8] text-slate-950">
+          <div className="col-span-full">
+            <div className="grid gap-3 rounded-2xl border-4 border-slate-300 bg-white px-5 py-5 text-center font-black leading-tight text-slate-950 sm:px-6">
               <ProblemHint>짧은 시간이 빠름</ProblemHint>
-              <p className="break-keep text-center">{decimalStoryDistance} m 달리기 기록</p>
-              <div className="grid gap-3 md:grid-cols-2">
-                {[
-                  { person: decimalStoryPerson1, time: decimalStoryTime1 },
-                  { person: decimalStoryPerson2, time: decimalStoryTime2 },
-                ].map((entry) => (
-                  <div key={entry.person} className="grid gap-2 rounded-2xl border-4 border-slate-200 bg-slate-50 p-5 text-center">
-                    <span className="text-2xl text-slate-700">{entry.person}</span>
-                    <span className="text-5xl text-slate-950">{entry.time}초</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center justify-center gap-3 rounded-2xl border-4 border-slate-300 bg-white p-5 text-3xl font-black text-slate-950">
-              <span>더 빠른 사람:</span>
-              <FractionBlankInput value={getKeyValueAnswer(answerValue, 'name')} onChange={(value) => setTextAnswer('name', value)} ariaLabel="더 빠른 사람 이름" text />
+              <p className="break-keep text-3xl leading-snug sm:text-4xl">
+                두 사람이 같은 도전을 했습니다. 기록은 다음과 같습니다. {decimalStoryPerson1}{getKoreanParticle(decimalStoryPerson1, '은', '는')} {decimalStoryTarget}{decimalStoryTargetParticle} {decimalStoryTime1}초에 {decimalStoryActionConnective}, {decimalStoryPerson2}{getKoreanParticle(decimalStoryPerson2, '은', '는')} {decimalStoryTime2}초에 {decimalStoryActionFinal}.{' '}
+                누가 더 빠른가요?
+              </p>
             </div>
           </div>
         ) : null}
@@ -25339,7 +25658,43 @@ export default function App() {
       problemCoachmark: null,
     });
     playSound('ui', { gainMultiplier: 0.84, detune: 22 });
-    updateMessage(`${match.levelTitle} ${match.record.label} 변주로 이동!`);
+  });
+
+  const moveToAdjacentSimilarProblem = useEffectEvent((direction: 1 | -1) => {
+    const sameLevelMatches = similarProblemMatches.filter((match) =>
+      match.unitId === activeLearningUnitId && match.level === level
+    );
+    const candidates = sameLevelMatches.length > 1 ? sameLevelMatches : similarProblemMatches;
+
+    if (candidates.length <= 1) {
+      updateMessage('바꿀 수 있는 변주가 없어요.');
+      playSound('ui', { gainMultiplier: 0.78, detune: -14 });
+      return;
+    }
+
+    const currentIndex = candidates.findIndex((match) =>
+      match.unitId === activeLearningUnitId &&
+      match.level === level &&
+      match.record.problem === problem
+    );
+    const baseIndex = currentIndex >= 0 ? currentIndex : 0;
+    const nextIndex = (baseIndex + direction + candidates.length) % candidates.length;
+    const nextMatch = candidates[nextIndex];
+
+    resetDeveloperBattleState();
+    setSelectedLearningUnitId(nextMatch.unitId);
+    setLevel(nextMatch.level);
+    setOpponentHP(opponentHP);
+    setProblem(nextMatch.record.problem);
+    setProblemCoachmark(null);
+    setIsSimilarProblemPanelOpen(false);
+    pushDeveloperProblemSnapshot({
+      level: nextMatch.level,
+      opponentHP,
+      problem: nextMatch.record.problem,
+      problemCoachmark: null,
+    });
+    playSound('ui', { gainMultiplier: 0.82, detune: direction > 0 ? 18 : -8 });
   });
 
   const attackAndMoveToNextDeveloperProblem = useEffectEvent(() => {
@@ -25381,6 +25736,12 @@ export default function App() {
     (problem.shapeDraw.identifyVariant === 'rightTriangleClassify' || problem.shapeDraw.identifyVariant === 'shapeClassify');
   const displayedInputValue = isInternalShapeAnswerToken && !isCurrentProblemShapeDragClassify ? '' : inputValue;
   const normalizedInputValue = displayedInputValue.trim();
+  const isDecimalCompareStoryProblem =
+    problem.kind === 'fractionIntro' && problem.fractionIntro?.activity === 'decimalCompareStory';
+  const decimalCompareStoryAnswerName = isDecimalCompareStoryProblem ? getKeyValueAnswer(inputValue, 'name') : '';
+  const decimalCompareStoryAnswerParticle = decimalCompareStoryAnswerName
+    ? getKoreanParticle(decimalCompareStoryAnswerName, '이', '가')
+    : '이/가';
   const normalizedUnitInputValue = normalizeAnswerUnit(unitInputValue);
   const normalizedSecretCodeInput = normalizeSecretCode(secretCodeInput);
   const parsedInputAnswer = Number.parseInt(normalizedInputValue, 10);
@@ -25534,8 +25895,14 @@ export default function App() {
   const shouldHighlightPromptNumbers = !(activeLearningUnitId === 'unit3' && level === 8);
   const shouldUseCompactUnit1ShapeViewport = activeLearningUnitId === 'unit1' && problem.kind === 'shapeDraw';
   const shouldUseCompactUnit3Viewport = activeLearningUnitId === 'unit3' && level >= 8 && !isStoryTimeAdditionProblem;
+  const shouldUseCompactUnit6FractionCompareViewport =
+    activeLearningUnitId === 'unit6' && level === 5 && problem.kind === 'fractionIntro';
   const isCompactBattleViewport =
-    isShortViewport || shouldUseCompactUnit1ShapeViewport || shouldUseCompactUnit3Viewport || hasNumberedStoryOptions;
+    isShortViewport ||
+    shouldUseCompactUnit1ShapeViewport ||
+    shouldUseCompactUnit3Viewport ||
+    shouldUseCompactUnit6FractionCompareViewport ||
+    hasNumberedStoryOptions;
   const numberedStoryOptionCount = storyPromptSections?.optionLines.length ?? 0;
   const isDenseNumberedStoryLayout = Boolean(
     isCompactBattleViewport && problem.kind === 'story' && problem.storyTable && numberedStoryOptionCount >= 4,
@@ -26554,6 +26921,42 @@ export default function App() {
     }
 
     if (problem.kind === 'fractionIntro' && problem.fractionIntro) {
+      if (problem.fractionIntro.activity === 'unitConversionDecimal') {
+        const conversionResult = resolveUnitConversionDecimalAnswer(inputValue, problem.fractionIntro);
+        if (!conversionResult.hasAnswer && inputValue !== UNIT_CONVERSION_DECIMAL_COMPLETE_ANSWER) {
+          playSound('ui');
+          updateMessage('빈칸을 채운 뒤 공격해요!');
+          return;
+        }
+
+        playSound('submit', {
+          gainMultiplier: 0.9,
+          detune: 10,
+        });
+
+        if (conversionResult.isComplete) {
+          setInputValue(conversionResult.answerValue);
+          resolveProblemResult(true);
+          return;
+        }
+
+        setInputValue(conversionResult.answerValue);
+        if (conversionResult.isCorrect) {
+          playSound('correct', {
+            gainMultiplier: 0.95,
+            detune: 12,
+          });
+          updateMessage(`공격 성공! 연속 ${conversionResult.streak} / ${UNIT_CONVERSION_DECIMAL_STREAK_TARGET}`);
+        } else {
+          playSound('wrong', {
+            gainMultiplier: 0.9,
+            detune: -18,
+          });
+          updateMessage('공격 실패! 연속 정답이 다시 시작돼요.');
+        }
+        return;
+      }
+
       if (!isFractionIntroAnswerReady(inputValue, problem.fractionIntro)) {
         playSound('ui');
         updateMessage('빈칸을 채우거나 그림을 색칠한 뒤 공격해요!');
@@ -26691,6 +27094,18 @@ export default function App() {
       if (!event.ctrlKey && !event.altKey && !event.metaKey && event.key === 'ArrowLeft') {
         event.preventDefault();
         moveToPreviousDeveloperProblem();
+        return;
+      }
+
+      if (!event.ctrlKey && !event.altKey && !event.metaKey && event.key === 'ArrowDown') {
+        event.preventDefault();
+        moveToAdjacentSimilarProblem(1);
+        return;
+      }
+
+      if (!event.ctrlKey && !event.altKey && !event.metaKey && event.key === 'ArrowUp') {
+        event.preventDefault();
+        moveToAdjacentSimilarProblem(-1);
       }
     };
 
@@ -27329,8 +27744,13 @@ export default function App() {
                       {selectedArchiveProblem.label} · {selectedArchiveProblem.kind}
                     </p>
                   </div>
-                  <span className="max-w-[45%] shrink-0 truncate rounded-lg bg-emerald-400/10 px-3 py-2 text-sm font-black text-emerald-100">
-                    답: {selectedArchiveProblem.answer}
+                  <span className="inline-flex max-w-[45%] shrink-0 items-center gap-2 rounded-lg bg-emerald-400/10 px-3 py-2 text-sm font-black text-emerald-100">
+                    <span>답:</span>
+                    <ArchiveProblemAnswer
+                      problem={selectedArchiveProblem.problem}
+                      unitId={selectedArchiveSection.unit.id}
+                      answer={selectedArchiveProblem.answer}
+                    />
                   </span>
                 </div>
 
@@ -27735,7 +28155,17 @@ export default function App() {
                       <div key={i} className={`h-2 flex-1 rounded-full ${i < level ? 'bg-yellow-500' : 'bg-slate-700'}`} />
                   ))}
                   </div>
-                  <span className="shrink-0 text-xs font-bold text-slate-300 sm:text-sm">{level} / {totalLevels}</span>
+                  <span className="shrink-0 text-xs font-bold text-slate-300 sm:text-sm">
+                    {activeLearningUnitId === 'unit6' ? (
+                      <span className="inline-grid min-w-[2.25rem] place-items-center rounded-lg border border-emerald-300/35 bg-slate-950 px-2 py-0.5 text-center font-black leading-none text-slate-50 shadow-[0_0_10px_rgba(16,185,129,0.12)]">
+                        <span className="text-sm">{level}</span>
+                        <span className="my-0.5 h-0.5 w-6 rounded-full bg-emerald-300" aria-hidden="true" />
+                        <span className="text-sm">{totalLevels}</span>
+                      </span>
+                    ) : (
+                      `${level} / ${totalLevels}`
+                    )}
+                  </span>
                 </div>
               </div>{/*
 
@@ -28325,7 +28755,7 @@ export default function App() {
                   isShapeDragClassifyProblem ||
                   problem.kind === 'verticalBlank' ||
                   (problem.kind === 'equalPartition' && problem.equalPartition?.activity !== 'classify') ||
-                  problem.kind === 'fractionIntro' ? (
+                  (problem.kind === 'fractionIntro' && !isDecimalCompareStoryProblem) ? (
                   <button
                     type="button"
                     disabled={!canAttemptAttack}
@@ -28338,6 +28768,47 @@ export default function App() {
                   >
                     <Sword size={22} /> 공격!
                   </button>
+                ) : isDecimalCompareStoryProblem ? (
+                  <div className="grid grid-cols-[minmax(0,1fr)_auto] items-stretch gap-2">
+                    <div className="flex min-w-0 flex-wrap items-center justify-center gap-x-3 gap-y-2 rounded-2xl border-4 border-slate-500 bg-slate-700 px-3 py-2 text-lg font-black leading-tight text-slate-100 focus-within:border-emerald-500 sm:flex-nowrap sm:px-4 sm:text-xl">
+                      <input
+                        type="text"
+                        inputMode="text"
+                        value={decimalCompareStoryAnswerName}
+                        disabled={isBattleAnswerInputDisabled}
+                        onChange={(event) => {
+                          if (isBattleAnswerInputDisabled) return;
+                          setInputValue(setKeyValueTextAnswer(inputValue, 'name', event.target.value));
+                        }}
+                        onKeyDown={(event) => {
+                          if (isBattleAnswerInputDisabled) {
+                            event.preventDefault();
+                            return;
+                          }
+                          if (event.key === 'Enter' && !event.ctrlKey && !event.altKey) {
+                            event.preventDefault();
+                            checkAnswer();
+                          }
+                        }}
+                        className="h-12 w-36 shrink-0 rounded-full border-4 border-sky-500 bg-slate-950 px-4 text-center text-2xl font-black text-white outline-none placeholder:text-slate-500 disabled:cursor-not-allowed disabled:text-slate-400 sm:w-44"
+                        aria-label="더 빠른 사람 이름"
+                        placeholder="이름"
+                      />
+                      <span>{decimalCompareStoryAnswerParticle} 더 빠릅니다.</span>
+                    </div>
+                    <button
+                      type="button"
+                      disabled={!canAttemptAttack}
+                      onClick={checkAnswer}
+                      className={`flex min-w-[8.5rem] items-center justify-center gap-2 rounded-2xl px-5 py-3 text-lg font-black text-white shadow-lg sm:px-6 sm:text-xl ${
+                        canAttemptAttack
+                          ? 'bg-emerald-600 hover:bg-emerald-500'
+                          : 'cursor-not-allowed bg-slate-500 opacity-60'
+                      }`}
+                    >
+                      <Sword size={22} /> 공격!
+                    </button>
+                  </div>
                 ) : (
                   <div className={`grid grid-cols-[minmax(0,1fr)_auto] items-stretch ${isDenseNumberedStoryLayout ? 'gap-2' : battleInputResponsiveClass}`}>
                     <div className={`flex min-w-0 items-center rounded-2xl border-4 border-slate-500 bg-slate-700 px-4 focus-within:border-emerald-500 ${
