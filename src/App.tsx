@@ -2095,9 +2095,9 @@ type CompatibleWindow = Window & typeof globalThis & {
 };
 
 const LAYER_GAIN_BOOST = 1.8;
-const MASTER_EFFECT_GAIN = 1.9;
+const MASTER_EFFECT_GAIN = 1.71;
 const POST_COMPRESSOR_GAIN = 3.2;
-const AUDIO_ENGINE_VERSION = 6;
+const AUDIO_ENGINE_VERSION = 7;
 
 const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
   start: {
@@ -15003,6 +15003,12 @@ function EqualPartitionProblemCard({
               pattern="[0-9]*"
               value={answerValue}
               onChange={(event) => onAnswerChange(event.target.value.replace(/[^0-9]/g, ''))}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && !event.ctrlKey && !event.altKey && !event.metaKey) {
+                  event.preventDefault();
+                  onSubmit?.();
+                }
+              }}
               className={`min-w-0 rounded-[0.9rem] border-4 border-slate-400 bg-white px-4 py-1.5 text-center font-black text-slate-950 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-200 ${
                 condensed ? 'text-2xl' : 'text-3xl sm:text-4xl'
               }`}
@@ -27324,6 +27330,64 @@ export default function App() {
     });
     resolveProblemResult(isCorrect);
   };
+
+  const pressAttackButtonFromKeyboard = useEffectEvent(() => {
+    const hasVisibleAttackButton =
+      !isSpecialChallengeActive &&
+      problem.kind !== 'shapeRain' &&
+      !(
+        problem.kind === 'equalPartition' &&
+        problem.equalPartition?.activity === 'classify'
+      );
+
+    if (
+      gameState !== 'playing' ||
+      !hasVisibleAttackButton ||
+      !canAttemptAttack ||
+      isBattleActionResolvingRef.current ||
+      isAttacking ||
+      isOpponentAttacking ||
+      isOpponentHit ||
+      isPlayerHit ||
+      isNamePromptOpen ||
+      isRecordModalOpen ||
+      isSimilarProblemPanelOpen ||
+      isSecretCodePromptOpen ||
+      isCaterpillarEvolutionOpen ||
+      isMetamonTransformOpen
+    ) {
+      return;
+    }
+
+    checkAnswer();
+  });
+
+  useEffect(() => {
+    const handleAttackShortcut = (event: KeyboardEvent) => {
+      if (
+        event.defaultPrevented ||
+        event.repeat ||
+        event.isComposing ||
+        event.key !== 'Enter' ||
+        event.ctrlKey ||
+        event.altKey ||
+        event.metaKey
+      ) {
+        return;
+      }
+
+      const target = event.target instanceof Element ? event.target : null;
+      if (target?.closest('input, textarea, select, button, [contenteditable="true"]')) {
+        return;
+      }
+
+      event.preventDefault();
+      pressAttackButtonFromKeyboard();
+    };
+
+    window.addEventListener('keydown', handleAttackShortcut);
+    return () => window.removeEventListener('keydown', handleAttackShortcut);
+  }, []);
 
   useEffect(() => {
     const handlePointerDown = (event: PointerEvent) => {
