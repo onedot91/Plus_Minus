@@ -16169,11 +16169,12 @@ function CompleteWholeGridFigure({
 }) {
   const geometry = getCompleteWholeGridGeometry(problem);
   const givenCellSet = new Set(geometry.givenCells);
-	  const selectedCellSet = new Set(selectedPieces);
-	  const cellSize = condensed ? 'clamp(3.55rem, 7.35vh, 5.2rem)' : 'clamp(4rem, 8.4vh, 5.9rem)';
-	  const givenColor = '#fbcfe8';
-	  const selectedColor = '#f9a8d4';
-	  const emptyCellColor = '#ffffff';
+  const selectedCellSet = new Set(selectedPieces);
+  const preferredCellSize = condensed ? 'clamp(2.4rem, 6.2vh, 4.15rem)' : 'clamp(2.75rem, 7.1vh, 4.75rem)';
+  const cellSize = `min(${preferredCellSize}, calc((100cqw - 0.75rem) / ${geometry.gridColumns}), calc((100cqh - 0.75rem) / ${geometry.gridRows}))`;
+  const givenColor = '#fbcfe8';
+  const selectedColor = '#f9a8d4';
+  const emptyCellColor = '#ffffff';
   const givenPositions = geometry.givenCells.map((cellId) => {
     const [, rowText, columnText] = cellId.split(':');
     const row = Number(rowText);
@@ -16191,15 +16192,15 @@ function CompleteWholeGridFigure({
   ].filter((edge) => edge.visible)));
 
   return (
-    <div className="flex min-h-0 h-full w-full items-center justify-center">
-	      <div
-	        className="relative grid rounded-lg shadow-[0_18px_34px_rgba(0,0,0,0.18)]"
-	        style={{
-	          gridTemplateColumns: `repeat(${geometry.gridColumns}, ${cellSize})`,
-	          gridTemplateRows: `repeat(${geometry.gridRows}, ${cellSize})`,
-	          backgroundColor: emptyCellColor,
-	        }}
-	      >
+    <div className="flex h-full min-h-0 w-full items-center justify-center overflow-hidden" style={{ containerType: 'size' }}>
+      <div
+        className="relative grid max-h-full max-w-full rounded-lg shadow-[0_18px_34px_rgba(0,0,0,0.18)]"
+        style={{
+          gridTemplateColumns: `repeat(${geometry.gridColumns}, ${cellSize})`,
+          gridTemplateRows: `repeat(${geometry.gridRows}, ${cellSize})`,
+          backgroundColor: emptyCellColor,
+        }}
+      >
         {Array.from({ length: geometry.gridRows * geometry.gridColumns }, (_, index) => {
           const row = Math.floor(index / geometry.gridColumns);
           const column = index % geometry.gridColumns;
@@ -16223,13 +16224,13 @@ function CompleteWholeGridFigure({
               key={cellId}
               type="button"
               onClick={() => onTogglePiece(cellId)}
-		              className="relative z-10 h-full w-full border border-slate-300 transition hover:border-pink-500 focus-visible:z-20"
-		              style={{
-		                borderRadius: 0,
-		                borderColor: isSelected ? '#ec4899' : undefined,
-		                boxShadow: isSelected ? 'inset 0 0 0 2px rgba(255,255,255,0.72)' : 'none',
-		                backgroundColor: isSelected ? selectedColor : emptyCellColor,
-		              }}
+              className="relative z-10 h-full w-full border border-slate-300 transition hover:border-pink-500 focus-visible:z-20"
+              style={{
+                borderRadius: 0,
+                borderColor: isSelected ? '#ec4899' : undefined,
+                boxShadow: isSelected ? 'inset 0 0 0 2px rgba(255,255,255,0.72)' : 'none',
+                backgroundColor: isSelected ? selectedColor : emptyCellColor,
+              }}
               aria-label={`${row + 1}행 ${column + 1}열 채우기`}
             />
           );
@@ -16268,21 +16269,21 @@ function CompleteWholeGridFigure({
             top: `${(givenCenterRow / geometry.gridRows) * 100}%`,
             transform: 'translate(-50%, -50%)',
           }}
-	        >
-		          <div
-		            className="grid min-h-0 min-w-0 place-items-center text-center text-slate-950"
-		            style={{
-		              width: condensed ? '3rem' : '3.4rem',
-		              fontSize: condensed ? 'clamp(0.98rem, 2.35vh, 1.35rem)' : 'clamp(1.08rem, 2.7vh, 1.65rem)',
-		            }}
-		          >
-		            <div className="grid w-full place-items-center px-1.5 py-1 leading-none">
-		              <span className="font-black leading-[0.9] text-pink-800">{problem.numerator}</span>
-		              <span className="my-1 h-[3px] w-[76%] rounded-full bg-slate-950" />
-		              <span className="font-black leading-[0.9] text-pink-800">{problem.denominator}</span>
-		            </div>
-		          </div>
-	        </div>
+        >
+          <div
+            className="grid min-h-0 min-w-0 place-items-center text-center text-slate-950"
+            style={{
+              width: condensed ? '2.75rem' : '3.2rem',
+              fontSize: condensed ? 'clamp(0.9rem, 2.1vh, 1.2rem)' : 'clamp(1rem, 2.45vh, 1.45rem)',
+            }}
+          >
+            <div className="grid w-full place-items-center px-1.5 py-1 leading-none">
+              <span className="font-black leading-[0.9] text-pink-800">{problem.numerator}</span>
+              <span className="my-1 h-[3px] w-[76%] rounded-full bg-slate-950" />
+              <span className="font-black leading-[0.9] text-pink-800">{problem.denominator}</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
