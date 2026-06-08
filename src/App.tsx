@@ -12191,6 +12191,52 @@ function getKeyValueAnswer(value: string, key: string) {
   return parseKeyValueAnswer(value)[key] ?? '';
 }
 
+function parseDecimalRepresentationChoiceNumber(value: string) {
+  const compactValue = value.trim().replace(/\s+/g, '');
+  const directNumber = Number(compactValue);
+  if (Number.isFinite(directNumber)) {
+    return directNumber;
+  }
+
+  const tenthCountMatch = compactValue.match(/^0\.1이(\d+)개인수$/);
+  if (tenthCountMatch) {
+    return Number(tenthCountMatch[1]) / 10;
+  }
+
+  const combinedAmountMatch = compactValue.match(/^(\d+(?:\.\d+)?)와(\d+(?:\.\d+)?)만큼$/);
+  if (combinedAmountMatch) {
+    return Number(combinedAmountMatch[1]) + Number(combinedAmountMatch[2]);
+  }
+
+  return null;
+}
+
+function isSmallestDecimalRepresentationChoice(value: string, problem: FractionIntroProblemData) {
+  const selectedValue = getKeyValueAnswer(value, 'selected');
+  if (!selectedValue || !problem.choices?.length) {
+    return false;
+  }
+
+  const parsedChoices = problem.choices
+    .map((choice) => ({
+      value: choice.value,
+      number: parseDecimalRepresentationChoiceNumber(choice.value) ?? parseDecimalRepresentationChoiceNumber(choice.label),
+    }))
+    .filter((choice): choice is { value: string; number: number } => choice.number !== null);
+
+  if (parsedChoices.length !== problem.choices.length) {
+    return false;
+  }
+
+  const selectedChoice = parsedChoices.find((choice) => choice.value === selectedValue);
+  if (!selectedChoice) {
+    return false;
+  }
+
+  const smallestNumber = Math.min(...parsedChoices.map((choice) => choice.number));
+  return Math.abs(selectedChoice.number - smallestNumber) < 1e-9;
+}
+
 function getStableHash(value: string) {
   return [...value].reduce((hash, char) => {
     return (hash * 31 + char.charCodeAt(0)) % 1000003;
@@ -12552,6 +12598,10 @@ function isFractionIntroAnswerCorrect(value: string, problem: FractionIntroProbl
       normalizeFractionIntroAnswer(`${key}=${currentEntries[key] ?? ''}`) ===
       normalizeFractionIntroAnswer(`${key}=${expectedEntries[key] ?? ''}`)
     );
+  }
+
+  if (problem.activity === 'decimalRepresentationChoice' && isSmallestDecimalRepresentationChoice(value, problem)) {
+    return true;
   }
 
   return normalizeFractionIntroAnswer(value) === normalizeFractionIntroAnswer(problem.answerToken);
