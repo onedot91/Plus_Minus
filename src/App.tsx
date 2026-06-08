@@ -15519,19 +15519,21 @@ function FractionIntroSvg({
     return (
       <svg viewBox="0 0 220 180" className="h-full w-full" aria-hidden="true">
         {pieces.map((piece) => {
+          const pieceIndex = Number(piece.id);
           const isSelected = selectedPieces.includes(piece.id);
+          const isShaded = onTogglePiece ? isSelected : pieceIndex < problem.numerator;
           return (
             <motion.polygon
               key={piece.id}
               points={piece.points}
-              fill={isSelected ? diamondShadedFill : unshadedFill}
+              fill={isShaded ? diamondShadedFill : unshadedFill}
               stroke={partitionStroke}
               strokeWidth="3.5"
               strokeLinejoin="round"
               vectorEffect="non-scaling-stroke"
               className={onTogglePiece ? 'cursor-pointer transition-opacity hover:opacity-80' : ''}
               onClick={() => onTogglePiece?.(piece.id)}
-              {...getPieceMotionProps(isSelected)}
+              {...getPieceMotionProps(isShaded)}
             />
           );
         })}
