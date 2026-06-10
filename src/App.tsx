@@ -4111,14 +4111,14 @@ const PLAYER_SKINS: PlayerSkinConfig[] = [
   },
   {
     id: 'sprout-suit',
-    label: '새싹 고마',
+    label: '잎사귀 고마',
     badge: '랜덤 보상',
     spriteSet: SPROUT_SUIT_GOMA_PLAYER_SPRITES,
     isReward: true,
   },
   {
     id: 'weird-goma',
-    label: '이상한 고마',
+    label: '강아지똥 고마',
     badge: '랜덤 보상',
     spriteSet: WEIRD_GOMA_PLAYER_SPRITES,
     isReward: true,
@@ -4306,6 +4306,15 @@ function getRewardPlayerSkinsForUnit(unitId: LearningUnitId) {
   return REWARD_PLAYER_SKINS_BY_UNIT[unitId];
 }
 
+function getLockedRewardPlayerSkinsForUnit(
+  unitId: LearningUnitId,
+  unlockedSkinIds: PlayerSkinId[],
+  reservedSkinIds: PlayerSkinId[] = [],
+) {
+  const unavailableSkinIds = new Set<PlayerSkinId>([...unlockedSkinIds, ...reservedSkinIds]);
+  return getRewardPlayerSkinsForUnit(unitId).filter((skin) => !unavailableSkinIds.has(skin.id));
+}
+
 function getRewardUnitLabelForSkin(skinId: PlayerSkinId) {
   const matchingEntry = Object.entries(REWARD_PLAYER_SKINS_BY_UNIT).find(([, skins]) =>
     skins.some((skin) => skin.id === skinId),
@@ -4317,8 +4326,12 @@ function getRewardUnitLabelForSkin(skinId: PlayerSkinId) {
   return `${matchingEntry[0].replace('unit', '')}단원`;
 }
 
-function pickRandomLockedRewardSkin(unitId: LearningUnitId, unlockedSkinIds: PlayerSkinId[]) {
-  const lockedRewardSkins = getRewardPlayerSkinsForUnit(unitId).filter((skin) => !unlockedSkinIds.includes(skin.id));
+function pickRandomLockedRewardSkin(
+  unitId: LearningUnitId,
+  unlockedSkinIds: PlayerSkinId[],
+  reservedSkinIds: PlayerSkinId[] = [],
+) {
+  const lockedRewardSkins = getLockedRewardPlayerSkinsForUnit(unitId, unlockedSkinIds, reservedSkinIds);
   if (lockedRewardSkins.length === 0) {
     return null;
   }
@@ -25180,6 +25193,8 @@ export default function App() {
   const [battleDifficulty, setBattleDifficulty] = useState<BattleDifficulty>('normal');
   const [hasLegacyChampionGoma] = useState(readChampionGomaUnlock);
   const [unlockedPlayerSkinIds, setUnlockedPlayerSkinIds] = useState<PlayerSkinId[]>(() => readUnlockedPlayerSkinIds(hasLegacyChampionGoma));
+  const unlockedPlayerSkinIdsRef = useRef(unlockedPlayerSkinIds);
+  const reservedRewardSkinIdsRef = useRef(new Set<PlayerSkinId>());
   const [selectedPlayerSkinId, setSelectedPlayerSkinId] = useState<PlayerSkinId>(() => readSelectedPlayerSkinId(readUnlockedPlayerSkinIds(readChampionGomaUnlock())));
   const [isSkinPickerOpen, setIsSkinPickerOpen] = useState(false);
   const [pendingRewardSkin, setPendingRewardSkin] = useState<PlayerSkinConfig | null>(null);
@@ -25265,6 +25280,10 @@ export default function App() {
       setStoredBattleProgress(null);
     }
   }, [gameState]);
+
+  useEffect(() => {
+    unlockedPlayerSkinIdsRef.current = unlockedPlayerSkinIds;
+  }, [unlockedPlayerSkinIds]);
 
   const isActivePlayRun = (runId: number) => (
     currentPlayRunIdRef.current === runId && gameStateRef.current === 'playing'
@@ -25445,13 +25464,19 @@ export default function App() {
   };
 
   const prepareRandomSkinRewardForClear = (unitId: LearningUnitId) => {
-    const rewardSkin = pickRandomLockedRewardSkin(unitId, unlockedPlayerSkinIds);
+    const rewardSkin = pickRandomLockedRewardSkin(
+      unitId,
+      unlockedPlayerSkinIdsRef.current,
+      Array.from(reservedRewardSkinIdsRef.current),
+    );
+
     if (!rewardSkin) {
       setPendingRewardSkin(null);
       setIsRewardPoolDepleted(true);
       return;
     }
 
+    reservedRewardSkinIdsRef.current.add(rewardSkin.id);
     setIsRewardPoolDepleted(false);
     setPendingRewardSkin(rewardSkin);
     setRewardRoulettePhase('spinning');
@@ -25461,6 +25486,7 @@ export default function App() {
   const unlockRouletteRewardSkin = (rewardSkin: PlayerSkinConfig) => {
     setUnlockedPlayerSkinIds((previousUnlockedSkinIds) => {
       if (previousUnlockedSkinIds.includes(rewardSkin.id)) {
+        reservedRewardSkinIdsRef.current.delete(rewardSkin.id);
         return previousUnlockedSkinIds;
       }
 
@@ -25468,6 +25494,8 @@ export default function App() {
         [...previousUnlockedSkinIds, rewardSkin.id],
         hasLegacyChampionGoma,
       );
+      unlockedPlayerSkinIdsRef.current = nextUnlockedSkinIds;
+      reservedRewardSkinIdsRef.current.delete(rewardSkin.id);
       saveUnlockedPlayerSkinIds(nextUnlockedSkinIds);
       setSelectedPlayerSkinId(rewardSkin.id);
       saveSelectedPlayerSkinId(rewardSkin.id);
@@ -25853,7 +25881,11 @@ export default function App() {
   const currentLevelDescription = levelDescriptions[level] ?? `${level}단계`;
   const finalRecordLabel = gameState === 'win' ? `${level}단계 클리어` : `${level}단계 도달`;
   const finalRecordTopic = currentLevelDescription.replace(/^\d+단계:\s*/, '');
-  const rewardRouletteSkins = getRewardPlayerSkinsForUnit(activeLearningUnitId);
+  const rewardRouletteSkins = getLockedRewardPlayerSkinsForUnit(
+    activeLearningUnitId,
+    unlockedPlayerSkinIds,
+    pendingRewardSkin ? [pendingRewardSkin.id] : [],
+  );
   const rewardSlotMachineItems = pendingRewardSkin
     ? [...rewardRouletteSkins, ...rewardRouletteSkins, ...rewardRouletteSkins, pendingRewardSkin]
     : rewardRouletteSkins;
@@ -27553,6 +27585,7 @@ export default function App() {
     playSound('start', { gainMultiplier: 0.8, detune: 12 });
     gameStateRef.current = 'playing';
     setGameState('playing');
+    reservedRewardSkinIdsRef.current.clear();
     setPendingRewardSkin(null);
     setIsRewardPoolDepleted(false);
     setRewardRoulettePhase('spinning');
@@ -27624,6 +27657,7 @@ export default function App() {
     playSound('start', { gainMultiplier: 0.72, detune: 6 });
     gameStateRef.current = 'playing';
     setGameState('playing');
+    reservedRewardSkinIdsRef.current.clear();
     setPendingRewardSkin(null);
     setIsRewardPoolDepleted(false);
     setRewardRoulettePhase('spinning');
@@ -27684,6 +27718,7 @@ export default function App() {
     playSound('ui');
     gameStateRef.current = 'start';
     setGameState('start');
+    reservedRewardSkinIdsRef.current.clear();
     setPendingRewardSkin(null);
     setIsRewardPoolDepleted(false);
     setRewardRoulettePhase('spinning');
