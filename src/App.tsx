@@ -25477,30 +25477,28 @@ export default function App() {
     }
 
     reservedRewardSkinIdsRef.current.add(rewardSkin.id);
-    setIsRewardPoolDepleted(false);
-    setPendingRewardSkin(rewardSkin);
-    setRewardRoulettePhase('spinning');
-    setRewardRouletteSpinKey((spinKey) => spinKey + 1);
-  };
-
-  const unlockRouletteRewardSkin = (rewardSkin: PlayerSkinConfig) => {
     setUnlockedPlayerSkinIds((previousUnlockedSkinIds) => {
-      if (previousUnlockedSkinIds.includes(rewardSkin.id)) {
+      const currentUnlockedSkinIds = Array.from(new Set([...previousUnlockedSkinIds, ...unlockedPlayerSkinIdsRef.current]));
+      if (currentUnlockedSkinIds.includes(rewardSkin.id)) {
         reservedRewardSkinIdsRef.current.delete(rewardSkin.id);
-        return previousUnlockedSkinIds;
+        return currentUnlockedSkinIds;
       }
 
       const nextUnlockedSkinIds = normalizeUnlockedPlayerSkinIds(
-        [...previousUnlockedSkinIds, rewardSkin.id],
+        [...currentUnlockedSkinIds, rewardSkin.id],
         hasLegacyChampionGoma,
       );
       unlockedPlayerSkinIdsRef.current = nextUnlockedSkinIds;
       reservedRewardSkinIdsRef.current.delete(rewardSkin.id);
       saveUnlockedPlayerSkinIds(nextUnlockedSkinIds);
-      setSelectedPlayerSkinId(rewardSkin.id);
-      saveSelectedPlayerSkinId(rewardSkin.id);
       return nextUnlockedSkinIds;
     });
+    setSelectedPlayerSkinId(rewardSkin.id);
+    saveSelectedPlayerSkinId(rewardSkin.id);
+    setIsRewardPoolDepleted(false);
+    setPendingRewardSkin(rewardSkin);
+    setRewardRoulettePhase('spinning');
+    setRewardRouletteSpinKey((spinKey) => spinKey + 1);
   };
 
   useEffect(() => {
@@ -25521,7 +25519,6 @@ export default function App() {
     );
 
     const revealTimeoutId = window.setTimeout(() => {
-      unlockRouletteRewardSkin(pendingRewardSkin);
       setRewardRoulettePhase('revealed');
       playSound('rouletteWin', { gainMultiplier: 0.5, detune: 18 });
       queueSound('levelUp', 180, { gainMultiplier: 0.7, detune: 68 });
