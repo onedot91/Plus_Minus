@@ -25160,6 +25160,7 @@ export default function App() {
   const developerProblemHistoryRef = useRef<DeveloperProblemSnapshot[]>([]);
   const developerProblemHistoryIndexRef = useRef(-1);
   const currentPlayRunIdRef = useRef(0);
+  const currentPlayUnitIdRef = useRef<LearningUnitId>(DEFAULT_LEARNING_UNIT_ID);
   const recordedPlayRunIdRef = useRef<number | null>(null);
   const isBattleActionResolvingRef = useRef(false);
   const gameStateRef = useRef<GameState>('start');
@@ -25320,18 +25321,19 @@ export default function App() {
     }
 
     recordedPlayRunIdRef.current = currentPlayRunIdRef.current;
-    const unit = LEARNING_UNITS.find((learningUnit) => learningUnit.id === activeLearningUnitId);
-    const levelDescription = getLevelDescriptionsForUnit(activeLearningUnitId)[reachedLevel] ?? `${reachedLevel}단계`;
+    const recordUnitId = currentPlayUnitIdRef.current;
+    const unit = LEARNING_UNITS.find((learningUnit) => learningUnit.id === recordUnitId);
+    const levelDescription = getLevelDescriptionsForUnit(recordUnitId)[reachedLevel] ?? `${reachedLevel}단계`;
     const topic = levelDescription.replace(/^\d+단계:\s*/, '');
     const playedAt = new Date().toISOString();
     const record: StoredPlayRecord = {
       id: `${playedAt}-${currentPlayRunIdRef.current}`,
       playerName: playerName.trim() || DEFAULT_PLAYER_NAME,
-      unitId: activeLearningUnitId,
-      unitTitle: unit?.title ?? activeLearningUnitId,
+      unitId: recordUnitId,
+      unitTitle: unit?.title ?? recordUnitId,
       result,
       level: reachedLevel,
-      totalLevels: getPlayableTotalLevelsForUnit(activeLearningUnitId),
+      totalLevels: getPlayableTotalLevelsForUnit(recordUnitId),
       topic,
       playedAt,
     };
@@ -25340,7 +25342,7 @@ export default function App() {
       const nextRecords = [record, ...previousRecords].slice(0, MAX_STORED_PLAY_RECORDS);
       saveStoredPlayRecords(nextRecords);
       if (result === 'win') {
-        prepareRandomSkinRewardForClear(activeLearningUnitId);
+        prepareRandomSkinRewardForClear(recordUnitId);
       }
       return nextRecords;
     });
@@ -27577,6 +27579,7 @@ export default function App() {
     clearBattleTimeouts();
     isBattleActionResolvingRef.current = false;
     currentPlayRunIdRef.current += 1;
+    currentPlayUnitIdRef.current = activeLearningUnitId;
     recordedPlayRunIdRef.current = null;
     warmAudio();
     playSound('start', { gainMultiplier: 0.8, detune: 12 });
@@ -27649,6 +27652,7 @@ export default function App() {
     clearBattleTimeouts();
     isBattleActionResolvingRef.current = false;
     currentPlayRunIdRef.current += 1;
+    currentPlayUnitIdRef.current = progress.unitId;
     recordedPlayRunIdRef.current = null;
     warmAudio();
     playSound('start', { gainMultiplier: 0.72, detune: 6 });
