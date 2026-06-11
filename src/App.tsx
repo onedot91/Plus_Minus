@@ -2096,8 +2096,9 @@ type CompatibleWindow = Window & typeof globalThis & {
 
 const LAYER_GAIN_BOOST = 1.8;
 const MASTER_EFFECT_GAIN = 1.71;
+const EFFECT_VOLUME_ATTENUATION = 0.9;
 const POST_COMPRESSOR_GAIN = 3.2;
-const AUDIO_ENGINE_VERSION = 7;
+const AUDIO_ENGINE_VERSION = 9;
 
 const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
   start: {
@@ -2397,7 +2398,7 @@ function createAudioEngine(): AudioEngine | null {
   compressor.ratio.value = 10;
   compressor.attack.value = 0.001;
   compressor.release.value = 0.12;
-  masterGain.gain.value = POST_COMPRESSOR_GAIN;
+  masterGain.gain.value = POST_COMPRESSOR_GAIN * EFFECT_VOLUME_ATTENUATION;
   limiter.threshold.value = -3;
   limiter.knee.value = 0;
   limiter.ratio.value = 20;
@@ -11937,12 +11938,24 @@ appendUnit6FractionVariants(UNIT6_LEVEL5_PROBLEMS, 'unitFractionCompare', [
   [10, 5],
   [2, 8],
   [12, 6],
+  [3, 11],
+  [9, 2],
+  [5, 12],
+  [11, 4],
+  [7, 10],
+  [10, 7],
+  [6, 3],
+  [8, 12],
+  [12, 8],
+  [4, 2],
+  [9, 6],
+  [5, 5],
 ].map(([leftDenominator, rightDenominator]) =>
   makeUnit6FractionProblem('unitFractionCompare', '단위분수의 크기를 비교해 보세요.', rightDenominator, 1, `symbol=${getComparisonSymbol(rightDenominator, leftDenominator)}`, {
     shape: 'diamond',
     meta: { leftDenominator: String(leftDenominator), rightDenominator: String(rightDenominator) },
   })
-));
+), 16);
 appendUnit6FractionVariants(UNIT6_LEVEL5_PROBLEMS, 'shadeAndCompare', [
   [9, 7, 4, 5, 10],
   [12, 3, 8, 8, 6],
@@ -12344,6 +12357,7 @@ function getFractionIntroPaintSelection(value: string) {
 
 const UNIT_CONVERSION_DECIMAL_COMPLETE_ANSWER = 'unitConversionDecimalComplete';
 const UNIT_CONVERSION_DECIMAL_STREAK_TARGET = 3;
+const UNIT_FRACTION_COMPARE_STREAK_TARGET = 3;
 
 type UnitConversionDecimalQuestion = {
   key: 'mmAcm' | 'mmBcm' | 'cmAmm' | 'cmBmm';
@@ -16307,11 +16321,13 @@ function FractionIntroProblemCard({
   answerValue,
   onAnswerChange,
   condensed = false,
+  unitFractionCompareStreak = 0,
 }: {
   fractionIntro: FractionIntroProblemData;
   answerValue: string;
   onAnswerChange: (value: string) => void;
   condensed?: boolean;
+  unitFractionCompareStreak?: number;
 }) {
   const shouldReduceMotion = useReducedMotion();
   const setAnswer = (key: string, value: string) => onAnswerChange(setKeyValueAnswer(answerValue, key, value));
@@ -16326,6 +16342,9 @@ function FractionIntroProblemCard({
   const sameDenominatorRightCount = Number(expectedAnswerEntries.bCount) || 6;
   const unitFractionLeftDenominator = getMetaNumber('leftDenominator', 3);
   const unitFractionRightDenominator = getMetaNumber('rightDenominator', 7);
+  const shouldHideUnitFractionCompareModel =
+    fractionIntro.activity === 'unitFractionCompare' &&
+    unitFractionCompareStreak >= UNIT_FRACTION_COMPARE_STREAK_TARGET - 1;
   const shadeLeftNumerator = getMetaNumber('leftNumerator', 4);
   const shadeLeftDenominator = getMetaNumber('leftDenominator', 6);
   const shadeRightNumerator = getMetaNumber('rightNumerator', 3);
@@ -16450,10 +16469,15 @@ function FractionIntroProblemCard({
       className={`relative flex h-full w-full flex-col text-slate-900 ${condensed ? 'gap-3' : 'gap-4'}`}
     >
       {fractionIntro.activity === 'fractionWords' ? null : (
-        <div className="shrink-0">
+        <div className="flex shrink-0 flex-wrap items-start justify-between gap-3">
           <h2 className={`break-keep font-black leading-tight text-slate-950 ${condensed ? 'text-2xl sm:text-3xl' : 'text-3xl sm:text-4xl'}`}>
             {fractionIntro.title}
           </h2>
+          {fractionIntro.activity === 'unitFractionCompare' ? (
+            <div className={`shrink-0 rounded-2xl border-4 border-white bg-yellow-300 px-4 py-2 text-center font-black leading-none text-slate-950 shadow-[0_0_0_4px_rgba(15,23,42,0.92),0_10px_22px_rgba(0,0,0,0.38)] ${condensed ? 'text-base' : 'text-lg sm:text-xl'}`}>
+              연속 <span className="inline-flex min-w-7 items-center justify-center rounded-lg bg-slate-950 px-2 py-1 text-white">{unitFractionCompareStreak}</span> / {UNIT_FRACTION_COMPARE_STREAK_TARGET}
+            </div>
+          ) : null}
         </div>
       )}
 
@@ -16730,18 +16754,20 @@ function FractionIntroProblemCard({
         {fractionIntro.activity === 'unitFractionCompare' ? (
           <div className={`col-span-full grid ${condensed ? 'gap-3' : 'gap-6'}`}>
             <ProblemHint>
-              단위분수: 분모가 클수록 작음
+              {shouldHideUnitFractionCompareModel ? '그림 없이 도전' : '단위분수: 분모가 클수록 작음'}
             </ProblemHint>
-            <div className={`grid rounded-2xl border-4 border-slate-300 bg-white ${condensed ? 'gap-3 p-3' : 'gap-5 p-5'}`}>
-              <div className={`grid items-center ${condensed ? 'grid-cols-[4.5rem_minmax(0,1fr)] gap-3' : 'grid-cols-[5rem_minmax(0,1fr)] gap-4'}`}>
-                <FractionInline numerator={1} denominator={unitFractionLeftDenominator} className={`rounded-lg border-4 border-slate-300 bg-white py-2 text-slate-950 shadow-sm ${condensed ? 'px-2 text-2xl' : 'px-3 text-3xl'}`} />
-                <FractionCompareBar numerator={1} denominator={unitFractionLeftDenominator} color="#bae6fd" compact={condensed} />
+            {!shouldHideUnitFractionCompareModel ? (
+              <div className={`grid rounded-2xl border-4 border-slate-300 bg-white ${condensed ? 'gap-3 p-3' : 'gap-5 p-5'}`}>
+                <div className={`grid items-center ${condensed ? 'grid-cols-[4.5rem_minmax(0,1fr)] gap-3' : 'grid-cols-[5rem_minmax(0,1fr)] gap-4'}`}>
+                  <FractionInline numerator={1} denominator={unitFractionLeftDenominator} className={`rounded-lg border-4 border-slate-300 bg-white py-2 text-slate-950 shadow-sm ${condensed ? 'px-2 text-2xl' : 'px-3 text-3xl'}`} />
+                  <FractionCompareBar numerator={1} denominator={unitFractionLeftDenominator} color="#bae6fd" compact={condensed} />
+                </div>
+                <div className={`grid items-center ${condensed ? 'grid-cols-[4.5rem_minmax(0,1fr)] gap-3' : 'grid-cols-[5rem_minmax(0,1fr)] gap-4'}`}>
+                  <FractionInline numerator={1} denominator={unitFractionRightDenominator} className={`rounded-lg border-4 border-slate-300 bg-white py-2 text-slate-950 shadow-sm ${condensed ? 'px-2 text-2xl' : 'px-3 text-3xl'}`} />
+                  <FractionCompareBar numerator={1} denominator={unitFractionRightDenominator} color="#bae6fd" compact={condensed} />
+                </div>
               </div>
-              <div className={`grid items-center ${condensed ? 'grid-cols-[4.5rem_minmax(0,1fr)] gap-3' : 'grid-cols-[5rem_minmax(0,1fr)] gap-4'}`}>
-                <FractionInline numerator={1} denominator={unitFractionRightDenominator} className={`rounded-lg border-4 border-slate-300 bg-white py-2 text-slate-950 shadow-sm ${condensed ? 'px-2 text-2xl' : 'px-3 text-3xl'}`} />
-                <FractionCompareBar numerator={1} denominator={unitFractionRightDenominator} color="#bae6fd" compact={condensed} />
-              </div>
-            </div>
+            ) : null}
             <div className={`flex flex-wrap items-center justify-center rounded-2xl border-4 border-slate-300 bg-white text-slate-950 ${condensed ? 'gap-3 p-3' : 'gap-4 p-5'}`}>
               <FractionInline numerator={1} denominator={unitFractionLeftDenominator} className={condensed ? 'text-3xl' : 'text-4xl'} />
               <CompareSymbolChoice value={getKeyValueAnswer(answerValue, 'symbol')} onChange={(value) => setTextAnswer('symbol', value)} ariaLabel="단위분수 비교 기호" compact={condensed} />
@@ -25179,6 +25205,8 @@ export default function App() {
   const [level, setLevel] = useState(1);
   const [problem, setProblem] = useState<Problem>(() => getProblemForTurn(DEFAULT_LEARNING_UNIT_ID, 1, 100));
   const [inputValue, setInputValue] = useState('');
+  const [unitFractionCompareStreak, setUnitFractionCompareStreak] = useState(0);
+  const [unitFractionCompareStreakSequences, setUnitFractionCompareStreakSequences] = useState<number[]>([]);
   const [unitInputValue, setUnitInputValue] = useState('');
   const [shapeDrawNotice, setShapeDrawNotice] = useState('');
   const [resolvedShapeRouletteKey, setResolvedShapeRouletteKey] = useState<string | null>(null);
@@ -25654,10 +25682,15 @@ export default function App() {
     options: {
       opponentHP?: number;
       recordInDeveloperHistory?: boolean;
+      preserveUnitFractionCompareStreak?: boolean;
     } = {},
   ) => {
     const nextOpponentHP = options.opponentHP ?? opponentHP;
     setInputValue('');
+    if (!options.preserveUnitFractionCompareStreak) {
+      setUnitFractionCompareStreak(0);
+      setUnitFractionCompareStreakSequences([]);
+    }
     setUnitInputValue('');
     setClockAnswerInput({ hours: '', minutes: '', seconds: '' });
     setShapeDrawNotice('');
@@ -25745,6 +25778,52 @@ export default function App() {
       opponentHP: nextOpponentHP,
       problem,
       problemCoachmark,
+    });
+  };
+
+  const advanceUnitFractionCompareQuestion = (nextStreak: number) => {
+    const problemPool = getUnit6FractionProblemPool(5);
+    const unitFractionCompareSequences = problemPool
+      .map((candidate, index) => ({ candidate, sequence: index + 1 }))
+      .filter(({ candidate }) => candidate.activity === 'unitFractionCompare')
+      .map(({ sequence }) => sequence);
+    const currentSequence = unit6ProblemSequenceRef.current[5] ?? (
+      problem.kind === 'fractionIntro' && problem.fractionIntro
+        ? problemPool.findIndex((candidate) =>
+            candidate.activity === 'unitFractionCompare' &&
+            candidate.answerToken === problem.fractionIntro?.answerToken &&
+            candidate.meta?.leftDenominator === problem.fractionIntro?.meta?.leftDenominator &&
+            candidate.meta?.rightDenominator === problem.fractionIntro?.meta?.rightDenominator
+          ) + 1
+        : 0
+    );
+    const usedSequenceSet = new Set([
+      ...unitFractionCompareStreakSequences,
+      ...(unitFractionCompareSequences.includes(currentSequence) ? [currentSequence] : []),
+    ]);
+    const availableSequences = unitFractionCompareSequences.filter((sequence) => !usedSequenceSet.has(sequence));
+    const nextProblemSequencePool = availableSequences.length > 0
+      ? availableSequences
+      : unitFractionCompareSequences.filter((sequence) => sequence !== currentSequence);
+    const nextProblemSequence = nextProblemSequencePool[Math.floor(Math.random() * nextProblemSequencePool.length)] ?? currentSequence ?? 1;
+    const nextProblem = getProblemForTurn('unit6', 5, opponentHP, nextProblemSequence);
+    const recentProblemSequences = unit6RecentProblemSequencesRef.current[5] ?? [];
+    const nextStreakSequences = [
+      ...Array.from(usedSequenceSet).filter((sequence) => unitFractionCompareSequences.includes(sequence)),
+      nextProblemSequence,
+    ].slice(-UNIT_FRACTION_COMPARE_STREAK_TARGET);
+
+    unit6ProblemSequenceRef.current[5] = nextProblemSequence;
+    unit6RecentProblemSequencesRef.current[5] = [
+      nextProblemSequence,
+      ...recentProblemSequences.filter((sequence) => sequence !== nextProblemSequence),
+    ].slice(0, 3);
+    unit6ProblemActivityCycleRef.current[5] = ['unitFractionCompare'];
+    setUnitFractionCompareStreak(nextStreak);
+    setUnitFractionCompareStreakSequences(nextStreakSequences);
+    setProblemWithCoachmark(nextProblem, 5, {
+      opponentHP,
+      preserveUnitFractionCompareStreak: true,
     });
   };
 
@@ -25978,9 +26057,11 @@ export default function App() {
 
     resetDeveloperBattleState();
     developerProblemHistoryIndexRef.current = historyIndex;
-    setLevel(snapshot.level);
-    setOpponentHP(snapshot.opponentHP);
-    setProblem(snapshot.problem);
+	    setLevel(snapshot.level);
+	    setOpponentHP(snapshot.opponentHP);
+	    setUnitFractionCompareStreak(0);
+	    setUnitFractionCompareStreakSequences([]);
+	    setProblem(snapshot.problem);
     setProblemCoachmark(snapshot.problemCoachmark);
   });
 
@@ -26047,8 +26128,10 @@ export default function App() {
     resetDeveloperBattleState();
     setSelectedLearningUnitId(match.unitId);
     setLevel(match.level);
-    setOpponentHP(100);
-    setProblem(match.record.problem);
+	    setOpponentHP(100);
+	    setUnitFractionCompareStreak(0);
+	    setUnitFractionCompareStreakSequences([]);
+	    setProblem(match.record.problem);
     setProblemCoachmark(null);
     setIsSimilarProblemPanelOpen(false);
     pushDeveloperProblemSnapshot({
@@ -26083,9 +26166,11 @@ export default function App() {
 
     resetDeveloperBattleState();
     setSelectedLearningUnitId(nextMatch.unitId);
-    setLevel(nextMatch.level);
-    setOpponentHP(opponentHP);
-    setProblem(nextMatch.record.problem);
+	    setLevel(nextMatch.level);
+	    setOpponentHP(opponentHP);
+	    setUnitFractionCompareStreak(0);
+	    setUnitFractionCompareStreakSequences([]);
+	    setProblem(nextMatch.record.problem);
     setProblemCoachmark(null);
     setIsSimilarProblemPanelOpen(false);
     pushDeveloperProblemSnapshot({
@@ -26907,19 +26992,21 @@ export default function App() {
     }, ATTACK_POSE_DURATION_MS, runId);
   };
 
-  const resolveProblemResult = (
-    isCorrect: boolean,
-    options: {
-      skipSpecialChallenges?: boolean;
-    } = {},
-  ) => {
+	  const resolveProblemResult = (
+	    isCorrect: boolean,
+	    options: {
+	      skipSpecialChallenges?: boolean;
+	      forceOpponentDefeat?: boolean;
+	    } = {},
+	  ) => {
     if (isBattleActionResolvingRef.current || isAttacking || isOpponentAttacking || isOpponentHit || isPlayerHit) {
       return;
     }
 
-    isBattleActionResolvingRef.current = true;
-    const skipSpecialChallenges = options.skipSpecialChallenges === true;
-    const runId = currentPlayRunIdRef.current;
+	    isBattleActionResolvingRef.current = true;
+	    const skipSpecialChallenges = options.skipSpecialChallenges === true;
+	    const forceOpponentDefeat = options.forceOpponentDefeat === true;
+	    const runId = currentPlayRunIdRef.current;
 
     if (isCorrect) {
       triggerUnit6Sound('correct');
@@ -26942,11 +27029,13 @@ export default function App() {
         const currentUnit1ProblemSequence = unit1ProblemSequenceRef.current[level] ?? 1;
         const currentUnit3ProblemSequence = unit3ProblemSequenceRef.current[level] ?? 1;
         const unit1ProblemCount = UNIT1_PROBLEM_COUNTS[level] ?? 1;
-        const newOpponentHP =
-          activeLearningUnitId === 'unit1'
-            ? currentUnit1ProblemSequence >= unit1ProblemCount
-              ? 0
-              : Math.max(1, Math.round(100 - (currentUnit1ProblemSequence / unit1ProblemCount) * 100))
+	        const newOpponentHP =
+	          forceOpponentDefeat
+	            ? 0
+	            : activeLearningUnitId === 'unit1'
+	            ? currentUnit1ProblemSequence >= unit1ProblemCount
+	              ? 0
+	              : Math.max(1, Math.round(100 - (currentUnit1ProblemSequence / unit1ProblemCount) * 100))
             : isUnit3FixedTimeSequenceLevel(activeLearningUnitId, level)
             ? getUnit3FixedTimeOpponentHPAfterCorrect(currentUnit3ProblemSequence)
             : Math.max(0, opponentHP - regularAttackDamage);
@@ -27357,6 +27446,48 @@ export default function App() {
         return;
       }
 
+      if (problem.fractionIntro.activity === 'unitFractionCompare') {
+        if (!isFractionIntroAnswerReady(inputValue, problem.fractionIntro)) {
+          playSound('ui');
+          updateMessage('비교 기호를 고른 뒤 공격해요!');
+          return;
+        }
+
+        playSound('submit', {
+          gainMultiplier: 0.9,
+          detune: 10,
+        });
+
+        const expectedEntries = parseKeyValueAnswer(problem.fractionIntro.answerToken);
+        const isCorrect = getKeyValueAnswer(inputValue, 'symbol') === expectedEntries.symbol;
+        const nextStreak = isCorrect ? unitFractionCompareStreak + 1 : 0;
+        if (isCorrect && nextStreak >= UNIT_FRACTION_COMPARE_STREAK_TARGET) {
+          setUnitFractionCompareStreak(0);
+          setUnitFractionCompareStreakSequences([]);
+          resolveProblemResult(true, { forceOpponentDefeat: true });
+          return;
+        }
+
+        if (isCorrect) {
+          playSound('correct', {
+            gainMultiplier: 0.95,
+            detune: 12,
+          });
+          updateMessage(`공격 성공! 연속 ${nextStreak} / ${UNIT_FRACTION_COMPARE_STREAK_TARGET}`);
+          advanceUnitFractionCompareQuestion(nextStreak);
+        } else {
+          setUnitFractionCompareStreak(0);
+          setUnitFractionCompareStreakSequences([]);
+          setInputValue('');
+          playSound('wrong', {
+            gainMultiplier: 0.9,
+            detune: -18,
+          });
+          updateMessage('공격 실패! 연속 정답이 다시 시작돼요.');
+        }
+        return;
+      }
+
       if (!isFractionIntroAnswerReady(inputValue, problem.fractionIntro)) {
         playSound('ui');
         updateMessage('빈칸을 채우거나 그림을 색칠한 뒤 공격해요!');
@@ -27695,8 +27826,10 @@ export default function App() {
     setUnitSelectionChallenge(null);
     setIsSpecialChallengeResolving(false);
     setTimeLeft(ESTIMATION_TIME_LIMIT_SECONDS);
-    resetSecretCodePrompt();
-    setProblem(restoredProblem);
+	    resetSecretCodePrompt();
+	    setUnitFractionCompareStreak(0);
+	    setUnitFractionCompareStreakSequences([]);
+	    setProblem(restoredProblem);
     setProblemCoachmark(progress.problemCoachmark);
     pushDeveloperProblemSnapshot({
       level: progress.level,
@@ -28908,11 +29041,12 @@ export default function App() {
                   />
                 ) : problem.kind === 'fractionIntro' && problem.fractionIntro ? (
                   <FractionIntroProblemCard
-                    fractionIntro={problem.fractionIntro}
-                    answerValue={inputValue}
-                    onAnswerChange={setInputValue}
-                    condensed={isCompactBattleViewport}
-                  />
+	                    fractionIntro={problem.fractionIntro}
+	                    answerValue={inputValue}
+	                    onAnswerChange={setInputValue}
+	                    condensed={isCompactBattleViewport}
+	                    unitFractionCompareStreak={unitFractionCompareStreak}
+	                  />
                 ) : problem.kind === 'distanceWorksheet' && problem.distanceWorksheet ? (
                     <DistanceWorksheetProblemCard
                       distanceWorksheet={problem.distanceWorksheet}
