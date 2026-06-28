@@ -1,5 +1,5 @@
 ﻿import React, { Suspense, lazy, useState, useEffect, useRef, useEffectEvent, useMemo, useId } from 'react';
-import { Sword, Heart, RotateCcw, Play, Sparkles, Star, ChevronDown, Check, History, Lock, X, Crown, Archive } from 'lucide-react';
+import { Sword, Heart, RotateCcw, Play, Sparkles, Star, ChevronDown, Check, History, Lock, X, Crown, Archive, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import type { VisualControlSound } from './components/VisualCalculator';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -640,7 +640,7 @@ type BattleDifficulty = 'easy' | 'normal' | 'hard';
 
 type LearningUnitId = 'unit1' | 'unit2' | 'unit3' | 'unit4' | 'unit5' | 'unit6';
 
-type ProblemKind = 'equation' | 'story' | 'builder' | 'verticalBlank' | 'measurement' | 'distanceMap' | 'distanceWorksheet' | 'clockReading' | 'timeAddition' | 'shapeDraw' | 'shapeRain' | 'numberLineBox' | 'calculationErrorChoice' | 'equalPartition' | 'fractionIntro' | 'equalShareDivision' | 'equalGroupingDivision' | 'divisionEquationParts' | 'divisionSituationClassify';
+type ProblemKind = 'equation' | 'story' | 'builder' | 'verticalBlank' | 'measurement' | 'distanceMap' | 'distanceWorksheet' | 'clockReading' | 'timeAddition' | 'shapeDraw' | 'shapeRain' | 'numberLineBox' | 'calculationErrorChoice' | 'equalPartition' | 'fractionIntro' | 'equalShareDivision' | 'equalGroupingDivision' | 'divisionEquationParts' | 'divisionSituationClassify' | 'multiplicationDivisionLink' | 'arrayEquationDerivation' | 'divisionInterpretation' | 'divisionCardPlacement' | 'multiplicationQuotient';
 type MeasurementObjectKind =
   | 'seed'
   | 'rice'
@@ -837,6 +837,61 @@ interface DivisionSituationClassifyProblemData {
   answerToken: string;
 }
 
+interface MultiplicationDivisionLinkProblemData {
+  title: string;
+  instruction: string;
+  factorA: number;
+  factorB: number;
+  product: number;
+  answerToken: string;
+}
+
+interface ArrayEquationDerivationProblemData {
+  title: string;
+  instruction: string;
+  helperText: string;
+  itemKind: EqualShareDivisionItemKind;
+  itemLabel: string;
+  rows: number;
+  columns: number;
+  answerToken: string;
+}
+
+interface DivisionInterpretationProblemData {
+  title: string;
+  instruction: string;
+  helperText: string;
+  itemKind: EqualShareDivisionItemKind;
+  itemLabel: string;
+  total: number;
+  multiplier: number;
+  equalGroupingText: string;
+  equalShareText: string;
+  answerToken: string;
+}
+
+interface DivisionCardPlacementProblemData {
+  title: string;
+  instruction: string;
+  cards: number[];
+  dividend: number;
+  divisor: number;
+  quotient: number;
+  answerToken: string;
+}
+
+interface MultiplicationQuotientProblemData {
+  title: string;
+  instruction: string;
+  dividend: number;
+  divisor: number;
+  quotient: number;
+  strategy?: 'multiplicationTable';
+  storyPrompt?: string;
+  answerUnit?: string;
+  answerToken: string;
+}
+
 interface Problem {
   text: string;
   prompt: string;
@@ -862,6 +917,11 @@ interface Problem {
   equalGroupingDivision?: EqualGroupingDivisionProblemData;
   divisionEquationParts?: DivisionEquationPartsProblemData;
   divisionSituationClassify?: DivisionSituationClassifyProblemData;
+  multiplicationDivisionLink?: MultiplicationDivisionLinkProblemData;
+  arrayEquationDerivation?: ArrayEquationDerivationProblemData;
+  divisionInterpretation?: DivisionInterpretationProblemData;
+  divisionCardPlacement?: DivisionCardPlacementProblemData;
+  multiplicationQuotient?: MultiplicationQuotientProblemData;
 }
 
 interface EstimationProblem {
@@ -6543,6 +6603,11 @@ const EQUAL_GROUPING_SUBTRACTION_PREFIX = 'equal-grouping-subtraction:';
 const EQUAL_GROUPING_DIVISION_PREFIX = 'equal-grouping-division:';
 const DIVISION_EQUATION_PARTS_PREFIX = 'division-equation-parts:';
 const DIVISION_SITUATION_CLASSIFY_PREFIX = 'division-situation-classify:';
+const MULTIPLICATION_DIVISION_LINK_PREFIX = 'multiplication-division-link:';
+const ARRAY_EQUATION_DERIVATION_PREFIX = 'array-equation-derivation:';
+const DIVISION_INTERPRETATION_PREFIX = 'division-interpretation:';
+const DIVISION_CARD_PLACEMENT_PREFIX = 'division-card-placement:';
+const MULTIPLICATION_QUOTIENT_PREFIX = 'multiplication-quotient:';
 
 function getEqualShareDivisionAnswerToken(total: number, groups: number) {
   return `${total}|${groups}|${total / groups}`;
@@ -6768,6 +6833,178 @@ function isDivisionSituationClassifyAnswerReady(answerValue: string) {
 
 function isDivisionSituationClassifyAnswerCorrect(answerValue: string, data: DivisionSituationClassifyProblemData) {
   return parseDivisionSituationClassifyAnswer(answerValue) === data.situation.kind;
+}
+
+function createMultiplicationDivisionLinkProblem(data: Omit<MultiplicationDivisionLinkProblemData, 'answerToken' | 'product'>): Problem {
+  const product = data.factorA * data.factorB;
+  return {
+    text: `${data.factorA} × ${data.factorB} = ${product}`,
+    prompt: data.instruction,
+    answer: data.factorB,
+    kind: 'multiplicationDivisionLink',
+    multiplicationDivisionLink: {
+      ...data,
+      product,
+      answerToken: `${product}|${data.factorA}|${data.factorB}`,
+    },
+  };
+}
+
+function getMultiplicationDivisionLinkAnswer(firstDivisor: number, firstQuotient: number, secondDivisor: number, secondQuotient: number) {
+  return `${MULTIPLICATION_DIVISION_LINK_PREFIX}${firstDivisor},${firstQuotient},${secondDivisor},${secondQuotient}`;
+}
+
+function isMultiplicationDivisionLinkAnswerReady(answerValue: string) {
+  const numbers = parsePrefixedNumbers(answerValue, MULTIPLICATION_DIVISION_LINK_PREFIX);
+  return numbers.length === 4 && numbers.every((number) => !Number.isNaN(number));
+}
+
+function isMultiplicationDivisionLinkAnswerCorrect(answerValue: string, data: MultiplicationDivisionLinkProblemData) {
+  const [firstDivisor, firstQuotient, secondDivisor, secondQuotient] = parsePrefixedNumbers(answerValue, MULTIPLICATION_DIVISION_LINK_PREFIX);
+  return firstDivisor === data.factorA &&
+    firstQuotient === data.factorB &&
+    secondDivisor === data.factorB &&
+    secondQuotient === data.factorA;
+}
+
+function createArrayEquationDerivationProblem(data: Omit<ArrayEquationDerivationProblemData, 'answerToken'>): Problem {
+  return {
+    text: '',
+    prompt: data.instruction,
+    answer: data.rows * data.columns,
+    kind: 'arrayEquationDerivation',
+    arrayEquationDerivation: {
+      ...data,
+      answerToken: `${data.rows}|${data.columns}|${data.rows * data.columns}`,
+    },
+  };
+}
+
+function getArrayEquationDerivationAnswer(values: number[]) {
+  return `${ARRAY_EQUATION_DERIVATION_PREFIX}${values.join(',')}`;
+}
+
+function isArrayEquationDerivationAnswerReady(answerValue: string) {
+  const numbers = parsePrefixedNumbers(answerValue, ARRAY_EQUATION_DERIVATION_PREFIX);
+  return numbers.length === 12 && numbers.every((number) => !Number.isNaN(number));
+}
+
+function isArrayEquationDerivationAnswerCorrect(answerValue: string, data: ArrayEquationDerivationProblemData) {
+  const numbers = parsePrefixedNumbers(answerValue, ARRAY_EQUATION_DERIVATION_PREFIX);
+  const product = data.rows * data.columns;
+  const expected = [
+    data.rows, data.columns, product,
+    data.columns, data.rows, product,
+    product, data.rows, data.columns,
+    product, data.columns, data.rows,
+  ];
+  return expected.length === numbers.length && expected.every((value, index) => numbers[index] === value);
+}
+
+function createDivisionInterpretationProblem(data: Omit<DivisionInterpretationProblemData, 'answerToken'>): Problem {
+  return {
+    text: '',
+    prompt: data.instruction,
+    answer: data.total / data.multiplier,
+    kind: 'divisionInterpretation',
+    divisionInterpretation: {
+      ...data,
+      answerToken: `${data.total}|${data.multiplier}|${data.total / data.multiplier}`,
+    },
+  };
+}
+
+function getDivisionInterpretationAnswer(values: number[]) {
+  return `${DIVISION_INTERPRETATION_PREFIX}${values.join(',')}`;
+}
+
+function isDivisionInterpretationAnswerReady(answerValue: string) {
+  const numbers = parsePrefixedNumbers(answerValue, DIVISION_INTERPRETATION_PREFIX);
+  return numbers.length === 6 && numbers.every((number) => !Number.isNaN(number));
+}
+
+function isDivisionInterpretationAnswerCorrect(answerValue: string, data: DivisionInterpretationProblemData) {
+  const numbers = parsePrefixedNumbers(answerValue, DIVISION_INTERPRETATION_PREFIX);
+  const counterpart = data.total / data.multiplier;
+  if (numbers.length !== 6) {
+    return false;
+  }
+
+  const [firstFactor, secondFactor, groupingDivisor, groupingQuotient, sharingDivisor, sharingQuotient] = numbers;
+  const hasCorrectMultiplication =
+    (firstFactor === data.multiplier && secondFactor === counterpart) ||
+    (firstFactor === counterpart && secondFactor === data.multiplier);
+
+  return hasCorrectMultiplication &&
+    groupingDivisor === data.multiplier &&
+    groupingQuotient === counterpart &&
+    sharingDivisor === counterpart &&
+    sharingQuotient === data.multiplier;
+}
+
+function createDivisionCardPlacementProblem(data: Omit<DivisionCardPlacementProblemData, 'answerToken'>): Problem {
+  return {
+    text: `${data.dividend} ÷ ${data.divisor} = ${data.quotient}`,
+    prompt: data.instruction,
+    answer: data.quotient,
+    kind: 'divisionCardPlacement',
+    divisionCardPlacement: {
+      ...data,
+      answerToken: `${data.cards.join('|')}|${data.dividend}|${data.divisor}|${data.quotient}`,
+    },
+  };
+}
+
+function getDivisionCardPlacementAnswer(values: number[]) {
+  return `${DIVISION_CARD_PLACEMENT_PREFIX}${values.join(',')}`;
+}
+
+function isDivisionCardPlacementAnswerReady(answerValue: string) {
+  const numbers = parsePrefixedNumbers(answerValue, DIVISION_CARD_PLACEMENT_PREFIX);
+  return numbers.length === 6 && numbers.every((number) => !Number.isNaN(number));
+}
+
+function isDivisionCardPlacementAnswerCorrect(answerValue: string, data: DivisionCardPlacementProblemData) {
+  const numbers = parsePrefixedNumbers(answerValue, DIVISION_CARD_PLACEMENT_PREFIX);
+  const expected = [
+    data.dividend,
+    data.divisor,
+    data.quotient,
+    data.divisor,
+    data.quotient,
+    data.dividend,
+  ];
+  return expected.length === numbers.length && expected.every((value, index) => numbers[index] === value);
+}
+
+function createMultiplicationQuotientProblem(data: Omit<MultiplicationQuotientProblemData, 'answerToken'>): Problem {
+  return {
+    text: `${data.dividend} ÷ ${data.divisor}`,
+    prompt: data.instruction,
+    answer: data.quotient,
+    kind: 'multiplicationQuotient',
+    multiplicationQuotient: {
+      ...data,
+      answerToken: `${data.dividend}|${data.divisor}|${data.quotient}`,
+    },
+  };
+}
+
+function getMultiplicationQuotientAnswer(values: number[]) {
+  return `${MULTIPLICATION_QUOTIENT_PREFIX}${values.join(',')}`;
+}
+
+function isMultiplicationQuotientAnswerReady(answerValue: string) {
+  const numbers = parsePrefixedNumbers(answerValue, MULTIPLICATION_QUOTIENT_PREFIX);
+  return numbers.length === 3 && numbers.every((number) => !Number.isNaN(number));
+}
+
+function isMultiplicationQuotientAnswerCorrect(answerValue: string, data: MultiplicationQuotientProblemData) {
+  const numbers = parsePrefixedNumbers(answerValue, MULTIPLICATION_QUOTIENT_PREFIX);
+  const expected = data.strategy === 'multiplicationTable'
+    ? [data.divisor, data.dividend, data.quotient]
+    : [data.quotient, data.dividend, data.quotient];
+  return expected.length === numbers.length && expected.every((value, index) => numbers[index] === value);
 }
 
 const UNIT4_LEVEL1_MANIPULATION_VARIANTS: EqualShareDivisionProblemInput[] = [
@@ -7448,6 +7685,158 @@ const UNIT4_LEVEL3_SITUATION_CLASSIFY_VARIANTS: Array<Omit<DivisionSituationClas
   },
 ];
 
+const UNIT4_LEVEL7_STORY_VARIANTS: Array<{
+  prompt: string;
+  answer: number;
+  answerUnit: string;
+  storyTable?: StoryPromptTableData;
+}> = [
+  {
+    prompt: '학교 축제 아침에 나눠 줄 음료 72병이 도착했습니다.\n선생님은 8개 학급이 쉬는 시간마다 바로 가져갈 수 있도록 미리 같은 수씩 나누어 두려고 합니다.\n어느 학급이 더 많이 가져가면 안 되므로 모든 학급의 음료 수가 같아야 합니다.\n한 학급이 가져갈 수 있는 음료는 몇 병인가요?',
+    answer: 9,
+    answerUnit: '병',
+    storyTable: {
+      headers: ['준비한 음료', '나눌 곳', '나누는 방법'],
+      rows: [{ cells: ['72병', '8개 학급', '똑같이 나누기'] }],
+    },
+  },
+  {
+    prompt: '도서관 정리 시간에 새 책 63권을 책장에 꽂으려고 합니다.\n책장은 7칸이고, 사서 선생님은 각 칸의 책 높이가 비슷해 보이도록 같은 수씩 꽂으라고 했습니다.\n책이 남거나 어느 한 칸에만 더 많이 들어가면 다시 정리해야 합니다.\n책장 한 칸에는 책을 몇 권씩 꽂을 수 있나요?',
+    answer: 9,
+    answerUnit: '권',
+    storyTable: {
+      headers: ['새 책', '책장 칸', '구해야 할 것'],
+      rows: [{ cells: ['63권', '7칸', '한 칸의 책 수'] }],
+    },
+  },
+  {
+    prompt: '과학 동아리는 전구 실험 꾸러미를 만들기 위해 건전지 54개를 준비했습니다.\n실험 꾸러미 하나에는 건전지 6개가 꼭 들어가야 하며, 꾸러미마다 들어가는 건전지 수는 같습니다.\n건전지가 남으면 다음 실험 준비가 헷갈리기 때문에 모두 사용하려고 합니다.\n건전지를 남기지 않고 만들 수 있는 실험 꾸러미는 몇 개인가요?',
+    answer: 9,
+    answerUnit: '개',
+    storyTable: {
+      headers: ['준비한 건전지', '꾸러미 1개', '구해야 할 것'],
+      rows: [{ cells: ['54개', '6개씩', '꾸러미 수'] }],
+    },
+  },
+  {
+    prompt: '미술 시간에 모둠별 작품 이름표를 붙이려고 합니다.\n이름표 48장을 6개 모둠 책상 위에 미리 똑같이 나누어 놓아야 합니다.\n한 모둠이 사용할 이름표가 부족하면 작품 설명을 붙일 수 없으므로 모든 모둠에 같은 수를 놓습니다.\n한 모둠에는 이름표가 몇 장씩 놓이나요?',
+    answer: 8,
+    answerUnit: '장',
+    storyTable: {
+      headers: ['이름표', '모둠 수', '나누는 방법'],
+      rows: [{ cells: ['48장', '6모둠', '똑같이 나누기'] }],
+    },
+  },
+  {
+    prompt: '체육대회 준비반은 색깔 고깔 45개를 운동장에 세우려고 합니다.\n운동장은 5구역으로 나뉘어 있고, 각 구역의 출발선과 반환점에 같은 수의 고깔을 놓아야 합니다.\n구역마다 고깔 수가 다르면 경기 안내가 헷갈리므로 똑같이 나누어 세우려고 합니다.\n한 구역에는 고깔을 몇 개씩 세우면 되나요?',
+    answer: 9,
+    answerUnit: '개',
+    storyTable: {
+      headers: ['고깔', '운동장 구역', '구해야 할 것'],
+      rows: [{ cells: ['45개', '5구역', '한 구역의 고깔 수'] }],
+    },
+  },
+  {
+    prompt: '빵집 체험에서 학생들이 구운 머핀 64개를 선물 상자에 담으려고 합니다.\n상자 하나에는 머핀 8개씩 들어가며, 상자마다 들어가는 머핀 수는 모두 같아야 합니다.\n남은 머핀이 있으면 따로 포장해야 하므로 먼저 필요한 상자 수를 정확히 알아보려고 합니다.\n머핀을 모두 담으려면 선물 상자는 몇 개 필요한가요?',
+    answer: 8,
+    answerUnit: '개',
+    storyTable: {
+      headers: ['머핀', '상자 1개', '구해야 할 것'],
+      rows: [{ cells: ['64개', '8개씩', '상자 수'] }],
+    },
+  },
+  {
+    prompt: '학급 텃밭에 심을 모종 56포기가 도착했습니다.\n텃밭 담당 친구들은 물 주는 길을 남기기 위해 한 줄에 모종 8포기씩 가지런히 심으려고 합니다.\n한 줄에 들어가는 모종 수가 같아야 줄 간격도 맞출 수 있습니다.\n모종을 모두 심으면 몇 줄이 만들어지나요?',
+    answer: 7,
+    answerUnit: '줄',
+    storyTable: {
+      headers: ['모종', '한 줄', '구해야 할 것'],
+      rows: [{ cells: ['56포기', '8포기씩', '줄 수'] }],
+    },
+  },
+  {
+    prompt: '전시회 안내판에 붙일 설명 카드 42장을 준비했습니다.\n전시대 하나에는 작품 이름, 만든 사람, 설명을 포함해 설명 카드 7장씩 붙입니다.\n전시대마다 붙이는 카드 수가 같아야 관람 순서가 깔끔하게 보입니다.\n설명 카드를 모두 붙일 수 있는 전시대는 몇 개인가요?',
+    answer: 6,
+    answerUnit: '개',
+    storyTable: {
+      headers: ['설명 카드', '전시대 1개', '구해야 할 것'],
+      rows: [{ cells: ['42장', '7장씩', '전시대 수'] }],
+    },
+  },
+  {
+    prompt: '학예회 무대 장식용 색 테이프가 72m 있습니다.\n무대 가장자리를 꾸미는 팀은 테이프를 9m씩 같은 길이로 잘라 여러 곳에 붙이려고 합니다.\n조각 길이가 서로 다르면 무대 장식의 높이가 맞지 않으므로 같은 길이로 자릅니다.\n색 테이프는 몇 조각으로 나눌 수 있나요?',
+    answer: 8,
+    answerUnit: '조각',
+    storyTable: {
+      headers: ['전체 길이', '한 조각 길이', '구해야 할 것'],
+      rows: [{ cells: ['72m', '9m씩', '조각 수'] }],
+    },
+  },
+  {
+    prompt: '견학 간 학생 36명이 점심을 먹으려고 식당에 들어갔습니다.\n식당의 둥근 탁자 하나에는 학생 4명씩 앉을 수 있고, 선생님은 빈자리가 크게 남지 않도록 앉히려고 합니다.\n모든 학생이 자리에 앉아야 하므로 필요한 탁자 수를 먼저 세어 봅니다.\n모든 학생이 앉으려면 탁자는 몇 개 필요한가요?',
+    answer: 9,
+    answerUnit: '개',
+    storyTable: {
+      headers: ['학생', '탁자 1개', '구해야 할 것'],
+      rows: [{ cells: ['36명', '4명씩', '탁자 수'] }],
+    },
+  },
+  {
+    prompt: '수학 놀이 시간에 숫자 카드 81장을 준비했습니다.\n친구 9명이 같은 수만큼 카드를 받아야 게임이 공평하게 시작됩니다.\n카드를 더 많이 받은 친구가 있으면 점수를 비교하기 어려우므로 모두 똑같이 나누어 갖습니다.\n친구 한 명은 숫자 카드를 몇 장씩 받나요?',
+    answer: 9,
+    answerUnit: '장',
+    storyTable: {
+      headers: ['숫자 카드', '친구 수', '나누는 방법'],
+      rows: [{ cells: ['81장', '9명', '똑같이 나누기'] }],
+    },
+  },
+  {
+    prompt: '교실 게시판에 붙일 별 스티커 49장을 준비했습니다.\n선생님은 7개 작품에 별 스티커를 똑같이 붙여 친구들의 노력을 골고루 칭찬하려고 합니다.\n작품마다 붙이는 별 스티커 수가 같아야 하므로 먼저 한 작품에 붙일 수를 구합니다.\n작품 하나에는 별 스티커를 몇 장씩 붙일 수 있나요?',
+    answer: 7,
+    answerUnit: '장',
+    storyTable: {
+      headers: ['별 스티커', '작품 수', '구해야 할 것'],
+      rows: [{ cells: ['49장', '7개', '작품 하나의 스티커 수'] }],
+    },
+  },
+  {
+    prompt: '방과 후 방송부는 인터뷰 영상을 저장할 메모리 카드 40장을 정리하고 있습니다.\n카드 보관함 하나에는 메모리 카드 5장씩 넣을 수 있고, 보관함마다 같은 수를 넣어야 나중에 찾기 쉽습니다.\n모든 메모리 카드를 빠짐없이 정리하려면 보관함이 몇 개 필요한지 알아보려고 합니다.\n메모리 카드를 모두 넣으려면 보관함은 몇 개 필요한가요?',
+    answer: 8,
+    answerUnit: '개',
+    storyTable: {
+      headers: ['메모리 카드', '보관함 1개', '구해야 할 것'],
+      rows: [{ cells: ['40장', '5장씩', '보관함 수'] }],
+    },
+  },
+  {
+    prompt: '환경 동아리는 운동장 주변에 화분 48개를 놓아 작은 길을 꾸미려고 합니다.\n길은 8구역으로 나뉘어 있고, 각 구역에 놓는 화분 수가 같아야 전체 모양이 고르게 보입니다.\n화분을 남기지 않고 모든 구역에 똑같이 놓으려면 한 구역의 수를 구해야 합니다.\n한 구역에는 화분을 몇 개씩 놓을 수 있나요?',
+    answer: 6,
+    answerUnit: '개',
+    storyTable: {
+      headers: ['화분', '길 구역', '나누는 방법'],
+      rows: [{ cells: ['48개', '8구역', '똑같이 나누기'] }],
+    },
+  },
+  {
+    prompt: '음악실에서는 리듬 악기 35개를 공연 연습 조에 나누어 주려고 합니다.\n한 조에는 리듬 악기 5개씩 필요하고, 조마다 악기 수가 같아야 함께 연습할 수 있습니다.\n악기를 모두 나누어 주면 몇 조가 연습할 수 있는지 확인하려고 합니다.\n리듬 악기를 받을 수 있는 조는 몇 조인가요?',
+    answer: 7,
+    answerUnit: '조',
+    storyTable: {
+      headers: ['리듬 악기', '한 조에 필요한 수', '구해야 할 것'],
+      rows: [{ cells: ['35개', '5개씩', '조 수'] }],
+    },
+  },
+  {
+    prompt: '마을 안전 캠페인에서 나누어 줄 반사 스티커 56장을 준비했습니다.\n안내 봉투 하나에는 반사 스티커 7장씩 넣어 가족에게 나누어 주려고 합니다.\n봉투마다 들어가는 스티커 수가 같아야 안내하기 편하고, 남는 스티커 없이 모두 포장하려고 합니다.\n반사 스티커를 모두 넣으면 안내 봉투는 몇 개가 되나요?',
+    answer: 8,
+    answerUnit: '개',
+    storyTable: {
+      headers: ['반사 스티커', '봉투 1개', '구해야 할 것'],
+      rows: [{ cells: ['56장', '7장씩', '봉투 수'] }],
+    },
+  },
+];
+
 function buildUnit4Level3ProblemFactories(): Array<() => Problem> {
   const factories: Array<() => Problem> = [];
 
@@ -7470,37 +7859,135 @@ const UNIT4_PROBLEM_FACTORIES: Record<number, Array<() => Problem>> = {
   2: buildUnit4Level2ProblemFactories(),
   3: buildUnit4Level3ProblemFactories(),
   4: [
-    () => createPromptProblem('4 × 6 = 24를 이용해 24 ÷ 4를 구해 보세요.', 6),
-    () => createPromptProblem('7 × 3 = 21을 이용해 21 ÷ 7을 구해 보세요.', 3),
-    () => createPromptProblem('5 × □ = 35입니다.\n35 ÷ 5의 몫은 얼마인가요?', 7),
-    () => createPromptProblem('8 × 4 = 32입니다.\n32 ÷ 4의 몫은 얼마인가요?', 8),
-    () => createShuffledOptionsProblem('6 × 5 = 30과 관계있는 나눗셈식은?', ['30 ÷ 6 = 5', '30 + 6 = 36', '6 ÷ 30 = 5'], '30 ÷ 6 = 5'),
-    () => createShuffledOptionsProblem('9 × 2 = 18과 관계있는 나눗셈식은?', ['18 ÷ 2 = 9', '18 - 2 = 16', '9 ÷ 18 = 2'], '18 ÷ 2 = 9'),
+    () => createMultiplicationDivisionLinkProblem({
+      title: '곱셈식에서 나눗셈식 만들기',
+      instruction: '곱셈식과 관계있는 나눗셈식 2개를 완성하세요.',
+      factorA: 8,
+      factorB: 3,
+    }),
+    () => createArrayEquationDerivationProblem({
+      title: '그림에서 식 찾기',
+      instruction: '그림을 보고 곱셈식과 나눗셈식을 각각 2개씩 써 보세요.',
+      helperText: '줄의 수와 한 줄의 수를 모두 식에 넣어 보세요.',
+      itemKind: 'strawberry',
+      itemLabel: '딸기',
+      rows: 4,
+      columns: 6,
+    }),
+    () => createDivisionInterpretationProblem({
+      title: '같은 수를 다른 식으로 해석하기',
+      instruction: '그림과 문장을 보고 곱셈식과 나눗셈식을 완성하세요.',
+      helperText: '같은 전체 수라도 나누는 기준에 따라 나눗셈식이 달라져요.',
+      itemKind: 'tangerine',
+      itemLabel: '귤',
+      total: 24,
+      multiplier: 6,
+      equalGroupingText: '귤 24개를 한 봉지에 6개씩 담으면 몇 봉지를 만들 수 있나요?',
+      equalShareText: '귤 24개를 4명이 똑같이 나누어 가지면 한 명이 몇 개씩 가질 수 있나요?',
+    }),
+    () => createDivisionInterpretationProblem({
+      title: '같은 수를 다른 식으로 해석하기',
+      instruction: '그림과 문장을 보고 곱셈식과 나눗셈식을 완성하세요.',
+      helperText: '곱셈식 하나에서 서로 다른 나눗셈식 2개가 나와요.',
+      itemKind: 'sticker',
+      itemLabel: '스티커',
+      total: 36,
+      multiplier: 9,
+      equalGroupingText: '스티커 36장을 한 봉지에 9장씩 넣으면 몇 봉지를 만들 수 있나요?',
+      equalShareText: '스티커 36장을 4명에게 똑같이 나누어 주면 한 명이 몇 장씩 갖나요?',
+    }),
   ],
   5: [
-    () => createPromptProblem('□ × 4 = 28입니다.\n□에 들어갈 수는 무엇인가요?', 7),
-    () => createPromptProblem('3 × □ = 24입니다.\n□에 들어갈 수는 무엇인가요?', 8),
-    () => createPromptProblem('한 줄에 의자가 6개씩 있습니다. 의자가 모두 36개라면 몇 줄인가요?', 6, '줄'),
-    () => createPromptProblem('한 봉지에 사탕이 5개씩 들어 있습니다. 사탕이 모두 45개라면 몇 봉지인가요?', 9, '봉지'),
-    () => createPromptProblem('7개씩 담긴 상자가 몇 개 있어야 모두 42개가 되나요?', 6, '개'),
-    () => createPromptProblem('8명씩 앉는 모둠이 있습니다. 모두 32명이면 몇 모둠인가요?', 4, '모둠'),
+    () => createDivisionCardPlacementProblem({
+      title: '수 카드 배치',
+      instruction: '수 카드를 한 번씩만 사용하여 몫이 가장 큰 나눗셈식을 만들고, 곱셈식으로 바꾸세요.',
+      cards: [5, 45, 9],
+      dividend: 45,
+      divisor: 5,
+      quotient: 9,
+    }),
+    () => createDivisionCardPlacementProblem({
+      title: '수 카드 배치',
+      instruction: '수 카드를 한 번씩만 사용하여 몫이 가장 큰 나눗셈식을 만들고, 곱셈식으로 바꾸세요.',
+      cards: [6, 42, 7],
+      dividend: 42,
+      divisor: 6,
+      quotient: 7,
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈식으로 몫 구하기',
+      instruction: '나눗셈의 몫을 구하기 위해 필요한 곱셈식을 완성하세요.',
+      dividend: 24,
+      divisor: 3,
+      quotient: 8,
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈식으로 몫 구하기',
+      instruction: '나눗셈의 몫을 구하기 위해 필요한 곱셈식을 완성하세요.',
+      dividend: 56,
+      divisor: 7,
+      quotient: 8,
+    }),
   ],
   6: [
-    () => createPromptProblem('곱셈구구를 이용해 48 ÷ 6을 구해 보세요.', 8),
-    () => createPromptProblem('곱셈구구를 이용해 56 ÷ 7을 구해 보세요.', 8),
-    () => createPromptProblem('곱셈구구를 이용해 63 ÷ 9를 구해 보세요.', 7),
-    () => createPromptProblem('곱셈구구를 이용해 36 ÷ 4를 구해 보세요.', 9),
-    () => createPromptProblem('곱셈구구를 이용해 42 ÷ 6을 구해 보세요.', 7),
-    () => createPromptProblem('곱셈구구를 이용해 72 ÷ 8을 구해 보세요.', 9),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈표로 몫 구하기',
+      instruction: '곱셈표에서 4단을 찾고 36이 있는 칸을 눌러 몫을 구하세요.',
+      dividend: 36,
+      divisor: 4,
+      quotient: 9,
+      strategy: 'multiplicationTable',
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈표로 몫 구하기',
+      instruction: '곱셈표에서 6단을 찾고 48이 있는 칸을 눌러 몫을 구하세요.',
+      dividend: 48,
+      divisor: 6,
+      quotient: 8,
+      strategy: 'multiplicationTable',
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈표로 몫 구하기',
+      instruction: '곱셈표에서 7단을 찾고 56이 있는 칸을 눌러 몫을 구하세요.',
+      dividend: 56,
+      divisor: 7,
+      quotient: 8,
+      strategy: 'multiplicationTable',
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈표로 몫 구하기',
+      instruction: '곱셈표에서 8단을 찾고 72가 있는 칸을 눌러 몫을 구하세요.',
+      dividend: 72,
+      divisor: 8,
+      quotient: 9,
+      strategy: 'multiplicationTable',
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈표로 나누어 주기',
+      instruction: '구슬 42개를 6명에게 똑같이 나누어 줍니다. 곱셈표에서 6단을 찾아 한 명에게 몇 개씩 줄 수 있는지 구하세요.',
+      dividend: 42,
+      divisor: 6,
+      quotient: 7,
+      strategy: 'multiplicationTable',
+      storyPrompt: '구슬 42개를 6명에게 똑같이 나누어 줍니다.',
+      answerUnit: '개',
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈표로 나누어 주기',
+      instruction: '색종이 63장을 9명에게 똑같이 나누어 줍니다. 곱셈표에서 9단을 찾아 한 명에게 몇 장씩 줄 수 있는지 구하세요.',
+      dividend: 63,
+      divisor: 9,
+      quotient: 7,
+      strategy: 'multiplicationTable',
+      storyPrompt: '색종이 63장을 9명에게 똑같이 나누어 줍니다.',
+      answerUnit: '장',
+    }),
   ],
-  7: [
-    () => createPromptProblem('리본 36cm를 4명이 똑같이 나누어 가지려고 합니다.\n한 명이 갖는 리본은 몇 cm인가요?', 9, 'cm'),
-    () => createPromptProblem('책 54권을 책장 6칸에 똑같이 꽂습니다.\n한 칸에 몇 권씩 꽂나요?', 9, '권'),
-    () => createPromptProblem('학생 45명이 5명씩 한 모둠을 만듭니다.\n몇 모둠이 되나요?', 9, '모둠'),
-    () => createPromptProblem('연필 64자루를 8자루씩 상자에 담습니다.\n상자는 몇 개 필요한가요?', 8, '개'),
-    () => createPromptProblem('쿠키 42개를 7명에게 똑같이 나누어 줍니다.\n한 명에게 몇 개씩 줄 수 있나요?', 6, '개'),
-    () => createPromptProblem('색 테이프 30m를 5m씩 자릅니다.\n몇 조각이 되나요?', 6, '조각'),
-  ],
+  7: UNIT4_LEVEL7_STORY_VARIANTS.map((storyVariant) => () =>
+    createPromptProblem(storyVariant.prompt, storyVariant.answer, storyVariant.answerUnit, {
+      storyTable: storyVariant.storyTable,
+    }),
+  ),
 };
 
 function generateUnit4Problem(level: number, problemSequence?: number): Problem {
@@ -15257,6 +15744,11 @@ function getProblemKindLabel(problem: Problem) {
   }
   if (problem.kind === 'divisionEquationParts') return '나눗셈식 세 수';
   if (problem.kind === 'divisionSituationClassify') return '상황 구별';
+  if (problem.kind === 'multiplicationDivisionLink') return '곱셈식과 나눗셈식';
+  if (problem.kind === 'arrayEquationDerivation') return '그림에서 식 찾기';
+  if (problem.kind === 'divisionInterpretation') return '식 해석하기';
+  if (problem.kind === 'divisionCardPlacement') return '수 카드 배치';
+  if (problem.kind === 'multiplicationQuotient') return '곱셈식으로 몫 구하기';
   return problem.kind;
 }
 
@@ -15309,6 +15801,47 @@ function getProblemVariantSignature(problem: Problem) {
       problem.kind,
       problem.divisionSituationClassify.situation.id,
       problem.divisionSituationClassify.situation.kind,
+    ].join(':');
+  }
+
+  if (problem.kind === 'multiplicationDivisionLink' && problem.multiplicationDivisionLink) {
+    return [
+      problem.kind,
+      problem.multiplicationDivisionLink.factorA,
+      problem.multiplicationDivisionLink.factorB,
+    ].join(':');
+  }
+
+  if (problem.kind === 'arrayEquationDerivation' && problem.arrayEquationDerivation) {
+    return [
+      problem.kind,
+      problem.arrayEquationDerivation.rows,
+      problem.arrayEquationDerivation.columns,
+      problem.arrayEquationDerivation.itemKind,
+    ].join(':');
+  }
+
+  if (problem.kind === 'divisionInterpretation' && problem.divisionInterpretation) {
+    return [
+      problem.kind,
+      problem.divisionInterpretation.total,
+      problem.divisionInterpretation.multiplier,
+      problem.divisionInterpretation.itemKind,
+    ].join(':');
+  }
+
+  if (problem.kind === 'divisionCardPlacement' && problem.divisionCardPlacement) {
+    return [
+      problem.kind,
+      problem.divisionCardPlacement.cards.join('-'),
+    ].join(':');
+  }
+
+  if (problem.kind === 'multiplicationQuotient' && problem.multiplicationQuotient) {
+    return [
+      problem.kind,
+      problem.multiplicationQuotient.dividend,
+      problem.multiplicationQuotient.divisor,
     ].join(':');
   }
 
@@ -15435,6 +15968,26 @@ function getProblemArchiveQuestion(problem: Problem) {
     return `${problem.divisionSituationClassify.title}\n${problem.divisionSituationClassify.instruction}`;
   }
 
+  if (problem.kind === 'multiplicationDivisionLink' && problem.multiplicationDivisionLink) {
+    return `${problem.multiplicationDivisionLink.title}\n${problem.multiplicationDivisionLink.factorA} × ${problem.multiplicationDivisionLink.factorB} = ${problem.multiplicationDivisionLink.product}`;
+  }
+
+  if (problem.kind === 'arrayEquationDerivation' && problem.arrayEquationDerivation) {
+    return `${problem.arrayEquationDerivation.title}\n${problem.arrayEquationDerivation.rows}줄, 한 줄에 ${problem.arrayEquationDerivation.columns}개`;
+  }
+
+  if (problem.kind === 'divisionInterpretation' && problem.divisionInterpretation) {
+    return `${problem.divisionInterpretation.title}\n${problem.divisionInterpretation.itemLabel} ${problem.divisionInterpretation.total}개`;
+  }
+
+  if (problem.kind === 'divisionCardPlacement' && problem.divisionCardPlacement) {
+    return `${problem.divisionCardPlacement.title}\n수 카드: ${problem.divisionCardPlacement.cards.join(', ')}`;
+  }
+
+  if (problem.kind === 'multiplicationQuotient' && problem.multiplicationQuotient) {
+    return `${problem.multiplicationQuotient.title}\n${problem.multiplicationQuotient.dividend} ÷ ${problem.multiplicationQuotient.divisor}`;
+  }
+
   if (problem.kind === 'numberLineBox' && problem.numberLineBox) {
     return `${problem.numberLineBox.instruction}\n${problem.text}`;
   }
@@ -15527,6 +16080,33 @@ function getProblemArchiveAnswer(problem: Problem) {
 
   if (problem.kind === 'divisionSituationClassify' && problem.divisionSituationClassify) {
     return problem.divisionSituationClassify.situation.kind === 'equalShare' ? '나누기 상황' : '묶기 상황';
+  }
+
+  if (problem.kind === 'multiplicationDivisionLink' && problem.multiplicationDivisionLink) {
+    const { product, factorA, factorB } = problem.multiplicationDivisionLink;
+    return `${product} ÷ ${factorA} = ${factorB}, ${product} ÷ ${factorB} = ${factorA}`;
+  }
+
+  if (problem.kind === 'arrayEquationDerivation' && problem.arrayEquationDerivation) {
+    const { rows, columns } = problem.arrayEquationDerivation;
+    const product = rows * columns;
+    return `${rows} × ${columns} = ${product}, ${columns} × ${rows} = ${product}, ${product} ÷ ${rows} = ${columns}, ${product} ÷ ${columns} = ${rows}`;
+  }
+
+  if (problem.kind === 'divisionInterpretation' && problem.divisionInterpretation) {
+    const { total, multiplier } = problem.divisionInterpretation;
+    const counterpart = total / multiplier;
+    return `${multiplier} × ${counterpart} = ${total}, ${total} ÷ ${multiplier} = ${counterpart}, ${total} ÷ ${counterpart} = ${multiplier}`;
+  }
+
+  if (problem.kind === 'divisionCardPlacement' && problem.divisionCardPlacement) {
+    const { dividend, divisor, quotient } = problem.divisionCardPlacement;
+    return `${dividend} ÷ ${divisor} = ${quotient}, ${divisor} × ${quotient} = ${dividend}`;
+  }
+
+  if (problem.kind === 'multiplicationQuotient' && problem.multiplicationQuotient) {
+    const { dividend, divisor, quotient } = problem.multiplicationQuotient;
+    return `${divisor} × ${quotient} = ${dividend}, ${dividend} ÷ ${divisor} = ${quotient}`;
   }
 
   if (problem.kind === 'calculationErrorChoice' && problem.calculationErrorChoice) {
@@ -15707,7 +16287,7 @@ function buildArchiveSections(): ArchiveUnitSection[] {
 }
 
 function getArchivePreviewFrameClass(problem: Problem, unitId?: LearningUnitId, level?: number) {
-  if (problem.kind === 'shapeDraw' || problem.kind === 'shapeRain' || problem.kind === 'equalPartition' || problem.kind === 'fractionIntro' || problem.kind === 'equalShareDivision' || problem.kind === 'equalGroupingDivision' || problem.kind === 'divisionEquationParts' || problem.kind === 'divisionSituationClassify') {
+  if (problem.kind === 'shapeDraw' || problem.kind === 'shapeRain' || problem.kind === 'equalPartition' || problem.kind === 'fractionIntro' || problem.kind === 'equalShareDivision' || problem.kind === 'equalGroupingDivision' || problem.kind === 'divisionEquationParts' || problem.kind === 'divisionSituationClassify' || problem.kind === 'multiplicationDivisionLink' || problem.kind === 'arrayEquationDerivation' || problem.kind === 'divisionInterpretation' || problem.kind === 'divisionCardPlacement' || problem.kind === 'multiplicationQuotient') {
     return 'flex flex-col overflow-hidden p-3 sm:p-4 lg:p-5';
   }
 
@@ -19864,6 +20444,48 @@ function ArchiveProblemPreview({
           onSubmit={() => undefined}
           canSubmit={false}
           condensed
+        />
+      ) : problem.kind === 'multiplicationDivisionLink' && problem.multiplicationDivisionLink ? (
+        <MultiplicationDivisionLinkProblemCard
+          data={problem.multiplicationDivisionLink}
+          answerValue=""
+          onAnswerChange={() => undefined}
+          onSubmit={() => undefined}
+          canSubmit={false}
+        />
+      ) : problem.kind === 'arrayEquationDerivation' && problem.arrayEquationDerivation ? (
+        <ArrayEquationDerivationProblemCard
+          data={problem.arrayEquationDerivation}
+          answerValue=""
+          onAnswerChange={() => undefined}
+          onSubmit={() => undefined}
+          canSubmit={false}
+          condensed
+        />
+      ) : problem.kind === 'divisionInterpretation' && problem.divisionInterpretation ? (
+        <DivisionInterpretationProblemCard
+          data={problem.divisionInterpretation}
+          answerValue=""
+          onAnswerChange={() => undefined}
+          onSubmit={() => undefined}
+          canSubmit={false}
+          condensed
+        />
+      ) : problem.kind === 'divisionCardPlacement' && problem.divisionCardPlacement ? (
+        <DivisionCardPlacementProblemCard
+          data={problem.divisionCardPlacement}
+          answerValue=""
+          onAnswerChange={() => undefined}
+          onSubmit={() => undefined}
+          canSubmit={false}
+        />
+      ) : problem.kind === 'multiplicationQuotient' && problem.multiplicationQuotient ? (
+        <MultiplicationQuotientProblemCard
+          data={problem.multiplicationQuotient}
+          answerValue=""
+          onAnswerChange={() => undefined}
+          onSubmit={() => undefined}
+          canSubmit={false}
         />
       ) : problem.kind === 'distanceWorksheet' && problem.distanceWorksheet ? (
         <DistanceWorksheetProblemCard distanceWorksheet={problem.distanceWorksheet} condensed />
@@ -24893,7 +25515,7 @@ function EqualShareItemGlyph({
 }: {
   kind: EqualShareDivisionItemKind;
   className?: string;
-  size?: 'default' | 'tray' | 'trayCompact' | 'groupingTray' | 'groupingTrayCompact' | 'placed' | 'animation';
+  size?: 'default' | 'tray' | 'trayCompact' | 'groupingTray' | 'groupingTrayCompact' | 'placed' | 'animation' | 'animationPlaced';
 }) {
   const isTall = kind === 'pencil' || kind === 'coloredPencil';
   const dimensions = {
@@ -24904,6 +25526,7 @@ function EqualShareItemGlyph({
     groupingTrayCompact: isTall ? { width: 44, height: 78 } : { width: 64, height: 64 },
     placed: isTall ? { width: 52, height: 92 } : { width: 58, height: 58 },
     animation: isTall ? { width: 54, height: 96 } : { width: 68, height: 68 },
+    animationPlaced: isTall ? { width: 26, height: 46 } : { width: 38, height: 38 },
   }[size];
 
   return (
@@ -25210,6 +25833,19 @@ function EqualShareDivisionProblemCard({
                   <div key={`animation-container-${groupIndex}`} className="min-w-0">
                     <EqualShareContainerGlyph kind={data.containerKind} surface="dark" size="animation">
                       <span className="sr-only">{groupIndex + 1}번 {data.containerLabel}</span>
+                      {animationTargets
+                        .filter((target) => target.groupIndex === groupIndex)
+                        .map(({ itemIndex }) => (
+                          <motion.span
+                            key={`settled-equal-share-${animationRunId}-${itemIndex}`}
+                            className="grid shrink-0 place-items-center"
+                            initial={{ opacity: prefersReducedMotion ? 1 : 0, scale: prefersReducedMotion ? 1 : 0.78 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.18, delay: itemIndex * 0.13 + 0.88, ease: 'easeOut' }}
+                          >
+                            <EqualShareItemGlyph kind={data.itemKind} size="animationPlaced" />
+                          </motion.span>
+                        ))}
                     </EqualShareContainerGlyph>
                   </div>
                 ))}
@@ -25244,7 +25880,7 @@ function EqualShareDivisionProblemCard({
                     left: [`${startX}%`, `${midX}%`, `${endX}%`],
                     top: ['10%', `${midY}%`, `${endY}%`],
                     scale: [initialScale, middleScale, finalScale],
-                    opacity: 1,
+                    opacity: prefersReducedMotion ? 0 : [1, 1, 0],
                   }}
                   transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.92, delay: itemIndex * 0.13, ease: 'easeInOut', times: [0, 0.56, 1] }}
                   style={{ translateX: '-50%', translateY: '-50%' }}
@@ -25711,6 +26347,692 @@ function EqualGroupingDivisionProblemCard({
           </label>
         </div>
         {renderAttackButton()}
+      </div>
+    </div>
+  );
+}
+
+function DivisionNumberInput({
+  value,
+  onChange,
+  onSubmit,
+  label,
+  className = '',
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  onSubmit: () => void;
+  label: string;
+  className?: string;
+}) {
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      pattern="[0-9]*"
+      aria-label={label}
+      value={value}
+      onChange={(event) => onChange(sanitizeNonNegativeIntegerInput(event.target.value))}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' && !event.ctrlKey && !event.altKey) {
+          event.preventDefault();
+          onSubmit();
+        }
+      }}
+      className={`h-12 w-full min-w-0 rounded-xl border-4 border-slate-500 bg-slate-950 text-center text-2xl font-black text-slate-100 shadow-inner outline-none placeholder:text-slate-500 focus:border-emerald-400 sm:h-14 sm:text-3xl ${className}`}
+      placeholder="?"
+    />
+  );
+}
+
+function parsePositiveIntegerInput(value: string) {
+  const trimmedValue = value.trim();
+  return /^\d+$/.test(trimmedValue) ? Number.parseInt(trimmedValue, 10) : Number.NaN;
+}
+
+function MultiplicationDivisionLinkProblemCard({
+  data,
+  onAnswerChange,
+  onSubmit,
+  canSubmit,
+}: {
+  data: MultiplicationDivisionLinkProblemData;
+  answerValue: string;
+  onAnswerChange: (value: string) => void;
+  onSubmit: () => void;
+  canSubmit: boolean;
+}) {
+  const [values, setValues] = useState({ firstDivisor: '', firstQuotient: '', secondDivisor: '', secondQuotient: '' });
+
+  useEffect(() => {
+    setValues({ firstDivisor: '', firstQuotient: '', secondDivisor: '', secondQuotient: '' });
+    onAnswerChange('');
+  }, [data.answerToken, onAnswerChange]);
+
+  useEffect(() => {
+    const numbers = [values.firstDivisor, values.firstQuotient, values.secondDivisor, values.secondQuotient].map(parsePositiveIntegerInput);
+    if (numbers.every((number) => !Number.isNaN(number))) {
+      onAnswerChange(getMultiplicationDivisionLinkAnswer(numbers[0], numbers[1], numbers[2], numbers[3]));
+      return;
+    }
+
+    onAnswerChange('');
+  }, [onAnswerChange, values.firstDivisor, values.firstQuotient, values.secondDivisor, values.secondQuotient]);
+
+  const handleValueChange = (key: keyof typeof values, value: string) => {
+    setValues((previous) => ({ ...previous, [key]: value }));
+  };
+
+  const divisionRows = [
+    { divisorKey: 'firstDivisor', quotientKey: 'firstQuotient', label: '첫 번째 나눗셈식' },
+    { divisorKey: 'secondDivisor', quotientKey: 'secondQuotient', label: '두 번째 나눗셈식' },
+  ] as const;
+
+  return (
+    <div className="grid h-full min-h-0 w-full grid-rows-[minmax(0,1fr)_auto] gap-3 text-slate-100">
+      <div className="grid min-h-0 place-items-center overflow-hidden rounded-[1.1rem] border border-slate-700 bg-[linear-gradient(180deg,#111827,#0f172a)] p-3 shadow-inner">
+        <div className="grid w-full max-w-5xl gap-3 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)] lg:items-center">
+          <div className="grid min-w-0 place-items-center overflow-hidden rounded-[1rem] border-4 border-rose-400/45 bg-slate-950 px-4 py-5 shadow-[0_12px_24px_rgba(0,0,0,0.35)]">
+            <p className="max-w-full whitespace-nowrap text-center text-[clamp(1.7rem,4.4vw,4.1rem)] font-black leading-none tracking-normal text-slate-50">
+              {data.factorA} × {data.factorB} = {data.product}
+            </p>
+          </div>
+          <div className="grid gap-3">
+            {divisionRows.map((row) => (
+              <div key={row.label} className="grid grid-cols-[auto_minmax(3.6rem,5.5rem)_auto_minmax(3.6rem,5.5rem)] items-center gap-2 rounded-[1rem] border-4 border-slate-700 bg-slate-900 p-3 shadow-[0_12px_22px_rgba(0,0,0,0.28)]">
+                <span className="text-center text-[clamp(1.8rem,5.5vw,3.4rem)] font-black leading-none text-slate-100">
+                  {data.product} ÷
+                </span>
+                <DivisionNumberInput
+                  label={`${row.label} 나누는 수`}
+                  value={values[row.divisorKey]}
+                  onChange={(value) => handleValueChange(row.divisorKey, value)}
+                  onSubmit={onSubmit}
+                />
+                <span className="text-center text-[clamp(1.8rem,5.5vw,3.4rem)] font-black leading-none text-slate-100">=</span>
+                <DivisionNumberInput
+                  label={`${row.label} 몫`}
+                  value={values[row.quotientKey]}
+                  onChange={(value) => handleValueChange(row.quotientKey, value)}
+                  onSubmit={onSubmit}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-700 bg-slate-900/80 px-4 py-2">
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+          <p className="break-keep text-base font-black leading-snug text-slate-100 sm:text-lg">관계있는 나눗셈식 2개를 완성하세요.</p>
+        </div>
+        <button
+          type="button"
+          disabled={!canSubmit}
+          onClick={onSubmit}
+          className={`inline-flex min-h-[3.5rem] min-w-[8.5rem] items-center justify-center gap-2 rounded-xl px-5 text-lg font-black text-white shadow-lg transition ${
+            canSubmit ? 'bg-emerald-600 hover:bg-emerald-500' : 'cursor-not-allowed bg-slate-500 opacity-60'
+          }`}
+        >
+          <Sword size={22} /> 공격!
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ArrayEquationDerivationProblemCard({
+  data,
+  onAnswerChange,
+  onSubmit,
+  canSubmit,
+  condensed,
+}: {
+  data: ArrayEquationDerivationProblemData;
+  answerValue: string;
+  onAnswerChange: (value: string) => void;
+  onSubmit: () => void;
+  canSubmit: boolean;
+  condensed: boolean;
+}) {
+  const [values, setValues] = useState(Array.from({ length: 12 }, () => ''));
+
+  useEffect(() => {
+    setValues(Array.from({ length: 12 }, () => ''));
+    onAnswerChange('');
+  }, [data.answerToken, onAnswerChange]);
+
+  useEffect(() => {
+    const numbers = values.map(parsePositiveIntegerInput);
+    if (numbers.every((number) => !Number.isNaN(number))) {
+      onAnswerChange(getArrayEquationDerivationAnswer(numbers));
+      return;
+    }
+
+    onAnswerChange('');
+  }, [onAnswerChange, values]);
+
+  const handleValueChange = (index: number, value: string) => {
+    setValues((previous) => previous.map((current, currentIndex) => (currentIndex === index ? value : current)));
+  };
+
+  const renderEquation = (offset: number, operator: '×' | '÷', label: string) => (
+    <div className="grid w-full max-w-[24rem] grid-cols-[3.4rem_1.7rem_3.4rem_1.7rem_3.4rem] items-center justify-center gap-1 rounded-xl border border-slate-700 bg-slate-900 px-2 py-1.5 shadow-[0_12px_22px_rgba(0,0,0,0.24)]">
+      {[0, 1, 2].map((slotIndex) => (
+        <React.Fragment key={`${label}-${slotIndex}`}>
+          <DivisionNumberInput
+            label={`${label} ${slotIndex + 1}번째 수`}
+            value={values[offset + slotIndex]}
+            onChange={(value) => handleValueChange(offset + slotIndex, value)}
+            onSubmit={onSubmit}
+            className="h-11 rounded-full border-[3px] text-xl sm:h-11 sm:text-2xl"
+          />
+          {slotIndex === 0 ? <span className="text-center text-2xl font-black text-slate-200">{operator}</span> : null}
+          {slotIndex === 1 ? <span className="text-center text-2xl font-black text-slate-200">=</span> : null}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+
+  const total = data.rows * data.columns;
+  const gridColumnCount = data.columns;
+  const useSmallItems = total >= 30 || condensed;
+
+  return (
+    <div className="grid h-full min-h-0 w-full grid-rows-[minmax(0,1fr)_auto] gap-3 text-slate-100">
+      <div className="grid min-h-0 gap-3 overflow-hidden rounded-[1.1rem] border border-slate-700 bg-[linear-gradient(180deg,#111827,#0f172a)] p-3 shadow-inner lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)]">
+        <div className="grid min-h-[11rem] place-items-center overflow-auto rounded-[1rem] border-4 border-cyan-400/55 bg-slate-950 p-3 shadow-[0_12px_24px_rgba(0,0,0,0.32)]">
+          <div className="grid gap-1.5 sm:gap-2" style={{ gridTemplateColumns: `repeat(${gridColumnCount}, minmax(0, 1fr))` }}>
+            {Array.from({ length: total }, (_, index) => (
+              <div key={`array-derivation-item-${data.answerToken}-${index}`} className="grid place-items-center">
+                <EqualShareItemGlyph kind={data.itemKind} size={useSmallItems ? 'trayCompact' : 'placed'} />
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="grid min-h-0 content-center justify-items-center gap-2">
+          {renderEquation(0, '×', '첫 번째 곱셈식')}
+          {renderEquation(3, '×', '두 번째 곱셈식')}
+          {renderEquation(6, '÷', '첫 번째 나눗셈식')}
+          {renderEquation(9, '÷', '두 번째 나눗셈식')}
+        </div>
+      </div>
+      <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-700 bg-slate-900/80 px-4 py-2">
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+          <p className="break-keep text-base font-black leading-snug text-slate-100 sm:text-lg">그림을 보고 식을 완성하세요.</p>
+        </div>
+        <button
+          type="button"
+          disabled={!canSubmit}
+          onClick={onSubmit}
+          className={`inline-flex min-h-[3.5rem] min-w-[8.5rem] items-center justify-center gap-2 rounded-xl px-5 text-lg font-black text-white shadow-lg transition ${
+            canSubmit ? 'bg-emerald-600 hover:bg-emerald-500' : 'cursor-not-allowed bg-slate-500 opacity-60'
+          }`}
+        >
+          <Sword size={22} /> 공격!
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function DivisionInterpretationProblemCard({
+  data,
+  onAnswerChange,
+  onSubmit,
+  canSubmit,
+  condensed,
+}: {
+  data: DivisionInterpretationProblemData;
+  answerValue: string;
+  onAnswerChange: (value: string) => void;
+  onSubmit: () => void;
+  canSubmit: boolean;
+  condensed: boolean;
+}) {
+  const [values, setValues] = useState(Array.from({ length: 6 }, () => ''));
+
+  useEffect(() => {
+    setValues(Array.from({ length: 6 }, () => ''));
+    onAnswerChange('');
+  }, [data.answerToken, onAnswerChange]);
+
+  useEffect(() => {
+    const numbers = values.map(parsePositiveIntegerInput);
+    if (numbers.every((number) => !Number.isNaN(number))) {
+      onAnswerChange(getDivisionInterpretationAnswer(numbers));
+      return;
+    }
+
+    onAnswerChange('');
+  }, [onAnswerChange, values]);
+
+  const handleValueChange = (index: number, value: string) => {
+    setValues((previous) => previous.map((current, currentIndex) => (currentIndex === index ? value : current)));
+  };
+
+  const renderInput = (index: number, label: string) => (
+    <DivisionNumberInput
+      label={label}
+      value={values[index]}
+      onChange={(value) => handleValueChange(index, value)}
+      onSubmit={onSubmit}
+      className="h-10 rounded-2xl border-[3px] text-xl sm:h-11 sm:text-2xl"
+    />
+  );
+
+  const total = data.total;
+  const gridColumns = total <= 18 ? Math.min(data.multiplier, 6) : data.multiplier;
+  const equalShareDivisor = data.total / data.multiplier;
+  const itemGlyphSize: Parameters<typeof EqualShareItemGlyph>[0]['size'] = total >= 24 || condensed ? 'animationPlaced' : 'placed';
+
+  return (
+    <div className="grid h-full min-h-0 w-full grid-rows-[minmax(0,1fr)_auto] gap-3 text-slate-100">
+      <div className="grid min-h-0 gap-3 overflow-hidden rounded-[1.1rem] border border-slate-700 bg-[linear-gradient(180deg,#111827,#0f172a)] p-3 shadow-inner lg:grid-cols-[minmax(0,0.94fr)_minmax(0,1.06fr)]">
+        <div className="grid min-h-[11rem] min-w-0 place-items-center overflow-hidden rounded-[1rem] border-4 border-amber-400/55 bg-slate-950 p-3 shadow-[0_12px_24px_rgba(0,0,0,0.32)]">
+          <div className="grid max-w-full place-items-center gap-1.5" style={{ gridTemplateColumns: `repeat(${gridColumns}, minmax(0, 1fr))` }}>
+            {Array.from({ length: total }, (_, index) => (
+              <div key={`division-interpretation-item-${data.answerToken}-${index}`} className="grid place-items-center">
+                <EqualShareItemGlyph kind={data.itemKind} size={itemGlyphSize} />
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="grid min-h-0 min-w-0 content-center gap-2">
+          <div className="min-w-0 rounded-xl border border-amber-400/35 bg-slate-900 p-2 shadow-[0_12px_22px_rgba(0,0,0,0.24)]">
+            <div className="mb-1 inline-flex rounded-full bg-amber-400/18 px-2.5 py-0.5 text-sm font-black text-amber-200">전체: {total}개</div>
+            <div className="grid grid-cols-[minmax(2.8rem,4.8rem)_auto_minmax(2.8rem,4.8rem)_auto_auto] items-center justify-start gap-2 text-xl font-black text-slate-100 sm:text-2xl">
+              {renderInput(0, '곱셈식 첫 번째 수')}
+              <span>×</span>
+              {renderInput(1, '곱셈식 두 번째 수')}
+              <span>=</span>
+              <span>{total}</span>
+            </div>
+          </div>
+          <div className="min-w-0 rounded-xl border border-emerald-400/35 bg-slate-900 p-2 shadow-[0_12px_22px_rgba(0,0,0,0.24)]">
+            <div className="mb-1 inline-flex rounded-full bg-emerald-400/18 px-2.5 py-0.5 text-sm font-black text-emerald-200">{data.multiplier}개씩</div>
+            <div className="grid grid-cols-[auto_minmax(2.8rem,4.8rem)_auto_minmax(2.8rem,4.8rem)] items-center justify-start gap-2 text-xl font-black text-slate-100 sm:text-2xl">
+              <span>{total} ÷</span>
+              {renderInput(2, '묶기 상황 나누는 수')}
+              <span>=</span>
+              {renderInput(3, '묶기 상황 몫')}
+            </div>
+          </div>
+          <div className="min-w-0 rounded-xl border border-cyan-400/35 bg-slate-900 p-2 shadow-[0_12px_22px_rgba(0,0,0,0.24)]">
+            <div className="mb-1 inline-flex rounded-full bg-cyan-400/18 px-2.5 py-0.5 text-sm font-black text-cyan-200">{equalShareDivisor}명에게</div>
+            <div className="grid grid-cols-[auto_minmax(2.8rem,4.8rem)_auto_minmax(2.8rem,4.8rem)] items-center justify-start gap-2 text-xl font-black text-slate-100 sm:text-2xl">
+              <span>{total} ÷</span>
+              {renderInput(4, '나누기 상황 나누는 수')}
+              <span>=</span>
+              {renderInput(5, '나누기 상황 몫')}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-700 bg-slate-900/80 px-4 py-2">
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+          <p className="break-keep text-base font-black leading-snug text-slate-100 sm:text-lg">상황에 맞게 식을 완성하세요.</p>
+        </div>
+        <button
+          type="button"
+          disabled={!canSubmit}
+          onClick={onSubmit}
+          className={`inline-flex min-h-[3.5rem] min-w-[8.5rem] items-center justify-center gap-2 rounded-xl px-5 text-lg font-black text-white shadow-lg transition ${
+            canSubmit ? 'bg-emerald-600 hover:bg-emerald-500' : 'cursor-not-allowed bg-slate-500 opacity-60'
+          }`}
+        >
+          <Sword size={22} /> 공격!
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function DivisionCardPlacementProblemCard({
+  data,
+  onAnswerChange,
+  onSubmit,
+  canSubmit,
+}: {
+  data: DivisionCardPlacementProblemData;
+  answerValue: string;
+  onAnswerChange: (value: string) => void;
+  onSubmit: () => void;
+  canSubmit: boolean;
+}) {
+  const [values, setValues] = useState(Array.from({ length: 6 }, () => ''));
+
+  useEffect(() => {
+    setValues(Array.from({ length: 6 }, () => ''));
+    onAnswerChange('');
+  }, [data.answerToken, onAnswerChange]);
+
+  useEffect(() => {
+    const numbers = values.map(parsePositiveIntegerInput);
+    if (numbers.every((number) => !Number.isNaN(number))) {
+      onAnswerChange(getDivisionCardPlacementAnswer(numbers));
+      return;
+    }
+
+    onAnswerChange('');
+  }, [onAnswerChange, values]);
+
+  const handleValueChange = (index: number, value: string) => {
+    setValues((previous) => previous.map((current, currentIndex) => (currentIndex === index ? value : current)));
+  };
+
+  const renderInput = (index: number, label: string, className = 'h-12 rounded-xl text-2xl sm:h-14 sm:text-3xl') => (
+    <DivisionNumberInput
+      label={label}
+      value={values[index]}
+      onChange={(value) => handleValueChange(index, value)}
+      onSubmit={onSubmit}
+      className={className}
+    />
+  );
+
+  return (
+    <div className="grid h-full min-h-0 w-full grid-rows-[minmax(0,1fr)_auto] gap-3 text-slate-100">
+      <div className="grid min-h-0 overflow-hidden rounded-[1.1rem] border border-slate-700 bg-[linear-gradient(180deg,#111827,#0f172a)] p-3 shadow-inner">
+        <div className="grid min-h-0 w-full gap-4 lg:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] lg:items-center">
+          <div className="grid min-h-[12rem] content-center justify-items-center gap-4 rounded-[1rem] border-2 border-amber-300/65 bg-[radial-gradient(circle_at_50%_0%,rgba(251,191,36,0.16),transparent_42%),linear-gradient(180deg,#1f2937,#111827)] p-4 shadow-[0_14px_28px_rgba(0,0,0,0.38)]">
+            <div className="flex w-full flex-nowrap justify-center gap-3 sm:gap-4">
+              {data.cards.map((card) => (
+                <div key={`division-card-placement-${data.answerToken}-${card}`} className="grid h-20 w-[clamp(4rem,8vw,5rem)] shrink-0 place-items-center rounded-2xl border-4 border-amber-100 bg-[linear-gradient(180deg,#fde047,#facc15)] text-[clamp(2rem,4.5vw,2.5rem)] font-black text-slate-950 shadow-[0_14px_24px_rgba(0,0,0,0.38),inset_0_2px_0_rgba(255,255,255,0.5)] sm:h-24">
+                  {card}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="grid min-h-0 content-center gap-4">
+            <div className="grid gap-2 rounded-xl border border-emerald-400/35 bg-slate-900 p-3 shadow-[0_12px_22px_rgba(0,0,0,0.24)]">
+              <span className="inline-flex w-fit rounded-full bg-emerald-400/18 px-3 py-1 text-base font-black text-emerald-200">나눗셈식</span>
+              <div className="grid grid-cols-[minmax(3.5rem,5.5rem)_auto_minmax(3.5rem,5.5rem)_auto_minmax(3.5rem,5.5rem)] items-center gap-2 text-3xl font-black text-slate-100">
+                {renderInput(0, '나눗셈식 나누어지는 수')}
+                <span className="text-center">÷</span>
+                {renderInput(1, '나눗셈식 나누는 수')}
+                <span className="text-center">=</span>
+                {renderInput(2, '나눗셈식 몫')}
+              </div>
+            </div>
+            <div className="grid gap-2 rounded-xl border border-cyan-400/35 bg-slate-900 p-3 shadow-[0_12px_22px_rgba(0,0,0,0.24)]">
+              <span className="inline-flex w-fit rounded-full bg-cyan-400/18 px-3 py-1 text-base font-black text-cyan-200">곱셈식</span>
+              <div className="grid grid-cols-[minmax(3.5rem,5.5rem)_auto_minmax(3.5rem,5.5rem)_auto_minmax(3.5rem,5.5rem)] items-center gap-2 text-3xl font-black text-slate-100">
+                {renderInput(3, '곱셈식 첫 번째 수')}
+                <span className="text-center">×</span>
+                {renderInput(4, '곱셈식 두 번째 수')}
+                <span className="text-center">=</span>
+                {renderInput(5, '곱셈식 전체 수')}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-700 bg-slate-900/80 px-4 py-2">
+        <p className="break-keep text-base font-black leading-snug text-slate-100 sm:text-lg">수 카드를 한 번씩만 사용하여 몫이 가장 큰 나눗셈식을 만드세요.</p>
+        <button
+          type="button"
+          disabled={!canSubmit}
+          onClick={onSubmit}
+          className={`inline-flex min-h-[3.5rem] min-w-[8.5rem] items-center justify-center gap-2 rounded-xl px-5 text-lg font-black text-white shadow-lg transition ${
+            canSubmit ? 'bg-emerald-600 hover:bg-emerald-500' : 'cursor-not-allowed bg-slate-500 opacity-60'
+          }`}
+        >
+          <Sword size={22} /> 공격!
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function MultiplicationQuotientProblemCard({
+  data,
+  onAnswerChange,
+  onSubmit,
+  canSubmit,
+}: {
+  data: MultiplicationQuotientProblemData;
+  answerValue: string;
+  onAnswerChange: (value: string) => void;
+  onSubmit: () => void;
+  canSubmit: boolean;
+}) {
+  const [values, setValues] = useState(Array.from({ length: 3 }, () => ''));
+  const usesMultiplicationTable = data.strategy === 'multiplicationTable';
+
+  useEffect(() => {
+    setValues(Array.from({ length: 3 }, () => ''));
+    onAnswerChange('');
+  }, [data.answerToken, onAnswerChange]);
+
+  useEffect(() => {
+    const numbers = values.map(parsePositiveIntegerInput);
+    if (numbers.every((number) => !Number.isNaN(number))) {
+      onAnswerChange(getMultiplicationQuotientAnswer(numbers));
+      return;
+    }
+
+    onAnswerChange('');
+  }, [onAnswerChange, values]);
+
+  const handleValueChange = (index: number, value: string) => {
+    setValues((previous) => previous.map((current, currentIndex) => (currentIndex === index ? value : current)));
+  };
+
+  const handleTableRowSelect = (row: number) => {
+    setValues((previous) => [String(row), previous[1], previous[2]]);
+  };
+
+  const handleTableCellSelect = (row: number, column: number) => {
+    setValues((previous) => [String(row), String(row * column), previous[2]]);
+  };
+
+  const renderInput = (
+    index: number,
+    label: string,
+    className = 'h-12 rounded-xl text-2xl sm:h-14 sm:text-3xl',
+  ) => (
+    <DivisionNumberInput
+      label={label}
+      value={values[index]}
+      onChange={(value) => handleValueChange(index, value)}
+      onSubmit={onSubmit}
+      className={className}
+    />
+  );
+
+  if (usesMultiplicationTable) {
+    const selectedRow = parsePositiveIntegerInput(values[0]);
+    const selectedProduct = parsePositiveIntegerInput(values[1]);
+    const selectedColumn = selectedRow > 0 && selectedProduct > 0 && selectedProduct % selectedRow === 0
+      ? selectedProduct / selectedRow
+      : Number.NaN;
+    const shouldShowTableArrow = selectedRow >= 1 && selectedRow <= 9 && selectedColumn >= 1 && selectedColumn <= 9;
+    const arrowRowTrack = selectedRow * 10 + 8.2;
+    const arrowColumnTrack = selectedColumn * 10 + 1.6;
+    const tableNumbers = Array.from({ length: 9 }, (_, index) => index + 1);
+
+    return (
+      <div className="grid h-full min-h-0 w-full grid-rows-[minmax(0,1fr)_auto] gap-2 text-slate-100">
+        <div className="grid min-h-0 overflow-hidden rounded-[1rem] border border-slate-700 bg-[linear-gradient(180deg,#111827,#0f172a)] p-2 shadow-inner">
+          <div className="grid min-h-0 w-full gap-2 lg:grid-cols-[minmax(18rem,0.82fr)_minmax(0,1.18fr)]">
+            <div className="grid min-h-0 content-center gap-3 rounded-[0.85rem] border border-slate-700 bg-slate-950 p-3 shadow-[0_10px_20px_rgba(0,0,0,0.28)]">
+              <div className="grid gap-1.5">
+                <div className="text-center text-[clamp(1.8rem,4.1vw,3.35rem)] font-black leading-none text-slate-50">
+                  {data.dividend} ÷ {data.divisor} = {values[2] || '?'}
+                </div>
+              </div>
+              <div className="grid overflow-hidden rounded-[0.8rem] border border-white/10 bg-[#151515]">
+                <div className="grid grid-cols-[minmax(6.5rem,1fr)_minmax(5rem,6.25rem)_auto] items-center gap-2 border-b border-white/10 bg-amber-300/10 px-3 py-2">
+                  <span className="break-keep text-sm font-black leading-tight text-amber-100 sm:text-base">1. 찾아야 할 단</span>
+                  {renderInput(0, '찾아야 할 곱셈 단', 'h-10 rounded-[0.7rem] text-xl sm:h-11 sm:text-2xl')}
+                  <span className="text-xl font-black text-white sm:text-2xl">단</span>
+                </div>
+                <div className="grid grid-cols-[minmax(6.5rem,1fr)_minmax(5rem,6.25rem)] items-center gap-2 bg-emerald-300/10 px-3 py-2">
+                  <span className="break-keep text-sm font-black leading-tight text-emerald-100 sm:text-base">2. 몫</span>
+                  {renderInput(2, '나눗셈식 몫', 'h-10 rounded-[0.7rem] text-xl sm:h-11 sm:text-2xl')}
+                </div>
+              </div>
+            </div>
+
+	            <div className="grid min-h-0 content-center overflow-hidden rounded-[0.85rem] border border-lime-400/70 bg-[#f7fee7] p-2 text-slate-950 shadow-[0_12px_24px_rgba(0,0,0,0.26)]">
+	              <div className="relative grid grid-cols-10 overflow-hidden rounded-[0.45rem] border-2 border-lime-500 bg-white text-center font-black">
+                {shouldShowTableArrow ? (
+                  <svg
+                    className="pointer-events-none absolute inset-0 z-20 h-full w-full"
+                    viewBox="0 0 100 100"
+                    preserveAspectRatio="none"
+                    aria-hidden="true"
+                  >
+                    <defs>
+                      <marker id={`multiplication-table-arrow-${data.answerToken}`} markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" markerUnits="strokeWidth">
+                        <path d="M0,0 L6,3 L0,6 Z" fill="#dc2626" stroke="#ffffff" strokeWidth="0.7" />
+                      </marker>
+                    </defs>
+                    <path
+                      d={`M10 ${arrowRowTrack} H${arrowColumnTrack} V10`}
+                      fill="none"
+                      stroke="#ffffff"
+                      strokeWidth="5.4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                    <path
+                      d={`M10 ${arrowRowTrack} H${arrowColumnTrack} V10`}
+                      fill="none"
+                      stroke="#dc2626"
+                      strokeWidth="3.4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      markerEnd={`url(#multiplication-table-arrow-${data.answerToken})`}
+                      vectorEffect="non-scaling-stroke"
+                    />
+                    <circle
+                      cx="10"
+                      cy={arrowRowTrack}
+                      r="1.35"
+                      fill="#dc2626"
+                      stroke="#ffffff"
+                      strokeWidth="0.65"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                  </svg>
+                ) : null}
+                <div className="multiplication-table-label grid h-9 place-items-center border-b border-r border-lime-400 bg-lime-100 text-xl text-slate-950 sm:h-10 sm:text-2xl">×</div>
+                {tableNumbers.map((column) => (
+                  <div
+                    key={`multiplication-table-column-${column}`}
+                    className={`multiplication-table-label grid h-9 place-items-center border-b border-r border-lime-400 text-xl text-slate-950 last:border-r-0 sm:h-10 sm:text-2xl ${
+                      selectedColumn === column
+                        ? 'bg-orange-300'
+                        : 'bg-lime-100'
+                    }`}
+                  >
+                    {column}
+                  </div>
+                ))}
+                {tableNumbers.map((row) => (
+                  <React.Fragment key={`multiplication-table-row-${row}`}>
+                    <button
+                      type="button"
+                      onClick={() => handleTableRowSelect(row)}
+                      className={`multiplication-table-button multiplication-table-label grid h-9 place-items-center border-b border-r border-lime-400 text-xl text-slate-950 transition sm:h-10 sm:text-2xl ${
+                        selectedRow === row ? 'bg-amber-300' : 'bg-lime-100 hover:bg-lime-200'
+                      }`}
+                      aria-label={`${row}단 선택`}
+                    >
+                      {row}
+                    </button>
+                    {tableNumbers.map((column) => {
+                      const product = row * column;
+                      const isSelectedRow = selectedRow === row;
+                      const isSelectedColumn = selectedColumn === column;
+                      const isSelectedProduct = isSelectedRow && selectedProduct === product;
+                      const isTargetPath = row === data.divisor && product === data.dividend;
+                      const isHighlightedCell = isSelectedProduct || isSelectedRow || isSelectedColumn;
+                      return (
+                        <button
+                          key={`multiplication-table-cell-${row}-${column}`}
+                          type="button"
+                          onClick={() => handleTableCellSelect(row, column)}
+                          className={`multiplication-table-button ${isHighlightedCell ? 'multiplication-table-light-cell' : 'multiplication-table-dark-cell'} grid h-9 place-items-center border-b border-r border-lime-300 text-lg font-black transition sm:h-10 sm:text-xl ${
+                            isSelectedProduct
+                              ? 'bg-orange-300 shadow-[inset_0_0_0_3px_rgba(249,115,22,0.65)]'
+                              : isSelectedRow
+                                ? 'bg-amber-100 hover:bg-amber-200'
+                              : isSelectedColumn
+                                  ? 'bg-sky-100 hover:bg-sky-200'
+                                  : 'bg-[#181818] hover:bg-[#202020]'
+                          } ${isTargetPath && selectedRow === data.divisor ? 'ring-2 ring-inset ring-emerald-500' : ''}`}
+                          aria-label={`${row} 곱하기 ${column}는 ${product}`}
+                        >
+                          {product}
+                        </button>
+                      );
+                    })}
+                  </React.Fragment>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center justify-between gap-3 rounded-[0.9rem] border border-slate-700 bg-slate-900/80 px-3 py-1.5">
+          <p className="break-keep text-sm font-black leading-snug text-slate-100 sm:text-base">곱셈표에서 단과 전체 수 칸을 누른 뒤 몫을 쓰세요.</p>
+          <button
+            type="button"
+            disabled={!canSubmit}
+            onClick={onSubmit}
+            className={`inline-flex min-h-[3rem] min-w-[7.5rem] items-center justify-center gap-2 rounded-xl px-4 text-base font-black text-white shadow-lg transition ${
+              canSubmit ? 'bg-emerald-600 hover:bg-emerald-500' : 'cursor-not-allowed bg-slate-500 opacity-60'
+            }`}
+          >
+            <Sword size={20} /> 공격!
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid h-full min-h-0 w-full grid-rows-[minmax(0,1fr)_auto] gap-3 text-slate-100">
+      <div className="grid min-h-0 place-items-center overflow-hidden rounded-[1.1rem] border border-slate-700 bg-[linear-gradient(180deg,#111827,#0f172a)] p-3 shadow-inner">
+        <div className="grid w-full max-w-5xl gap-4 rounded-[1rem] border border-slate-700 bg-slate-950 p-5 shadow-[0_12px_24px_rgba(0,0,0,0.32)]">
+          <div className="text-center text-[clamp(2.2rem,5.5vw,4.5rem)] font-black leading-none text-slate-50">
+            {data.dividend} ÷ {data.divisor}
+          </div>
+          <div className="grid items-center gap-4 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
+            <div className="grid gap-2 rounded-xl border border-amber-400/35 bg-slate-900 p-3">
+              <span className="inline-flex w-fit rounded-full bg-amber-400/18 px-3 py-1 text-base font-black text-amber-200">필요한 곱셈식</span>
+              <div className="grid grid-cols-[auto_minmax(3.5rem,5.5rem)_auto_auto] items-center justify-center gap-2 text-3xl font-black text-slate-100">
+                <span>{data.divisor} ×</span>
+                {renderInput(0, '곱셈식 빈칸')}
+                <span>=</span>
+                {renderInput(1, '곱셈식 전체 수')}
+              </div>
+            </div>
+            <ArrowRight className="hidden text-emerald-300 lg:block" size={38} />
+            <div className="grid gap-2 rounded-xl border border-emerald-400/35 bg-slate-900 p-3">
+              <span className="inline-flex w-fit rounded-full bg-emerald-400/18 px-3 py-1 text-base font-black text-emerald-200">몫</span>
+              <div className="grid grid-cols-[auto_minmax(3.5rem,5.5rem)] items-center justify-center gap-2 text-3xl font-black text-slate-100">
+                <span>{data.dividend} ÷ {data.divisor} =</span>
+                {renderInput(2, '나눗셈식 몫')}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-700 bg-slate-900/80 px-4 py-2">
+        <p className="break-keep text-base font-black leading-snug text-slate-100 sm:text-lg">곱셈식으로 몫을 구하세요.</p>
+        <button
+          type="button"
+          disabled={!canSubmit}
+          onClick={onSubmit}
+          className={`inline-flex min-h-[3.5rem] min-w-[8.5rem] items-center justify-center gap-2 rounded-xl px-5 text-lg font-black text-white shadow-lg transition ${
+            canSubmit ? 'bg-emerald-600 hover:bg-emerald-500' : 'cursor-not-allowed bg-slate-500 opacity-60'
+          }`}
+        >
+          <Sword size={22} /> 공격!
+        </button>
       </div>
     </div>
   );
@@ -29880,7 +31202,7 @@ export default function App() {
       ? builderEvaluation?.status === 'ready'
         ? builderEvaluation.text
         : null
-      : problem.kind === 'equalPartition' || problem.kind === 'fractionIntro' || problem.kind === 'equalShareDivision' || problem.kind === 'equalGroupingDivision' || problem.kind === 'divisionEquationParts' || problem.kind === 'divisionSituationClassify'
+      : problem.kind === 'equalPartition' || problem.kind === 'fractionIntro' || problem.kind === 'equalShareDivision' || problem.kind === 'equalGroupingDivision' || problem.kind === 'divisionEquationParts' || problem.kind === 'divisionSituationClassify' || problem.kind === 'multiplicationDivisionLink' || problem.kind === 'arrayEquationDerivation' || problem.kind === 'divisionInterpretation' || problem.kind === 'divisionCardPlacement' || problem.kind === 'multiplicationQuotient'
         ? null
       : problem.kind === 'numberLineBox'
         ? null
@@ -30040,6 +31362,16 @@ export default function App() {
       ? isDivisionEquationPartsAnswerReady(inputValue)
       : problem.kind === 'divisionSituationClassify'
       ? isDivisionSituationClassifyAnswerReady(inputValue)
+      : problem.kind === 'multiplicationDivisionLink'
+      ? isMultiplicationDivisionLinkAnswerReady(inputValue)
+      : problem.kind === 'arrayEquationDerivation'
+      ? isArrayEquationDerivationAnswerReady(inputValue)
+      : problem.kind === 'divisionInterpretation'
+      ? isDivisionInterpretationAnswerReady(inputValue)
+      : problem.kind === 'divisionCardPlacement'
+      ? isDivisionCardPlacementAnswerReady(inputValue)
+      : problem.kind === 'multiplicationQuotient'
+      ? isMultiplicationQuotientAnswerReady(inputValue)
       : hasValidAnswerInput;
   const storyPromptSections = problem.kind === 'story' ? splitStoryPromptSections(problem.prompt) : null;
   const hasNumberedStoryOptions = Boolean(storyPromptSections && storyPromptSections.optionLines.length >= 2);
@@ -30060,6 +31392,7 @@ export default function App() {
   const numberedStoryQuestionLine = problem.storyTable
     ? filteredNumberedStoryIntroLines[filteredNumberedStoryIntroLines.length - 1] ?? ''
     : '';
+  const isUnit4Level7StoryProblem = activeLearningUnitId === 'unit4' && level === 7 && problem.kind === 'story';
   const shouldHighlightPromptNumbers = !(activeLearningUnitId === 'unit3' && level === 8);
   const shouldUseCompactUnit1ShapeViewport = activeLearningUnitId === 'unit1' && problem.kind === 'shapeDraw';
   const shouldUseCompactUnit3Viewport = activeLearningUnitId === 'unit3' && level >= 8 && !isStoryTimeAdditionProblem;
@@ -31262,6 +32595,106 @@ export default function App() {
       });
 
       resolveProblemResult(isDivisionSituationClassifyAnswerCorrect(inputValue, problem.divisionSituationClassify));
+      return;
+    }
+
+    if (problem.kind === 'multiplicationDivisionLink' && problem.multiplicationDivisionLink) {
+      if (!isMultiplicationDivisionLinkAnswerReady(inputValue)) {
+        playSound('ui');
+        updateMessage('관계있는 나눗셈식 2개를 모두 채운 뒤 공격해요!');
+        return;
+      }
+
+      playSound('submit', {
+        gainMultiplier: 0.9,
+        detune: 10,
+      });
+
+      const isCorrect = isMultiplicationDivisionLinkAnswerCorrect(inputValue, problem.multiplicationDivisionLink);
+      if (!isCorrect) {
+        updateMessage('곱셈식의 두 수가 각각 나누는 수가 되는지 확인해 봐!');
+      }
+      resolveProblemResult(isCorrect);
+      return;
+    }
+
+    if (problem.kind === 'arrayEquationDerivation' && problem.arrayEquationDerivation) {
+      if (!isArrayEquationDerivationAnswerReady(inputValue)) {
+        playSound('ui');
+        updateMessage('그림에 맞는 곱셈식과 나눗셈식을 모두 채운 뒤 공격해요!');
+        return;
+      }
+
+      playSound('submit', {
+        gainMultiplier: 0.9,
+        detune: 10,
+      });
+
+      const isCorrect = isArrayEquationDerivationAnswerCorrect(inputValue, problem.arrayEquationDerivation);
+      if (!isCorrect) {
+        updateMessage('줄 수, 한 줄의 수, 전체 수의 자리를 다시 살펴봐!');
+      }
+      resolveProblemResult(isCorrect);
+      return;
+    }
+
+    if (problem.kind === 'divisionInterpretation' && problem.divisionInterpretation) {
+      if (!isDivisionInterpretationAnswerReady(inputValue)) {
+        playSound('ui');
+        updateMessage('곱셈식과 두 나눗셈식을 모두 채운 뒤 공격해요!');
+        return;
+      }
+
+      playSound('submit', {
+        gainMultiplier: 0.9,
+        detune: 10,
+      });
+
+      const isCorrect = isDivisionInterpretationAnswerCorrect(inputValue, problem.divisionInterpretation);
+      if (!isCorrect) {
+        updateMessage('전체 수는 같고, 나누는 기준이 무엇인지 다시 확인해 봐!');
+      }
+      resolveProblemResult(isCorrect);
+      return;
+    }
+
+    if (problem.kind === 'divisionCardPlacement' && problem.divisionCardPlacement) {
+      if (!isDivisionCardPlacementAnswerReady(inputValue)) {
+        playSound('ui');
+        updateMessage('나눗셈식과 곱셈식을 모두 완성한 뒤 공격해요!');
+        return;
+      }
+
+      playSound('submit', {
+        gainMultiplier: 0.9,
+        detune: 10,
+      });
+
+      const isCorrect = isDivisionCardPlacementAnswerCorrect(inputValue, problem.divisionCardPlacement);
+      if (!isCorrect) {
+        updateMessage('몫이 가장 커지려면 가장 큰 수를 나누어지는 수로 두는지 확인해 봐!');
+      }
+      resolveProblemResult(isCorrect);
+      return;
+    }
+
+    if (problem.kind === 'multiplicationQuotient' && problem.multiplicationQuotient) {
+      if (!isMultiplicationQuotientAnswerReady(inputValue)) {
+        playSound('ui');
+        updateMessage('곱셈식과 나눗셈식의 몫을 모두 채운 뒤 공격해요!');
+        return;
+      }
+
+      playSound('submit', {
+        gainMultiplier: 0.9,
+        detune: 10,
+      });
+
+      const isCorrect = isMultiplicationQuotientAnswerCorrect(inputValue, problem.multiplicationQuotient);
+      if (!isCorrect) {
+        updateMessage('나누는 수에 어떤 수를 곱해야 전체가 되는지 다시 확인해 봐!');
+      }
+      resolveProblemResult(isCorrect);
       return;
     }
 
@@ -32831,7 +34264,7 @@ export default function App() {
                 className={`flex min-h-0 flex-1 rounded-3xl ${isDenseNumberedStoryLayout ? 'border-4' : 'border-8'} border-slate-200 bg-white shadow-inner ${
                   problem.kind === 'distanceMap' || problem.kind === 'distanceWorksheet'
                     ? 'flex flex-col overflow-y-auto p-2 sm:p-3 lg:p-3'
-                    : problem.kind === 'shapeDraw' || problem.kind === 'shapeRain' || problem.kind === 'equalPartition' || problem.kind === 'fractionIntro' || problem.kind === 'equalShareDivision' || problem.kind === 'equalGroupingDivision' || problem.kind === 'divisionEquationParts' || problem.kind === 'divisionSituationClassify'
+                    : problem.kind === 'shapeDraw' || problem.kind === 'shapeRain' || problem.kind === 'equalPartition' || problem.kind === 'fractionIntro' || problem.kind === 'equalShareDivision' || problem.kind === 'equalGroupingDivision' || problem.kind === 'divisionEquationParts' || problem.kind === 'divisionSituationClassify' || problem.kind === 'multiplicationDivisionLink' || problem.kind === 'arrayEquationDerivation' || problem.kind === 'divisionInterpretation' || problem.kind === 'divisionCardPlacement' || problem.kind === 'multiplicationQuotient'
                       ? 'flex flex-col overflow-hidden p-3 sm:p-4 lg:p-5'
                     : problem.kind === 'timeAddition' && isStoryTimeAdditionProblem
                       ? `flex flex-col justify-center ${isCompactBattleViewport ? 'overflow-hidden p-3 sm:p-4 lg:p-5' : 'overflow-y-auto p-4 sm:p-6 lg:p-8'}`
@@ -32940,6 +34373,48 @@ export default function App() {
                     onSubmit={checkAnswer}
                     canSubmit={canAttemptAttack}
                     condensed={isCompactBattleViewport}
+                  />
+                ) : problem.kind === 'multiplicationDivisionLink' && problem.multiplicationDivisionLink ? (
+                  <MultiplicationDivisionLinkProblemCard
+                    data={problem.multiplicationDivisionLink}
+                    answerValue={inputValue}
+                    onAnswerChange={setInputValue}
+                    onSubmit={checkAnswer}
+                    canSubmit={canAttemptAttack}
+                  />
+                ) : problem.kind === 'arrayEquationDerivation' && problem.arrayEquationDerivation ? (
+                  <ArrayEquationDerivationProblemCard
+                    data={problem.arrayEquationDerivation}
+                    answerValue={inputValue}
+                    onAnswerChange={setInputValue}
+                    onSubmit={checkAnswer}
+                    canSubmit={canAttemptAttack}
+                    condensed={isCompactBattleViewport}
+                  />
+                ) : problem.kind === 'divisionInterpretation' && problem.divisionInterpretation ? (
+                  <DivisionInterpretationProblemCard
+                    data={problem.divisionInterpretation}
+                    answerValue={inputValue}
+                    onAnswerChange={setInputValue}
+                    onSubmit={checkAnswer}
+                    canSubmit={canAttemptAttack}
+                    condensed={isCompactBattleViewport}
+                  />
+                ) : problem.kind === 'divisionCardPlacement' && problem.divisionCardPlacement ? (
+                  <DivisionCardPlacementProblemCard
+                    data={problem.divisionCardPlacement}
+                    answerValue={inputValue}
+                    onAnswerChange={setInputValue}
+                    onSubmit={checkAnswer}
+                    canSubmit={canAttemptAttack}
+                  />
+                ) : problem.kind === 'multiplicationQuotient' && problem.multiplicationQuotient ? (
+                  <MultiplicationQuotientProblemCard
+                    data={problem.multiplicationQuotient}
+                    answerValue={inputValue}
+                    onAnswerChange={setInputValue}
+                    onSubmit={checkAnswer}
+                    canSubmit={canAttemptAttack}
                   />
                 ) : problem.kind === 'distanceWorksheet' && problem.distanceWorksheet ? (
                     <DistanceWorksheetProblemCard
@@ -33104,8 +34579,10 @@ export default function App() {
                       </div>
                     )
                   ) : (
-                    <div className={`mx-auto flex w-full max-w-[52rem] flex-col text-left text-slate-900 ${
-                      isCompactBattleViewport ? 'gap-3' : 'gap-4 sm:gap-6'
+                    <div className={`mx-auto flex w-full flex-col text-left text-slate-900 ${
+                      isUnit4Level7StoryProblem ? 'h-full max-w-[58rem] justify-center overflow-y-auto pr-1' : 'max-w-[52rem]'
+                    } ${
+                      isCompactBattleViewport ? 'gap-3' : isUnit4Level7StoryProblem ? 'gap-4 sm:gap-5' : 'gap-4 sm:gap-6'
                     }`}>
                       {(() => {
                         const storyLines = getStoryPromptLines(problem.prompt);
@@ -33113,27 +34590,37 @@ export default function App() {
                         return (
                           <>
                             <div
-                              className={`rounded-[2rem] border border-slate-200 bg-slate-50/85 shadow-sm ${
+                              className={`rounded-[2rem] border shadow-sm ${
+                                isUnit4Level7StoryProblem
+                                  ? 'border-emerald-100 bg-white/95 shadow-[0_18px_34px_rgba(15,23,42,0.12)]'
+                                  : 'border-slate-200 bg-slate-50/85'
+                              } ${
                                 isCompactBattleViewport
                                   ? 'px-4 py-3 sm:px-5 sm:py-4'
-                                  : 'px-4 py-4 sm:px-6 sm:py-5 md:px-8 md:py-7'
+                                  : isUnit4Level7StoryProblem
+                                    ? 'px-5 py-4 sm:px-7 sm:py-5 md:px-8 md:py-6'
+                                    : 'px-4 py-4 sm:px-6 sm:py-5 md:px-8 md:py-7'
                               }`}
                             >
-                              <div className={`flex flex-col ${isCompactBattleViewport ? 'gap-3' : 'gap-4 sm:gap-5'}`}>
+                              <div className={`flex flex-col ${isCompactBattleViewport ? 'gap-3' : isUnit4Level7StoryProblem ? 'gap-3 sm:gap-4' : 'gap-4 sm:gap-5'}`}>
                                 {storyLines.map((line, index) => {
                                   const isQuestionLine = storyLines.length === 1 || index === storyLines.length - 1;
 
                                   return (
                                     <p
                                       key={`${line}-${index}`}
-                                      className={`break-keep tracking-[-0.01em] ${
+                                      className={`break-keep ${
                                         isQuestionLine
                                           ? isCompactBattleViewport
                                             ? 'text-[1.2rem] font-black leading-[1.45] text-slate-900 sm:text-[1.5rem] lg:text-[1.9rem]'
-                                            : 'text-[1.3rem] font-black leading-[1.55] text-slate-900 sm:text-[1.75rem] md:text-[2.45rem]'
+                                            : isUnit4Level7StoryProblem
+                                              ? 'text-[1.12rem] font-black leading-[1.52] text-slate-950 sm:text-[1.34rem] md:text-[1.62rem]'
+                                              : 'text-[1.3rem] font-black leading-[1.55] text-slate-900 sm:text-[1.75rem] md:text-[2.45rem]'
                                           : isCompactBattleViewport
                                             ? 'text-[1rem] font-bold leading-[1.58] text-slate-700 sm:text-[1.15rem] lg:text-[1.45rem]'
-                                            : 'text-[1.1rem] font-bold leading-[1.72] text-slate-700 sm:text-[1.45rem] md:text-[2rem]'
+                                            : isUnit4Level7StoryProblem
+                                              ? 'text-[0.96rem] font-bold leading-[1.58] text-slate-700 sm:text-[1.08rem] md:text-[1.3rem]'
+                                              : 'text-[1.1rem] font-bold leading-[1.72] text-slate-700 sm:text-[1.45rem] md:text-[2rem]'
                                       }`}
                                     >
                                       {renderPromptWithHighlight(line, shouldHighlightPromptNumbers)}
@@ -33146,7 +34633,7 @@ export default function App() {
                               <StoryPromptTableCard
                                 table={problem.storyTable}
                                 condensed={isCompactBattleViewport}
-                                dense={isCompactBattleViewport}
+                                dense={isCompactBattleViewport || isUnit4Level7StoryProblem}
                               />
                             ) : null}
                           </>
@@ -33234,6 +34721,11 @@ export default function App() {
               problem.kind !== 'equalGroupingDivision' &&
               problem.kind !== 'divisionEquationParts' &&
               problem.kind !== 'divisionSituationClassify' &&
+              problem.kind !== 'multiplicationDivisionLink' &&
+              problem.kind !== 'arrayEquationDerivation' &&
+              problem.kind !== 'divisionInterpretation' &&
+              problem.kind !== 'divisionCardPlacement' &&
+              problem.kind !== 'multiplicationQuotient' &&
               !(problem.kind === 'equalPartition' && (problem.equalPartition?.activity === 'classify' || problem.equalPartition?.activity === 'countPieces')) && (
               <div className={`shrink-0 flex flex-col ${battleInputResponsiveClass}`}>
                 {usesBattleStructuredTimeInput ? (

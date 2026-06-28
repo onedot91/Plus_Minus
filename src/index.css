@@ -133,6 +133,26 @@ body {
   box-shadow: none;
 }
 
+.spotify-app .multiplication-table-button,
+.spotify-app .multiplication-table-button:disabled {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  letter-spacing: 0;
+}
+
+.spotify-app .multiplication-table-dark-cell {
+  color: #d8dee7 !important;
+}
+
+.spotify-app .multiplication-table-light-cell {
+  color: #0f172a !important;
+}
+
+.spotify-app .multiplication-table-label {
+  color: #0f172a !important;
+  letter-spacing: 0;
+}
+
 .spotify-app .equal-share-item-button,
 .spotify-app .equal-share-item-button:disabled {
   appearance: none;
