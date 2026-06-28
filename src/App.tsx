@@ -2309,6 +2309,8 @@ type SoundEffectName =
   | 'alert'
   | 'enemyHit'
   | 'playerHit'
+  | 'akmagomaFlame'
+  | 'akmagomaImpact'
   | 'levelUp'
   | 'tick'
   | 'ui'
@@ -2391,7 +2393,7 @@ const LAYER_GAIN_BOOST = 1.8;
 const MASTER_EFFECT_GAIN = 1.71;
 const EFFECT_VOLUME_ATTENUATION = 0.45;
 const POST_COMPRESSOR_GAIN = 3.2;
-const AUDIO_ENGINE_VERSION = 10;
+const AUDIO_ENGINE_VERSION = 11;
 
 const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
   start: {
@@ -2440,6 +2442,24 @@ const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
       { kind: 'oscillator', wave: 'sine', startAt: 0.012, frequency: 96, glideTo: 62, duration: 0.21, gain: 0.038, attack: 0.0015, release: 0.14, filter: { type: 'lowpass', frequency: 620, sweepTo: 140, q: 0.8 }, reverbSend: 0.03 },
       { kind: 'oscillator', wave: 'triangle', startAt: 0.004, frequency: 520, glideTo: 360, duration: 0.05, gain: 0.0065, attack: 0.001, release: 0.028, filter: { type: 'lowpass', frequency: 1400, sweepTo: 700, q: 0.8 }, pan: 0.08 },
       { kind: 'oscillator', wave: 'sine', startAt: 0.05, frequency: 62, glideTo: 49, duration: 0.14, gain: 0.012, attack: 0.002, release: 0.1, filter: { type: 'lowpass', frequency: 320, sweepTo: 140, q: 0.8 }, reverbSend: 0.04 },
+    ],
+  },
+  akmagomaFlame: {
+    output: 0.72,
+    layers: [
+      { kind: 'noise', duration: 0.42, gain: 0.011, attack: 0.018, release: 0.24, playbackRate: 0.58, filter: { type: 'bandpass', frequency: 520, sweepTo: 1200, q: 0.8 }, reverbSend: 0.08, delaySend: 0.03, pan: -0.22, panJitter: 0.18 },
+      { kind: 'noise', startAt: 0.045, duration: 0.25, gain: 0.008, attack: 0.01, release: 0.16, playbackRate: 1.24, filter: { type: 'highpass', frequency: 1800, sweepTo: 4200, q: 0.7 }, reverbSend: 0.04, pan: 0.2, panJitter: 0.16 },
+      { kind: 'oscillator', wave: 'sawtooth', frequency: 82, glideTo: 54, duration: 0.32, gain: 0.014, attack: 0.01, release: 0.2, filter: { type: 'lowpass', frequency: 520, sweepTo: 180, q: 0.8 }, reverbSend: 0.05 },
+      { kind: 'oscillator', wave: 'triangle', startAt: 0.05, frequency: 196, glideTo: 146.83, duration: 0.2, gain: 0.008, attack: 0.008, release: 0.13, filter: { type: 'bandpass', frequency: 740, sweepTo: 420, q: 1.8 }, pan: 0.1 },
+    ],
+  },
+  akmagomaImpact: {
+    output: 0.86,
+    layers: [
+      { kind: 'noise', duration: 0.08, gain: 0.017, attack: 0.001, release: 0.055, playbackRate: 0.82, filter: { type: 'bandpass', frequency: 980, sweepTo: 360, q: 1.1 }, reverbSend: 0.06, panJitter: 0.22 },
+      { kind: 'noise', startAt: 0.018, duration: 0.16, gain: 0.009, attack: 0.003, release: 0.12, playbackRate: 1.35, filter: { type: 'highpass', frequency: 2400, sweepTo: 6800, q: 0.7 }, reverbSend: 0.05, delaySend: 0.025, pan: 0.18 },
+      { kind: 'oscillator', wave: 'sine', frequency: 92, glideTo: 46, duration: 0.24, gain: 0.035, attack: 0.0015, release: 0.17, filter: { type: 'lowpass', frequency: 680, sweepTo: 120, q: 0.75 }, reverbSend: 0.04 },
+      { kind: 'oscillator', wave: 'square', startAt: 0.004, frequency: 740, glideTo: 420, duration: 0.052, gain: 0.0048, attack: 0.001, release: 0.032, filter: { type: 'lowpass', frequency: 2400, sweepTo: 900, q: 0.8 }, pan: -0.16 },
     ],
   },
   wrong: {
@@ -29058,6 +29078,27 @@ export default function App() {
     window.setTimeout(() => playSound(effectName, options), delayMs);
   };
 
+  const triggerAkmagomaSound = (phase: 'attack' | 'impact') => {
+    if (activeLearningUnitId !== 'unit3' || level !== 12) {
+      return;
+    }
+
+    if (phase === 'attack') {
+      playSound('akmagomaFlame', {
+        gainMultiplier: 1.08,
+        detune: -28,
+        noisePlaybackRateMultiplier: 0.94,
+      });
+      return;
+    }
+
+    playSound('akmagomaImpact', {
+      gainMultiplier: 1.16,
+      detune: 18,
+      noisePlaybackRateMultiplier: 1.08,
+    });
+  };
+
   const triggerUnit6Sound = (kind: 'correct' | 'wrong' | 'hit', options: { soft?: boolean } = {}) => {
     if (activeLearningUnitId !== 'unit6') {
       return;
@@ -29512,6 +29553,7 @@ export default function App() {
   const opponentImageClassName = currentSpecialOpponent?.spriteClassName ?? '';
   const defeatSceneImageClassName = currentSpecialOpponent?.defeatSceneClassName ?? '';
   const isAkmagomaOpponentAction = activeLearningUnitId === 'unit3' && level === 12 && (isOpponentHit || isOpponentAttacking);
+  const isAkmagomaPageEffectActive = activeLearningUnitId === 'unit3' && level === 12 && (isOpponentHit || isOpponentAttacking || isPlayerHit);
   const akmagomaInfernoDuration = isOpponentAttacking ? ATTACK_MOTION_DURATION_S : HIT_MOTION_DURATION_S;
   const displayPlayerName = playerName.trim() || DEFAULT_PLAYER_NAME;
   const trimmedPendingPlayerName = pendingPlayerName.trim();
@@ -30498,6 +30540,7 @@ export default function App() {
       scheduleBattleTimeout(() => {
         setIsAttacking(false);
         setIsOpponentHit(true);
+        triggerAkmagomaSound('impact');
         playSound('enemyHit', {
           gainMultiplier: 1.1 + level * 0.02,
           detune: Math.min(level * 10, 80),
@@ -30529,9 +30572,11 @@ export default function App() {
         detune: -30,
       });
       setIsOpponentAttacking(true);
+      triggerAkmagomaSound('attack');
       scheduleBattleTimeout(() => {
         setIsOpponentAttacking(false);
         setIsPlayerHit(true);
+        triggerAkmagomaSound('impact');
         playSound('playerHit', {
           gainMultiplier: previewRemainingHP(playerHP, estimationHitDamage) <= 30 ? 1.12 : 1.04,
           detune: -Math.min(level * 10, 70),
@@ -30577,6 +30622,7 @@ export default function App() {
       scheduleBattleTimeout(() => {
         setIsAttacking(false);
         setIsOpponentHit(true);
+        triggerAkmagomaSound('impact');
         playSound('enemyHit', {
           gainMultiplier: 1.08 + level * 0.02,
           detune: Math.min(level * 10, 80),
@@ -30610,9 +30656,11 @@ export default function App() {
       detune: -24,
     });
     setIsOpponentAttacking(true);
+    triggerAkmagomaSound('attack');
     scheduleBattleTimeout(() => {
       setIsOpponentAttacking(false);
       setIsPlayerHit(true);
+      triggerAkmagomaSound('impact');
       playSound('playerHit', {
         gainMultiplier: previewRemainingHP(playerHP, estimationHitDamage) <= 30 ? 1.12 : 1.04,
         detune: -Math.min(level * 10, 70),
@@ -30666,6 +30714,7 @@ export default function App() {
         setIsAttacking(false);
         setIsOpponentHit(true);
         triggerUnit6Sound('hit');
+        triggerAkmagomaSound('impact');
         playSound('enemyHit', {
           gainMultiplier: 1.06 + level * 0.02,
           detune: Math.min(level * 10, 80),
@@ -30730,10 +30779,12 @@ export default function App() {
         detune: -24,
       });
       setIsOpponentAttacking(true);
+      triggerAkmagomaSound('attack');
       scheduleBattleTimeout(() => {
         setIsOpponentAttacking(false);
         setIsPlayerHit(true);
         triggerUnit6Sound('wrong', { soft: true });
+        triggerAkmagomaSound('impact');
         playSound('playerHit', {
           gainMultiplier: previewRemainingHP(playerHP, regularHitDamage) <= 30 ? 1.1 : 1.03,
           detune: -Math.min(level * 10, 70),
@@ -30787,6 +30838,7 @@ export default function App() {
         setIsAttacking(false);
         setIsOpponentHit(true);
         triggerUnit6Sound('hit', { soft: !oxResult.isComplete });
+        triggerAkmagomaSound('impact');
         playSound('enemyHit', {
           gainMultiplier: 1.02 + level * 0.012,
           detune: Math.min(level * 8, 64),
@@ -30828,10 +30880,12 @@ export default function App() {
       detune: -18,
     });
     setIsOpponentAttacking(true);
+    triggerAkmagomaSound('attack');
     scheduleBattleTimeout(() => {
       setIsOpponentAttacking(false);
       setIsPlayerHit(true);
       triggerUnit6Sound('wrong', { soft: true });
+      triggerAkmagomaSound('impact');
       playSound('playerHit', {
         gainMultiplier: previewRemainingHP(playerHP, oxHitDamage) <= 30 ? 1.08 : 0.98,
         detune: -Math.min(level * 8, 56),
@@ -32321,9 +32375,9 @@ export default function App() {
 	      {gameState === 'playing' && (
 	        <>
 	          <AnimatePresence>
-	            {isAkmagomaOpponentAction && (
-	              <motion.div
-	                key={`akmagoma-page-inferno-${isOpponentAttacking ? 'attack' : 'hit'}`}
+		            {isAkmagomaPageEffectActive && (
+		              <motion.div
+		                key={`akmagoma-page-inferno-${isOpponentAttacking ? 'attack' : 'hit'}`}
 	                className="pointer-events-none fixed inset-0 z-40 overflow-hidden"
 	                initial={{ opacity: 0 }}
 	                animate={{ opacity: [0, 1, 0.82, 0] }}
