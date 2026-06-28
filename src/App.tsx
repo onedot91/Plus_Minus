@@ -5,6 +5,64 @@ import type { VisualControlSound } from './components/VisualCalculator';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import startHeroImage from './assets/start-hero-math-adventure.png';
 import readingActivityWarningImage from './assets/reading-activity-warning.webp';
+import equalShareEmptyContainersImage from './assets/unit4/equal-share-empty-containers.png';
+import equalShareSpritesImage from './assets/unit4/equal-share-sprites.png';
+import unit4Level1WayipaAttackImage from './assets/unit4/unit4-level1-wayipa-attack-cutout.png';
+import unit4Level1WayipaDefaultImage from './assets/unit4/unit4-level1-wayipa-default-cutout.png';
+import unit4Level1WayipaDefeatSceneImage from './assets/unit4/unit4-level1-wayipa-defeat-scene-cutout.png';
+import unit4Level1WayipaHitImage from './assets/unit4/unit4-level1-wayipa-hit-cutout.png';
+import unit4Level1GreenAlienAttackImage from './assets/unit4/unit4-level1-green-alien-attack-cutout.png';
+import unit4Level1GreenAlienDefaultImage from './assets/unit4/unit4-level1-green-alien-default-cutout.png';
+import unit4Level1GreenAlienDefeatSceneImage from './assets/unit4/unit4-level1-green-alien-defeat-scene-cutout.png';
+import unit4Level1GreenAlienHitImage from './assets/unit4/unit4-level1-green-alien-hit-cutout.png';
+import unit4Level2CapybaraAttackImage from './assets/unit4/unit4-level2-capybara-attack-cutout.png';
+import unit4Level2CapybaraDefaultImage from './assets/unit4/unit4-level2-capybara-default-cutout.png';
+import unit4Level2CapybaraDefeatSceneImage from './assets/unit4/unit4-level2-capybara-defeat-scene-cutout.png';
+import unit4Level2CapybaraHitImage from './assets/unit4/unit4-level2-capybara-hit-cutout.png';
+import unit4Level2BeretPuppyAttackImage from './assets/unit4/unit4-level2-beret-puppy-attack-cutout.png';
+import unit4Level2BeretPuppyDefaultImage from './assets/unit4/unit4-level2-beret-puppy-default-cutout.png';
+import unit4Level2BeretPuppyDefeatSceneImage from './assets/unit4/unit4-level2-beret-puppy-defeat-scene-cutout.png';
+import unit4Level2BeretPuppyHitImage from './assets/unit4/unit4-level2-beret-puppy-hit-cutout.png';
+import unit4Level3BlackCatAttackImage from './assets/unit4/unit4-level3-black-cat-attack-cutout.png';
+import unit4Level3BlackCatDefaultImage from './assets/unit4/unit4-level3-black-cat-default-cutout.png';
+import unit4Level3BlackCatDefeatSceneImage from './assets/unit4/unit4-level3-black-cat-defeat-scene-cutout.png';
+import unit4Level3BlackCatHitImage from './assets/unit4/unit4-level3-black-cat-hit-cutout.png';
+import unit4CryingBabyAttackImage from './assets/unit4/unit4-crying-baby-attack-cutout.png';
+import unit4CryingBabyDefaultImage from './assets/unit4/unit4-crying-baby-default-cutout.png';
+import unit4CryingBabyDefeatSceneImage from './assets/unit4/unit4-crying-baby-defeat-scene-cutout.png';
+import unit4CryingBabyHitImage from './assets/unit4/unit4-crying-baby-hit-cutout.png';
+import unit4Level4MonkeyAttackImage from './assets/unit4/unit4-level4-monkey-attack-cutout.png';
+import unit4Level4MonkeyDefaultImage from './assets/unit4/unit4-level4-monkey-default-cutout.png';
+import unit4Level4MonkeyDefeatSceneImage from './assets/unit4/unit4-level4-monkey-defeat-scene-cutout.png';
+import unit4Level4MonkeyHitImage from './assets/unit4/unit4-level4-monkey-hit-cutout.png';
+import unit4Level4SawpuppyAttackImage from './assets/unit4/unit4-level4-sawpuppy-attack-cutout.png';
+import unit4Level4SawpuppyDefaultImage from './assets/unit4/unit4-level4-sawpuppy-default-cutout.png';
+import unit4Level4SawpuppyDefeatSceneImage from './assets/unit4/unit4-level4-sawpuppy-defeat-scene-cutout.png';
+import unit4Level4SawpuppyHitImage from './assets/unit4/unit4-level4-sawpuppy-hit-cutout.png';
+import unit4Level5MerongAttackImage from './assets/unit4/unit4-level5-merong-attack-cutout.png';
+import unit4Level5MerongDefaultImage from './assets/unit4/unit4-level5-merong-default-cutout.png';
+import unit4Level5MerongDefeatSceneImage from './assets/unit4/unit4-level5-merong-defeat-scene-cutout.png';
+import unit4Level5MerongHitImage from './assets/unit4/unit4-level5-merong-hit-cutout.png';
+import unit4Level5DazedPondbirdAttackImage from './assets/unit4/unit4-level5-dazed-pondbird-attack-cutout.png';
+import unit4Level5DazedPondbirdDefaultImage from './assets/unit4/unit4-level5-dazed-pondbird-default-cutout.png';
+import unit4Level5DazedPondbirdDefeatSceneImage from './assets/unit4/unit4-level5-dazed-pondbird-defeat-scene-cutout.png';
+import unit4Level5DazedPondbirdHitImage from './assets/unit4/unit4-level5-dazed-pondbird-hit-cutout.png';
+import unit4Level6CloudkidAttackImage from './assets/unit4/unit4-level6-cloudkid-attack-cutout.png';
+import unit4Level6CloudkidDefaultImage from './assets/unit4/unit4-level6-cloudkid-default-cutout.png';
+import unit4Level6CloudkidDefeatSceneImage from './assets/unit4/unit4-level6-cloudkid-defeat-scene-cutout.png';
+import unit4Level6CloudkidHitImage from './assets/unit4/unit4-level6-cloudkid-hit-cutout.png';
+import unit4Level6ChickenVestAttackImage from './assets/unit4/unit4-level6-chicken-vest-attack-cutout.png';
+import unit4Level6ChickenVestDefaultImage from './assets/unit4/unit4-level6-chicken-vest-default-cutout.png';
+import unit4Level6ChickenVestDefeatSceneImage from './assets/unit4/unit4-level6-chicken-vest-defeat-scene-cutout.png';
+import unit4Level6ChickenVestHitImage from './assets/unit4/unit4-level6-chicken-vest-hit-cutout.png';
+import unit4Level7StarfishAttackImage from './assets/unit4/unit4-level7-starfish-attack-cutout.png';
+import unit4Level7StarfishDefaultImage from './assets/unit4/unit4-level7-starfish-default-cutout.png';
+import unit4Level7StarfishDefeatSceneImage from './assets/unit4/unit4-level7-starfish-defeat-scene-cutout.png';
+import unit4Level7StarfishHitImage from './assets/unit4/unit4-level7-starfish-hit-cutout.png';
+import unit4Level7SpaceRangerAttackImage from './assets/unit4/unit4-level7-space-ranger-attack-cutout.png';
+import unit4Level7SpaceRangerDefaultImage from './assets/unit4/unit4-level7-space-ranger-default-cutout.png';
+import unit4Level7SpaceRangerDefeatSceneImage from './assets/unit4/unit4-level7-space-ranger-defeat-scene-cutout.png';
+import unit4Level7SpaceRangerHitImage from './assets/unit4/unit4-level7-space-ranger-hit-cutout.png';
 import stage1DefeatSceneImage from './assets/stage1-defeat-scene-cutout.webp';
 import stage1ChurusigiDefeatSceneImage from './assets/stage1-churusigi-defeat-scene.jpeg';
 import stage2DefeatSceneImage from './assets/stage2-defeat-scene.jpeg';
@@ -385,34 +443,66 @@ import unit6Level1RedStickerAttackImage from './assets/unit6-level1-red-sticker-
 import unit6Level1RedStickerDefaultImage from './assets/unit6-level1-red-sticker-default.webp';
 import unit6Level1RedStickerDefeatSceneImage from './assets/unit6-level1-red-sticker-defeat-scene.webp';
 import unit6Level1RedStickerHitImage from './assets/unit6-level1-red-sticker-hit.webp';
+import unit6Level1OguoguStickerAttackImage from './assets/unit6-level1-oguogu-sticker-attack.png';
+import unit6Level1OguoguStickerDefaultImage from './assets/unit6-level1-oguogu-sticker-default.png';
+import unit6Level1OguoguStickerDefeatSceneImage from './assets/unit6-level1-oguogu-sticker-defeat-scene.png';
+import unit6Level1OguoguStickerHitImage from './assets/unit6-level1-oguogu-sticker-hit.png';
 import unit6Level2FrogStickerAttackImage from './assets/unit6-level2-frog-sticker-attack.webp';
 import unit6Level2FrogStickerDefaultImage from './assets/unit6-level2-frog-sticker-default.webp';
 import unit6Level2FrogStickerDefeatSceneImage from './assets/unit6-level2-frog-sticker-defeat-scene.webp';
 import unit6Level2FrogStickerHitImage from './assets/unit6-level2-frog-sticker-hit.webp';
+import unit6Level2JjyordiStickerAttackImage from './assets/unit6-level2-jjyordi-sticker-attack.png';
+import unit6Level2JjyordiStickerDefaultImage from './assets/unit6-level2-jjyordi-sticker-default.png';
+import unit6Level2JjyordiStickerDefeatSceneImage from './assets/unit6-level2-jjyordi-sticker-defeat-scene.png';
+import unit6Level2JjyordiStickerHitImage from './assets/unit6-level2-jjyordi-sticker-hit.png';
 import unit6Level3LuchadorStickerAttackImage from './assets/unit6-level3-luchador-sticker-attack.webp';
 import unit6Level3LuchadorStickerDefaultImage from './assets/unit6-level3-luchador-sticker-default.webp';
 import unit6Level3LuchadorStickerDefeatSceneImage from './assets/unit6-level3-luchador-sticker-defeat-scene.webp';
 import unit6Level3LuchadorStickerHitImage from './assets/unit6-level3-luchador-sticker-hit.webp';
+import unit6Level3BonongbonongAttackImage from './assets/unit6-level3-bonongbonong-attack.png';
+import unit6Level3BonongbonongDefaultImage from './assets/unit6-level3-bonongbonong-default.png';
+import unit6Level3BonongbonongDefeatSceneImage from './assets/unit6-level3-bonongbonong-defeat-scene.png';
+import unit6Level3BonongbonongHitImage from './assets/unit6-level3-bonongbonong-hit.png';
 import unit6Level4PinkBeaverStickerAttackImage from './assets/unit6-level4-pink-beaver-sticker-attack.webp';
 import unit6Level4PinkBeaverStickerDefaultImage from './assets/unit6-level4-pink-beaver-sticker-default.webp';
 import unit6Level4PinkBeaverStickerDefeatSceneImage from './assets/unit6-level4-pink-beaver-sticker-defeat-scene.webp';
 import unit6Level4PinkBeaverStickerHitImage from './assets/unit6-level4-pink-beaver-sticker-hit.webp';
+import unit6Level4UljjeokiStickerAttackImage from './assets/unit6-level4-uljjeoki-sticker-attack.png';
+import unit6Level4UljjeokiStickerDefaultImage from './assets/unit6-level4-uljjeoki-sticker-default.png';
+import unit6Level4UljjeokiStickerDefeatSceneImage from './assets/unit6-level4-uljjeoki-sticker-defeat-scene.png';
+import unit6Level4UljjeokiStickerHitImage from './assets/unit6-level4-uljjeoki-sticker-hit.png';
 import unit6Level5RaccoonStickerAttackImage from './assets/unit6-level5-raccoon-sticker-attack.webp';
 import unit6Level5RaccoonStickerDefaultImage from './assets/unit6-level5-raccoon-sticker-default.webp';
 import unit6Level5RaccoonStickerDefeatSceneImage from './assets/unit6-level5-raccoon-sticker-defeat-scene.webp';
 import unit6Level5RaccoonStickerHitImage from './assets/unit6-level5-raccoon-sticker-hit.webp';
+import unit6Level5GoracheolpudeokStickerAttackImage from './assets/unit6-level5-goracheolpudeok-sticker-attack.png';
+import unit6Level5GoracheolpudeokStickerDefaultImage from './assets/unit6-level5-goracheolpudeok-sticker-default.png';
+import unit6Level5GoracheolpudeokStickerDefeatSceneImage from './assets/unit6-level5-goracheolpudeok-sticker-defeat-scene.png';
+import unit6Level5GoracheolpudeokStickerHitImage from './assets/unit6-level5-goracheolpudeok-sticker-hit.png';
 import unit6Level6CreeperStickerAttackImage from './assets/unit6-level6-creeper-sticker-attack.webp';
 import unit6Level6CreeperStickerDefaultImage from './assets/unit6-level6-creeper-sticker-default.webp';
 import unit6Level6CreeperStickerDefeatSceneImage from './assets/unit6-level6-creeper-sticker-defeat-scene.webp';
 import unit6Level6CreeperStickerHitImage from './assets/unit6-level6-creeper-sticker-hit.webp';
+import unit6Level6TigerMagpieAttackImage from './assets/unit6-level6-tiger-magpie-attack.png';
+import unit6Level6TigerMagpieDefaultImage from './assets/unit6-level6-tiger-magpie-default.png';
+import unit6Level6TigerMagpieDefeatSceneImage from './assets/unit6-level6-tiger-magpie-defeat-scene.png';
+import unit6Level6TigerMagpieHitImage from './assets/unit6-level6-tiger-magpie-hit.png';
 import unit6Level7YolkStickerAttackImage from './assets/unit6-level7-yolk-sticker-attack.webp';
 import unit6Level7YolkStickerDefaultImage from './assets/unit6-level7-yolk-sticker-default.webp';
 import unit6Level7YolkStickerDefeatSceneImage from './assets/unit6-level7-yolk-sticker-defeat-scene.webp';
 import unit6Level7YolkStickerHitImage from './assets/unit6-level7-yolk-sticker-hit.webp';
+import unit6Level7MossSleepyAttackImage from './assets/unit6-level7-moss-sleepy-attack.png';
+import unit6Level7MossSleepyDefaultImage from './assets/unit6-level7-moss-sleepy-default.png';
+import unit6Level7MossSleepyDefeatSceneImage from './assets/unit6-level7-moss-sleepy-defeat-scene.png';
+import unit6Level7MossSleepyHitImage from './assets/unit6-level7-moss-sleepy-hit.png';
 import unit6Level8IdolStickerAttackImage from './assets/unit6-level8-idol-sticker-attack.webp';
 import unit6Level8IdolStickerDefaultImage from './assets/unit6-level8-idol-sticker-default.webp';
 import unit6Level8IdolStickerDefeatSceneImage from './assets/unit6-level8-idol-sticker-defeat-scene.webp';
 import unit6Level8IdolStickerHitImage from './assets/unit6-level8-idol-sticker-hit.webp';
+import unit6Level8YisunsinStatueStickerAttackImage from './assets/unit6-level8-yisunsin-statue-sticker-attack.png';
+import unit6Level8YisunsinStatueStickerDefaultImage from './assets/unit6-level8-yisunsin-statue-sticker-default.png';
+import unit6Level8YisunsinStatueStickerDefeatSceneImage from './assets/unit6-level8-yisunsin-statue-sticker-defeat-scene.png';
+import unit6Level8YisunsinStatueStickerHitImage from './assets/unit6-level8-yisunsin-statue-sticker-hit.png';
 import unit3Level9GimgangrimAttackImage from './assets/unit3-level9-gimgangrim-attack.jpeg';
 import unit3Level9GimgangrimDefaultImage from './assets/unit3-level9-gimgangrim-default.jpeg';
 import unit3Level9GimgangrimDefeatSceneImage from './assets/unit3-level9-gimgangrim-defeat-scene.jpeg';
@@ -484,9 +574,9 @@ type GameState = 'start' | 'unitSelect' | 'archive' | 'playing' | 'win' | 'lose'
 
 type BattleDifficulty = 'easy' | 'normal' | 'hard';
 
-type LearningUnitId = 'unit1' | 'unit2' | 'unit3' | 'unit6';
+type LearningUnitId = 'unit1' | 'unit2' | 'unit3' | 'unit4' | 'unit5' | 'unit6';
 
-type ProblemKind = 'equation' | 'story' | 'builder' | 'verticalBlank' | 'measurement' | 'distanceMap' | 'distanceWorksheet' | 'clockReading' | 'timeAddition' | 'shapeDraw' | 'shapeRain' | 'numberLineBox' | 'calculationErrorChoice' | 'equalPartition' | 'fractionIntro';
+type ProblemKind = 'equation' | 'story' | 'builder' | 'verticalBlank' | 'measurement' | 'distanceMap' | 'distanceWorksheet' | 'clockReading' | 'timeAddition' | 'shapeDraw' | 'shapeRain' | 'numberLineBox' | 'calculationErrorChoice' | 'equalPartition' | 'fractionIntro' | 'equalShareDivision' | 'equalGroupingDivision' | 'divisionEquationParts' | 'divisionSituationClassify';
 type MeasurementObjectKind =
   | 'seed'
   | 'rice'
@@ -611,6 +701,78 @@ interface FractionIntroProblemData {
   choices?: Array<{ label: string; value: string }>;
 }
 
+type EqualShareDivisionActivity = 'manipulate' | 'animationEquation';
+type EqualGroupingDivisionActivity = 'groupManipulate' | 'repeatedSubtraction' | 'subtractionToDivision';
+type EqualShareDivisionItemKind =
+  | 'pencil'
+  | 'peach'
+  | 'apple'
+  | 'cookie'
+  | 'strawberry'
+  | 'tangerine'
+  | 'candy'
+  | 'marble'
+  | 'coloredPencil'
+  | 'notebook'
+  | 'sticker'
+  | 'block';
+type EqualShareDivisionContainerKind = 'pencilCup' | 'plate' | 'basket' | 'box';
+
+interface EqualShareDivisionProblemData {
+  activity: EqualShareDivisionActivity;
+  title: string;
+  instruction: string;
+  helperText: string;
+  itemKind: EqualShareDivisionItemKind;
+  itemLabel: string;
+  containerKind: EqualShareDivisionContainerKind;
+  containerLabel: string;
+  total: number;
+  groups: number;
+  answerToken: string;
+}
+
+interface EqualGroupingDivisionProblemData {
+  activity: EqualGroupingDivisionActivity;
+  title: string;
+  instruction: string;
+  helperText: string;
+  itemKind: EqualShareDivisionItemKind;
+  itemLabel: string;
+  total: number;
+  groupSize: number;
+  answerToken: string;
+  answerUnit: string;
+}
+
+interface DivisionEquationPartsProblemData {
+  title: string;
+  instruction: string;
+  dividend: number;
+  divisor: number;
+  quotient: number;
+  partOrder: DivisionEquationPartKey[];
+  answerToken: string;
+}
+
+type DivisionEquationPartKey = 'dividend' | 'divisor' | 'quotient';
+
+type DivisionSituationKind = 'equalShare' | 'equalGrouping';
+
+interface DivisionSituationCardData {
+  id: string;
+  text: string;
+  kind: DivisionSituationKind;
+}
+
+interface DivisionSituationClassifyProblemData {
+  title: string;
+  instruction: string;
+  helperText: string;
+  situation: DivisionSituationCardData;
+  answerToken: string;
+}
+
 interface Problem {
   text: string;
   prompt: string;
@@ -632,6 +794,10 @@ interface Problem {
   numberLineBox?: NumberLineBoxProblemData;
   equalPartition?: EqualPartitionProblemData;
   fractionIntro?: FractionIntroProblemData;
+  equalShareDivision?: EqualShareDivisionProblemData;
+  equalGroupingDivision?: EqualGroupingDivisionProblemData;
+  divisionEquationParts?: DivisionEquationPartsProblemData;
+  divisionSituationClassify?: DivisionSituationClassifyProblemData;
 }
 
 interface EstimationProblem {
@@ -1631,6 +1797,7 @@ interface StoredBattleProgress {
   unit6ProblemSequence: Record<number, number>;
   unit6ProblemActivityCycle: Record<number, string[]>;
   unit3ProblemSequence: Record<number, number>;
+  unit4ProblemSequence: Record<number, number>;
   unit3Level12RoundTemplateOrder: Level12TemplateId[] | null;
   unit3Level12PreviousTemplateOrder: Level12TemplateId[];
 }
@@ -1801,6 +1968,21 @@ type Level4OpponentId = 'koronan' | 'baekgeurigoa';
 type Level5OpponentId = 'niiik' | 'jurdi';
 type Level6OpponentId = 'syuppeolboi' | 'anheunhannammae';
 type Level7OpponentId = 'anijeuko' | 'arnya';
+type Unit4Level1OpponentId = 'wayipa' | 'green-alien';
+type Unit4Level2OpponentId = 'capybara' | 'beret-puppy';
+type Unit4Level3OpponentId = 'black-cat' | 'crying-baby';
+type Unit4Level4OpponentId = 'monkey' | 'sawpuppy';
+type Unit4Level5OpponentId = 'merong' | 'dazed-pondbird';
+type Unit4Level6OpponentId = 'cloudkid' | 'chicken-vest';
+type Unit4Level7OpponentId = 'starfish' | 'space-ranger';
+type Unit6Level1OpponentId = 'red-sticker' | 'oguogu';
+type Unit6Level2OpponentId = 'frog-sticker' | 'jjyordi';
+type Unit6Level3OpponentId = 'luchador' | 'bonongbonong';
+type Unit6Level4OpponentId = 'pink-beaver' | 'uljjeoki';
+type Unit6Level5OpponentId = 'raccoon-sticker' | 'goracheolpudeok';
+type Unit6Level6OpponentId = 'creeper-sticker' | 'tiger-magpie';
+type Unit6Level7OpponentId = 'yolk-sticker' | 'moss-sleepy';
+type Unit6Level8OpponentId = 'idol-sticker' | 'yisunsin-statue';
 
 interface SpecialOpponentConfig {
   name: string;
@@ -1820,6 +2002,21 @@ interface SpecialOpponentSelections {
   level5: Level5OpponentId;
   level6: Level6OpponentId;
   level7: Level7OpponentId;
+  unit4Level1: Unit4Level1OpponentId;
+  unit4Level2: Unit4Level2OpponentId;
+  unit4Level3: Unit4Level3OpponentId;
+  unit4Level4: Unit4Level4OpponentId;
+  unit4Level5: Unit4Level5OpponentId;
+  unit4Level6: Unit4Level6OpponentId;
+  unit4Level7: Unit4Level7OpponentId;
+  unit6Level1: Unit6Level1OpponentId;
+  unit6Level2: Unit6Level2OpponentId;
+  unit6Level3: Unit6Level3OpponentId;
+  unit6Level4: Unit6Level4OpponentId;
+  unit6Level5: Unit6Level5OpponentId;
+  unit6Level6: Unit6Level6OpponentId;
+  unit6Level7: Unit6Level7OpponentId;
+  unit6Level8: Unit6Level8OpponentId;
 }
 
 interface BattleDifficultyConfig {
@@ -2096,9 +2293,9 @@ type CompatibleWindow = Window & typeof globalThis & {
 
 const LAYER_GAIN_BOOST = 1.8;
 const MASTER_EFFECT_GAIN = 1.71;
-const EFFECT_VOLUME_ATTENUATION = 0.9;
+const EFFECT_VOLUME_ATTENUATION = 0.45;
 const POST_COMPRESSOR_GAIN = 3.2;
-const AUDIO_ENGINE_VERSION = 9;
+const AUDIO_ENGINE_VERSION = 10;
 
 const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
   start: {
@@ -2334,6 +2531,10 @@ function roundToNearestUnit(value: number, unit: number) {
 
 function previewRemainingHP(currentHP: number, damage: number) {
   return Math.max(0, currentHP - damage);
+}
+
+function sanitizeNonNegativeIntegerInput(value: string) {
+  return value.replace(/\D/g, '');
 }
 
 function randomCentered(amount = 0) {
@@ -2606,6 +2807,21 @@ const DEFAULT_LEVEL4_OPPONENT_ID: Level4OpponentId = 'koronan';
 const DEFAULT_LEVEL5_OPPONENT_ID: Level5OpponentId = 'niiik';
 const DEFAULT_LEVEL6_OPPONENT_ID: Level6OpponentId = 'syuppeolboi';
 const DEFAULT_LEVEL7_OPPONENT_ID: Level7OpponentId = 'anijeuko';
+const DEFAULT_UNIT4_LEVEL1_OPPONENT_ID: Unit4Level1OpponentId = 'wayipa';
+const DEFAULT_UNIT4_LEVEL2_OPPONENT_ID: Unit4Level2OpponentId = 'capybara';
+const DEFAULT_UNIT4_LEVEL3_OPPONENT_ID: Unit4Level3OpponentId = 'black-cat';
+const DEFAULT_UNIT4_LEVEL4_OPPONENT_ID: Unit4Level4OpponentId = 'monkey';
+const DEFAULT_UNIT4_LEVEL5_OPPONENT_ID: Unit4Level5OpponentId = 'merong';
+const DEFAULT_UNIT4_LEVEL6_OPPONENT_ID: Unit4Level6OpponentId = 'cloudkid';
+const DEFAULT_UNIT4_LEVEL7_OPPONENT_ID: Unit4Level7OpponentId = 'starfish';
+const DEFAULT_UNIT6_LEVEL1_OPPONENT_ID: Unit6Level1OpponentId = 'red-sticker';
+const DEFAULT_UNIT6_LEVEL2_OPPONENT_ID: Unit6Level2OpponentId = 'frog-sticker';
+const DEFAULT_UNIT6_LEVEL3_OPPONENT_ID: Unit6Level3OpponentId = 'luchador';
+const DEFAULT_UNIT6_LEVEL4_OPPONENT_ID: Unit6Level4OpponentId = 'pink-beaver';
+const DEFAULT_UNIT6_LEVEL5_OPPONENT_ID: Unit6Level5OpponentId = 'raccoon-sticker';
+const DEFAULT_UNIT6_LEVEL6_OPPONENT_ID: Unit6Level6OpponentId = 'creeper-sticker';
+const DEFAULT_UNIT6_LEVEL7_OPPONENT_ID: Unit6Level7OpponentId = 'yolk-sticker';
+const DEFAULT_UNIT6_LEVEL8_OPPONENT_ID: Unit6Level8OpponentId = 'idol-sticker';
 const DEFAULT_SPECIAL_OPPONENT_SELECTIONS: SpecialOpponentSelections = {
   level1: DEFAULT_LEVEL1_OPPONENT_ID,
   level2: DEFAULT_LEVEL2_OPPONENT_ID,
@@ -2614,6 +2830,21 @@ const DEFAULT_SPECIAL_OPPONENT_SELECTIONS: SpecialOpponentSelections = {
   level5: DEFAULT_LEVEL5_OPPONENT_ID,
   level6: DEFAULT_LEVEL6_OPPONENT_ID,
   level7: DEFAULT_LEVEL7_OPPONENT_ID,
+  unit4Level1: DEFAULT_UNIT4_LEVEL1_OPPONENT_ID,
+  unit4Level2: DEFAULT_UNIT4_LEVEL2_OPPONENT_ID,
+  unit4Level3: DEFAULT_UNIT4_LEVEL3_OPPONENT_ID,
+  unit4Level4: DEFAULT_UNIT4_LEVEL4_OPPONENT_ID,
+  unit4Level5: DEFAULT_UNIT4_LEVEL5_OPPONENT_ID,
+  unit4Level6: DEFAULT_UNIT4_LEVEL6_OPPONENT_ID,
+  unit4Level7: DEFAULT_UNIT4_LEVEL7_OPPONENT_ID,
+  unit6Level1: DEFAULT_UNIT6_LEVEL1_OPPONENT_ID,
+  unit6Level2: DEFAULT_UNIT6_LEVEL2_OPPONENT_ID,
+  unit6Level3: DEFAULT_UNIT6_LEVEL3_OPPONENT_ID,
+  unit6Level4: DEFAULT_UNIT6_LEVEL4_OPPONENT_ID,
+  unit6Level5: DEFAULT_UNIT6_LEVEL5_OPPONENT_ID,
+  unit6Level6: DEFAULT_UNIT6_LEVEL6_OPPONENT_ID,
+  unit6Level7: DEFAULT_UNIT6_LEVEL7_OPPONENT_ID,
+  unit6Level8: DEFAULT_UNIT6_LEVEL8_OPPONENT_ID,
 };
 const LEVEL1_OPPONENT_VARIANTS: Record<Level1OpponentId, SpecialOpponentConfig> = {
   jeongichu: {
@@ -2957,8 +3188,149 @@ const UNIT3_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
     removeDefeatSceneBlackBackground: true,
   },
 };
-const UNIT6_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
-  1: {
+const UNIT4_LEVEL1_OPPONENT_VARIANTS: Record<Unit4Level1OpponentId, SpecialOpponentConfig> = {
+  wayipa: {
+    name: '대파',
+    spriteSet: {
+      attack: unit4Level1WayipaAttackImage,
+      default: unit4Level1WayipaDefaultImage,
+      hit: unit4Level1WayipaHitImage,
+    },
+    defeatSceneImage: unit4Level1WayipaDefeatSceneImage,
+  },
+  'green-alien': {
+    name: '신비로운 도깨비',
+    spriteSet: {
+      attack: unit4Level1GreenAlienAttackImage,
+      default: unit4Level1GreenAlienDefaultImage,
+      hit: unit4Level1GreenAlienHitImage,
+    },
+    defeatSceneImage: unit4Level1GreenAlienDefeatSceneImage,
+  },
+};
+const UNIT4_LEVEL2_OPPONENT_VARIANTS: Record<Unit4Level2OpponentId, SpecialOpponentConfig> = {
+  capybara: {
+    name: '커피봐라',
+    spriteSet: {
+      attack: unit4Level2CapybaraAttackImage,
+      default: unit4Level2CapybaraDefaultImage,
+      hit: unit4Level2CapybaraHitImage,
+    },
+    defeatSceneImage: unit4Level2CapybaraDefeatSceneImage,
+  },
+  'beret-puppy': {
+    name: '폼폼푸딩',
+    spriteSet: {
+      attack: unit4Level2BeretPuppyAttackImage,
+      default: unit4Level2BeretPuppyDefaultImage,
+      hit: unit4Level2BeretPuppyHitImage,
+    },
+    defeatSceneImage: unit4Level2BeretPuppyDefeatSceneImage,
+  },
+};
+const UNIT4_LEVEL3_OPPONENT_VARIANTS: Record<Unit4Level3OpponentId, SpecialOpponentConfig> = {
+  'black-cat': {
+    name: '검정냥',
+    spriteSet: {
+      attack: unit4Level3BlackCatAttackImage,
+      default: unit4Level3BlackCatDefaultImage,
+      hit: unit4Level3BlackCatHitImage,
+    },
+    defeatSceneImage: unit4Level3BlackCatDefeatSceneImage,
+  },
+  'crying-baby': {
+    name: '우는 아기',
+    spriteSet: {
+      attack: unit4CryingBabyAttackImage,
+      default: unit4CryingBabyDefaultImage,
+      hit: unit4CryingBabyHitImage,
+    },
+    defeatSceneImage: unit4CryingBabyDefeatSceneImage,
+  },
+};
+const UNIT4_LEVEL4_OPPONENT_VARIANTS: Record<Unit4Level4OpponentId, SpecialOpponentConfig> = {
+  monkey: {
+    name: '이키아 원숭이',
+    spriteSet: {
+      attack: unit4Level4MonkeyAttackImage,
+      default: unit4Level4MonkeyDefaultImage,
+      hit: unit4Level4MonkeyHitImage,
+    },
+    defeatSceneImage: unit4Level4MonkeyDefeatSceneImage,
+  },
+  sawpuppy: {
+    name: '치타',
+    spriteSet: {
+      attack: unit4Level4SawpuppyAttackImage,
+      default: unit4Level4SawpuppyDefaultImage,
+      hit: unit4Level4SawpuppyHitImage,
+    },
+    defeatSceneImage: unit4Level4SawpuppyDefeatSceneImage,
+  },
+};
+const UNIT4_LEVEL5_OPPONENT_VARIANTS: Record<Unit4Level5OpponentId, SpecialOpponentConfig> = {
+  merong: {
+    name: '마루마루',
+    spriteSet: {
+      attack: unit4Level5MerongAttackImage,
+      default: unit4Level5MerongDefaultImage,
+      hit: unit4Level5MerongHitImage,
+    },
+    defeatSceneImage: unit4Level5MerongDefeatSceneImage,
+  },
+  'dazed-pondbird': {
+    name: '고라철푸덕',
+    spriteSet: {
+      attack: unit4Level5DazedPondbirdAttackImage,
+      default: unit4Level5DazedPondbirdDefaultImage,
+      hit: unit4Level5DazedPondbirdHitImage,
+    },
+    defeatSceneImage: unit4Level5DazedPondbirdDefeatSceneImage,
+  },
+};
+const UNIT4_LEVEL6_OPPONENT_VARIANTS: Record<Unit4Level6OpponentId, SpecialOpponentConfig> = {
+  cloudkid: {
+    name: '곰곰이',
+    spriteSet: {
+      attack: unit4Level6CloudkidAttackImage,
+      default: unit4Level6CloudkidDefaultImage,
+      hit: unit4Level6CloudkidHitImage,
+    },
+    defeatSceneImage: unit4Level6CloudkidDefeatSceneImage,
+  },
+  'chicken-vest': {
+    name: '치킨조끼',
+    spriteSet: {
+      attack: unit4Level6ChickenVestAttackImage,
+      default: unit4Level6ChickenVestDefaultImage,
+      hit: unit4Level6ChickenVestHitImage,
+    },
+    defeatSceneImage: unit4Level6ChickenVestDefeatSceneImage,
+  },
+};
+const UNIT4_LEVEL7_OPPONENT_VARIANTS: Record<Unit4Level7OpponentId, SpecialOpponentConfig> = {
+  starfish: {
+    name: '똥이',
+    spriteSet: {
+      attack: unit4Level7StarfishAttackImage,
+      default: unit4Level7StarfishDefaultImage,
+      hit: unit4Level7StarfishHitImage,
+    },
+    defeatSceneImage: unit4Level7StarfishDefeatSceneImage,
+  },
+  'space-ranger': {
+    name: '비즈 라이트이어',
+    spriteSet: {
+      attack: unit4Level7SpaceRangerAttackImage,
+      default: unit4Level7SpaceRangerDefaultImage,
+      hit: unit4Level7SpaceRangerHitImage,
+    },
+    defeatSceneImage: unit4Level7SpaceRangerDefeatSceneImage,
+  },
+};
+const UNIT4_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {};
+const UNIT6_LEVEL1_OPPONENT_VARIANTS: Record<Unit6Level1OpponentId, SpecialOpponentConfig> = {
+  'red-sticker': {
     name: '어몽어몽',
     spriteSet: {
       attack: unit6Level1RedStickerAttackImage,
@@ -2967,7 +3339,18 @@ const UNIT6_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
     },
     defeatSceneImage: unit6Level1RedStickerDefeatSceneImage,
   },
-  2: {
+  oguogu: {
+    name: '오구오구',
+    spriteSet: {
+      attack: unit6Level1OguoguStickerAttackImage,
+      default: unit6Level1OguoguStickerDefaultImage,
+      hit: unit6Level1OguoguStickerHitImage,
+    },
+    defeatSceneImage: unit6Level1OguoguStickerDefeatSceneImage,
+  },
+};
+const UNIT6_LEVEL2_OPPONENT_VARIANTS: Record<Unit6Level2OpponentId, SpecialOpponentConfig> = {
+  'frog-sticker': {
     name: '케로케로',
     spriteSet: {
       attack: unit6Level2FrogStickerAttackImage,
@@ -2976,7 +3359,18 @@ const UNIT6_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
     },
     defeatSceneImage: unit6Level2FrogStickerDefeatSceneImage,
   },
-  3: {
+  jjyordi: {
+    name: '쬬르디',
+    spriteSet: {
+      attack: unit6Level2JjyordiStickerAttackImage,
+      default: unit6Level2JjyordiStickerDefaultImage,
+      hit: unit6Level2JjyordiStickerHitImage,
+    },
+    defeatSceneImage: unit6Level2JjyordiStickerDefeatSceneImage,
+  },
+};
+const UNIT6_LEVEL3_OPPONENT_VARIANTS: Record<Unit6Level3OpponentId, SpecialOpponentConfig> = {
+  luchador: {
     name: '엘프리몽',
     spriteSet: {
       attack: unit6Level3LuchadorStickerAttackImage,
@@ -2985,7 +3379,18 @@ const UNIT6_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
     },
     defeatSceneImage: unit6Level3LuchadorStickerDefeatSceneImage,
   },
-  4: {
+  bonongbonong: {
+    name: '보농보농',
+    spriteSet: {
+      attack: unit6Level3BonongbonongAttackImage,
+      default: unit6Level3BonongbonongDefaultImage,
+      hit: unit6Level3BonongbonongHitImage,
+    },
+    defeatSceneImage: unit6Level3BonongbonongDefeatSceneImage,
+  },
+};
+const UNIT6_LEVEL4_OPPONENT_VARIANTS: Record<Unit6Level4OpponentId, SpecialOpponentConfig> = {
+  'pink-beaver': {
     name: '루우피',
     spriteSet: {
       attack: unit6Level4PinkBeaverStickerAttackImage,
@@ -2994,7 +3399,18 @@ const UNIT6_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
     },
     defeatSceneImage: unit6Level4PinkBeaverStickerDefeatSceneImage,
   },
-  5: {
+  uljjeoki: {
+    name: '울쩍이',
+    spriteSet: {
+      attack: unit6Level4UljjeokiStickerAttackImage,
+      default: unit6Level4UljjeokiStickerDefaultImage,
+      hit: unit6Level4UljjeokiStickerHitImage,
+    },
+    defeatSceneImage: unit6Level4UljjeokiStickerDefeatSceneImage,
+  },
+};
+const UNIT6_LEVEL5_OPPONENT_VARIANTS: Record<Unit6Level5OpponentId, SpecialOpponentConfig> = {
+  'raccoon-sticker': {
     name: '너굴너굴',
     spriteSet: {
       attack: unit6Level5RaccoonStickerAttackImage,
@@ -3003,7 +3419,18 @@ const UNIT6_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
     },
     defeatSceneImage: unit6Level5RaccoonStickerDefeatSceneImage,
   },
-  6: {
+  goracheolpudeok: {
+    name: '고라철푸덕',
+    spriteSet: {
+      attack: unit6Level5GoracheolpudeokStickerAttackImage,
+      default: unit6Level5GoracheolpudeokStickerDefaultImage,
+      hit: unit6Level5GoracheolpudeokStickerHitImage,
+    },
+    defeatSceneImage: unit6Level5GoracheolpudeokStickerDefeatSceneImage,
+  },
+};
+const UNIT6_LEVEL6_OPPONENT_VARIANTS: Record<Unit6Level6OpponentId, SpecialOpponentConfig> = {
+  'creeper-sticker': {
     name: '크리펑',
     spriteSet: {
       attack: unit6Level6CreeperStickerAttackImage,
@@ -3012,16 +3439,18 @@ const UNIT6_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
     },
     defeatSceneImage: unit6Level6CreeperStickerDefeatSceneImage,
   },
-  7: {
-    name: '노른자',
+  'tiger-magpie': {
+    name: '호랑이와 까치',
     spriteSet: {
-      attack: unit6Level7YolkStickerAttackImage,
-      default: unit6Level7YolkStickerDefaultImage,
-      hit: unit6Level7YolkStickerHitImage,
+      attack: unit6Level6TigerMagpieAttackImage,
+      default: unit6Level6TigerMagpieDefaultImage,
+      hit: unit6Level6TigerMagpieHitImage,
     },
-    defeatSceneImage: unit6Level7YolkStickerDefeatSceneImage,
+    defeatSceneImage: unit6Level6TigerMagpieDefeatSceneImage,
   },
-  8: {
+};
+const UNIT6_LEVEL8_OPPONENT_VARIANTS: Record<Unit6Level8OpponentId, SpecialOpponentConfig> = {
+  'idol-sticker': {
     name: '루비',
     spriteSet: {
       attack: unit6Level8IdolStickerAttackImage,
@@ -3030,7 +3459,39 @@ const UNIT6_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
     },
     defeatSceneImage: unit6Level8IdolStickerDefeatSceneImage,
   },
+  'yisunsin-statue': {
+    name: '이순신 동상',
+    spriteSet: {
+      attack: unit6Level8YisunsinStatueStickerAttackImage,
+      default: unit6Level8YisunsinStatueStickerDefaultImage,
+      hit: unit6Level8YisunsinStatueStickerHitImage,
+    },
+    defeatSceneImage: unit6Level8YisunsinStatueStickerDefeatSceneImage,
+  },
 };
+const UNIT6_LEVEL7_OPPONENT_VARIANTS: Record<Unit6Level7OpponentId, SpecialOpponentConfig> = {
+  'yolk-sticker': {
+    name: '노른자',
+    spriteSet: {
+      attack: unit6Level7YolkStickerAttackImage,
+      default: unit6Level7YolkStickerDefaultImage,
+      hit: unit6Level7YolkStickerHitImage,
+    },
+    defeatSceneImage: unit6Level7YolkStickerDefeatSceneImage,
+  },
+  'moss-sleepy': {
+    name: '이끼 낀 잠많이보',
+    spriteSet: {
+      attack: unit6Level7MossSleepyAttackImage,
+      default: unit6Level7MossSleepyDefaultImage,
+      hit: unit6Level7MossSleepyHitImage,
+    },
+    defeatSceneImage: unit6Level7MossSleepyDefeatSceneImage,
+  },
+};
+const UNIT6_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
+};
+
 const LEVEL_OPPONENT_SPRITES: Partial<Record<number, CharacterSpriteSet>> = {
   1: {
     attack: opponentLevel1AttackImage,
@@ -3117,6 +3578,27 @@ const UNIT_LEVEL_DESCRIPTIONS: Record<LearningUnitId, string[]> = {
     '10단계: 시간의 덧셈',
     '11단계: 시간의 뺄셈',
     '12단계: 시간의 덧셈과 뺄셈 종합',
+  ],
+  unit4: [
+    '',
+    '1단계: 똑같이 나누기',
+    '2단계: 똑같이 묶기',
+    '3단계: 나눗셈식',
+    '4단계: 곱셈과 나눗셈의 관계',
+    '5단계: 곱셈식 활용하기',
+    '6단계: 곱셈구구 활용하기',
+    '7단계: 나눗셈 활용하기',
+  ],
+  unit5: [
+    '',
+    '1단계: 묶어 세기',
+    '2단계: 곱셈식 알아보기',
+    '3단계: 2~5단 곱셈구구',
+    '4단계: 6~9단 곱셈구구',
+    '5단계: 0, 1, 10의 곱',
+    '6단계: 몇 배 알아보기',
+    '7단계: 곱셈 문장제',
+    '8단계: 곱셈 종합',
   ],
   unit6: [
     '',
@@ -3215,6 +3697,24 @@ const STORED_PLAY_RECORD_UNIT_THEMES: Record<LearningUnitId, StoredPlayRecordUni
     dotClassName: 'bg-violet-300',
     labelClassName: 'text-violet-100',
     latestRingClassName: 'ring-violet-200/75',
+  },
+  unit4: {
+    sectionClassName: 'border-rose-200/20 bg-rose-400/[0.045]',
+    cardClassName: 'border-rose-100/20 bg-[linear-gradient(180deg,rgba(58,18,36,0.96),rgba(12,18,34,0.98))]',
+    accentClassName: 'bg-rose-300',
+    progressClassName: 'bg-rose-300',
+    dotClassName: 'bg-rose-300',
+    labelClassName: 'text-rose-100',
+    latestRingClassName: 'ring-rose-200/75',
+  },
+  unit5: {
+    sectionClassName: 'border-orange-200/20 bg-orange-400/[0.045]',
+    cardClassName: 'border-orange-100/20 bg-[linear-gradient(180deg,rgba(61,35,12,0.96),rgba(12,18,34,0.98))]',
+    accentClassName: 'bg-orange-300',
+    progressClassName: 'bg-orange-300',
+    dotClassName: 'bg-orange-300',
+    labelClassName: 'text-orange-100',
+    latestRingClassName: 'ring-orange-200/75',
   },
   unit6: {
     sectionClassName: 'border-amber-200/20 bg-amber-400/[0.045]',
@@ -4222,6 +4722,8 @@ const REWARD_PLAYER_SKINS_BY_UNIT: Record<LearningUnitId, PlayerSkinConfig[]> = 
   unit1: REWARD_PLAYER_SKINS.slice(0, 20),
   unit2: REWARD_PLAYER_SKINS.slice(20, 40),
   unit3: REWARD_PLAYER_SKINS.slice(40, 60),
+  unit4: [],
+  unit5: [],
   unit6: REWARD_PLAYER_SKINS.slice(60),
 };
 
@@ -4396,7 +4898,7 @@ function readStoredPlayRecords(): StoredPlayRecord[] {
       record &&
       typeof record.id === 'string' &&
       typeof record.playerName === 'string' &&
-      (record.unitId === 'unit1' || record.unitId === 'unit2' || record.unitId === 'unit3' || record.unitId === 'unit6') &&
+      (record.unitId === 'unit1' || record.unitId === 'unit2' || record.unitId === 'unit3' || record.unitId === 'unit4' || record.unitId === 'unit6') &&
       typeof record.unitTitle === 'string' &&
       (record.result === 'win' || record.result === 'lose') &&
       typeof record.level === 'number' &&
@@ -4433,7 +4935,7 @@ const LEVEL12_TEMPLATE_ID_SET = new Set([
 ]);
 
 function isLearningUnitId(value: unknown): value is LearningUnitId {
-  return value === 'unit1' || value === 'unit2' || value === 'unit3' || value === 'unit6';
+  return value === 'unit1' || value === 'unit2' || value === 'unit3' || value === 'unit4' || value === 'unit5' || value === 'unit6';
 }
 
 function isBattleDifficulty(value: unknown): value is BattleDifficulty {
@@ -4531,7 +5033,7 @@ function readStoredBattleProgress(): StoredBattleProgress | null {
       playerName: parsedProgress.playerName,
       unitId: parsedProgress.unitId,
       battleDifficulty: parsedProgress.battleDifficulty,
-      specialOpponentSelections: parsedProgress.specialOpponentSelections ?? DEFAULT_SPECIAL_OPPONENT_SELECTIONS,
+      specialOpponentSelections: normalizeSpecialOpponentSelections(parsedProgress.specialOpponentSelections),
       level: parsedProgress.level,
       playerHP: Math.min(100, Math.max(1, parsedProgress.playerHP)),
       opponentHP: Math.min(100, Math.max(1, parsedProgress.opponentHP)),
@@ -4541,6 +5043,7 @@ function readStoredBattleProgress(): StoredBattleProgress | null {
       unit6ProblemSequence: normalizeStoredNumberRecord(parsedProgress.unit6ProblemSequence),
       unit6ProblemActivityCycle: normalizeStoredStringArrayRecord(parsedProgress.unit6ProblemActivityCycle),
       unit3ProblemSequence: normalizeStoredNumberRecord(parsedProgress.unit3ProblemSequence),
+      unit4ProblemSequence: normalizeStoredNumberRecord(parsedProgress.unit4ProblemSequence),
       unit3Level12RoundTemplateOrder: normalizeStoredLevel12TemplateOrder(parsedProgress.unit3Level12RoundTemplateOrder),
       unit3Level12PreviousTemplateOrder: normalizeStoredLevel12TemplateOrder(parsedProgress.unit3Level12PreviousTemplateOrder) ?? [],
     };
@@ -4677,6 +5180,22 @@ const LEARNING_UNITS: LearningUnitConfig[] = [
     isAvailable: true,
   },
   {
+    id: 'unit4',
+    chapterLabel: '4단원',
+    title: '나눗셈',
+    summary: '나누고 묶어 계산하기',
+    description: '똑같이 나누기와 묶기에서 나눗셈식, 곱셈구구 활용까지 이어지는 단원입니다.',
+    isAvailable: true,
+  },
+  {
+    id: 'unit5',
+    chapterLabel: '5단원',
+    title: '곱셈',
+    summary: '곱셈구구와 몇 배',
+    description: '묶어 세기에서 곱셈구구, 몇 배, 문장제까지 연습하는 단원입니다.',
+    isAvailable: true,
+  },
+  {
     id: 'unit6',
     chapterLabel: '6단원',
     title: '분수와 소수',
@@ -4686,9 +5205,12 @@ const LEARNING_UNITS: LearningUnitConfig[] = [
   },
 ];
 const IN_PROGRESS_LEARNING_UNIT_IDS = new Set<LearningUnitId>();
+const DEVELOPER_ONLY_LEARNING_UNIT_IDS = new Set<LearningUnitId>(['unit4', 'unit5']);
 const isLearningUnitInProgress = (unitId: LearningUnitId) => IN_PROGRESS_LEARNING_UNIT_IDS.has(unitId);
+const isDeveloperOnlyLearningUnit = (unitId: LearningUnitId) => DEVELOPER_ONLY_LEARNING_UNIT_IDS.has(unitId);
 const canEnterLearningUnit = (unit: LearningUnitConfig, isDeveloperMode: boolean) =>
-  unit.isAvailable && (isDeveloperMode || !isLearningUnitInProgress(unit.id));
+  unit.isAvailable &&
+  (isDeveloperMode || (!isLearningUnitInProgress(unit.id) && !isDeveloperOnlyLearningUnit(unit.id)));
 const FINAL_BUILDER_HP = 25;
 const ESTIMATION_SAFE_HP = 40;
 const UNIT_SELECTION_TIME_LIMIT_SECONDS = 20;
@@ -4726,6 +5248,248 @@ function pickSpecialOpponentSelections(): SpecialOpponentSelections {
     level5: Math.random() < 0.5 ? DEFAULT_LEVEL5_OPPONENT_ID : 'jurdi',
     level6: Math.random() < 0.5 ? DEFAULT_LEVEL6_OPPONENT_ID : 'anheunhannammae',
     level7: Math.random() < 0.5 ? DEFAULT_LEVEL7_OPPONENT_ID : 'arnya',
+    unit4Level1: Math.random() < 0.5 ? DEFAULT_UNIT4_LEVEL1_OPPONENT_ID : 'green-alien',
+    unit4Level2: Math.random() < 0.5 ? DEFAULT_UNIT4_LEVEL2_OPPONENT_ID : 'beret-puppy',
+    unit4Level3: Math.random() < 0.5 ? DEFAULT_UNIT4_LEVEL3_OPPONENT_ID : 'crying-baby',
+    unit4Level4: Math.random() < 0.5 ? DEFAULT_UNIT4_LEVEL4_OPPONENT_ID : 'sawpuppy',
+    unit4Level5: Math.random() < 0.5 ? DEFAULT_UNIT4_LEVEL5_OPPONENT_ID : 'dazed-pondbird',
+    unit4Level6: Math.random() < 0.5 ? DEFAULT_UNIT4_LEVEL6_OPPONENT_ID : 'chicken-vest',
+    unit4Level7: Math.random() < 0.5 ? DEFAULT_UNIT4_LEVEL7_OPPONENT_ID : 'space-ranger',
+    unit6Level1: Math.random() < 0.5 ? DEFAULT_UNIT6_LEVEL1_OPPONENT_ID : 'oguogu',
+    unit6Level2: Math.random() < 0.5 ? DEFAULT_UNIT6_LEVEL2_OPPONENT_ID : 'jjyordi',
+    unit6Level3: Math.random() < 0.5 ? DEFAULT_UNIT6_LEVEL3_OPPONENT_ID : 'bonongbonong',
+    unit6Level4: Math.random() < 0.5 ? DEFAULT_UNIT6_LEVEL4_OPPONENT_ID : 'uljjeoki',
+    unit6Level5: Math.random() < 0.5 ? DEFAULT_UNIT6_LEVEL5_OPPONENT_ID : 'goracheolpudeok',
+    unit6Level6: Math.random() < 0.5 ? DEFAULT_UNIT6_LEVEL6_OPPONENT_ID : 'tiger-magpie',
+    unit6Level7: Math.random() < 0.5 ? DEFAULT_UNIT6_LEVEL7_OPPONENT_ID : 'moss-sleepy',
+    unit6Level8: Math.random() < 0.5 ? DEFAULT_UNIT6_LEVEL8_OPPONENT_ID : 'yisunsin-statue',
+  };
+}
+
+function pickDifferentOption<T extends string>(current: T, options: readonly T[]) {
+  const candidates = options.filter((option) => option !== current);
+  if (candidates.length === 0) {
+    return current;
+  }
+
+  return candidates[Math.floor(Math.random() * candidates.length)];
+}
+
+function pickDeveloperOpponentSelections(
+  unitId: LearningUnitId,
+  level: number,
+  currentSelections: SpecialOpponentSelections,
+): SpecialOpponentSelections {
+  if (unitId === 'unit4' && level === 1) {
+    return {
+      ...currentSelections,
+      unit4Level1: pickDifferentOption(currentSelections.unit4Level1, [
+        DEFAULT_UNIT4_LEVEL1_OPPONENT_ID,
+        'green-alien',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit4' && level === 2) {
+    return {
+      ...currentSelections,
+      unit4Level2: pickDifferentOption(currentSelections.unit4Level2, [
+        DEFAULT_UNIT4_LEVEL2_OPPONENT_ID,
+        'beret-puppy',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit4' && level === 3) {
+    return {
+      ...currentSelections,
+      unit4Level3: pickDifferentOption(currentSelections.unit4Level3, [
+        DEFAULT_UNIT4_LEVEL3_OPPONENT_ID,
+        'crying-baby',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit4' && level === 4) {
+    return {
+      ...currentSelections,
+      unit4Level4: pickDifferentOption(currentSelections.unit4Level4, [
+        DEFAULT_UNIT4_LEVEL4_OPPONENT_ID,
+        'sawpuppy',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit4' && level === 5) {
+    return {
+      ...currentSelections,
+      unit4Level5: pickDifferentOption(currentSelections.unit4Level5, [
+        DEFAULT_UNIT4_LEVEL5_OPPONENT_ID,
+        'dazed-pondbird',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit4' && level === 6) {
+    return {
+      ...currentSelections,
+      unit4Level6: pickDifferentOption(currentSelections.unit4Level6, [
+        DEFAULT_UNIT4_LEVEL6_OPPONENT_ID,
+        'chicken-vest',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit4' && level === 7) {
+    return {
+      ...currentSelections,
+      unit4Level7: pickDifferentOption(currentSelections.unit4Level7, [
+        DEFAULT_UNIT4_LEVEL7_OPPONENT_ID,
+        'space-ranger',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit6' && level === 1) {
+    return {
+      ...currentSelections,
+      unit6Level1: pickDifferentOption(currentSelections.unit6Level1, [
+        DEFAULT_UNIT6_LEVEL1_OPPONENT_ID,
+        'oguogu',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit6' && level === 2) {
+    return {
+      ...currentSelections,
+      unit6Level2: pickDifferentOption(currentSelections.unit6Level2, [
+        DEFAULT_UNIT6_LEVEL2_OPPONENT_ID,
+        'jjyordi',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit6' && level === 3) {
+    return {
+      ...currentSelections,
+      unit6Level3: pickDifferentOption(currentSelections.unit6Level3, [
+        DEFAULT_UNIT6_LEVEL3_OPPONENT_ID,
+        'bonongbonong',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit6' && level === 4) {
+    return {
+      ...currentSelections,
+      unit6Level4: pickDifferentOption(currentSelections.unit6Level4, [
+        DEFAULT_UNIT6_LEVEL4_OPPONENT_ID,
+        'uljjeoki',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit6' && level === 5) {
+    return {
+      ...currentSelections,
+      unit6Level5: pickDifferentOption(currentSelections.unit6Level5, [
+        DEFAULT_UNIT6_LEVEL5_OPPONENT_ID,
+        'goracheolpudeok',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit6' && level === 6) {
+    return {
+      ...currentSelections,
+      unit6Level6: pickDifferentOption(currentSelections.unit6Level6, [
+        DEFAULT_UNIT6_LEVEL6_OPPONENT_ID,
+        'tiger-magpie',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit6' && level === 7) {
+    return {
+      ...currentSelections,
+      unit6Level7: pickDifferentOption(currentSelections.unit6Level7, [
+        DEFAULT_UNIT6_LEVEL7_OPPONENT_ID,
+        'moss-sleepy',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit6' && level === 8) {
+    return {
+      ...currentSelections,
+      unit6Level8: pickDifferentOption(currentSelections.unit6Level8, [
+        DEFAULT_UNIT6_LEVEL8_OPPONENT_ID,
+        'yisunsin-statue',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit1' || unitId === 'unit3' || unitId === 'unit4' || unitId === 'unit6') {
+    return currentSelections;
+  }
+
+  if (level === 1) {
+    return {
+      ...currentSelections,
+      level1: pickDifferentOption(currentSelections.level1, [DEFAULT_LEVEL1_OPPONENT_ID, 'churusigi']),
+    };
+  }
+
+  if (level === 2) {
+    return {
+      ...currentSelections,
+      level2: pickDifferentOption(currentSelections.level2, [DEFAULT_LEVEL2_OPPONENT_ID, 'jjangpal']),
+    };
+  }
+
+  if (level === 3) {
+    return {
+      ...currentSelections,
+      level3: pickDifferentOption(currentSelections.level3, [DEFAULT_LEVEL3_OPPONENT_ID, 'gamjaaniguma']),
+    };
+  }
+
+  if (level === 4) {
+    return {
+      ...currentSelections,
+      level4: pickDifferentOption(currentSelections.level4, [DEFAULT_LEVEL4_OPPONENT_ID, 'baekgeurigoa']),
+    };
+  }
+
+  if (level === 5) {
+    return {
+      ...currentSelections,
+      level5: pickDifferentOption(currentSelections.level5, [DEFAULT_LEVEL5_OPPONENT_ID, 'jurdi']),
+    };
+  }
+
+  if (level === 6) {
+    return {
+      ...currentSelections,
+      level6: pickDifferentOption(currentSelections.level6, [DEFAULT_LEVEL6_OPPONENT_ID, 'anheunhannammae']),
+    };
+  }
+
+  if (level === 7) {
+    return {
+      ...currentSelections,
+      level7: pickDifferentOption(currentSelections.level7, [DEFAULT_LEVEL7_OPPONENT_ID, 'arnya']),
+    };
+  }
+
+  return currentSelections;
+}
+
+function normalizeSpecialOpponentSelections(selections: Partial<SpecialOpponentSelections> | null | undefined): SpecialOpponentSelections {
+  return {
+    ...DEFAULT_SPECIAL_OPPONENT_SELECTIONS,
+    ...(selections ?? {}),
   };
 }
 
@@ -4774,7 +5538,71 @@ function getConfiguredOpponentForUnit(
     return UNIT3_LEVEL_OPPONENTS[level] ?? null;
   }
 
+  if (unitId === 'unit4') {
+    if (level === 1) {
+      return UNIT4_LEVEL1_OPPONENT_VARIANTS[selections.unit4Level1] ?? UNIT4_LEVEL1_OPPONENT_VARIANTS[DEFAULT_UNIT4_LEVEL1_OPPONENT_ID];
+    }
+
+    if (level === 2) {
+      return UNIT4_LEVEL2_OPPONENT_VARIANTS[selections.unit4Level2] ?? UNIT4_LEVEL2_OPPONENT_VARIANTS[DEFAULT_UNIT4_LEVEL2_OPPONENT_ID];
+    }
+
+    if (level === 3) {
+      return UNIT4_LEVEL3_OPPONENT_VARIANTS[selections.unit4Level3] ?? UNIT4_LEVEL3_OPPONENT_VARIANTS[DEFAULT_UNIT4_LEVEL3_OPPONENT_ID];
+    }
+
+    if (level === 4) {
+      return UNIT4_LEVEL4_OPPONENT_VARIANTS[selections.unit4Level4] ?? UNIT4_LEVEL4_OPPONENT_VARIANTS[DEFAULT_UNIT4_LEVEL4_OPPONENT_ID];
+    }
+
+    if (level === 5) {
+      return UNIT4_LEVEL5_OPPONENT_VARIANTS[selections.unit4Level5] ?? UNIT4_LEVEL5_OPPONENT_VARIANTS[DEFAULT_UNIT4_LEVEL5_OPPONENT_ID];
+    }
+
+    if (level === 6) {
+      return UNIT4_LEVEL6_OPPONENT_VARIANTS[selections.unit4Level6] ?? UNIT4_LEVEL6_OPPONENT_VARIANTS[DEFAULT_UNIT4_LEVEL6_OPPONENT_ID];
+    }
+
+    if (level === 7) {
+      return UNIT4_LEVEL7_OPPONENT_VARIANTS[selections.unit4Level7] ?? UNIT4_LEVEL7_OPPONENT_VARIANTS[DEFAULT_UNIT4_LEVEL7_OPPONENT_ID];
+    }
+
+    return UNIT4_LEVEL_OPPONENTS[level] ?? null;
+  }
+
   if (unitId === 'unit6') {
+    if (level === 1) {
+      return UNIT6_LEVEL1_OPPONENT_VARIANTS[selections.unit6Level1] ?? UNIT6_LEVEL1_OPPONENT_VARIANTS[DEFAULT_UNIT6_LEVEL1_OPPONENT_ID];
+    }
+
+    if (level === 2) {
+      return UNIT6_LEVEL2_OPPONENT_VARIANTS[selections.unit6Level2] ?? UNIT6_LEVEL2_OPPONENT_VARIANTS[DEFAULT_UNIT6_LEVEL2_OPPONENT_ID];
+    }
+
+    if (level === 3) {
+      return UNIT6_LEVEL3_OPPONENT_VARIANTS[selections.unit6Level3] ?? UNIT6_LEVEL3_OPPONENT_VARIANTS[DEFAULT_UNIT6_LEVEL3_OPPONENT_ID];
+    }
+
+    if (level === 4) {
+      return UNIT6_LEVEL4_OPPONENT_VARIANTS[selections.unit6Level4] ?? UNIT6_LEVEL4_OPPONENT_VARIANTS[DEFAULT_UNIT6_LEVEL4_OPPONENT_ID];
+    }
+
+    if (level === 5) {
+      return UNIT6_LEVEL5_OPPONENT_VARIANTS[selections.unit6Level5] ?? UNIT6_LEVEL5_OPPONENT_VARIANTS[DEFAULT_UNIT6_LEVEL5_OPPONENT_ID];
+    }
+
+    if (level === 6) {
+      return UNIT6_LEVEL6_OPPONENT_VARIANTS[selections.unit6Level6] ?? UNIT6_LEVEL6_OPPONENT_VARIANTS[DEFAULT_UNIT6_LEVEL6_OPPONENT_ID];
+    }
+
+    if (level === 7) {
+      return UNIT6_LEVEL7_OPPONENT_VARIANTS[selections.unit6Level7] ?? UNIT6_LEVEL7_OPPONENT_VARIANTS[DEFAULT_UNIT6_LEVEL7_OPPONENT_ID];
+    }
+
+    if (level === 8) {
+      return UNIT6_LEVEL8_OPPONENT_VARIANTS[selections.unit6Level8] ?? UNIT6_LEVEL8_OPPONENT_VARIANTS[DEFAULT_UNIT6_LEVEL8_OPPONENT_ID];
+    }
+
     return UNIT6_LEVEL_OPPONENTS[level] ?? null;
   }
 
@@ -5133,6 +5961,982 @@ function createShuffledOptionsProblem(question: string, options: string[], corre
     buildNumberedOptionsPrompt(question, shuffledOptions),
     shuffledOptions.indexOf(correctOption) + 1,
   );
+}
+
+const EQUAL_SHARE_DIVISION_COUNTS_PREFIX = 'equal-share-counts:';
+const EQUAL_SHARE_DIVISION_EQUATION_PREFIX = 'equal-share-equation:';
+const EQUAL_GROUPING_COUNTS_PREFIX = 'equal-grouping-counts:';
+const EQUAL_GROUPING_SUBTRACTION_PREFIX = 'equal-grouping-subtraction:';
+const EQUAL_GROUPING_DIVISION_PREFIX = 'equal-grouping-division:';
+const DIVISION_EQUATION_PARTS_PREFIX = 'division-equation-parts:';
+const DIVISION_SITUATION_CLASSIFY_PREFIX = 'division-situation-classify:';
+
+function getEqualShareDivisionAnswerToken(total: number, groups: number) {
+  return `${total}|${groups}|${total / groups}`;
+}
+
+function createEqualShareDivisionProblem(data: Omit<EqualShareDivisionProblemData, 'answerToken'>): Problem {
+  return {
+    text: '',
+    prompt: data.instruction,
+    answer: data.total / data.groups,
+    kind: 'equalShareDivision',
+    equalShareDivision: {
+      ...data,
+      answerToken: getEqualShareDivisionAnswerToken(data.total, data.groups),
+    },
+  };
+}
+
+function getEqualShareDivisionCountsAnswer(counts: number[]) {
+  return `${EQUAL_SHARE_DIVISION_COUNTS_PREFIX}${counts.join(',')}`;
+}
+
+function getEqualShareDivisionEquationAnswer(total: number, groups: number, quotient: number) {
+  return `${EQUAL_SHARE_DIVISION_EQUATION_PREFIX}${total},${groups},${quotient}`;
+}
+
+function parseEqualShareDivisionNumbers(answerValue: string, prefix: string) {
+  if (!answerValue.startsWith(prefix)) {
+    return [];
+  }
+
+  return answerValue
+    .slice(prefix.length)
+    .split(',')
+    .map((value) => {
+      const trimmedValue = value.trim();
+      return /^\d+$/.test(trimmedValue) ? Number.parseInt(trimmedValue, 10) : Number.NaN;
+    });
+}
+
+function isEqualShareDivisionAnswerReady(answerValue: string, data: EqualShareDivisionProblemData) {
+  if (data.activity === 'manipulate') {
+    const counts = parseEqualShareDivisionNumbers(answerValue, EQUAL_SHARE_DIVISION_COUNTS_PREFIX);
+    return counts.length === data.groups && counts.every((count) => !Number.isNaN(count));
+  }
+
+  const numbers = parseEqualShareDivisionNumbers(answerValue, EQUAL_SHARE_DIVISION_EQUATION_PREFIX);
+  return numbers.length === 3 && numbers.every((number) => !Number.isNaN(number));
+}
+
+function isEqualShareDivisionAnswerCorrect(answerValue: string, data: EqualShareDivisionProblemData) {
+  const quotient = data.total / data.groups;
+
+  if (data.activity === 'manipulate') {
+    const counts = parseEqualShareDivisionNumbers(answerValue, EQUAL_SHARE_DIVISION_COUNTS_PREFIX);
+    return counts.length === data.groups && counts.every((count) => count === quotient);
+  }
+
+  const [total, groups, answer] = parseEqualShareDivisionNumbers(answerValue, EQUAL_SHARE_DIVISION_EQUATION_PREFIX);
+  return total === data.total && groups === data.groups && answer === quotient;
+}
+
+type EqualShareDivisionProblemInput = Omit<EqualShareDivisionProblemData, 'answerToken'>;
+type EqualGroupingDivisionProblemInput = Omit<EqualGroupingDivisionProblemData, 'answerToken'>;
+type DivisionEquationPartsProblemInput = Omit<DivisionEquationPartsProblemData, 'answerToken' | 'partOrder'>;
+
+function getEqualGroupingDivisionAnswerToken(total: number, groupSize: number) {
+  return `${total}|${groupSize}|${total / groupSize}`;
+}
+
+function createEqualGroupingDivisionProblem(data: EqualGroupingDivisionProblemInput): Problem {
+  return {
+    text: '',
+    prompt: data.instruction,
+    answer: data.total / data.groupSize,
+    kind: 'equalGroupingDivision',
+    answerUnit: data.answerUnit,
+    equalGroupingDivision: {
+      ...data,
+      answerToken: getEqualGroupingDivisionAnswerToken(data.total, data.groupSize),
+    },
+  };
+}
+
+function getEqualGroupingCountsAnswer(counts: number[]) {
+  return `${EQUAL_GROUPING_COUNTS_PREFIX}${counts.join(',')}`;
+}
+
+function getEqualGroupingSubtractionAnswer(total: number, groupSize: number, answer: number) {
+  return `${EQUAL_GROUPING_SUBTRACTION_PREFIX}${total},${groupSize},${answer}`;
+}
+
+function getEqualGroupingDivisionAnswer(total: number, groupSize: number, answer: number) {
+  return `${EQUAL_GROUPING_DIVISION_PREFIX}${total},${groupSize},${answer}`;
+}
+
+function getEqualGroupingLinkedEquationAnswer(total: number, groupSize: number, answer: number, subtractionCorrect: boolean, divisionCorrect: boolean) {
+  return `${EQUAL_GROUPING_DIVISION_PREFIX}${total},${groupSize},${answer},${subtractionCorrect ? 1 : 0},${divisionCorrect ? 1 : 0}`;
+}
+
+function parsePrefixedNumbers(answerValue: string, prefix: string) {
+  if (!answerValue.startsWith(prefix)) {
+    return [];
+  }
+
+  return answerValue
+    .slice(prefix.length)
+    .split(',')
+    .map((value) => {
+      const trimmedValue = value.trim();
+      return /^\d+$/.test(trimmedValue) ? Number.parseInt(trimmedValue, 10) : Number.NaN;
+    });
+}
+
+function isEqualGroupingDivisionAnswerReady(answerValue: string, data: EqualGroupingDivisionProblemData) {
+  const groupCount = data.total / data.groupSize;
+
+  if (data.activity === 'groupManipulate') {
+    const counts = parsePrefixedNumbers(answerValue, EQUAL_GROUPING_COUNTS_PREFIX);
+    return counts.length === groupCount && counts.every((count) => !Number.isNaN(count));
+  }
+
+  const prefix = data.activity === 'repeatedSubtraction'
+    ? EQUAL_GROUPING_SUBTRACTION_PREFIX
+    : EQUAL_GROUPING_DIVISION_PREFIX;
+  const numbers = parsePrefixedNumbers(answerValue, prefix);
+  const expectedLength = data.activity === 'subtractionToDivision' ? 5 : 3;
+  return numbers.length === expectedLength && numbers.every((number) => !Number.isNaN(number));
+}
+
+function isEqualGroupingDivisionAnswerCorrect(answerValue: string, data: EqualGroupingDivisionProblemData) {
+  const groupCount = data.total / data.groupSize;
+
+  if (data.activity === 'groupManipulate') {
+    const counts = parsePrefixedNumbers(answerValue, EQUAL_GROUPING_COUNTS_PREFIX);
+    return counts.length === groupCount && counts.every((count) => count === data.groupSize);
+  }
+
+  const prefix = data.activity === 'repeatedSubtraction'
+    ? EQUAL_GROUPING_SUBTRACTION_PREFIX
+    : EQUAL_GROUPING_DIVISION_PREFIX;
+  const [total, groupSize, answer, subtractionCorrect = 1, divisionCorrect = 1] = parsePrefixedNumbers(answerValue, prefix);
+  if (data.activity === 'subtractionToDivision') {
+    return total === data.total && groupSize > 0 && total % groupSize === 0 && answer === total / groupSize && subtractionCorrect === 1 && divisionCorrect === 1;
+  }
+
+  return total === data.total && groupSize === data.groupSize && answer === groupCount && subtractionCorrect === 1 && divisionCorrect === 1;
+}
+
+const DIVISION_EQUATION_PART_ORDER: DivisionEquationPartKey[] = ['dividend', 'divisor', 'quotient'];
+
+function getDivisionEquationPartsAnswerToken(
+  dividend: number,
+  divisor: number,
+  quotient: number,
+  partOrder: DivisionEquationPartKey[],
+) {
+  return `${dividend}|${divisor}|${quotient}|${partOrder.join('-')}`;
+}
+
+function createDivisionEquationPartsProblem(data: DivisionEquationPartsProblemInput): Problem {
+  const partOrder = shuffleValues(DIVISION_EQUATION_PART_ORDER);
+  return {
+    text: `${data.dividend} ÷ ${data.divisor} = ${data.quotient}`,
+    prompt: data.instruction,
+    answer: data.quotient,
+    kind: 'divisionEquationParts',
+    divisionEquationParts: {
+      ...data,
+      partOrder,
+      answerToken: getDivisionEquationPartsAnswerToken(data.dividend, data.divisor, data.quotient, partOrder),
+    },
+  };
+}
+
+function getDivisionEquationPartsAnswer(dividend: number, divisor: number, quotient: number) {
+  return `${DIVISION_EQUATION_PARTS_PREFIX}${dividend},${divisor},${quotient}`;
+}
+
+function isDivisionEquationPartsAnswerReady(answerValue: string) {
+  const numbers = parsePrefixedNumbers(answerValue, DIVISION_EQUATION_PARTS_PREFIX);
+  return numbers.length === 3 && numbers.every((number) => !Number.isNaN(number));
+}
+
+function isDivisionEquationPartsAnswerCorrect(answerValue: string, data: DivisionEquationPartsProblemData) {
+  const [dividend, divisor, quotient] = parsePrefixedNumbers(answerValue, DIVISION_EQUATION_PARTS_PREFIX);
+  return dividend === data.dividend && divisor === data.divisor && quotient === data.quotient;
+}
+
+function getDivisionSituationClassifyAnswerToken(situation: DivisionSituationCardData) {
+  return situation.kind;
+}
+
+function createDivisionSituationClassifyProblem(data: Omit<DivisionSituationClassifyProblemData, 'answerToken'>): Problem {
+  return {
+    text: '',
+    prompt: data.instruction,
+    answer: 0,
+    kind: 'divisionSituationClassify',
+    divisionSituationClassify: {
+      ...data,
+      answerToken: getDivisionSituationClassifyAnswerToken(data.situation),
+    },
+  };
+}
+
+function parseDivisionSituationClassifyAnswer(answerValue: string): DivisionSituationKind | null {
+  if (!answerValue.startsWith(DIVISION_SITUATION_CLASSIFY_PREFIX)) {
+    return null;
+  }
+
+  const kind = answerValue.slice(DIVISION_SITUATION_CLASSIFY_PREFIX.length);
+  return kind === 'equalShare' || kind === 'equalGrouping' ? kind : null;
+}
+
+function getDivisionSituationClassifyAnswer(kind: DivisionSituationKind | null) {
+  return kind === null ? '' : `${DIVISION_SITUATION_CLASSIFY_PREFIX}${kind}`;
+}
+
+function isDivisionSituationClassifyAnswerReady(answerValue: string) {
+  return parseDivisionSituationClassifyAnswer(answerValue) !== null;
+}
+
+function isDivisionSituationClassifyAnswerCorrect(answerValue: string, data: DivisionSituationClassifyProblemData) {
+  return parseDivisionSituationClassifyAnswer(answerValue) === data.situation.kind;
+}
+
+const UNIT4_LEVEL1_MANIPULATION_VARIANTS: EqualShareDivisionProblemInput[] = [
+  {
+    activity: 'manipulate',
+    title: '연필 나누기',
+    instruction: '연필 8자루를 연필꽂이 4개에 똑같이 나누어 넣어 보세요.',
+    helperText: '연필을 드래그하거나 연필을 고른 뒤 연필꽂이를 눌러요.',
+    itemKind: 'pencil',
+    itemLabel: '연필',
+    containerKind: 'pencilCup',
+    containerLabel: '연필꽂이',
+    total: 8,
+    groups: 4,
+  },
+  {
+    activity: 'manipulate',
+    title: '접시에 나누기',
+    instruction: '딸기 6개를 접시 2개에 똑같이 나누어 담아 보세요.',
+    helperText: '두 접시에 들어간 딸기 수가 같아야 해요.',
+    itemKind: 'strawberry',
+    itemLabel: '딸기',
+    containerKind: 'plate',
+    containerLabel: '접시',
+    total: 6,
+    groups: 2,
+  },
+  {
+    activity: 'manipulate',
+    title: '바구니에 나누기',
+    instruction: '사과 12개를 바구니 3개에 똑같이 나누어 담아 보세요.',
+    helperText: '바구니마다 같은 수가 되게 담아요.',
+    itemKind: 'apple',
+    itemLabel: '사과',
+    containerKind: 'basket',
+    containerLabel: '바구니',
+    total: 12,
+    groups: 3,
+  },
+  {
+    activity: 'manipulate',
+    title: '상자에 나누기',
+    instruction: '블록 10개를 상자 5개에 똑같이 나누어 담아 보세요.',
+    helperText: '상자마다 같은 수가 되게 담아요.',
+    itemKind: 'block',
+    itemLabel: '블록',
+    containerKind: 'box',
+    containerLabel: '상자',
+    total: 10,
+    groups: 5,
+  },
+  {
+    activity: 'manipulate',
+    title: '연필꽂이에 나누기',
+    instruction: '연필 12자루를 연필꽂이 3개에 똑같이 나누어 넣어 보세요.',
+    helperText: '연필꽂이마다 같은 수가 되게 넣어요.',
+    itemKind: 'pencil',
+    itemLabel: '연필',
+    containerKind: 'pencilCup',
+    containerLabel: '연필꽂이',
+    total: 12,
+    groups: 3,
+  },
+  {
+    activity: 'manipulate',
+    title: '복숭아 나누기',
+    instruction: '복숭아 10개를 접시 2개에 똑같이 나누어 담아 보세요.',
+    helperText: '접시마다 같은 수가 되게 놓아요.',
+    itemKind: 'peach',
+    itemLabel: '복숭아',
+    containerKind: 'plate',
+    containerLabel: '접시',
+    total: 10,
+    groups: 2,
+  },
+  {
+    activity: 'manipulate',
+    title: '귤 나누기',
+    instruction: '귤 10개를 바구니 5개에 똑같이 나누어 담아 보세요.',
+    helperText: '바구니마다 같은 수가 되게 담아요.',
+    itemKind: 'tangerine',
+    itemLabel: '귤',
+    containerKind: 'basket',
+    containerLabel: '바구니',
+    total: 10,
+    groups: 5,
+  },
+  {
+    activity: 'manipulate',
+    title: '쿠키 나누기',
+    instruction: '쿠키 12개를 상자 4개에 똑같이 나누어 담아 보세요.',
+    helperText: '상자마다 같은 수가 되게 담아요.',
+    itemKind: 'cookie',
+    itemLabel: '쿠키',
+    containerKind: 'box',
+    containerLabel: '상자',
+    total: 12,
+    groups: 4,
+  },
+  {
+    activity: 'manipulate',
+    title: '사탕 나누기',
+    instruction: '사탕 12개를 상자 6개에 똑같이 나누어 담아 보세요.',
+    helperText: '상자마다 같은 수가 되게 담아요.',
+    itemKind: 'candy',
+    itemLabel: '사탕',
+    containerKind: 'box',
+    containerLabel: '상자',
+    total: 12,
+    groups: 6,
+  },
+  {
+    activity: 'manipulate',
+    title: '구슬 나누기',
+    instruction: '구슬 12개를 컵 4개에 똑같이 나누어 담아 보세요.',
+    helperText: '컵마다 같은 수가 되게 담아요.',
+    itemKind: 'marble',
+    itemLabel: '구슬',
+    containerKind: 'pencilCup',
+    containerLabel: '컵',
+    total: 12,
+    groups: 4,
+  },
+  {
+    activity: 'manipulate',
+    title: '색연필 나누기',
+    instruction: '색연필 12자루를 연필꽂이 3개에 똑같이 나누어 넣어 보세요.',
+    helperText: '연필꽂이마다 같은 수가 되게 넣어요.',
+    itemKind: 'coloredPencil',
+    itemLabel: '색연필',
+    containerKind: 'pencilCup',
+    containerLabel: '연필꽂이',
+    total: 12,
+    groups: 3,
+  },
+  {
+    activity: 'manipulate',
+    title: '공책 나누기',
+    instruction: '공책 12권을 상자 6개에 똑같이 나누어 담아 보세요.',
+    helperText: '상자마다 같은 수가 되게 담아요.',
+    itemKind: 'notebook',
+    itemLabel: '공책',
+    containerKind: 'box',
+    containerLabel: '상자',
+    total: 12,
+    groups: 6,
+  },
+  {
+    activity: 'manipulate',
+    title: '스티커 나누기',
+    instruction: '스티커 12장을 접시 4개에 똑같이 나누어 놓아 보세요.',
+    helperText: '접시마다 같은 수가 되게 담아요.',
+    itemKind: 'sticker',
+    itemLabel: '스티커',
+    containerKind: 'plate',
+    containerLabel: '접시',
+    total: 12,
+    groups: 4,
+  },
+];
+
+const UNIT4_LEVEL1_ANIMATION_VARIANTS: EqualShareDivisionProblemInput[] = [
+  {
+    activity: 'animationEquation',
+    title: '식 쓰기',
+    instruction: '사과 6개가 바구니 2개에 똑같이 나누어 들어갑니다.',
+    helperText: '움직임을 보고 식을 완성해요.',
+    itemKind: 'apple',
+    itemLabel: '사과',
+    containerKind: 'basket',
+    containerLabel: '바구니',
+    total: 6,
+    groups: 2,
+  },
+  {
+    activity: 'animationEquation',
+    title: '식 쓰기',
+    instruction: '연필 8자루가 연필꽂이 4개에 똑같이 나누어 들어갑니다.',
+    helperText: '움직임을 보고 식을 완성해요.',
+    itemKind: 'pencil',
+    itemLabel: '연필',
+    containerKind: 'pencilCup',
+    containerLabel: '연필꽂이',
+    total: 8,
+    groups: 4,
+  },
+  {
+    activity: 'animationEquation',
+    title: '식 쓰기',
+    instruction: '복숭아 14개가 접시 2개에 똑같이 나누어 들어갑니다.',
+    helperText: '움직임을 보고 식을 완성해요.',
+    itemKind: 'peach',
+    itemLabel: '복숭아',
+    containerKind: 'plate',
+    containerLabel: '접시',
+    total: 14,
+    groups: 2,
+  },
+  {
+    activity: 'animationEquation',
+    title: '식 쓰기',
+    instruction: '딸기 12개가 접시 3개에 똑같이 나누어 들어갑니다.',
+    helperText: '움직임을 보고 식을 완성해요.',
+    itemKind: 'strawberry',
+    itemLabel: '딸기',
+    containerKind: 'plate',
+    containerLabel: '접시',
+    total: 12,
+    groups: 3,
+  },
+  {
+    activity: 'animationEquation',
+    title: '식 쓰기',
+    instruction: '귤 15개가 바구니 5개에 똑같이 나누어 들어갑니다.',
+    helperText: '움직임을 보고 식을 완성해요.',
+    itemKind: 'tangerine',
+    itemLabel: '귤',
+    containerKind: 'basket',
+    containerLabel: '바구니',
+    total: 15,
+    groups: 5,
+  },
+  {
+    activity: 'animationEquation',
+    title: '식 쓰기',
+    instruction: '쿠키 16개가 상자 4개에 똑같이 나누어 들어갑니다.',
+    helperText: '움직임을 보고 식을 완성해요.',
+    itemKind: 'cookie',
+    itemLabel: '쿠키',
+    containerKind: 'box',
+    containerLabel: '상자',
+    total: 16,
+    groups: 4,
+  },
+  {
+    activity: 'animationEquation',
+    title: '식 쓰기',
+    instruction: '사탕 18개가 상자 3개에 똑같이 나누어 들어갑니다.',
+    helperText: '움직임을 보고 식을 완성해요.',
+    itemKind: 'candy',
+    itemLabel: '사탕',
+    containerKind: 'box',
+    containerLabel: '상자',
+    total: 18,
+    groups: 3,
+  },
+  {
+    activity: 'animationEquation',
+    title: '식 쓰기',
+    instruction: '구슬 20개가 컵 4개에 똑같이 나누어 들어갑니다.',
+    helperText: '움직임을 보고 식을 완성해요.',
+    itemKind: 'marble',
+    itemLabel: '구슬',
+    containerKind: 'pencilCup',
+    containerLabel: '컵',
+    total: 20,
+    groups: 4,
+  },
+  {
+    activity: 'animationEquation',
+    title: '식 쓰기',
+    instruction: '색연필 21자루가 연필꽂이 3개에 똑같이 나누어 들어갑니다.',
+    helperText: '움직임을 보고 식을 완성해요.',
+    itemKind: 'coloredPencil',
+    itemLabel: '색연필',
+    containerKind: 'pencilCup',
+    containerLabel: '연필꽂이',
+    total: 21,
+    groups: 3,
+  },
+  {
+    activity: 'animationEquation',
+    title: '식 쓰기',
+    instruction: '공책 24권이 상자 6개에 똑같이 나누어 들어갑니다.',
+    helperText: '움직임을 보고 식을 완성해요.',
+    itemKind: 'notebook',
+    itemLabel: '공책',
+    containerKind: 'box',
+    containerLabel: '상자',
+    total: 24,
+    groups: 6,
+  },
+  {
+    activity: 'animationEquation',
+    title: '식 쓰기',
+    instruction: '스티커 24장이 접시 4개에 똑같이 나누어 놓입니다.',
+    helperText: '움직임을 보고 식을 완성해요.',
+    itemKind: 'sticker',
+    itemLabel: '스티커',
+    containerKind: 'plate',
+    containerLabel: '접시',
+    total: 24,
+    groups: 4,
+  },
+];
+
+const UNIT4_LEVEL1_STORY_VARIANTS: Array<{ prompt: string; answer: number; answerUnit: string }> = [
+  { prompt: '쿠키 8개를 접시 2개에 똑같이 담으려고 합니다.\n접시 한 개에 몇 개씩 담나요?', answer: 4, answerUnit: '개' },
+  { prompt: '구슬 9개를 컵 3개에 똑같이 나누어 담습니다.\n컵 한 개에 몇 개씩 들어가나요?', answer: 3, answerUnit: '개' },
+  { prompt: '색종이 10장을 5명에게 똑같이 나누어 줍니다.\n한 명이 몇 장씩 갖나요?', answer: 2, answerUnit: '장' },
+  { prompt: '딸기 12개를 접시 4개에 똑같이 나누어 담습니다.\n접시 한 개에 몇 개씩 담나요?', answer: 3, answerUnit: '개' },
+  { prompt: '연필 14자루를 2명에게 똑같이 나누어 줍니다.\n한 명이 몇 자루씩 갖나요?', answer: 7, answerUnit: '자루' },
+  { prompt: '사과 16개를 바구니 4개에 똑같이 나누어 담습니다.\n한 바구니에 몇 개씩 들어가나요?', answer: 4, answerUnit: '개' },
+  { prompt: '복숭아 18개를 접시 6개에 똑같이 나누어 담습니다.\n접시 한 개에 몇 개씩 담나요?', answer: 3, answerUnit: '개' },
+  { prompt: '공책 21권을 3명에게 똑같이 나누어 줍니다.\n한 명이 몇 권씩 갖나요?', answer: 7, answerUnit: '권' },
+  { prompt: '스티커 24장을 8명에게 똑같이 나누어 줍니다.\n한 명이 몇 장씩 갖나요?', answer: 3, answerUnit: '장' },
+  { prompt: '사탕 28개를 봉지 4개에 똑같이 나누어 담습니다.\n한 봉지에 몇 개씩 들어가나요?', answer: 7, answerUnit: '개' },
+  { prompt: '카드 32장을 8명에게 똑같이 나누어 줍니다.\n한 명이 몇 장씩 갖나요?', answer: 4, answerUnit: '장' },
+  { prompt: '초콜릿 36개를 상자 6개에 똑같이 나누어 담습니다.\n한 상자에 몇 개씩 들어가나요?', answer: 6, answerUnit: '개' },
+  { prompt: '귤 40개를 접시 5개에 똑같이 나누어 담습니다.\n접시 한 개에 몇 개씩 담나요?', answer: 8, answerUnit: '개' },
+  { prompt: '블록 42개를 7명에게 똑같이 나누어 줍니다.\n한 명이 몇 개씩 갖나요?', answer: 6, answerUnit: '개' },
+  { prompt: '리본 45개를 5명에게 똑같이 나누어 줍니다.\n한 명이 몇 개씩 갖나요?', answer: 9, answerUnit: '개' },
+  { prompt: '구슬 48개를 컵 6개에 똑같이 나누어 담습니다.\n컵 한 개에 몇 개씩 들어가나요?', answer: 8, answerUnit: '개' },
+  { prompt: '연필 54자루를 9명에게 똑같이 나누어 줍니다.\n한 명이 몇 자루씩 갖나요?', answer: 6, answerUnit: '자루' },
+  { prompt: '책 56권을 책장 7칸에 똑같이 나누어 꽂습니다.\n한 칸에 몇 권씩 꽂나요?', answer: 8, answerUnit: '권' },
+  { prompt: '쿠키 63개를 9명에게 똑같이 나누어 줍니다.\n한 명에게 몇 개씩 줄 수 있나요?', answer: 7, answerUnit: '개' },
+  { prompt: '색연필 72자루를 상자 8개에 똑같이 나누어 담습니다.\n한 상자에 몇 자루씩 들어가나요?', answer: 9, answerUnit: '자루' },
+];
+
+const UNIT4_LEVEL1_COMPLETE_VARIANT_SET_COUNT = Math.max(
+  1,
+  Math.min(
+    Math.floor(UNIT4_LEVEL1_MANIPULATION_VARIANTS.length / 2),
+    UNIT4_LEVEL1_ANIMATION_VARIANTS.length,
+    UNIT4_LEVEL1_STORY_VARIANTS.length,
+  ),
+);
+
+function getInitialUnit4ProblemSequence(level: number) {
+  if (level !== 1) {
+    return 1;
+  }
+
+  return Math.floor(Math.random() * UNIT4_LEVEL1_COMPLETE_VARIANT_SET_COUNT) * 4 + 1;
+}
+
+function buildUnit4Level1ProblemFactories(): Array<() => Problem> {
+  const factories: Array<() => Problem> = [];
+  const maxCount = Math.max(
+    Math.ceil(UNIT4_LEVEL1_MANIPULATION_VARIANTS.length / 2),
+    UNIT4_LEVEL1_ANIMATION_VARIANTS.length,
+    UNIT4_LEVEL1_STORY_VARIANTS.length,
+  );
+
+  for (let index = 0; index < maxCount; index += 1) {
+    const firstManipulationVariant = UNIT4_LEVEL1_MANIPULATION_VARIANTS[index * 2];
+    if (firstManipulationVariant) {
+      factories.push(() => createEqualShareDivisionProblem(firstManipulationVariant));
+    }
+
+    const secondManipulationVariant = UNIT4_LEVEL1_MANIPULATION_VARIANTS[index * 2 + 1];
+    if (secondManipulationVariant) {
+      factories.push(() => createEqualShareDivisionProblem(secondManipulationVariant));
+    }
+
+    const animationVariant = UNIT4_LEVEL1_ANIMATION_VARIANTS[index];
+    if (animationVariant) {
+      factories.push(() => createEqualShareDivisionProblem(animationVariant));
+    }
+
+    const storyVariant = UNIT4_LEVEL1_STORY_VARIANTS[index];
+    if (storyVariant) {
+      factories.push(() => createPromptProblem(storyVariant.prompt, storyVariant.answer, storyVariant.answerUnit));
+    }
+  }
+
+  return factories;
+}
+
+const UNIT4_LEVEL2_GROUP_MANIPULATION_VARIANTS: EqualGroupingDivisionProblemInput[] = [
+  {
+    activity: 'groupManipulate',
+    title: '딸기 묶기',
+    instruction: '딸기 6개를 2개씩 묶어 보세요.',
+    helperText: '한 묶음에 딸기 2개씩 들어가게 만들어요.',
+    itemKind: 'strawberry',
+    itemLabel: '딸기',
+    total: 6,
+    groupSize: 2,
+    answerUnit: '묶음',
+  },
+  {
+    activity: 'groupManipulate',
+    title: '쿠키 묶기',
+    instruction: '쿠키 8개를 2개씩 묶어 보세요.',
+    helperText: '쿠키를 2개씩 같은 묶음으로 옮겨요.',
+    itemKind: 'cookie',
+    itemLabel: '쿠키',
+    total: 8,
+    groupSize: 2,
+    answerUnit: '묶음',
+  },
+  {
+    activity: 'groupManipulate',
+    title: '사과 묶기',
+    instruction: '사과 12개를 3개씩 묶어 보세요.',
+    helperText: '한 묶음에 사과 3개씩 들어가야 해요.',
+    itemKind: 'apple',
+    itemLabel: '사과',
+    total: 12,
+    groupSize: 3,
+    answerUnit: '묶음',
+  },
+  {
+    activity: 'groupManipulate',
+    title: '사탕 묶기',
+    instruction: '사탕 12개를 4개씩 묶어 보세요.',
+    helperText: '사탕 4개가 한 묶음이에요.',
+    itemKind: 'candy',
+    itemLabel: '사탕',
+    total: 12,
+    groupSize: 4,
+    answerUnit: '묶음',
+  },
+  {
+    activity: 'groupManipulate',
+    title: '블록 묶기',
+    instruction: '블록 15개를 5개씩 묶어 보세요.',
+    helperText: '블록을 5개씩 같은 묶음으로 만들어요.',
+    itemKind: 'block',
+    itemLabel: '블록',
+    total: 15,
+    groupSize: 5,
+    answerUnit: '묶음',
+  },
+  {
+    activity: 'groupManipulate',
+    title: '스티커 묶기',
+    instruction: '스티커 18장을 6장씩 묶어 보세요.',
+    helperText: '한 묶음에 스티커 6장씩 들어가게 만들어요.',
+    itemKind: 'sticker',
+    itemLabel: '스티커',
+    total: 18,
+    groupSize: 6,
+    answerUnit: '묶음',
+  },
+  {
+    activity: 'groupManipulate',
+    title: '공책 묶기',
+    instruction: '공책 24권을 6권씩 묶어 보세요.',
+    helperText: '공책을 6권씩 같은 묶음으로 옮겨요.',
+    itemKind: 'notebook',
+    itemLabel: '공책',
+    total: 24,
+    groupSize: 6,
+    answerUnit: '묶음',
+  },
+];
+
+const UNIT4_LEVEL2_REPEATED_SUBTRACTION_VARIANTS: EqualGroupingDivisionProblemInput[] = [
+  {
+    activity: 'repeatedSubtraction',
+    title: '딸기 덜어 내기',
+    instruction: '딸기 15개를 5개씩 덜어 내면 몇 번 덜어 낼 수 있나요?',
+    helperText: '5개씩 덜어 내며 뺄셈식을 완성해요.',
+    itemKind: 'strawberry',
+    itemLabel: '딸기',
+    total: 15,
+    groupSize: 5,
+    answerUnit: '번',
+  },
+  {
+    activity: 'repeatedSubtraction',
+    title: '귤 덜어 내기',
+    instruction: '귤 12개를 3개씩 덜어 내면 몇 번 덜어 낼 수 있나요?',
+    helperText: '3개씩 덜어 낸 횟수를 세어 봐요.',
+    itemKind: 'tangerine',
+    itemLabel: '귤',
+    total: 12,
+    groupSize: 3,
+    answerUnit: '번',
+  },
+  {
+    activity: 'repeatedSubtraction',
+    title: '구슬 덜어 내기',
+    instruction: '구슬 20개를 5개씩 덜어 내면 몇 번 덜어 낼 수 있나요?',
+    helperText: '남은 수가 0이 될 때까지 5개씩 덜어 내요.',
+    itemKind: 'marble',
+    itemLabel: '구슬',
+    total: 20,
+    groupSize: 5,
+    answerUnit: '번',
+  },
+  {
+    activity: 'repeatedSubtraction',
+    title: '연필 덜어 내기',
+    instruction: '연필 18자루를 3자루씩 덜어 내면 몇 번 덜어 낼 수 있나요?',
+    helperText: '3자루씩 덜어 낸 횟수가 답이에요.',
+    itemKind: 'pencil',
+    itemLabel: '연필',
+    total: 18,
+    groupSize: 3,
+    answerUnit: '번',
+  },
+  {
+    activity: 'repeatedSubtraction',
+    title: '복숭아 덜어 내기',
+    instruction: '복숭아 14개를 7개씩 덜어 내면 몇 번 덜어 낼 수 있나요?',
+    helperText: '7개씩 덜어 내며 식을 살펴봐요.',
+    itemKind: 'peach',
+    itemLabel: '복숭아',
+    total: 14,
+    groupSize: 7,
+    answerUnit: '번',
+  },
+  {
+    activity: 'repeatedSubtraction',
+    title: '색연필 덜어 내기',
+    instruction: '색연필 24자루를 4자루씩 덜어 내면 몇 번 덜어 낼 수 있나요?',
+    helperText: '4자루씩 덜어 낸 횟수를 답으로 써요.',
+    itemKind: 'coloredPencil',
+    itemLabel: '색연필',
+    total: 24,
+    groupSize: 4,
+    answerUnit: '번',
+  },
+];
+
+const UNIT4_LEVEL2_SUBTRACTION_TO_DIVISION_VARIANTS: EqualGroupingDivisionProblemInput[] = [
+  {
+    activity: 'subtractionToDivision',
+    title: '당근 대신 사과 담기',
+    instruction: '사과 18개를 한 바구니에 6개씩 담으려고 합니다.',
+    helperText: '6개씩 덜어 낸 횟수를 나눗셈식의 답으로 써요.',
+    itemKind: 'apple',
+    itemLabel: '사과',
+    total: 18,
+    groupSize: 6,
+    answerUnit: '바구니',
+  },
+  {
+    activity: 'subtractionToDivision',
+    title: '쿠키 봉지 만들기',
+    instruction: '쿠키 16개를 한 봉지에 4개씩 담으려고 합니다.',
+    helperText: '4개씩 몇 번 덜어 내는지 나눗셈식으로 이어 봐요.',
+    itemKind: 'cookie',
+    itemLabel: '쿠키',
+    total: 16,
+    groupSize: 4,
+    answerUnit: '봉지',
+  },
+  {
+    activity: 'subtractionToDivision',
+    title: '사탕 상자 만들기',
+    instruction: '사탕 30개를 한 상자에 5개씩 넣으려고 합니다.',
+    helperText: '5개씩 덜어 낸 횟수가 상자 수예요.',
+    itemKind: 'candy',
+    itemLabel: '사탕',
+    total: 30,
+    groupSize: 5,
+    answerUnit: '상자',
+  },
+  {
+    activity: 'subtractionToDivision',
+    title: '스티커 봉지 만들기',
+    instruction: '스티커 21장을 한 봉지에 7장씩 넣으려고 합니다.',
+    helperText: '7장씩 덜어 낸 횟수를 나눗셈식으로 써요.',
+    itemKind: 'sticker',
+    itemLabel: '스티커',
+    total: 21,
+    groupSize: 7,
+    answerUnit: '봉지',
+  },
+  {
+    activity: 'subtractionToDivision',
+    title: '블록 상자 만들기',
+    instruction: '블록 24개를 한 상자에 6개씩 담으려고 합니다.',
+    helperText: '6개씩 덜어 낸 횟수가 몇 상자인지 알려 줘요.',
+    itemKind: 'block',
+    itemLabel: '블록',
+    total: 24,
+    groupSize: 6,
+    answerUnit: '상자',
+  },
+  {
+    activity: 'subtractionToDivision',
+    title: '공책 줄 만들기',
+    instruction: '공책 24권을 한 줄에 4권씩 놓으려고 합니다.',
+    helperText: '반복 뺄셈식과 나눗셈식이 같은 답을 가리켜요.',
+    itemKind: 'notebook',
+    itemLabel: '공책',
+    total: 24,
+    groupSize: 4,
+    answerUnit: '줄',
+  },
+];
+
+const UNIT4_LEVEL2_STORY_VARIANTS: Array<{ prompt: string; answer: number; answerUnit: string }> = [
+  { prompt: '귤 12개를 한 접시에 3개씩 담으려고 합니다.\n접시는 몇 개 필요한가요?', answer: 4, answerUnit: '개' },
+  { prompt: '스티커 20장을 한 봉지에 5장씩 넣습니다.\n몇 봉지를 만들 수 있나요?', answer: 4, answerUnit: '봉지' },
+  { prompt: '공 18개를 한 바구니에 6개씩 담습니다.\n바구니는 몇 개 필요한가요?', answer: 3, answerUnit: '개' },
+  { prompt: '초콜릿 21개를 한 상자에 7개씩 넣습니다.\n몇 상자를 만들 수 있나요?', answer: 3, answerUnit: '상자' },
+  { prompt: '카드 24장을 한 묶음에 4장씩 묶습니다.\n몇 묶음이 되나요?', answer: 6, answerUnit: '묶음' },
+  { prompt: '54쪽짜리 책을 매일 9쪽씩 읽습니다.\n모두 읽으려면 며칠이 걸리나요?', answer: 6, answerUnit: '일' },
+  { prompt: '학생 42명이 7명씩 한 모둠을 만듭니다.\n몇 모둠이 되나요?', answer: 6, answerUnit: '모둠' },
+  { prompt: '리본 72cm를 8cm씩 자릅니다.\n몇 조각이 되나요?', answer: 9, answerUnit: '조각' },
+];
+
+function buildUnit4Level2ProblemFactories(): Array<() => Problem> {
+  const factories: Array<() => Problem> = [];
+  const maxCount = Math.max(
+    UNIT4_LEVEL2_GROUP_MANIPULATION_VARIANTS.length,
+    UNIT4_LEVEL2_REPEATED_SUBTRACTION_VARIANTS.length,
+    UNIT4_LEVEL2_SUBTRACTION_TO_DIVISION_VARIANTS.length,
+    UNIT4_LEVEL2_STORY_VARIANTS.length,
+  );
+
+  for (let index = 0; index < maxCount; index += 1) {
+    const groupManipulationVariant = UNIT4_LEVEL2_GROUP_MANIPULATION_VARIANTS[index];
+    if (groupManipulationVariant) {
+      factories.push(() => createEqualGroupingDivisionProblem(groupManipulationVariant));
+    }
+
+    const repeatedSubtractionVariant = UNIT4_LEVEL2_REPEATED_SUBTRACTION_VARIANTS[index];
+    if (repeatedSubtractionVariant) {
+      factories.push(() => createEqualGroupingDivisionProblem(repeatedSubtractionVariant));
+    }
+
+    const subtractionToDivisionVariant = UNIT4_LEVEL2_SUBTRACTION_TO_DIVISION_VARIANTS[index];
+    if (subtractionToDivisionVariant) {
+      factories.push(() => createEqualGroupingDivisionProblem(subtractionToDivisionVariant));
+    }
+
+    const storyVariant = UNIT4_LEVEL2_STORY_VARIANTS[index];
+    if (storyVariant) {
+      factories.push(() => createPromptProblem(storyVariant.prompt, storyVariant.answer, storyVariant.answerUnit));
+    }
+  }
+
+  return factories;
+}
+
+const UNIT4_LEVEL3_EQUATION_PART_VARIANTS: DivisionEquationPartsProblemInput[] = [
+  { title: '나눗셈식의 세 수', instruction: '나눗셈식을 보고 빈칸에 알맞은 수를 써넣으세요.', dividend: 30, divisor: 5, quotient: 6 },
+  { title: '나눗셈식의 세 수', instruction: '나눗셈식에서 나누어지는 수, 나누는 수, 몫을 찾아 쓰세요.', dividend: 24, divisor: 4, quotient: 6 },
+  { title: '나눗셈식의 세 수', instruction: '나눗셈식을 보고 각 자리의 수를 구별해 보세요.', dividend: 18, divisor: 3, quotient: 6 },
+  { title: '나눗셈식의 세 수', instruction: '나눗셈식에서 알맞은 이름에 맞게 수를 써넣으세요.', dividend: 32, divisor: 4, quotient: 8 },
+  { title: '나눗셈식의 세 수', instruction: '나눗셈식을 보고 세 수의 뜻을 확인해 보세요.', dividend: 42, divisor: 7, quotient: 6 },
+  { title: '나눗셈식의 세 수', instruction: '나눗셈식을 보고 빈칸을 모두 채우세요.', dividend: 48, divisor: 8, quotient: 6 },
+];
+
+const UNIT4_LEVEL3_SITUATION_CLASSIFY_VARIANTS: Array<Omit<DivisionSituationClassifyProblemData, 'answerToken'>> = [
+  {
+    title: '상황 구별하기',
+    instruction: '어떤 상황인가요?',
+    helperText: '',
+    situation: { id: 'share-cookie-24-4', kind: 'equalShare', text: '쿠키 24개를 4명에게 똑같이 나누어 줍니다. 한 명에게 몇 개씩 주나요?' },
+  },
+  {
+    title: '상황 구별하기',
+    instruction: '어떤 상황인가요?',
+    helperText: '',
+    situation: { id: 'group-sticker-24-4', kind: 'equalGrouping', text: '스티커 24장을 4장씩 봉지에 넣습니다. 몇 봉지를 만들 수 있나요?' },
+  },
+  {
+    title: '상황 구별하기',
+    instruction: '어떤 상황인가요?',
+    helperText: '',
+    situation: { id: 'share-pencil-18-3', kind: 'equalShare', text: '연필 18자루를 3개의 통에 똑같이 꽂습니다. 한 통에 몇 자루씩 꽂나요?' },
+  },
+  {
+    title: '상황 구별하기',
+    instruction: '어떤 상황인가요?',
+    helperText: '',
+    situation: { id: 'group-candy-30-5', kind: 'equalGrouping', text: '사탕 30개를 5개씩 상자에 담습니다. 몇 상자를 만들 수 있나요?' },
+  },
+  {
+    title: '상황 구별하기',
+    instruction: '어떤 상황인가요?',
+    helperText: '',
+    situation: { id: 'share-bead-20-5', kind: 'equalShare', text: '구슬 20개를 5명에게 똑같이 나누어 줍니다. 한 명이 몇 개씩 갖나요?' },
+  },
+  {
+    title: '상황 구별하기',
+    instruction: '어떤 상황인가요?',
+    helperText: '',
+    situation: { id: 'group-block-20-5', kind: 'equalGrouping', text: '블록 20개를 5개씩 묶습니다. 몇 묶음이 되나요?' },
+  },
+];
+
+function buildUnit4Level3ProblemFactories(): Array<() => Problem> {
+  const factories: Array<() => Problem> = [];
+
+  for (let index = 0; index < UNIT4_LEVEL3_EQUATION_PART_VARIANTS.length; index += 1) {
+    const equationPartVariant = UNIT4_LEVEL3_EQUATION_PART_VARIANTS[index];
+    factories.push(() => createDivisionEquationPartsProblem(equationPartVariant));
+
+    for (let classifyOffset = 0; classifyOffset < 3; classifyOffset += 1) {
+      const classifyIndex = (index * 3 + classifyOffset) % UNIT4_LEVEL3_SITUATION_CLASSIFY_VARIANTS.length;
+      const classifyVariant = UNIT4_LEVEL3_SITUATION_CLASSIFY_VARIANTS[classifyIndex];
+      factories.push(() => createDivisionSituationClassifyProblem(classifyVariant));
+    }
+  }
+
+  return factories;
+}
+
+const UNIT4_PROBLEM_FACTORIES: Record<number, Array<() => Problem>> = {
+  1: buildUnit4Level1ProblemFactories(),
+  2: buildUnit4Level2ProblemFactories(),
+  3: buildUnit4Level3ProblemFactories(),
+  4: [
+    () => createPromptProblem('4 × 6 = 24를 이용해 24 ÷ 4를 구해 보세요.', 6),
+    () => createPromptProblem('7 × 3 = 21을 이용해 21 ÷ 7을 구해 보세요.', 3),
+    () => createPromptProblem('5 × □ = 35입니다.\n35 ÷ 5의 몫은 얼마인가요?', 7),
+    () => createPromptProblem('8 × 4 = 32입니다.\n32 ÷ 4의 몫은 얼마인가요?', 8),
+    () => createShuffledOptionsProblem('6 × 5 = 30과 관계있는 나눗셈식은?', ['30 ÷ 6 = 5', '30 + 6 = 36', '6 ÷ 30 = 5'], '30 ÷ 6 = 5'),
+    () => createShuffledOptionsProblem('9 × 2 = 18과 관계있는 나눗셈식은?', ['18 ÷ 2 = 9', '18 - 2 = 16', '9 ÷ 18 = 2'], '18 ÷ 2 = 9'),
+  ],
+  5: [
+    () => createPromptProblem('□ × 4 = 28입니다.\n□에 들어갈 수는 무엇인가요?', 7),
+    () => createPromptProblem('3 × □ = 24입니다.\n□에 들어갈 수는 무엇인가요?', 8),
+    () => createPromptProblem('한 줄에 의자가 6개씩 있습니다. 의자가 모두 36개라면 몇 줄인가요?', 6, '줄'),
+    () => createPromptProblem('한 봉지에 사탕이 5개씩 들어 있습니다. 사탕이 모두 45개라면 몇 봉지인가요?', 9, '봉지'),
+    () => createPromptProblem('7개씩 담긴 상자가 몇 개 있어야 모두 42개가 되나요?', 6, '개'),
+    () => createPromptProblem('8명씩 앉는 모둠이 있습니다. 모두 32명이면 몇 모둠인가요?', 4, '모둠'),
+  ],
+  6: [
+    () => createPromptProblem('곱셈구구를 이용해 48 ÷ 6을 구해 보세요.', 8),
+    () => createPromptProblem('곱셈구구를 이용해 56 ÷ 7을 구해 보세요.', 8),
+    () => createPromptProblem('곱셈구구를 이용해 63 ÷ 9를 구해 보세요.', 7),
+    () => createPromptProblem('곱셈구구를 이용해 36 ÷ 4를 구해 보세요.', 9),
+    () => createPromptProblem('곱셈구구를 이용해 42 ÷ 6을 구해 보세요.', 7),
+    () => createPromptProblem('곱셈구구를 이용해 72 ÷ 8을 구해 보세요.', 9),
+  ],
+  7: [
+    () => createPromptProblem('리본 36cm를 4명이 똑같이 나누어 가지려고 합니다.\n한 명이 갖는 리본은 몇 cm인가요?', 9, 'cm'),
+    () => createPromptProblem('책 54권을 책장 6칸에 똑같이 꽂습니다.\n한 칸에 몇 권씩 꽂나요?', 9, '권'),
+    () => createPromptProblem('학생 45명이 5명씩 한 모둠을 만듭니다.\n몇 모둠이 되나요?', 9, '모둠'),
+    () => createPromptProblem('연필 64자루를 8자루씩 상자에 담습니다.\n상자는 몇 개 필요한가요?', 8, '개'),
+    () => createPromptProblem('쿠키 42개를 7명에게 똑같이 나누어 줍니다.\n한 명에게 몇 개씩 줄 수 있나요?', 6, '개'),
+    () => createPromptProblem('색 테이프 30m를 5m씩 자릅니다.\n몇 조각이 되나요?', 6, '조각'),
+  ],
+};
+
+function generateUnit4Problem(level: number, problemSequence?: number): Problem {
+  const factories = UNIT4_PROBLEM_FACTORIES[level] ?? UNIT4_PROBLEM_FACTORIES[7];
+  const index =
+    typeof problemSequence === 'number'
+      ? (Math.max(1, problemSequence) - 1) % factories.length
+      : Math.floor(Math.random() * factories.length);
+  return factories[index]();
 }
 
 function formatClockTime(hours: number, minutes: number, seconds?: number) {
@@ -6658,6 +8462,11 @@ function createSecondNeedChoiceProblem(): Problem {
 function createEquationProblem(a: number, b: number, op: '+' | '-', answer: number): Problem {
   const text = `${a} ${op} ${b}`;
   return { text, prompt: text, answer, kind: 'equation' };
+}
+
+function createMultiplicationProblem(a: number, b: number, prompt?: string): Problem {
+  const text = `${a} × ${b}`;
+  return { text, prompt: prompt ?? text, answer: a * b, kind: prompt ? 'story' : 'equation' };
 }
 
 function createStoryProblem(level: number, a: number, b: number, op: '+' | '-', answer: number): Problem {
@@ -9498,6 +11307,62 @@ function generateUnit2Problem(level: number, opponentHP: number): Problem {
   }
 
   return isFinalBuilderTurn(level, opponentHP) ? createUnit2FinalProblem(level) : generateRegularProblem(level);
+}
+
+function generateUnit5Problem(level: number, problemSequence = 1): Problem {
+  const storyItems = [
+    { item: '쿠키', unit: '개', groups: 3, count: 4 },
+    { item: '연필', unit: '자루', groups: 5, count: 6 },
+    { item: '스티커', unit: '장', groups: 7, count: 8 },
+    { item: '사탕', unit: '개', groups: 9, count: 6 },
+    { item: '공책', unit: '권', groups: 4, count: 10 },
+    { item: '구슬', unit: '개', groups: 8, count: 7 },
+  ];
+  const storyItem = storyItems[(problemSequence - 1) % storyItems.length];
+
+  if (level === 1) {
+    const groups = randomIntInRange(2, 5);
+    const count = randomIntInRange(2, 5);
+    return createMultiplicationProblem(groups, count, `${count}개씩 ${groups}묶음이면 모두 몇 개인가요?`);
+  }
+
+  if (level === 2) {
+    const groups = randomIntInRange(2, 6);
+    const count = randomIntInRange(2, 6);
+    return createMultiplicationProblem(groups, count, `${count}씩 ${groups}묶음을 곱셈식으로 계산해 보세요.`);
+  }
+
+  if (level === 3) {
+    return createMultiplicationProblem(randomIntInRange(2, 5), randomIntInRange(2, 9));
+  }
+
+  if (level === 4) {
+    return createMultiplicationProblem(randomIntInRange(6, 9), randomIntInRange(2, 9));
+  }
+
+  if (level === 5) {
+    const factors = [0, 1, 10, randomIntInRange(2, 9)];
+    return createMultiplicationProblem(sample(factors), randomIntInRange(0, 10));
+  }
+
+  if (level === 6) {
+    const base = randomIntInRange(2, 9);
+    const multiplier = randomIntInRange(2, 9);
+    return createMultiplicationProblem(base, multiplier, `${base}의 ${multiplier}배는 얼마인가요?`);
+  }
+
+  if (level === 7) {
+    return createMultiplicationProblem(
+      storyItem.groups,
+      storyItem.count,
+      `${storyItem.item}가 한 상자에 ${storyItem.count}${storyItem.unit}씩 들어 있습니다.\n${storyItem.groups}상자에는 모두 몇 ${storyItem.unit}가 있나요?`,
+    );
+  }
+
+  const factors = level >= 8
+    ? [randomIntInRange(2, 9), randomIntInRange(2, 9)]
+    : [randomIntInRange(2, 5), randomIntInRange(2, 9)];
+  return createMultiplicationProblem(factors[0], factors[1]);
 }
 
 function createShapeDrawProblem(
@@ -12721,6 +14586,14 @@ function getProblemForTurn(unitId: LearningUnitId, level: number, opponentHP: nu
     return generateUnit3Problem(level, opponentHP, problemSequence);
   }
 
+  if (unitId === 'unit4') {
+    return generateUnit4Problem(level, problemSequence);
+  }
+
+  if (unitId === 'unit5') {
+    return generateUnit5Problem(level, problemSequence);
+  }
+
   if (unitId === 'unit6') {
     return generateUnit6Problem(level, problemSequence);
   }
@@ -12799,6 +14672,18 @@ function getProblemKindLabel(problem: Problem) {
   if (problem.kind === 'shapeRain') return '평면도형 산성비';
   if (problem.kind === 'equalPartition') return '똑같이 나누기';
   if (problem.kind === 'fractionIntro') return '분수';
+  if (problem.kind === 'equalShareDivision') {
+    return problem.equalShareDivision?.activity === 'animationEquation'
+      ? '나누기 식 쓰기'
+      : '나누기 조작';
+  }
+  if (problem.kind === 'equalGroupingDivision') {
+    if (problem.equalGroupingDivision?.activity === 'groupManipulate') return '똑같이 묶기 조작';
+    if (problem.equalGroupingDivision?.activity === 'repeatedSubtraction') return '반복 뺄셈';
+    return '뺄셈식과 나눗셈식';
+  }
+  if (problem.kind === 'divisionEquationParts') return '나눗셈식 세 수';
+  if (problem.kind === 'divisionSituationClassify') return '상황 구별';
   return problem.kind;
 }
 
@@ -12819,6 +14704,39 @@ function getProblemVariantSignature(problem: Problem) {
 
   if (problem.kind === 'fractionIntro' && problem.fractionIntro) {
     return [problem.kind, problem.fractionIntro.activity].join(':');
+  }
+
+  if (problem.kind === 'equalShareDivision' && problem.equalShareDivision) {
+    return [
+      problem.kind,
+      problem.equalShareDivision.activity,
+    ].join(':');
+  }
+
+  if (problem.kind === 'equalGroupingDivision' && problem.equalGroupingDivision) {
+    return [
+      problem.kind,
+      problem.equalGroupingDivision.activity,
+      problem.equalGroupingDivision.total,
+      problem.equalGroupingDivision.groupSize,
+    ].join(':');
+  }
+
+  if (problem.kind === 'divisionEquationParts' && problem.divisionEquationParts) {
+    return [
+      problem.kind,
+      problem.divisionEquationParts.dividend,
+      problem.divisionEquationParts.divisor,
+      problem.divisionEquationParts.quotient,
+    ].join(':');
+  }
+
+  if (problem.kind === 'divisionSituationClassify' && problem.divisionSituationClassify) {
+    return [
+      problem.kind,
+      problem.divisionSituationClassify.situation.id,
+      problem.divisionSituationClassify.situation.kind,
+    ].join(':');
   }
 
   if (problem.kind === 'timeAddition' && problem.timeAddition) {
@@ -12928,6 +14846,22 @@ function getProblemArchiveQuestion(problem: Problem) {
     return problem.fractionIntro.title;
   }
 
+  if (problem.kind === 'equalShareDivision' && problem.equalShareDivision) {
+    return `${problem.equalShareDivision.title}\n${problem.equalShareDivision.instruction}`;
+  }
+
+  if (problem.kind === 'equalGroupingDivision' && problem.equalGroupingDivision) {
+    return `${problem.equalGroupingDivision.title}\n${problem.equalGroupingDivision.instruction}`;
+  }
+
+  if (problem.kind === 'divisionEquationParts' && problem.divisionEquationParts) {
+    return `${problem.divisionEquationParts.title}\n${problem.divisionEquationParts.dividend} ÷ ${problem.divisionEquationParts.divisor} = ${problem.divisionEquationParts.quotient}`;
+  }
+
+  if (problem.kind === 'divisionSituationClassify' && problem.divisionSituationClassify) {
+    return `${problem.divisionSituationClassify.title}\n${problem.divisionSituationClassify.instruction}`;
+  }
+
   if (problem.kind === 'numberLineBox' && problem.numberLineBox) {
     return `${problem.numberLineBox.instruction}\n${problem.text}`;
   }
@@ -13002,6 +14936,24 @@ function getProblemArchiveAnswer(problem: Problem) {
     }
 
     return `${problem.fractionIntro.numerator}/${problem.fractionIntro.denominator}`;
+  }
+
+  if (problem.kind === 'equalShareDivision' && problem.equalShareDivision) {
+    const quotient = problem.equalShareDivision.total / problem.equalShareDivision.groups;
+    return `${problem.equalShareDivision.total} ÷ ${problem.equalShareDivision.groups} = ${quotient}`;
+  }
+
+  if (problem.kind === 'equalGroupingDivision' && problem.equalGroupingDivision) {
+    const groupCount = problem.equalGroupingDivision.total / problem.equalGroupingDivision.groupSize;
+    return `${problem.equalGroupingDivision.total} ÷ ${problem.equalGroupingDivision.groupSize} = ${groupCount}${problem.equalGroupingDivision.answerUnit}`;
+  }
+
+  if (problem.kind === 'divisionEquationParts' && problem.divisionEquationParts) {
+    return `나누어지는 수 ${problem.divisionEquationParts.dividend}, 나누는 수 ${problem.divisionEquationParts.divisor}, 몫 ${problem.divisionEquationParts.quotient}`;
+  }
+
+  if (problem.kind === 'divisionSituationClassify' && problem.divisionSituationClassify) {
+    return problem.divisionSituationClassify.situation.kind === 'equalShare' ? '나누기 상황' : '묶기 상황';
   }
 
   if (problem.kind === 'calculationErrorChoice' && problem.calculationErrorChoice) {
@@ -13129,6 +15081,13 @@ function getArchiveProblemsForLevel(unitId: LearningUnitId, level: number) {
     );
   }
 
+  if (unitId === 'unit4') {
+    const factories = UNIT4_PROBLEM_FACTORIES[level] ?? [];
+    return factories.map((factory, index) =>
+      createArchiveProblemRecord(factory(), `${unitId}-${level}-${index + 1}`, `${index + 1}번`),
+    );
+  }
+
   return Array.from({ length: 4 }, (_, index) => {
     const opponentHP = Math.max(25, 100 - index * 25);
     return createArchiveProblemRecord(
@@ -13175,7 +15134,7 @@ function buildArchiveSections(): ArchiveUnitSection[] {
 }
 
 function getArchivePreviewFrameClass(problem: Problem, unitId?: LearningUnitId, level?: number) {
-  if (problem.kind === 'shapeDraw' || problem.kind === 'shapeRain' || problem.kind === 'equalPartition' || problem.kind === 'fractionIntro') {
+  if (problem.kind === 'shapeDraw' || problem.kind === 'shapeRain' || problem.kind === 'equalPartition' || problem.kind === 'fractionIntro' || problem.kind === 'equalShareDivision' || problem.kind === 'equalGroupingDivision' || problem.kind === 'divisionEquationParts' || problem.kind === 'divisionSituationClassify') {
     return 'flex flex-col overflow-hidden p-3 sm:p-4 lg:p-5';
   }
 
@@ -15079,7 +17038,7 @@ function EqualPartitionProblemCard({
               inputMode="numeric"
               pattern="[0-9]*"
               value={answerValue}
-              onChange={(event) => onAnswerChange(event.target.value.replace(/[^0-9]/g, ''))}
+              onChange={(event) => onAnswerChange(sanitizeNonNegativeIntegerInput(event.target.value))}
               onKeyDown={(event) => {
                 if (event.key === 'Enter' && !event.ctrlKey && !event.altKey && !event.metaKey) {
                   event.preventDefault();
@@ -15251,7 +17210,7 @@ function FractionBlankInput({
       inputMode={acceptsText ? 'text' : 'numeric'}
       pattern={acceptsText ? undefined : '[0-9]*'}
       value={value}
-      onChange={(event) => onChange(acceptsText ? event.target.value : event.target.value.replace(/[^0-9]/g, ''))}
+      onChange={(event) => onChange(acceptsText ? event.target.value : sanitizeNonNegativeIntegerInput(event.target.value))}
       aria-label={ariaLabel}
       className={`inline-flex border-4 text-center font-black shadow-sm outline-none transition focus:ring-4 ${sizeClass} ${toneClass}`}
     />
@@ -17298,6 +19257,41 @@ function ArchiveProblemPreview({
           onAnswerChange={() => undefined}
           condensed
         />
+      ) : problem.kind === 'equalShareDivision' && problem.equalShareDivision ? (
+        <EqualShareDivisionProblemCard
+          data={problem.equalShareDivision}
+          answerValue=""
+          onAnswerChange={() => undefined}
+          onSubmit={() => undefined}
+          canSubmit={false}
+          condensed
+        />
+      ) : problem.kind === 'equalGroupingDivision' && problem.equalGroupingDivision ? (
+        <EqualGroupingDivisionProblemCard
+          data={problem.equalGroupingDivision}
+          answerValue=""
+          onAnswerChange={() => undefined}
+          onSubmit={() => undefined}
+          canSubmit={false}
+          condensed
+        />
+      ) : problem.kind === 'divisionEquationParts' && problem.divisionEquationParts ? (
+        <DivisionEquationPartsProblemCard
+          data={problem.divisionEquationParts}
+          answerValue=""
+          onAnswerChange={() => undefined}
+          onSubmit={() => undefined}
+          canSubmit={false}
+        />
+      ) : problem.kind === 'divisionSituationClassify' && problem.divisionSituationClassify ? (
+        <DivisionSituationClassifyProblemCard
+          data={problem.divisionSituationClassify}
+          answerValue=""
+          onAnswerChange={() => undefined}
+          onSubmit={() => undefined}
+          canSubmit={false}
+          condensed
+        />
       ) : problem.kind === 'distanceWorksheet' && problem.distanceWorksheet ? (
         <DistanceWorksheetProblemCard distanceWorksheet={problem.distanceWorksheet} condensed />
       ) : problem.kind === 'distanceMap' && problem.distanceMap ? (
@@ -18370,7 +20364,6 @@ function AnalogClockFigure({
   const innerStroke = isResultPalette ? '#bfdbfe' : '#dbe6f3';
   const majorTickColor = isResultPalette ? '#60a5fa' : '#111827';
   const minorTickColor = isResultPalette ? '#93c5fd' : '#4b5563';
-  const numberColor = isResultPalette ? '#1e3a8a' : '#111827';
   const hourOpacity = activeHand === 'seconds' ? 0.78 : 1;
   const minuteOpacity = activeHand === 'seconds' ? 0.72 : 1;
   const secondOpacity = activeHand === 'minutes' ? 0.65 : 1;
@@ -18402,23 +20395,6 @@ function AnalogClockFigure({
             strokeWidth={isHourTick ? 3.4 : 1.5}
             strokeLinecap="round"
           />
-        );
-      })}
-      {Array.from({ length: 12 }, (_, index) => {
-        const value = index + 1;
-        const labelPoint = getClockFacePoint(cx, cy, radius - 38, value * 30);
-        return (
-          <text
-            key={`clock-number-${value}`}
-            x={labelPoint.x}
-            y={labelPoint.y + 7}
-            textAnchor="middle"
-            fontSize="31"
-            fontWeight="900"
-            fill={numberColor}
-          >
-            {value}
-          </text>
         );
       })}
       {activeHand ? (
@@ -18705,7 +20681,7 @@ function ClockTimeAdditionFigure({
   const totalAddText = formatDuration(add.hours, add.minutes, add.seconds);
   const operationLabel = operation === '+' ? '더할 시간' : '뺄 시간';
   return (
-    <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(16.5rem,18rem)_minmax(0,1fr)] xl:items-center">
+    <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(16.5rem,18rem)_minmax(0,1fr)] lg:items-center">
       <div className="rounded-[1.75rem] border border-sky-200 bg-white p-3 shadow-[inset_0_2px_14px_rgba(148,163,184,0.12)] sm:p-4">
         <div className="mx-auto w-full max-w-[18rem]">
           <AnalogClockFigure hour={start.hours} minute={start.minutes} second={start.seconds} displayMode="teaching" />
@@ -21266,10 +23242,11 @@ function DistanceSentenceField({
         <label className="mx-2 inline-flex h-12 w-20 items-center justify-center rounded-2xl border-2 border-slate-400 bg-white align-middle shadow-sm sm:h-14 sm:w-24">
           <span className="sr-only">{distanceMap.targetLabel}까지의 거리</span>
           <input
-            type="number"
+            type="text"
             inputMode="numeric"
+            pattern="[0-9]*"
             value={answerValue}
-            onChange={(event) => onAnswerChange(event.target.value)}
+            onChange={(event) => onAnswerChange(sanitizeNonNegativeIntegerInput(event.target.value))}
             onKeyDown={(event) => {
               if (event.key === 'Enter' && !event.ctrlKey && !event.altKey) {
                 event.preventDefault();
@@ -22290,6 +24267,1074 @@ function ShapeRainGameCard({
         </button>
       </motion.div>
 
+    </div>
+  );
+}
+
+const EQUAL_SHARE_ITEM_SPRITE_CELLS: Record<EqualShareDivisionItemKind, { row: number; col: number }> = {
+  pencil: { row: 0, col: 0 },
+  peach: { row: 0, col: 1 },
+  apple: { row: 0, col: 2 },
+  cookie: { row: 0, col: 3 },
+  strawberry: { row: 1, col: 0 },
+  tangerine: { row: 1, col: 1 },
+  candy: { row: 1, col: 2 },
+  marble: { row: 1, col: 3 },
+  coloredPencil: { row: 2, col: 0 },
+  notebook: { row: 2, col: 1 },
+  sticker: { row: 2, col: 2 },
+  block: { row: 2, col: 3 },
+};
+
+const EQUAL_SHARE_CONTAINER_SPRITE_CELLS: Record<EqualShareDivisionContainerKind, { row: number; col: number }> = {
+  plate: { row: 0, col: 0 },
+  pencilCup: { row: 0, col: 1 },
+  basket: { row: 1, col: 0 },
+  box: { row: 1, col: 1 },
+};
+
+function getEqualShareItemSpriteStyle(kind: EqualShareDivisionItemKind): React.CSSProperties {
+  const { row, col } = EQUAL_SHARE_ITEM_SPRITE_CELLS[kind];
+  return {
+    backgroundImage: `url(${equalShareSpritesImage})`,
+    backgroundPosition: `${(col * 100) / 3}% ${(row * 100) / 3}%`,
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: '400% 400%',
+  };
+}
+
+function getEqualShareContainerSpriteStyle(kind: EqualShareDivisionContainerKind): React.CSSProperties {
+  const { row, col } = EQUAL_SHARE_CONTAINER_SPRITE_CELLS[kind];
+  return {
+    backgroundImage: `url(${equalShareEmptyContainersImage})`,
+    backgroundPosition: `${col * 100}% ${row * 100}%`,
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: '200% 200%',
+  };
+}
+
+function EqualShareItemGlyph({
+  kind,
+  className = '',
+  size = 'default',
+}: {
+  kind: EqualShareDivisionItemKind;
+  className?: string;
+  size?: 'default' | 'tray' | 'trayCompact' | 'groupingTray' | 'groupingTrayCompact' | 'placed' | 'animation';
+}) {
+  const isTall = kind === 'pencil' || kind === 'coloredPencil';
+  const dimensions = {
+    default: isTall ? { width: 44, height: 78 } : { width: 64, height: 64 },
+    tray: isTall ? { width: 52, height: 92 } : { width: 78, height: 78 },
+    trayCompact: isTall ? { width: 32, height: 56 } : { width: 46, height: 46 },
+    groupingTray: isTall ? { width: 62, height: 110 } : { width: 92, height: 92 },
+    groupingTrayCompact: isTall ? { width: 44, height: 78 } : { width: 64, height: 64 },
+    placed: isTall ? { width: 52, height: 92 } : { width: 58, height: 58 },
+    animation: isTall ? { width: 54, height: 96 } : { width: 68, height: 68 },
+  }[size];
+
+  return (
+    <span
+      className={`block bg-contain ${className}`}
+      style={{ ...getEqualShareItemSpriteStyle(kind), ...dimensions }}
+      aria-hidden="true"
+    />
+  );
+}
+
+function EqualShareContainerGlyph({
+  kind,
+  children,
+  isActive = false,
+  surface = 'light',
+  size = 'default',
+}: {
+  kind: EqualShareDivisionContainerKind;
+  children?: React.ReactNode;
+  isActive?: boolean;
+  surface?: 'light' | 'dark';
+  size?: 'default' | 'animation';
+}) {
+  const baseClassName = `relative flex h-full ${size === 'animation' ? 'min-h-[8.2rem]' : 'min-h-[10.5rem]'} items-center justify-center overflow-hidden rounded-[1.35rem] border-2 transition ${
+    isActive
+      ? 'border-emerald-400 bg-slate-900 shadow-[0_0_0_4px_rgba(52,211,153,0.22),0_18px_34px_rgba(0,0,0,0.28)]'
+      : surface === 'dark'
+        ? 'border-slate-600 bg-slate-950/45 shadow-[0_14px_26px_rgba(0,0,0,0.22)]'
+        : 'border-slate-600 bg-slate-950/45 shadow-[0_14px_26px_rgba(0,0,0,0.22)]'
+  }`;
+
+  return (
+    <div className={baseClassName}>
+      <span
+        className={`pointer-events-none absolute bg-contain ${
+          kind === 'plate'
+            ? size === 'animation' ? 'bottom-3 h-[6rem] w-[8.4rem]' : 'bottom-3 h-[7.2rem] w-[10rem]'
+            : kind === 'pencilCup'
+              ? size === 'animation' ? 'bottom-2 h-[7rem] w-[7rem]' : 'bottom-2 h-[8.8rem] w-[8.8rem]'
+              : kind === 'basket'
+                ? size === 'animation' ? 'bottom-2 h-[6.6rem] w-[7.4rem]' : 'bottom-2 h-[8.2rem] w-[9.2rem]'
+                : size === 'animation' ? 'bottom-1 h-[6.7rem] w-[7.2rem]' : 'bottom-1 h-[8.4rem] w-[9rem]'
+        }`}
+        style={getEqualShareContainerSpriteStyle(kind)}
+        aria-hidden="true"
+      />
+      <div className={`absolute inset-x-0 bottom-0 top-0 z-10 mx-auto flex flex-wrap items-end justify-center gap-0 px-1 ${
+        kind === 'plate'
+          ? size === 'animation' ? 'max-w-[8.6rem] pb-4 pt-2' : 'max-w-[10.2rem] pb-5 pt-2'
+          : kind === 'pencilCup'
+            ? size === 'animation' ? 'max-w-[10.5rem] pb-6 pt-2' : 'max-w-[12rem] pb-8 pt-2'
+            : kind === 'basket'
+              ? size === 'animation' ? 'max-w-[8.3rem] pb-5 pt-3' : 'max-w-[9.8rem] pb-7 pt-4'
+              : size === 'animation' ? 'max-w-[8.1rem] pb-5 pt-3' : 'max-w-[9.4rem] pb-7 pt-4'
+      }`}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function EqualShareDivisionProblemCard({
+  data,
+  answerValue,
+  onAnswerChange,
+  onSubmit,
+  canSubmit,
+  condensed,
+}: {
+  data: EqualShareDivisionProblemData;
+  answerValue: string;
+  onAnswerChange: (value: string) => void;
+  onSubmit: () => void;
+  canSubmit: boolean;
+  condensed: boolean;
+}) {
+  const prefersReducedMotion = useReducedMotion();
+  const [placements, setPlacements] = useState<Array<number | null>>(() => Array.from({ length: data.total }, () => null));
+  const [selectedItem, setSelectedItem] = useState<number | null>(null);
+  const [draggingItem, setDraggingItem] = useState<number | null>(null);
+  const [equationValues, setEquationValues] = useState({ total: '', groups: '', quotient: '' });
+  const [animationRunId, setAnimationRunId] = useState(0);
+  const quotient = data.total / data.groups;
+  const counts = Array.from({ length: data.groups }, (_, groupIndex) => placements.filter((placement) => placement === groupIndex).length);
+  const placedCount = placements.filter((placement) => placement !== null).length;
+  const allPlaced = placedCount === data.total;
+
+  useEffect(() => {
+    setPlacements(Array.from({ length: data.total }, () => null));
+    setSelectedItem(null);
+    setDraggingItem(null);
+    setEquationValues({ total: '', groups: '', quotient: '' });
+    setAnimationRunId((previous) => previous + 1);
+    onAnswerChange('');
+  }, [data.answerToken, data.total, onAnswerChange]);
+
+  useEffect(() => {
+    if (data.activity !== 'manipulate') {
+      return;
+    }
+
+    onAnswerChange(allPlaced ? getEqualShareDivisionCountsAnswer(counts) : '');
+  }, [allPlaced, counts.join(','), data.activity, onAnswerChange]);
+
+  useEffect(() => {
+    if (data.activity !== 'animationEquation') {
+      return;
+    }
+
+    const parseEquationValue = (value: string) => {
+      const trimmedValue = value.trim();
+      return /^\d+$/.test(trimmedValue) ? Number.parseInt(trimmedValue, 10) : Number.NaN;
+    };
+    const total = parseEquationValue(equationValues.total);
+    const groups = parseEquationValue(equationValues.groups);
+    const answer = parseEquationValue(equationValues.quotient);
+    if ([total, groups, answer].every((value) => !Number.isNaN(value))) {
+      onAnswerChange(getEqualShareDivisionEquationAnswer(total, groups, answer));
+      return;
+    }
+
+    onAnswerChange('');
+  }, [data.activity, equationValues.groups, equationValues.quotient, equationValues.total, onAnswerChange]);
+
+  const placeItem = (itemIndex: number, groupIndex: number | null) => {
+    setPlacements((previous) => previous.map((placement, index) => (index === itemIndex ? groupIndex : placement)));
+    setSelectedItem(null);
+  };
+
+  const handleContainerClick = (groupIndex: number) => {
+    if (selectedItem === null) {
+      return;
+    }
+
+    placeItem(selectedItem, groupIndex);
+  };
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>, groupIndex: number) => {
+    event.preventDefault();
+    const rawIndex = event.dataTransfer.getData('text/plain');
+    const itemIndex = Number.parseInt(rawIndex, 10);
+    if (!Number.isNaN(itemIndex)) {
+      placeItem(itemIndex, groupIndex);
+    }
+    setDraggingItem(null);
+  };
+
+  const handleTrayDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const rawIndex = event.dataTransfer.getData('text/plain');
+    const itemIndex = Number.parseInt(rawIndex, 10);
+    if (!Number.isNaN(itemIndex)) {
+      placeItem(itemIndex, null);
+    }
+    setDraggingItem(null);
+  };
+
+  const shouldUseCompactTrayItems = data.total > 8;
+  const trayColumnCount = data.total <= 8 ? data.total : data.total <= 12 ? 6 : data.total <= 18 ? 9 : 12;
+
+  const renderDraggableItem = (itemIndex: number, compact = false) => (
+    <button
+      key={`equal-share-item-${itemIndex}`}
+      type="button"
+      draggable
+      onDragStart={(event) => {
+        event.dataTransfer.setData('text/plain', String(itemIndex));
+        setDraggingItem(itemIndex);
+      }}
+      onDragEnd={() => setDraggingItem(null)}
+      onClick={() => setSelectedItem((previous) => (previous === itemIndex ? null : itemIndex))}
+      className={`equal-share-item-button grid shrink-0 appearance-none place-items-center border-0 bg-transparent p-0 shadow-none outline-none transition ${
+        compact ? 'h-14 w-14' : shouldUseCompactTrayItems ? 'h-14 w-14' : 'h-[6.25rem] w-[6.25rem]'
+      } ${
+        selectedItem === itemIndex
+          ? 'ring-4 ring-emerald-500/40'
+        : draggingItem === itemIndex
+          ? 'opacity-60'
+          : 'hover:scale-105 focus-visible:ring-2 focus-visible:ring-sky-300'
+      }`}
+      aria-label={`${data.itemLabel} ${itemIndex + 1}`}
+    >
+      <EqualShareItemGlyph kind={data.itemKind} size={compact ? 'placed' : shouldUseCompactTrayItems ? 'trayCompact' : 'tray'} />
+    </button>
+  );
+
+  const animationTargets = Array.from({ length: data.total }, (_, index) => ({
+    itemIndex: index,
+    groupIndex: index % data.groups,
+    round: Math.floor(index / data.groups),
+  }));
+  const manipulationColumnCount =
+    data.groups === 3
+      ? 3
+      : data.groups <= 4
+        ? Math.min(data.groups, condensed ? 2 : 4)
+        : Math.min(data.groups, condensed ? 3 : 4);
+  const shouldUseCompactContainer = data.groups >= 5 || (condensed && data.groups >= 4);
+  const animationColumnCount = data.groups <= 4 ? Math.min(data.groups, 2) : Math.min(data.groups, 3);
+  const animationRowCount = Math.ceil(data.groups / animationColumnCount);
+  const getAnimationContainerPosition = (groupIndex: number) => {
+    const columnIndex = groupIndex % animationColumnCount;
+    const rowIndex = Math.floor(groupIndex / animationColumnCount);
+    const rowCenterY =
+      animationRowCount === 1
+        ? 70
+        : animationRowCount === 2
+          ? 54 + rowIndex * 21
+          : 50 + rowIndex * 16;
+    return {
+      x: ((columnIndex + 0.5) / animationColumnCount) * 100,
+      y: rowCenterY,
+    };
+  };
+
+  return (
+    <div className="flex h-full min-h-0 w-full flex-col gap-3 text-slate-900">
+      {data.activity === 'manipulate' ? (
+        <div className="grid min-h-0 flex-1 grid-rows-[minmax(8.5rem,0.44fr)_minmax(16rem,1fr)_auto] gap-4">
+          <div
+            className="relative min-h-0 overflow-hidden rounded-[1.35rem] border border-slate-600 bg-[linear-gradient(180deg,#111827,#0f172a)] p-3 shadow-inner"
+            onDragOver={(event) => event.preventDefault()}
+            onDrop={handleTrayDrop}
+          >
+            <div
+              className="grid h-full min-h-0 content-center justify-items-center gap-2 px-2"
+              style={{ gridTemplateColumns: `repeat(${trayColumnCount}, minmax(0, 1fr))` }}
+            >
+              {placements.map((placement, itemIndex) => (placement === null ? renderDraggableItem(itemIndex) : null))}
+            </div>
+          </div>
+
+          <div className="grid min-h-0 auto-rows-fr gap-4" style={{ gridTemplateColumns: `repeat(${manipulationColumnCount}, minmax(0, 1fr))` }}>
+            {Array.from({ length: data.groups }, (_, groupIndex) => (
+              <div
+                key={`equal-share-container-${groupIndex}`}
+                onDragOver={(event) => event.preventDefault()}
+                onDrop={(event) => handleDrop(event, groupIndex)}
+                onClick={() => handleContainerClick(groupIndex)}
+                role="button"
+                tabIndex={0}
+                aria-label={`${groupIndex + 1}번 ${data.containerLabel}`}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    handleContainerClick(groupIndex);
+                  }
+                }}
+                className="h-full min-w-0"
+              >
+                <EqualShareContainerGlyph kind={data.containerKind} isActive={selectedItem !== null} size={shouldUseCompactContainer ? 'animation' : 'default'}>
+                  {placements.map((placement, itemIndex) =>
+                    placement === groupIndex ? (
+                      <span key={`placed-${itemIndex}`} onClick={(event) => event.stopPropagation()}>
+                        <button
+                          type="button"
+                          draggable
+                          onDragStart={(event) => {
+                            event.dataTransfer.setData('text/plain', String(itemIndex));
+                            setDraggingItem(itemIndex);
+                          }}
+                          onDragEnd={() => setDraggingItem(null)}
+                          onClick={() => {
+                            if (selectedItem !== null) {
+                              placeItem(selectedItem, groupIndex);
+                              return;
+                            }
+                            placeItem(itemIndex, null);
+                          }}
+                          className="equal-share-item-button -mx-1 grid place-items-center border-0 bg-transparent p-0 shadow-none outline-none transition hover:scale-105 focus-visible:ring-2 focus-visible:ring-emerald-300"
+                        >
+                          <EqualShareItemGlyph kind={data.itemKind} size="placed" />
+                        </button>
+                      </span>
+                    ) : null,
+                  )}
+                </EqualShareContainerGlyph>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid items-center gap-3 sm:grid-cols-[1fr_auto_1fr]">
+            <p className="text-center text-2xl font-black text-slate-200 sm:text-3xl">똑같이 나누어 보세요.</p>
+            <button
+              type="button"
+              disabled={!canSubmit}
+              onClick={onSubmit}
+              className={`inline-flex min-h-[4.25rem] min-w-[10rem] items-center justify-center gap-2 rounded-2xl px-7 text-xl font-black text-white shadow-lg transition sm:col-start-3 sm:justify-self-end ${
+                canSubmit ? 'bg-emerald-600 hover:bg-emerald-500' : 'cursor-not-allowed bg-slate-500 opacity-60'
+              }`}
+            >
+              <Sword size={22} /> 공격!
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto] gap-4">
+          <div className="relative min-h-[24rem] overflow-hidden rounded-[1.35rem] border border-slate-600 bg-[radial-gradient(circle_at_50%_0%,rgba(16,185,129,0.18),transparent_32%),linear-gradient(180deg,#111827,#0f172a)] p-4 shadow-inner">
+            <div className="absolute inset-x-6 top-5 h-24 rounded-[1.25rem] border border-slate-600 bg-slate-950/35" />
+            <div className="absolute inset-x-6 bottom-5 rounded-[1.25rem] border border-slate-600 bg-slate-950/30 p-3">
+              <div className="grid h-full gap-3" style={{ gridTemplateColumns: `repeat(${animationColumnCount}, minmax(0, 1fr))` }}>
+                {Array.from({ length: data.groups }, (_, groupIndex) => (
+                  <div key={`animation-container-${groupIndex}`} className="min-w-0">
+                    <EqualShareContainerGlyph kind={data.containerKind} surface="dark" size="animation">
+                      <span className="sr-only">{groupIndex + 1}번 {data.containerLabel}</span>
+                    </EqualShareContainerGlyph>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {animationTargets.map(({ itemIndex, groupIndex, round }) => {
+              const startX = 9 + (itemIndex % Math.min(data.total, 8)) * (82 / Math.min(data.total, 8));
+              const target = getAnimationContainerPosition(groupIndex);
+              const spread = Math.min(3.2, 13 / Math.max(1, quotient));
+              const endX = target.x + ((round % Math.max(1, quotient)) - (quotient - 1) / 2) * spread;
+              const finalSettleOffset =
+                data.containerKind === 'pencilCup'
+                  ? -1.4
+                  : data.containerKind === 'plate'
+                    ? -2.2
+                    : data.containerKind === 'basket'
+                      ? -1.8
+                      : -1.6;
+              const endY = target.y + finalSettleOffset + (round % 2 === 0 ? -1 : 1);
+              const midX = (startX + endX) / 2;
+              const midY = animationRowCount === 1 ? 39 : Math.min(45, endY - 18);
+              const isTallAnimationItem = data.itemKind === 'pencil' || data.itemKind === 'coloredPencil';
+              const initialScale = isTallAnimationItem ? 1 : 0.96;
+              const middleScale = isTallAnimationItem ? 0.96 : 0.82;
+              const finalScale = isTallAnimationItem ? 0.94 : 0.62;
+              return (
+                <motion.div
+                  key={`animated-equal-share-${animationRunId}-${itemIndex}`}
+                  className="absolute z-20"
+                  initial={{ left: `${startX}%`, top: '10%', scale: initialScale, opacity: 1 }}
+                  animate={{
+                    left: [`${startX}%`, `${midX}%`, `${endX}%`],
+                    top: ['10%', `${midY}%`, `${endY}%`],
+                    scale: [initialScale, middleScale, finalScale],
+                    opacity: 1,
+                  }}
+                  transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.92, delay: itemIndex * 0.13, ease: 'easeInOut', times: [0, 0.56, 1] }}
+                  style={{ translateX: '-50%', translateY: '-50%' }}
+                >
+                  <EqualShareItemGlyph kind={data.itemKind} size="animation" />
+                </motion.div>
+              );
+            })}
+          </div>
+
+          <div className="grid gap-3 rounded-[1.35rem] border border-slate-600 bg-slate-900 p-4 shadow-sm sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-stretch">
+            <div className="grid min-w-0 grid-cols-[1fr_auto_1fr_auto_1fr] items-center gap-2">
+              {([
+                ['total', '전체'],
+                ['groups', '나누는 곳'],
+                ['quotient', '한 곳'],
+              ] as const).map(([key, label], index) => (
+                <React.Fragment key={key}>
+                  <label className="min-w-0">
+                    <span className="sr-only">{label}</span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      value={equationValues[key]}
+                      onChange={(event) => setEquationValues((previous) => ({ ...previous, [key]: sanitizeNonNegativeIntegerInput(event.target.value) }))}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' && !event.ctrlKey && !event.altKey) {
+                          event.preventDefault();
+                          onSubmit();
+                        }
+                      }}
+                      className="h-16 w-full rounded-2xl border-4 border-slate-600 bg-slate-950 text-center text-3xl font-black text-white outline-none focus:border-emerald-400"
+                      placeholder="?"
+                    />
+                  </label>
+                  {index === 0 ? <span className="text-3xl font-black text-slate-300">÷</span> : null}
+                  {index === 1 ? <span className="text-3xl font-black text-slate-300">=</span> : null}
+                </React.Fragment>
+              ))}
+            </div>
+            <p className="self-center whitespace-nowrap text-base font-extrabold text-slate-300">식을 완성했나요?</p>
+            <button
+              type="button"
+              disabled={!canSubmit}
+              onClick={onSubmit}
+              className={`inline-flex min-h-[4.25rem] items-center justify-center gap-2 rounded-2xl px-7 text-xl font-black text-white shadow-lg transition ${
+                canSubmit ? 'bg-emerald-600 hover:bg-emerald-500' : 'cursor-not-allowed bg-slate-500 opacity-60'
+              }`}
+            >
+              <Sword size={22} /> 공격!
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function EqualGroupingDivisionProblemCard({
+  data,
+  answerValue,
+  onAnswerChange,
+  onSubmit,
+  canSubmit,
+  condensed,
+}: {
+  data: EqualGroupingDivisionProblemData;
+  answerValue: string;
+  onAnswerChange: (value: string) => void;
+  onSubmit: () => void;
+  canSubmit: boolean;
+  condensed: boolean;
+}) {
+  const prefersReducedMotion = useReducedMotion();
+  const [groupedItems, setGroupedItems] = useState<number[][]>([]);
+  const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [subtractionSteps, setSubtractionSteps] = useState(0);
+  const [answerInput, setAnswerInput] = useState('');
+  const [subtractionExpressionInput, setSubtractionExpressionInput] = useState('');
+  const [divisionEquationValues, setDivisionEquationValues] = useState({ total: '', groupSize: '', quotient: '' });
+  const groupCount = data.total / data.groupSize;
+  const remaining = Math.max(0, data.total - subtractionSteps * data.groupSize);
+  const parsedAnswerInput = /^\d+$/.test(answerInput.trim()) ? Number.parseInt(answerInput.trim(), 10) : Number.NaN;
+  const displayItems = Array.from({ length: data.total }, (_, index) => index);
+  const groupedItemSet = new Set(groupedItems.flat());
+  const ungroupedItems = displayItems.filter((itemIndex) => !groupedItemSet.has(itemIndex));
+  const groupCounts = groupedItems.map((group) => group.length);
+  const allGroupsCreated =
+    groupedItems.length === groupCount &&
+    groupedItemSet.size === data.total &&
+    groupedItems.every((group) => group.length === data.groupSize);
+  const activeItemCount = data.activity === 'repeatedSubtraction' ? remaining : data.total;
+  const expressionParts = Array.from({ length: subtractionSteps }, () => data.groupSize);
+  const shouldUseCompactItems = data.total >= 14 || condensed;
+  const itemColumnCount = data.total <= 8 ? data.total : data.total <= 12 ? 6 : data.total <= 18 ? 9 : 12;
+  const groupingLayoutColumnCount =
+    data.total <= 6
+      ? 3
+      : data.total <= 12
+        ? 4
+        : data.total <= 15
+          ? 5
+          : 6;
+  const itemCounterUnit =
+    data.itemLabel === '연필' || data.itemLabel === '색연필'
+      ? '자루'
+      : data.itemLabel === '스티커'
+        ? '장'
+        : data.itemLabel === '공책'
+          ? '권'
+          : '개';
+
+  useEffect(() => {
+    setGroupedItems([]);
+    setSelectedItems([]);
+    setSubtractionSteps(0);
+    setAnswerInput('');
+    setSubtractionExpressionInput('');
+    setDivisionEquationValues({ total: '', groupSize: '', quotient: '' });
+    onAnswerChange('');
+  }, [data.answerToken, data.total, onAnswerChange]);
+
+  useEffect(() => {
+    if (data.activity !== 'groupManipulate') {
+      return;
+    }
+
+    onAnswerChange(allGroupsCreated ? getEqualGroupingCountsAnswer(groupCounts) : '');
+  }, [allGroupsCreated, groupCounts.join(','), data.activity, onAnswerChange]);
+
+  useEffect(() => {
+    if (data.activity === 'repeatedSubtraction') {
+      if (remaining === 0 && !Number.isNaN(parsedAnswerInput)) {
+        onAnswerChange(getEqualGroupingSubtractionAnswer(data.total, data.groupSize, parsedAnswerInput));
+        return;
+      }
+      onAnswerChange('');
+      return;
+    }
+
+    if (data.activity === 'subtractionToDivision') {
+      const isSubtractionFilled = subtractionExpressionInput.trim().length > 0;
+      const divisionTotal = parseEquationNumber(divisionEquationValues.total);
+      const divisionGroupSize = parseEquationNumber(divisionEquationValues.groupSize);
+      const divisionQuotient = parseEquationNumber(divisionEquationValues.quotient);
+      const isDivisionFilled = [divisionTotal, divisionGroupSize, divisionQuotient].every((value) => !Number.isNaN(value));
+      if (isSubtractionFilled && isDivisionFilled) {
+        onAnswerChange(
+          getEqualGroupingLinkedEquationAnswer(
+            data.total,
+            divisionGroupSize,
+            divisionQuotient,
+            isRepeatedSubtractionExpressionCorrect(subtractionExpressionInput, data.total, divisionGroupSize),
+            divisionTotal === data.total && divisionGroupSize > 0 && divisionTotal % divisionGroupSize === 0 && divisionQuotient === divisionTotal / divisionGroupSize,
+          ),
+        );
+        return;
+      }
+      onAnswerChange('');
+    }
+  }, [data.activity, data.groupSize, data.total, divisionEquationValues.groupSize, divisionEquationValues.quotient, divisionEquationValues.total, groupCount, onAnswerChange, parsedAnswerInput, remaining, subtractionExpressionInput]);
+
+  const normalizeMathExpression = (value: string) => value.replace(/\s/g, '').replace(/[−–—]/g, '-').replace(/[÷／]/g, '/').replace(/[＝]/g, '=');
+  const parseEquationNumber = (value: string) => (/^\d+$/.test(value.trim()) ? Number.parseInt(value.trim(), 10) : Number.NaN);
+
+  const isRepeatedSubtractionExpressionCorrect = (value: string, total: number, groupSize: number) => {
+    const groupCountForExpression = total / groupSize;
+    const expected = `${total}${Array.from({ length: groupCountForExpression }, () => `-${groupSize}`).join('')}=0`;
+    return normalizeMathExpression(value) === expected;
+  };
+
+  const toggleSelectedItem = (itemIndex: number) => {
+    if (data.activity !== 'groupManipulate' || groupedItemSet.has(itemIndex)) {
+      return;
+    }
+
+    setSelectedItems((previous) => {
+      if (previous.includes(itemIndex)) {
+        return previous.filter((selectedItem) => selectedItem !== itemIndex);
+      }
+
+      return [...previous, itemIndex];
+    });
+  };
+
+  const createSelectedGroup = () => {
+    if (selectedItems.length === 0) {
+      return;
+    }
+
+    setGroupedItems((previous) => [...previous, selectedItems]);
+    setSelectedItems([]);
+  };
+
+  const returnGroupToTray = (groupIndex: number) => {
+    setGroupedItems((previous) => previous.filter((_, index) => index !== groupIndex));
+    setSelectedItems([]);
+  };
+
+  const renderItemButton = (itemIndex: number, compact = false) => {
+    const isSelected = selectedItems.includes(itemIndex);
+    const isSelectable = data.activity === 'groupManipulate' && !groupedItemSet.has(itemIndex);
+    const groupingItemSize = data.total <= 8 ? 'h-[6.5rem] w-[6.5rem]' : data.total <= 12 ? 'h-[5.75rem] w-[5.75rem]' : 'h-[5rem] w-[5rem]';
+    const groupingGlyphSize = data.total <= 12 ? 'groupingTray' : 'groupingTrayCompact';
+
+    return (
+      <button
+        key={`equal-grouping-item-${itemIndex}`}
+        type="button"
+        onClick={() => toggleSelectedItem(itemIndex)}
+        aria-pressed={isSelected}
+        className={`equal-share-item-button relative grid shrink-0 place-items-center outline-none transition ${
+          compact ? 'h-12 w-12' : data.activity === 'groupManipulate' ? groupingItemSize : shouldUseCompactItems ? 'h-[4.25rem] w-[4.25rem]' : 'h-[5.25rem] w-[5.25rem]'
+        } ${
+          isSelected
+            ? 'scale-110 ring-4 ring-emerald-300/70'
+            : isSelectable
+              ? 'hover:scale-105 focus-visible:ring-4 focus-visible:ring-sky-300/45'
+              : ''
+        }`}
+        aria-label={`${data.itemLabel} ${itemIndex + 1}${isSelected ? ' 선택됨' : ''}`}
+      >
+        {isSelected ? (
+          <span className="absolute -right-2 -top-2 grid h-7 w-7 place-items-center rounded-full border-2 border-slate-950 bg-emerald-300 text-slate-950 shadow-lg">
+            <Check size={17} strokeWidth={4} />
+          </span>
+        ) : null}
+        <EqualShareItemGlyph
+          kind={data.itemKind}
+          size={compact ? 'trayCompact' : data.activity === 'groupManipulate' ? groupingGlyphSize : shouldUseCompactItems ? 'trayCompact' : 'tray'}
+        />
+      </button>
+    );
+  };
+
+  const renderAttackButton = () => (
+    <button
+      type="button"
+      onClick={onSubmit}
+      aria-disabled={!canSubmit}
+      className={`inline-flex min-h-[4.25rem] min-w-[9rem] items-center justify-center gap-2 rounded-2xl px-7 text-xl font-black text-white shadow-lg transition ${
+        canSubmit ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-slate-700 hover:bg-slate-600'
+      }`}
+    >
+      <Sword size={22} /> 공격!
+    </button>
+  );
+
+  const renderExpression = (parts: number[], showZero: boolean) => (
+    <div className="flex min-h-[4.75rem] flex-wrap items-center justify-center gap-3 rounded-[1.1rem] border border-slate-500 bg-slate-950/70 px-4 py-3 text-3xl font-black text-white shadow-inner sm:text-4xl">
+      <span>{data.total}</span>
+      {parts.map((part, index) => (
+        <React.Fragment key={`subtraction-chip-${index}`}>
+          <span className="text-slate-200">-</span>
+          <span className="px-1 text-emerald-300">{part}</span>
+        </React.Fragment>
+      ))}
+      <span className="text-slate-200">=</span>
+      <span>{showZero ? 0 : remaining}</span>
+    </div>
+  );
+
+  if (data.activity === 'groupManipulate') {
+    return (
+      <div className="flex h-full min-h-0 w-full flex-col gap-3 text-slate-900">
+        <div className="grid min-h-0 flex-1 grid-rows-[minmax(18rem,1fr)_auto] gap-4">
+          <div className="relative min-h-0 overflow-y-auto rounded-[1.35rem] border border-slate-600 bg-[linear-gradient(180deg,#111827,#0f172a)] p-4 pt-24 shadow-inner">
+            <div className="absolute left-4 right-4 top-4 z-10 flex flex-wrap items-center justify-between gap-3 rounded-[1rem] border border-slate-600 bg-slate-950/78 px-4 py-3 shadow-lg backdrop-blur">
+              <p className="text-sm font-black text-slate-200 sm:text-base">
+                선택한 {data.itemLabel}: {selectedItems.length}개 · 만든 묶음: {groupedItems.length}개
+              </p>
+              <button
+                type="button"
+                disabled={selectedItems.length === 0}
+                onClick={createSelectedGroup}
+                className={`inline-flex min-h-[3.25rem] items-center justify-center rounded-2xl px-5 text-base font-black shadow-lg transition sm:min-w-[9rem] sm:text-lg ${
+                  selectedItems.length > 0
+                    ? 'bg-emerald-500 text-slate-950 hover:bg-emerald-400'
+                    : 'cursor-not-allowed bg-slate-600 text-slate-300'
+                }`}
+              >
+                묶음 만들기
+              </button>
+            </div>
+            <div className="grid min-h-full place-items-center">
+              <div
+                className="grid w-full max-w-[66rem] content-center justify-items-center gap-x-10 gap-y-8"
+                style={{ gridTemplateColumns: `repeat(${groupingLayoutColumnCount}, minmax(0, 1fr))` }}
+              >
+                {groupedItems.map((groupItems, groupIndex) => (
+                  <motion.div
+                    key={`equal-grouping-created-group-${groupIndex}`}
+                    initial={{ opacity: 0, scale: 0.92, y: 8 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.18 }}
+                    className="relative flex min-h-[7.25rem] min-w-[10rem] flex-col items-center justify-center rounded-[1.25rem] border-2 border-emerald-400 bg-emerald-400/10 px-4 py-3 shadow-[0_0_0_4px_rgba(52,211,153,0.12),0_14px_26px_rgba(0,0,0,0.22)]"
+                  >
+                    <div className="absolute left-3 top-2 rounded-full bg-emerald-400 px-2.5 py-1 text-xs font-black text-slate-950">
+                      {groupIndex + 1}묶음
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => returnGroupToTray(groupIndex)}
+                      className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full border border-slate-600 bg-slate-900 text-sm font-black text-slate-100 shadow-none transition hover:bg-slate-700"
+                      aria-label={`${groupIndex + 1}묶음 다시 풀기`}
+                    >
+                      ×
+                    </button>
+                    <div className="mt-6 flex flex-wrap items-center justify-center gap-0.5">
+                      {groupItems.map((itemIndex) => (
+                        <span key={`equal-grouping-inline-created-${itemIndex}`} className="grid place-items-center">
+                          <EqualShareItemGlyph kind={data.itemKind} size="trayCompact" />
+                        </span>
+                      ))}
+                    </div>
+                  </motion.div>
+                ))}
+
+                {ungroupedItems.map((itemIndex) => renderItemButton(itemIndex))}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between gap-3 rounded-[1.1rem] border border-slate-600 bg-slate-900 px-5 py-4">
+            <p className="text-2xl font-black leading-tight text-slate-100 sm:text-3xl">
+              {allGroupsCreated
+                ? `${data.itemLabel}를 한 묶음에 ${data.groupSize}${itemCounterUnit}씩 모두 묶었어요.`
+                : `${data.itemLabel}를 한 묶음에 ${data.groupSize}${itemCounterUnit}씩 묶어 봐요.`}
+            </p>
+            {renderAttackButton()}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (data.activity === 'repeatedSubtraction') {
+    return (
+      <div className="grid h-full min-h-0 w-full grid-rows-[minmax(0,1fr)_auto] gap-4 text-slate-900">
+        <div className="grid min-h-0 gap-4 rounded-[1.35rem] border border-slate-600 bg-[radial-gradient(circle_at_50%_0%,rgba(16,185,129,0.16),transparent_34%),linear-gradient(180deg,#111827,#0f172a)] p-4 shadow-inner">
+          <div className="grid min-h-[10rem] content-center justify-items-center gap-2 rounded-[1.1rem] border border-slate-600 bg-slate-950/35 p-3" style={{ gridTemplateColumns: `repeat(${itemColumnCount}, minmax(0, 1fr))` }}>
+            {displayItems.map((itemIndex) => (
+              <motion.div
+                key={`subtraction-item-${data.answerToken}-${itemIndex}`}
+                animate={{ opacity: itemIndex < activeItemCount ? 1 : 0.16, scale: itemIndex < activeItemCount ? 1 : 0.78 }}
+                transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.2 }}
+                className={itemIndex < activeItemCount ? '' : 'grayscale'}
+              >
+                {renderItemButton(itemIndex, true)}
+              </motion.div>
+            ))}
+          </div>
+          <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
+            {renderExpression(expressionParts, remaining === 0)}
+            <button
+              type="button"
+              disabled={remaining === 0}
+              onClick={() => setSubtractionSteps((previous) => Math.min(groupCount, previous + 1))}
+              className={`inline-flex min-h-[3.75rem] items-center justify-center rounded-2xl px-6 text-lg font-black shadow-lg transition ${
+                remaining > 0 ? 'bg-emerald-500 text-slate-950 hover:bg-emerald-400' : 'cursor-not-allowed bg-slate-600 text-slate-300'
+              }`}
+            >
+              {data.groupSize}
+              {itemCounterUnit}씩 덜어 내기
+            </button>
+          </div>
+        </div>
+        <div className="grid gap-4 rounded-[1.35rem] border border-slate-600 bg-slate-900 p-5 shadow-sm sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+          <label className="flex min-w-0 flex-nowrap items-center justify-center gap-4 whitespace-nowrap text-2xl font-black leading-none text-slate-100 sm:text-3xl lg:text-4xl">
+            <span className="shrink-0">
+              {data.groupSize}
+              {itemCounterUnit}씩
+            </span>
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              disabled={remaining !== 0}
+              value={answerInput}
+              onChange={(event) => setAnswerInput(sanitizeNonNegativeIntegerInput(event.target.value))}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && !event.ctrlKey && !event.altKey) {
+                  event.preventDefault();
+                  onSubmit();
+                }
+              }}
+              className="h-20 w-32 shrink-0 rounded-2xl border-4 border-slate-500 bg-slate-950 text-center text-4xl font-black text-white outline-none focus:border-emerald-400 disabled:cursor-not-allowed disabled:opacity-45 sm:w-36 sm:text-5xl"
+              placeholder="?"
+            />
+            <span className="shrink-0">{data.answerUnit} 덜어 낼 수 있어요.</span>
+          </label>
+          {renderAttackButton()}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid h-full min-h-0 w-full grid-rows-[minmax(0,1fr)_auto] gap-4 text-slate-900">
+      <div className="grid min-h-0 gap-4 rounded-[1.35rem] border border-slate-600 bg-[radial-gradient(circle_at_50%_0%,rgba(16,185,129,0.16),transparent_34%),linear-gradient(180deg,#111827,#0f172a)] p-4 shadow-inner">
+        <div className="grid min-h-[9rem] content-center justify-items-center gap-2 rounded-[1.1rem] border border-slate-600 bg-slate-950/35 p-3" style={{ gridTemplateColumns: `repeat(${itemColumnCount}, minmax(0, 1fr))` }}>
+          {displayItems.map((itemIndex) => (
+            <motion.div
+              key={`division-link-item-${data.answerToken}-${itemIndex}`}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.16, delay: Math.min(itemIndex * 0.025, 0.3) }}
+            >
+              {renderItemButton(itemIndex, true)}
+            </motion.div>
+          ))}
+        </div>
+      </div>
+      <div className="grid gap-4 rounded-[1.35rem] border border-slate-600 bg-slate-900 p-5 shadow-sm sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+        <div className="grid min-w-0 gap-3">
+          <label className="grid min-w-0 grid-cols-[7.25rem_minmax(0,1fr)] items-center gap-3">
+            <span className="rounded-full border border-emerald-400 bg-emerald-400/15 px-4 py-2 text-center text-xl font-black text-emerald-100">뺄셈식</span>
+            <input
+              type="text"
+              inputMode="text"
+              value={subtractionExpressionInput}
+              onChange={(event) => setSubtractionExpressionInput(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && !event.ctrlKey && !event.altKey) {
+                  event.preventDefault();
+                  onSubmit();
+                }
+              }}
+              className="h-16 w-full rounded-2xl border-4 border-slate-500 bg-slate-950 px-5 text-3xl font-black text-white outline-none focus:border-emerald-400"
+              placeholder="?"
+            />
+          </label>
+          <label className="grid min-w-0 grid-cols-[7.25rem_minmax(0,1fr)] items-center gap-3">
+            <span className="rounded-full border border-emerald-400 bg-emerald-400/15 px-4 py-2 text-center text-xl font-black text-emerald-100">나눗셈식</span>
+            <div className="grid min-w-0 grid-cols-[minmax(4.5rem,7rem)_auto_minmax(4.5rem,7rem)_auto_minmax(4.5rem,7rem)] items-center justify-start gap-3 text-3xl font-black text-slate-100">
+              {([
+                ['total', '나누어지는 수'],
+                ['groupSize', '나누는 수'],
+                ['quotient', '몫'],
+              ] as const).map(([key, label], index) => (
+                <React.Fragment key={`equal-grouping-division-input-${key}`}>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    aria-label={label}
+                    value={divisionEquationValues[key]}
+                    onChange={(event) => setDivisionEquationValues((previous) => ({ ...previous, [key]: sanitizeNonNegativeIntegerInput(event.target.value) }))}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' && !event.ctrlKey && !event.altKey) {
+                        event.preventDefault();
+                        onSubmit();
+                      }
+                    }}
+                    className="h-16 w-full rounded-2xl border-4 border-slate-500 bg-slate-950 text-center text-3xl font-black text-white outline-none focus:border-emerald-400"
+                    placeholder="?"
+                  />
+                  {index === 0 ? <span className="text-slate-200">÷</span> : null}
+                  {index === 1 ? <span className="text-slate-200">=</span> : null}
+                </React.Fragment>
+              ))}
+            </div>
+          </label>
+        </div>
+        {renderAttackButton()}
+      </div>
+    </div>
+  );
+}
+
+function DivisionEquationPartsProblemCard({
+  data,
+  onAnswerChange,
+  onSubmit,
+  canSubmit,
+}: {
+  data: DivisionEquationPartsProblemData;
+  answerValue: string;
+  onAnswerChange: (value: string) => void;
+  onSubmit: () => void;
+  canSubmit: boolean;
+}) {
+  const [values, setValues] = useState({ dividend: '', divisor: '', quotient: '' });
+
+  useEffect(() => {
+    setValues({ dividend: '', divisor: '', quotient: '' });
+    onAnswerChange('');
+  }, [data.answerToken, onAnswerChange]);
+
+  useEffect(() => {
+    const numbers = [values.dividend, values.divisor, values.quotient].map((value) => {
+      const trimmedValue = value.trim();
+      return /^\d+$/.test(trimmedValue) ? Number.parseInt(trimmedValue, 10) : Number.NaN;
+    });
+
+    if (numbers.every((number) => !Number.isNaN(number))) {
+      onAnswerChange(getDivisionEquationPartsAnswer(numbers[0], numbers[1], numbers[2]));
+      return;
+    }
+
+    onAnswerChange('');
+  }, [onAnswerChange, values.dividend, values.divisor, values.quotient]);
+
+  const handleValueChange = (key: keyof typeof values, value: string) => {
+    setValues((previous) => ({ ...previous, [key]: sanitizeNonNegativeIntegerInput(value) }));
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter' && !event.ctrlKey && !event.altKey) {
+      event.preventDefault();
+      onSubmit();
+    }
+  };
+
+  const partLabelByKey: Record<DivisionEquationPartKey, string> = {
+    dividend: '나누어지는 수',
+    divisor: '나누는 수',
+    quotient: '몫',
+  };
+  const rowKeys = data.partOrder?.length === DIVISION_EQUATION_PART_ORDER.length
+    ? data.partOrder
+    : DIVISION_EQUATION_PART_ORDER;
+  const rows = rowKeys.map((key) => ({ key, label: partLabelByKey[key] }));
+
+  return (
+    <div className="grid h-full min-h-0 w-full grid-rows-[auto_minmax(0,1fr)_auto] gap-4 text-white">
+      <div className="rounded-[1.2rem] border border-white/15 bg-[#202020] px-4 py-3 text-lg font-black text-white shadow-sm sm:text-xl">
+        {data.instruction}
+      </div>
+      <div className="grid min-h-0 place-items-center rounded-[1.35rem] border border-white/15 bg-[radial-gradient(circle_at_50%_0%,rgba(251,113,133,0.18),transparent_34%),linear-gradient(180deg,#202020,#171717)] p-4 shadow-inner">
+        <div className="grid w-full max-w-4xl gap-6">
+          <div className="mx-auto rounded-[1.25rem] border border-rose-300/45 bg-rose-500/16 px-8 py-5 text-center text-[clamp(2.6rem,9vw,5.5rem)] font-black leading-none text-rose-50 shadow-[0_18px_34px_rgba(0,0,0,0.42)]">
+            {data.dividend} ÷ {data.divisor} = {data.quotient}
+          </div>
+          <div className="overflow-hidden rounded-[1.25rem] border-4 border-rose-300/70 bg-[#121212] shadow-[0_16px_28px_rgba(0,0,0,0.38)]">
+            <div className="grid grid-cols-3 bg-rose-400/18 text-center text-base font-black text-rose-50 sm:text-2xl">
+              {rows.map((row) => (
+                <div key={row.key} className="border-r-2 border-rose-200/45 px-2 py-3 last:border-r-0">
+                  {row.label}
+                </div>
+              ))}
+            </div>
+            <div className="grid grid-cols-3">
+              {rows.map((row) => (
+                <label key={row.key} className="border-r-2 border-rose-200/35 bg-[#171717] p-2 last:border-r-0 sm:p-4">
+                  <span className="sr-only">{row.label}</span>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={values[row.key]}
+                    onChange={(event) => handleValueChange(row.key, event.target.value)}
+                    onKeyDown={handleKeyDown}
+                    className="h-16 w-full rounded-2xl border-4 border-white/25 bg-[#202020] text-center text-3xl font-black text-white outline-none placeholder:text-white/45 focus:border-rose-300 sm:h-20 sm:text-4xl"
+                    placeholder="?"
+                  />
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="flex justify-end">
+        <button
+          type="button"
+          disabled={!canSubmit}
+          onClick={onSubmit}
+          className={`inline-flex min-h-[4.25rem] min-w-[10rem] items-center justify-center gap-2 rounded-2xl px-7 text-xl font-black text-white shadow-lg transition ${
+            canSubmit ? 'bg-emerald-600 hover:bg-emerald-500' : 'cursor-not-allowed bg-slate-500 opacity-60'
+          }`}
+        >
+          <Sword size={22} /> 공격!
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function DivisionSituationClassifyProblemCard({
+  data,
+  onAnswerChange,
+  onSubmit,
+  canSubmit,
+  condensed,
+}: {
+  data: DivisionSituationClassifyProblemData;
+  answerValue: string;
+  onAnswerChange: (value: string) => void;
+  onSubmit: () => void;
+  canSubmit: boolean;
+  condensed: boolean;
+}) {
+  const [selectedKind, setSelectedKind] = useState<DivisionSituationKind | null>(null);
+
+  useEffect(() => {
+    setSelectedKind(null);
+    onAnswerChange('');
+  }, [data.answerToken, onAnswerChange]);
+
+  const handleChoiceSelect = (kind: DivisionSituationKind) => {
+    setSelectedKind(kind);
+    onAnswerChange(getDivisionSituationClassifyAnswer(kind));
+  };
+
+  const choices = [
+    {
+      kind: 'equalShare',
+      label: '나누기 상황',
+      className: 'border-cyan-300/45 bg-cyan-300/12 text-cyan-100 hover:bg-cyan-300/18',
+      selectedClassName: 'border-cyan-200 bg-cyan-300 text-slate-950 shadow-[0_14px_28px_rgba(103,232,249,0.22)]',
+    },
+    {
+      kind: 'equalGrouping',
+      label: '묶기 상황',
+      className: 'border-amber-300/45 bg-amber-300/12 text-amber-100 hover:bg-amber-300/18',
+      selectedClassName: 'border-amber-200 bg-amber-300 text-slate-950 shadow-[0_14px_28px_rgba(252,211,77,0.2)]',
+    },
+  ] as const;
+
+  return (
+    <div className="grid h-full min-h-0 w-full grid-rows-[auto_minmax(0,1fr)_auto] gap-4 text-white">
+      <div className="grid rounded-[1.2rem] border border-white/15 bg-[#202020] px-4 py-3 shadow-sm">
+        <p className="text-lg font-black text-white sm:text-xl">{data.instruction}</p>
+        {data.helperText ? (
+          <p className="break-keep text-sm font-bold leading-6 text-white/68 sm:text-base">{data.helperText}</p>
+        ) : null}
+      </div>
+      <div className="grid min-h-0 place-items-center rounded-[1.35rem] border border-white/15 bg-[radial-gradient(circle_at_50%_0%,rgba(34,211,238,0.12),transparent_34%),linear-gradient(180deg,#202020,#171717)] p-4 shadow-inner sm:p-6">
+        <div className="grid h-full w-full max-w-5xl grid-rows-[minmax(0,1fr)_auto] gap-6">
+          <div className="grid min-h-[10rem] place-items-center rounded-[1.35rem] border border-white/14 bg-[#202020] px-6 py-6 shadow-[0_18px_34px_rgba(0,0,0,0.35)] sm:min-h-[12rem] sm:px-9">
+            <p className={`${condensed ? 'text-[clamp(1.75rem,6.2vw,2.45rem)] leading-[1.35]' : 'text-[clamp(2.1rem,4vw,3.2rem)] leading-[1.28]'} max-w-4xl break-keep text-center font-black text-white`}>
+              {data.situation.text}
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {choices.map((choice) => (
+              <button
+                key={choice.kind}
+                type="button"
+                onClick={() => handleChoiceSelect(choice.kind)}
+                className={`grid min-h-[5.75rem] place-items-center rounded-[1.25rem] border-2 px-4 py-3 text-center transition sm:min-h-[6.25rem] ${
+                  selectedKind === choice.kind ? choice.selectedClassName : choice.className
+                }`}
+              >
+                <span className="text-[clamp(1.55rem,5vw,2.25rem)] font-black leading-tight">{choice.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="flex justify-end">
+        <button
+          type="button"
+          disabled={!canSubmit}
+          onClick={onSubmit}
+          className={`inline-flex min-h-[4.25rem] min-w-[10rem] items-center justify-center gap-2 rounded-2xl px-7 text-xl font-black text-white shadow-lg transition ${
+            canSubmit ? 'bg-emerald-600 hover:bg-emerald-500' : 'cursor-not-allowed bg-slate-500 opacity-60'
+          }`}
+        >
+          <Sword size={22} /> 공격!
+        </button>
+      </div>
     </div>
   );
 }
@@ -25181,6 +28226,7 @@ export default function App() {
   const unit6RecentProblemSequencesRef = useRef<Record<number, number[]>>({});
   const unit6ProblemActivityCycleRef = useRef<Record<number, string[]>>({});
   const unit3ProblemSequenceRef = useRef<Record<number, number>>({});
+  const unit4ProblemSequenceRef = useRef<Record<number, number>>({});
   const unit3Level12RoundTemplateOrderRef = useRef<Level12TemplateId[] | null>(null);
   const unit3Level12PreviousTemplateOrderRef = useRef<Level12TemplateId[]>([]);
   const developerProblemHistoryRef = useRef<DeveloperProblemSnapshot[]>([]);
@@ -25602,10 +28648,17 @@ export default function App() {
     developerProblemHistoryIndexRef.current = -1;
   };
 
-  const getNextProblemForTurn = (targetUnitId: LearningUnitId, targetLevel: number, targetOpponentHP: number) => {
+  const getNextProblemForTurn = (
+    targetUnitId: LearningUnitId,
+    targetLevel: number,
+    targetOpponentHP: number,
+    options: { advanceFullHpSequence?: boolean } = {},
+  ) => {
+    const shouldUseOpeningSequence = targetOpponentHP === 100 && !options.advanceFullHpSequence;
+
     if (targetUnitId === 'unit1') {
       const nextProblemSequence =
-        targetOpponentHP === 100
+        shouldUseOpeningSequence
           ? 1
           : (unit1ProblemSequenceRef.current[targetLevel] ?? 1) + 1;
 
@@ -25614,15 +28667,15 @@ export default function App() {
     }
 
     if (targetUnitId === 'unit6') {
-      const previousProblemSequence = targetOpponentHP === 100
+      const previousProblemSequence = shouldUseOpeningSequence
         ? undefined
         : unit6ProblemSequenceRef.current[targetLevel];
-      const recentProblemSequences = targetOpponentHP === 100
+      const recentProblemSequences = shouldUseOpeningSequence
         ? []
         : unit6RecentProblemSequencesRef.current[targetLevel] ?? [];
       const activityCycle = getUnit6ProblemActivities(targetLevel);
       const usedActivities =
-        targetOpponentHP === 100
+        shouldUseOpeningSequence
           ? []
           : (unit6ProblemActivityCycleRef.current[targetLevel] ?? [])
             .filter((activity) => activityCycle.includes(activity));
@@ -25648,12 +28701,22 @@ export default function App() {
       return getProblemForTurn(targetUnitId, targetLevel, targetOpponentHP, nextProblemSequence);
     }
 
+    if (targetUnitId === 'unit4') {
+      const nextProblemSequence =
+        shouldUseOpeningSequence
+          ? getInitialUnit4ProblemSequence(targetLevel)
+          : (unit4ProblemSequenceRef.current[targetLevel] ?? 1) + 1;
+
+      unit4ProblemSequenceRef.current[targetLevel] = nextProblemSequence;
+      return getProblemForTurn(targetUnitId, targetLevel, targetOpponentHP, nextProblemSequence);
+    }
+
     if (targetUnitId !== 'unit3') {
       return getProblemForTurn(targetUnitId, targetLevel, targetOpponentHP);
     }
 
     const nextProblemSequence =
-      targetOpponentHP === 100
+      shouldUseOpeningSequence
         ? 1
         : (unit3ProblemSequenceRef.current[targetLevel] ?? 1) + 1;
 
@@ -25879,6 +28942,7 @@ export default function App() {
     : isAttacking
       ? playerSpriteSet.attack
       : playerSpriteSet.default;
+  const currentSpecialOpponent = getConfiguredOpponentForUnit(activeLearningUnitId, level, specialOpponentSelections);
   const opponentSpriteSet = getOpponentSpriteSetForLevel(activeLearningUnitId, level, specialOpponentSelections);
   const opponentCharacterImage = opponentSpriteSet
     ? isOpponentHit
@@ -25887,7 +28951,6 @@ export default function App() {
         ? opponentSpriteSet.attack
         : opponentSpriteSet.default
     : null;
-  const currentSpecialOpponent = getConfiguredOpponentForUnit(activeLearningUnitId, level, specialOpponentSelections);
   const currentOpponentName = getOpponentNameForLevel(activeLearningUnitId, level, specialOpponentSelections);
   const opponentImageClassName = currentSpecialOpponent?.spriteClassName ?? '';
   const defeatSceneImageClassName = currentSpecialOpponent?.defeatSceneClassName ?? '';
@@ -26082,11 +29145,22 @@ export default function App() {
       return;
     }
 
+    const nextSpecialOpponentSelections = pickDeveloperOpponentSelections(
+      activeLearningUnitId,
+      targetLevel,
+      specialOpponentSelections,
+    );
+
     resetDeveloperBattleState();
+    setSpecialOpponentSelections(nextSpecialOpponentSelections);
     setPlayerHP(100);
     setLevel(targetLevel);
     setOpponentHP(100);
-    setProblemWithCoachmark(getNextProblemForTurn(activeLearningUnitId, targetLevel, 100), targetLevel, { opponentHP: 100 });
+    setProblemWithCoachmark(
+      getNextProblemForTurn(activeLearningUnitId, targetLevel, 100, { advanceFullHpSequence: true }),
+      targetLevel,
+      { opponentHP: 100 },
+    );
     playSound('ui', { gainMultiplier: 0.84, detune: 16 });
     updateMessage(`개발자 모드: ${targetLevel}단계로 이동!`);
   });
@@ -26205,7 +29279,7 @@ export default function App() {
       ? builderEvaluation?.status === 'ready'
         ? builderEvaluation.text
         : null
-      : problem.kind === 'equalPartition' || problem.kind === 'fractionIntro'
+      : problem.kind === 'equalPartition' || problem.kind === 'fractionIntro' || problem.kind === 'equalShareDivision' || problem.kind === 'equalGroupingDivision' || problem.kind === 'divisionEquationParts' || problem.kind === 'divisionSituationClassify'
         ? null
       : problem.kind === 'numberLineBox'
         ? null
@@ -26357,6 +29431,14 @@ export default function App() {
         : normalizedInputValue.length > 0
       : problem.kind === 'fractionIntro'
       ? problem.fractionIntro ? isFractionIntroAnswerReady(inputValue, problem.fractionIntro) : false
+      : problem.kind === 'equalShareDivision'
+      ? problem.equalShareDivision ? isEqualShareDivisionAnswerReady(inputValue, problem.equalShareDivision) : false
+      : problem.kind === 'equalGroupingDivision'
+      ? problem.equalGroupingDivision ? isEqualGroupingDivisionAnswerReady(inputValue, problem.equalGroupingDivision) : false
+      : problem.kind === 'divisionEquationParts'
+      ? isDivisionEquationPartsAnswerReady(inputValue)
+      : problem.kind === 'divisionSituationClassify'
+      ? isDivisionSituationClassifyAnswerReady(inputValue)
       : hasValidAnswerInput;
   const storyPromptSections = problem.kind === 'story' ? splitStoryPromptSections(problem.prompt) : null;
   const hasNumberedStoryOptions = Boolean(storyPromptSections && storyPromptSections.optionLines.length >= 2);
@@ -26382,11 +29464,14 @@ export default function App() {
   const shouldUseCompactUnit3Viewport = activeLearningUnitId === 'unit3' && level >= 8 && !isStoryTimeAdditionProblem;
   const shouldUseCompactUnit6FractionCompareViewport =
     activeLearningUnitId === 'unit6' && level === 5 && problem.kind === 'fractionIntro';
+  const shouldUseCompactUnit4EqualShareViewport =
+    activeLearningUnitId === 'unit4' && level === 1 && problem.kind === 'equalShareDivision';
   const isCompactBattleViewport =
     isShortViewport ||
     shouldUseCompactUnit1ShapeViewport ||
     shouldUseCompactUnit3Viewport ||
     shouldUseCompactUnit6FractionCompareViewport ||
+    shouldUseCompactUnit4EqualShareViewport ||
     hasNumberedStoryOptions;
   const numberedStoryOptionCount = storyPromptSections?.optionLines.length ?? 0;
   const isDenseNumberedStoryLayout = Boolean(
@@ -26610,6 +29695,7 @@ export default function App() {
         Object.entries(unit6ProblemActivityCycleRef.current).map(([key, activities]) => [key, [...activities]]),
       ),
       unit3ProblemSequence: { ...unit3ProblemSequenceRef.current },
+      unit4ProblemSequence: { ...unit4ProblemSequenceRef.current },
       unit3Level12RoundTemplateOrder: unit3Level12RoundTemplateOrderRef.current
         ? [...unit3Level12RoundTemplateOrderRef.current]
         : null,
@@ -26743,7 +29829,7 @@ export default function App() {
     const slot = slots.find((item) => item.id === slotId);
     if (!slot) return;
 
-    const sanitized = nextValue.replace(/\D/g, '').slice(-1);
+    const sanitized = sanitizeNonNegativeIntegerInput(nextValue).slice(-1);
     if (sanitized && !slot.digits.includes(sanitized)) {
       return;
     }
@@ -26752,7 +29838,7 @@ export default function App() {
   };
 
   const handleClockAnswerChange = (part: ClockInputPart, nextValue: string) => {
-    const sanitized = nextValue.replace(/\D/g, '').slice(0, 2);
+    const sanitized = sanitizeNonNegativeIntegerInput(nextValue).slice(0, 2);
     setClockAnswerInput((prev) => ({ ...prev, [part]: sanitized }));
   };
 
@@ -26997,6 +30083,7 @@ export default function App() {
 	    options: {
 	      skipSpecialChallenges?: boolean;
 	      forceOpponentDefeat?: boolean;
+	      afterIncorrect?: () => void;
 	    } = {},
 	  ) => {
     if (isBattleActionResolvingRef.current || isAttacking || isOpponentAttacking || isOpponentHit || isPlayerHit) {
@@ -27006,6 +30093,7 @@ export default function App() {
 	    isBattleActionResolvingRef.current = true;
 	    const skipSpecialChallenges = options.skipSpecialChallenges === true;
 	    const forceOpponentDefeat = options.forceOpponentDefeat === true;
+	    const afterIncorrect = options.afterIncorrect;
 	    const runId = currentPlayRunIdRef.current;
 
     if (isCorrect) {
@@ -27103,6 +30191,7 @@ export default function App() {
           setGameState('lose');
           playSound('lose', { gainMultiplier: 1.06, detune: -18 });
         } else {
+          afterIncorrect?.();
           isBattleActionResolvingRef.current = false;
         }
       }, ATTACK_POSE_DURATION_MS, runId);
@@ -27364,31 +30453,13 @@ export default function App() {
           return;
         }
 
-        playSound('submit', {
-          gainMultiplier: 0.9,
-          detune: 10,
-        });
-
         if (oxResult.isComplete) {
           setInputValue(oxResult.answerValue);
           resolveProblemResult(true);
           return;
         }
 
-        setInputValue(oxResult.answerValue);
-        if (oxResult.isCorrect) {
-          playSound('correct', {
-            gainMultiplier: 0.95,
-            detune: 12,
-          });
-          updateMessage(`공격 성공! 연속 ${oxResult.streak} / 3`);
-        } else {
-          playSound('wrong', {
-            gainMultiplier: 0.9,
-            detune: -18,
-          });
-          updateMessage('공격 실패! 연속 정답이 다시 시작돼요.');
-        }
+        resolveEqualPartitionOxBattleResult(inputValue, oxResult);
         return;
       }
 
@@ -27437,11 +30508,9 @@ export default function App() {
           });
           updateMessage(`공격 성공! 연속 ${conversionResult.streak} / ${UNIT_CONVERSION_DECIMAL_STREAK_TARGET}`);
         } else {
-          playSound('wrong', {
-            gainMultiplier: 0.9,
-            detune: -18,
+          resolveProblemResult(false, {
+            afterIncorrect: () => setInputValue(conversionResult.answerValue),
           });
-          updateMessage('공격 실패! 연속 정답이 다시 시작돼요.');
         }
         return;
       }
@@ -27476,14 +30545,13 @@ export default function App() {
           updateMessage(`공격 성공! 연속 ${nextStreak} / ${UNIT_FRACTION_COMPARE_STREAK_TARGET}`);
           advanceUnitFractionCompareQuestion(nextStreak);
         } else {
-          setUnitFractionCompareStreak(0);
-          setUnitFractionCompareStreakSequences([]);
-          setInputValue('');
-          playSound('wrong', {
-            gainMultiplier: 0.9,
-            detune: -18,
+          resolveProblemResult(false, {
+            afterIncorrect: () => {
+              setUnitFractionCompareStreak(0);
+              setUnitFractionCompareStreakSequences([]);
+              setInputValue('');
+            },
           });
-          updateMessage('공격 실패! 연속 정답이 다시 시작돼요.');
         }
         return;
       }
@@ -27499,6 +30567,88 @@ export default function App() {
         detune: 10,
       });
       resolveProblemResult(isFractionIntroAnswerCorrect(inputValue, problem.fractionIntro));
+      return;
+    }
+
+    if (problem.kind === 'equalShareDivision' && problem.equalShareDivision) {
+      if (!isEqualShareDivisionAnswerReady(inputValue, problem.equalShareDivision)) {
+        playSound('ui');
+        updateMessage(
+          problem.equalShareDivision.activity === 'manipulate'
+            ? '모든 물건을 나누는 곳에 넣은 뒤 공격해요!'
+            : '나눗셈식의 빈칸을 모두 채운 뒤 공격해요!',
+        );
+        return;
+      }
+
+      playSound('submit', {
+        gainMultiplier: 0.9,
+        detune: 10,
+      });
+
+      const isCorrect = isEqualShareDivisionAnswerCorrect(inputValue, problem.equalShareDivision);
+      if (!isCorrect && problem.equalShareDivision.activity === 'manipulate') {
+        updateMessage('모두 같은 개수인지 확인해 봐!');
+      }
+      resolveProblemResult(isCorrect);
+      return;
+    }
+
+    if (problem.kind === 'equalGroupingDivision' && problem.equalGroupingDivision) {
+      if (!isEqualGroupingDivisionAnswerReady(inputValue, problem.equalGroupingDivision)) {
+        playSound('ui');
+        updateMessage(
+          problem.equalGroupingDivision.activity === 'groupManipulate'
+            ? '모든 물건을 같은 수씩 묶은 뒤 공격해요!'
+            : problem.equalGroupingDivision.activity === 'repeatedSubtraction'
+              ? '0이 될 때까지 덜어 내고 횟수를 쓴 뒤 공격해요!'
+              : '뺄셈식과 나눗셈식을 모두 쓴 뒤 공격해요!',
+        );
+        return;
+      }
+
+      playSound('submit', {
+        gainMultiplier: 0.9,
+        detune: 10,
+      });
+
+      const isCorrect = isEqualGroupingDivisionAnswerCorrect(inputValue, problem.equalGroupingDivision);
+      if (!isCorrect && problem.equalGroupingDivision.activity === 'groupManipulate') {
+        updateMessage('한 묶음에 들어간 개수가 모두 같은지 확인해 봐!');
+      }
+      resolveProblemResult(isCorrect);
+      return;
+    }
+
+    if (problem.kind === 'divisionEquationParts' && problem.divisionEquationParts) {
+      if (!isDivisionEquationPartsAnswerReady(inputValue)) {
+        playSound('ui');
+        updateMessage('나눗셈식의 세 수를 모두 쓴 뒤 공격해요!');
+        return;
+      }
+
+      playSound('submit', {
+        gainMultiplier: 0.9,
+        detune: 10,
+      });
+
+      resolveProblemResult(isDivisionEquationPartsAnswerCorrect(inputValue, problem.divisionEquationParts));
+      return;
+    }
+
+    if (problem.kind === 'divisionSituationClassify' && problem.divisionSituationClassify) {
+      if (!isDivisionSituationClassifyAnswerReady(inputValue)) {
+        playSound('ui');
+        updateMessage('나누기 상황인지 묶기 상황인지 고른 뒤 공격해요!');
+        return;
+      }
+
+      playSound('submit', {
+        gainMultiplier: 0.9,
+        detune: 10,
+      });
+
+      resolveProblemResult(isDivisionSituationClassifyAnswerCorrect(inputValue, problem.divisionSituationClassify));
       return;
     }
 
@@ -27713,7 +30863,7 @@ export default function App() {
     currentPlayUnitIdRef.current = activeLearningUnitId;
     recordedPlayRunIdRef.current = null;
     warmAudio();
-    playSound('start', { gainMultiplier: 0.8, detune: 12 });
+    playSound('start', { gainMultiplier: 0.32, detune: 12 });
     gameStateRef.current = 'playing';
     setGameState('playing');
     reservedRewardSkinIdsRef.current.clear();
@@ -27737,6 +30887,7 @@ export default function App() {
     unit6RecentProblemSequencesRef.current = {};
     unit6ProblemActivityCycleRef.current = {};
     unit3ProblemSequenceRef.current = {};
+    unit4ProblemSequenceRef.current = {};
     unit3Level12RoundTemplateOrderRef.current = null;
     setIsEstimation(false);
     setEstimationProblem(null);
@@ -27777,6 +30928,8 @@ export default function App() {
                 ? progress.unit6ProblemSequence[progress.level] ?? 1
               : progress.unitId === 'unit3'
                 ? progress.unit3ProblemSequence[progress.level] ?? 1
+              : progress.unitId === 'unit4'
+                ? progress.unit4ProblemSequence[progress.level] ?? 1
                 : undefined,
           );
 
@@ -27786,7 +30939,7 @@ export default function App() {
     currentPlayUnitIdRef.current = progress.unitId;
     recordedPlayRunIdRef.current = null;
     warmAudio();
-    playSound('start', { gainMultiplier: 0.72, detune: 6 });
+    playSound('start', { gainMultiplier: 0.3, detune: 6 });
     gameStateRef.current = 'playing';
     setGameState('playing');
     reservedRewardSkinIdsRef.current.clear();
@@ -27802,7 +30955,7 @@ export default function App() {
     setPlayerName(progress.playerName.trim() || DEFAULT_PLAYER_NAME);
     setSelectedLearningUnitId(progress.unitId);
     setBattleDifficulty(progress.battleDifficulty);
-    setSpecialOpponentSelections(progress.specialOpponentSelections);
+    setSpecialOpponentSelections(normalizeSpecialOpponentSelections(progress.specialOpponentSelections));
     setLevel(progress.level);
     setPlayerHP(progress.playerHP);
     setOpponentHP(progress.opponentHP);
@@ -27816,6 +30969,7 @@ export default function App() {
       Object.entries(progress.unit6ProblemActivityCycle).map(([key, activities]) => [key, [...activities]]),
     );
     unit3ProblemSequenceRef.current = { ...progress.unit3ProblemSequence };
+    unit4ProblemSequenceRef.current = { ...progress.unit4ProblemSequence };
     unit3Level12RoundTemplateOrderRef.current = progress.unit3Level12RoundTemplateOrder
       ? [...progress.unit3Level12RoundTemplateOrder]
       : null;
@@ -27869,6 +31023,7 @@ export default function App() {
     unit6RecentProblemSequencesRef.current = {};
     unit6ProblemActivityCycleRef.current = {};
     unit3ProblemSequenceRef.current = {};
+    unit4ProblemSequenceRef.current = {};
     unit3Level12RoundTemplateOrderRef.current = null;
     setIsEstimation(false);
     setEstimationProblem(null);
@@ -28385,10 +31540,12 @@ export default function App() {
               </button>
             </div>
 
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {LEARNING_UNITS.map((unit) => {
                 const isUnitInProgress = isLearningUnitInProgress(unit.id);
+                const isPrivateUnit = isDeveloperOnlyLearningUnit(unit.id) && !isDeveloperMode;
                 const canEnterUnit = canEnterLearningUnit(unit, isDeveloperMode);
+                const unitNumber = unit.chapterLabel.replace('단원', '');
 
                 return (
                   <motion.button
@@ -28400,26 +31557,30 @@ export default function App() {
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.24, ease: 'easeOut' }}
-                    className={`unit-select-card group relative flex h-full min-h-[6rem] flex-col overflow-hidden rounded-[1.15rem] border p-4 text-left shadow-none transition duration-200 sm:min-h-[6.5rem] ${
+                    className={`unit-select-card group relative flex h-full min-h-[6rem] flex-col overflow-hidden rounded-[1rem] border p-4 text-left shadow-none transition duration-200 ${
                       selectedLearningUnitId === unit.id
-                        ? 'border-emerald-400 bg-emerald-400/10 ring-1 ring-emerald-300/35'
+                        ? 'border-emerald-300 bg-slate-900 ring-2 ring-emerald-300/45'
                         : canEnterUnit
-                          ? 'border-slate-700 bg-slate-900 hover:border-slate-500 hover:bg-slate-800/90'
+                          ? 'border-slate-700 bg-slate-900 hover:-translate-y-0.5 hover:border-slate-500 hover:bg-slate-800/90'
                           : 'cursor-not-allowed border-slate-800 bg-slate-900/65 opacity-70 saturate-75'
                     }`}
                   >
+                    <div className={`absolute inset-x-0 top-0 h-1 ${
+                      selectedLearningUnitId === unit.id ? 'bg-emerald-300' : 'bg-slate-700'
+                    }`} />
                     <div className="relative flex h-full flex-col">
                       <div className="flex items-start justify-between gap-4">
-                        <div className="max-w-[85%]">
-                          <p className={`text-xs font-black tracking-[0.18em] ${
+                        <div className="flex min-w-0 items-start gap-3">
+                          <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[0.75rem] border text-base font-black ${
                             selectedLearningUnitId === unit.id
-                              ? 'text-emerald-200'
-                              : 'text-slate-400'
+                              ? 'border-emerald-300 bg-emerald-400 text-slate-950'
+                              : 'border-slate-700 bg-slate-950/65 text-slate-200'
                           }`}>
-                            {unit.chapterLabel}
-                          </p>
-                          <h3 className="mt-1.5 text-xl font-black leading-tight text-white">
-                            {unit.title}
+                            {unitNumber}
+                          </span>
+                          <div className="min-w-0 self-center">
+                          <h3 className="text-xl font-black leading-tight text-white">
+                            {isPrivateUnit ? '비공개' : unit.title}
                           </h3>
                           {isUnitInProgress ? (
                             <p className="mt-2 inline-flex rounded-full border border-amber-300/30 bg-amber-300/10 px-2.5 py-1 text-xs font-black text-amber-100">
@@ -28430,13 +31591,14 @@ export default function App() {
                               준비 중
                             </p>
                           ) : null}
+                          </div>
                         </div>
                         <div className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border ${
                           selectedLearningUnitId === unit.id
                             ? 'border-emerald-300 bg-emerald-400 text-slate-950'
                             : 'border-slate-600 bg-slate-950/40 text-slate-500'
                         }`}>
-                          {selectedLearningUnitId === unit.id ? <Check className="h-4 w-4" /> : null}
+                          {selectedLearningUnitId === unit.id ? <Check className="h-4 w-4" /> : isPrivateUnit ? <Lock className="h-4 w-4" /> : null}
                         </div>
                       </div>
                     </div>
@@ -28850,7 +32012,7 @@ export default function App() {
               </div>
             )}
 
-            <div className="flex flex-1 min-h-0 flex-col">
+            <div className={`${canUseHint && showHint ? 'flex-none' : 'flex-1'} flex min-h-0 flex-col`}>
               {isEstimation ? (
               <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4, ease: "easeOut" }} className="flex min-h-0 flex-1 flex-col items-center justify-center rounded-3xl border-4 border-yellow-500 bg-slate-900 p-5 text-center text-slate-100 shadow-inner sm:p-6 lg:p-8">
                 <h2 className="text-4xl font-black text-yellow-400 mb-4">어림잡기 도전! ({timeLeft}초)</h2>
@@ -28943,11 +32105,13 @@ export default function App() {
                       </div>
                     }
                   >
-                    <VisualCalculator
-                      problemText={hintProblemText}
-                      onControlSound={playVisualControlSound}
-                      condensed={isCompactBattleViewport}
-                    />
+                    <div className="h-[31rem] min-h-0 w-full max-h-[calc(100svh-13rem)]">
+                      <VisualCalculator
+                        problemText={hintProblemText}
+                        onControlSound={playVisualControlSound}
+                        condensed={isCompactBattleViewport}
+                      />
+                    </div>
                   </Suspense>
                 </ErrorBoundary>
               ) : (
@@ -28972,7 +32136,7 @@ export default function App() {
                 className={`flex min-h-0 flex-1 rounded-3xl ${isDenseNumberedStoryLayout ? 'border-4' : 'border-8'} border-slate-200 bg-white shadow-inner ${
                   problem.kind === 'distanceMap' || problem.kind === 'distanceWorksheet'
                     ? 'flex flex-col overflow-y-auto p-2 sm:p-3 lg:p-3'
-                    : problem.kind === 'shapeDraw' || problem.kind === 'shapeRain' || problem.kind === 'equalPartition' || problem.kind === 'fractionIntro'
+                    : problem.kind === 'shapeDraw' || problem.kind === 'shapeRain' || problem.kind === 'equalPartition' || problem.kind === 'fractionIntro' || problem.kind === 'equalShareDivision' || problem.kind === 'equalGroupingDivision' || problem.kind === 'divisionEquationParts' || problem.kind === 'divisionSituationClassify'
                       ? 'flex flex-col overflow-hidden p-3 sm:p-4 lg:p-5'
                     : problem.kind === 'timeAddition' && isStoryTimeAdditionProblem
                       ? `flex flex-col justify-center ${isCompactBattleViewport ? 'overflow-hidden p-3 sm:p-4 lg:p-5' : 'overflow-y-auto p-4 sm:p-6 lg:p-8'}`
@@ -29047,6 +32211,41 @@ export default function App() {
 	                    condensed={isCompactBattleViewport}
 	                    unitFractionCompareStreak={unitFractionCompareStreak}
 	                  />
+                ) : problem.kind === 'equalShareDivision' && problem.equalShareDivision ? (
+                  <EqualShareDivisionProblemCard
+                    data={problem.equalShareDivision}
+                    answerValue={inputValue}
+                    onAnswerChange={setInputValue}
+                    onSubmit={checkAnswer}
+                    canSubmit={canAttemptAttack}
+                    condensed={isCompactBattleViewport}
+                  />
+                ) : problem.kind === 'equalGroupingDivision' && problem.equalGroupingDivision ? (
+                  <EqualGroupingDivisionProblemCard
+                    data={problem.equalGroupingDivision}
+                    answerValue={inputValue}
+                    onAnswerChange={setInputValue}
+                    onSubmit={checkAnswer}
+                    canSubmit={canAttemptAttack}
+                    condensed={isCompactBattleViewport}
+                  />
+                ) : problem.kind === 'divisionEquationParts' && problem.divisionEquationParts ? (
+                  <DivisionEquationPartsProblemCard
+                    data={problem.divisionEquationParts}
+                    answerValue={inputValue}
+                    onAnswerChange={setInputValue}
+                    onSubmit={checkAnswer}
+                    canSubmit={canAttemptAttack}
+                  />
+                ) : problem.kind === 'divisionSituationClassify' && problem.divisionSituationClassify ? (
+                  <DivisionSituationClassifyProblemCard
+                    data={problem.divisionSituationClassify}
+                    answerValue={inputValue}
+                    onAnswerChange={setInputValue}
+                    onSubmit={checkAnswer}
+                    canSubmit={canAttemptAttack}
+                    condensed={isCompactBattleViewport}
+                  />
                 ) : problem.kind === 'distanceWorksheet' && problem.distanceWorksheet ? (
                     <DistanceWorksheetProblemCard
                       distanceWorksheet={problem.distanceWorksheet}
@@ -29336,6 +32535,10 @@ export default function App() {
 
             {!isSpecialChallengeActive &&
               problem.kind !== 'shapeRain' &&
+              problem.kind !== 'equalShareDivision' &&
+              problem.kind !== 'equalGroupingDivision' &&
+              problem.kind !== 'divisionEquationParts' &&
+              problem.kind !== 'divisionSituationClassify' &&
               !(problem.kind === 'equalPartition' && (problem.equalPartition?.activity === 'classify' || problem.equalPartition?.activity === 'countPieces')) && (
               <div className={`shrink-0 flex flex-col ${battleInputResponsiveClass}`}>
                 {usesBattleStructuredTimeInput ? (
@@ -29416,13 +32619,18 @@ export default function App() {
                           : 'gap-3 py-2'
                     }`}>
                       <input
-                        type={usesTextAnswerInput || isShapeReadProblem ? 'text' : 'number'}
+                        type="text"
                         inputMode={usesTextAnswerInput || isShapeReadProblem ? 'text' : 'numeric'}
+                        pattern={usesTextAnswerInput || isShapeReadProblem ? undefined : '[0-9]*'}
                         value={displayedInputValue}
                         disabled={isBattleAnswerInputDisabled}
                         onChange={e => {
                           if (isBattleAnswerInputDisabled) return;
-                          setInputValue(e.target.value);
+                          setInputValue(
+                            usesTextAnswerInput || isShapeReadProblem
+                              ? e.target.value
+                              : sanitizeNonNegativeIntegerInput(e.target.value),
+                          );
                         }}
                         onKeyDown={e => {
                           if (isBattleAnswerInputDisabled) {

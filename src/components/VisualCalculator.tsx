@@ -934,12 +934,23 @@ function BlockSet({
       id: `${prefix}-${index}`,
       tone,
     }));
+  const denseVerticalRods = place === 't' && safeCount >= 5;
+  const gridSpacingClass = denseVerticalRods
+    ? 'gap-x-1 gap-y-0.5 p-0.5 md:gap-x-1.5 md:gap-y-1 md:p-1'
+    : 'gap-1 p-1 md:gap-1.5 md:p-1.5';
+  const blockShapeClass = denseVerticalRods
+    ? compact
+      ? 'h-6 w-2 rounded-full md:h-[25px] md:w-2.5'
+      : 'h-7 w-2.5 rounded-full md:h-[30px] md:w-[11px]'
+    : compact
+      ? meta.compactBlockShape
+      : meta.blockShape;
 
   return (
     <div
       className={`grid ${
         compact ? meta.compactGridClass : meta.gridClass
-      } auto-rows-min content-start justify-items-center gap-1 p-1 md:gap-1.5 md:p-1.5 overflow-visible`}
+      } auto-rows-min content-start justify-items-center ${gridSpacingClass} overflow-visible`}
     >
       <AnimatePresence initial={false}>
         {visualItems.map((item) => {
@@ -967,7 +978,7 @@ function BlockSet({
               ease: STEP_TRANSITION_EASE,
             }}
             className={`relative flex items-center justify-center overflow-visible ${
-              compact ? meta.compactBlockShape : meta.blockShape
+              blockShapeClass
             } ${place === 'th' ? '' : meta.block[resolvedTone]} ${highlight ? 'ring-1 ring-white/65' : ''}`}
           >
             {place === 'th' ? (
@@ -2258,6 +2269,8 @@ function SimpleTransferOverlay({
   const lineLeft = Math.min(sourceLeft, targetLeft);
   const lineWidth = Math.abs(targetLeft - sourceLeft);
   const middleLeft = (sourceLeft + targetLeft) / 2;
+  const direction = targetLeft >= sourceLeft ? 1 : -1;
+  const arrowPositions = [0.42, 0.58, 0.74].map((progress) => sourceLeft + (targetLeft - sourceLeft) * progress);
   const railClass =
     transfer.mode === 'regroup'
       ? 'bg-gradient-to-r from-sky-300/0 via-cyan-200/85 to-emerald-300/0'
@@ -2266,6 +2279,10 @@ function SimpleTransferOverlay({
     transfer.mode === 'regroup'
       ? 'border-cyan-100/80 bg-cyan-200/85'
       : 'border-amber-100/80 bg-amber-200/85';
+  const arrowClass =
+    transfer.mode === 'regroup'
+      ? 'border-cyan-100 drop-shadow-[0_0_8px_rgba(103,232,249,0.55)]'
+      : 'border-amber-100 drop-shadow-[0_0_8px_rgba(253,230,138,0.55)]';
   const noteClass =
     transfer.mode === 'regroup'
       ? 'border-cyan-200/25 bg-slate-950/78 text-cyan-50'
@@ -2288,6 +2305,29 @@ function SimpleTransferOverlay({
           className={`absolute h-[2px] origin-center rounded-full ${railClass}`}
           style={{ top: '26%', left: `${lineLeft}%`, width: `${lineWidth}%` }}
         />
+
+        {arrowPositions.map((left, index) => (
+          <motion.div
+            key={`${transfer.key}-arrow-${index}`}
+            initial={{ opacity: 0, scale: 0.72 }}
+            animate={{
+              opacity: [0.35, 1, 0.35],
+              scale: [0.86, 1.08, 0.86],
+            }}
+            transition={{
+              duration: 1.1,
+              repeat: Infinity,
+              delay: index * 0.14,
+              ease: 'easeInOut',
+            }}
+            className={`absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 border-r-[3px] border-t-[3px] ${arrowClass}`}
+            style={{
+              top: '26%',
+              left: `${left}%`,
+              rotate: direction > 0 ? '45deg' : '-135deg',
+            }}
+          />
+        ))}
 
         {[sourceLeft, targetLeft].map((left, index) => (
           <motion.div

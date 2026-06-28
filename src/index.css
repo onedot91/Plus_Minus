@@ -133,6 +133,23 @@ body {
   box-shadow: none;
 }
 
+.spotify-app .equal-share-item-button,
+.spotify-app .equal-share-item-button:disabled {
+  appearance: none;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: inherit;
+  letter-spacing: 0;
+  outline: 0;
+  padding: 0 !important;
+}
+
+.spotify-app .equal-share-item-button:focus-visible {
+  outline: 0;
+}
+
 .spotify-app :where(input) {
   border-radius: 500px;
   background-color: var(--spotify-surface-2);
@@ -264,6 +281,7 @@ body {
 }
 
 .spotify-app :where(.unit-select-card) {
+  border-radius: 1rem !important;
   letter-spacing: 0;
 }
 
