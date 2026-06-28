@@ -371,22 +371,42 @@ import unit1Level1OlrapoAttackImage from './assets/unit1-level1-olrapo-attack.we
 import unit1Level1OlrapoDefaultImage from './assets/unit1-level1-olrapo-default.webp';
 import unit1Level1OlrapoDefeatSceneImage from './assets/unit1-level1-olrapo-defeat-scene.jpeg';
 import unit1Level1OlrapoHitImage from './assets/unit1-level1-olrapo-hit.webp';
+import unit1Level1BaseballLionAttackImage from './assets/unit1-level1-baseball-lion-attack.png';
+import unit1Level1BaseballLionDefaultImage from './assets/unit1-level1-baseball-lion-default.png';
+import unit1Level1BaseballLionDefeatSceneImage from './assets/unit1-level1-baseball-lion-defeat-scene.png';
+import unit1Level1BaseballLionHitImage from './assets/unit1-level1-baseball-lion-hit.png';
 import unit1Level2MarimarioAttackImage from './assets/unit1-level2-marimario-attack.webp';
 import unit1Level2MarimarioDefaultImage from './assets/unit1-level2-marimario-default.webp';
 import unit1Level2MarimarioDefeatSceneImage from './assets/unit1-level2-marimario-defeat-scene.jpeg';
 import unit1Level2MarimarioHitImage from './assets/unit1-level2-marimario-hit.webp';
+import unit1Level2GwiyomiStickerAttackImage from './assets/unit1-level2-gwiyomi-sticker-attack.png';
+import unit1Level2GwiyomiStickerDefaultImage from './assets/unit1-level2-gwiyomi-sticker-default.png';
+import unit1Level2GwiyomiStickerDefeatSceneImage from './assets/unit1-level2-gwiyomi-sticker-defeat-scene.png';
+import unit1Level2GwiyomiStickerHitImage from './assets/unit1-level2-gwiyomi-sticker-hit.png';
 import unit1Level3HoppangboyAttackImage from './assets/unit1-level3-hoppangboy-attack.webp';
 import unit1Level3HoppangboyDefaultImage from './assets/unit1-level3-hoppangboy-default.webp';
 import unit1Level3HoppangboyDefeatSceneImage from './assets/unit1-level3-hoppangboy-defeat-scene.jpeg';
 import unit1Level3HoppangboyHitImage from './assets/unit1-level3-hoppangboy-hit.webp';
+import unit1Level3GumihoAttackImage from './assets/unit1-level3-gumiho-attack.png';
+import unit1Level3GumihoDefaultImage from './assets/unit1-level3-gumiho-default.png';
+import unit1Level3GumihoDefeatSceneImage from './assets/unit1-level3-gumiho-defeat-scene.png';
+import unit1Level3GumihoHitImage from './assets/unit1-level3-gumiho-hit.png';
 import unit1Level4DogPigToastAttackImage from './assets/unit1-level4-dog-pig-toast-attack.webp';
 import unit1Level4DogPigToastDefaultImage from './assets/unit1-level4-dog-pig-toast-default.webp';
 import unit1Level4DogPigToastDefeatSceneImage from './assets/unit1-level4-dog-pig-toast-defeat-scene.jpeg';
 import unit1Level4DogPigToastHitImage from './assets/unit1-level4-dog-pig-toast-hit.webp';
+import unit1Level4MaengpalAttackImage from './assets/unit1-level4-maengpal-attack.png';
+import unit1Level4MaengpalDefaultImage from './assets/unit1-level4-maengpal-default.png';
+import unit1Level4MaengpalDefeatSceneImage from './assets/unit1-level4-maengpal-defeat-scene.png';
+import unit1Level4MaengpalHitImage from './assets/unit1-level4-maengpal-hit.png';
 import unit1Level5PenguinsuAttackImage from './assets/unit1-level5-penguinsu-attack.webp';
 import unit1Level5PenguinsuDefaultImage from './assets/unit1-level5-penguinsu-default.webp';
 import unit1Level5PenguinsuDefeatSceneImage from './assets/unit1-level5-penguinsu-defeat-scene.jpeg';
 import unit1Level5PenguinsuHitImage from './assets/unit1-level5-penguinsu-hit.webp';
+import unit1Level5KeycapStickerAttackImage from './assets/unit1-level5-keycap-sticker-attack.png';
+import unit1Level5KeycapStickerDefaultImage from './assets/unit1-level5-keycap-sticker-default.png';
+import unit1Level5KeycapStickerDefeatSceneImage from './assets/unit1-level5-keycap-sticker-defeat-scene.png';
+import unit1Level5KeycapStickerHitImage from './assets/unit1-level5-keycap-sticker-hit.png';
 import unit1Level6MetamonAttackImage from './assets/unit1-level6-metamon-attack.webp';
 import unit1Level6MetamonDefaultImage from './assets/unit1-level6-metamon-default.webp';
 import unit1Level6MetamonDefeatSceneImage from './assets/unit1-level6-metamon-defeat-scene.jpeg';
@@ -411,34 +431,66 @@ import unit3Level1YorsiAttackImage from './assets/unit3-level1-yorsi-attack.webp
 import unit3Level1YorsiDefaultImage from './assets/unit3-level1-yorsi-default.webp';
 import unit3Level1YorsiDefeatSceneImage from './assets/unit3-level1-yorsi-defeat-scene.webp';
 import unit3Level1YorsiHitImage from './assets/unit3-level1-yorsi-hit.webp';
+import unit3Level1JuuminStickerAttackImage from './assets/unit3-level1-juumin-sticker-attack.png';
+import unit3Level1JuuminStickerDefaultImage from './assets/unit3-level1-juumin-sticker-default.png';
+import unit3Level1JuuminStickerDefeatSceneImage from './assets/unit3-level1-juumin-sticker-defeat-scene.png';
+import unit3Level1JuuminStickerHitImage from './assets/unit3-level1-juumin-sticker-hit.png';
 import unit3Level2JjeojjeomiAttackImage from './assets/unit3-level2-jjeojjeomi-attack.webp';
 import unit3Level2JjeojjeomiDefaultImage from './assets/unit3-level2-jjeojjeomi-default.webp';
 import unit3Level2JjeojjeomiDefeatSceneImage from './assets/unit3-level2-jjeojjeomi-defeat-scene.webp';
 import unit3Level2JjeojjeomiHitImage from './assets/unit3-level2-jjeojjeomi-hit.webp';
+import unit3Level2ColtuStickerAttackImage from './assets/unit3-level2-coltu-sticker-attack.png';
+import unit3Level2ColtuStickerDefaultImage from './assets/unit3-level2-coltu-sticker-default.png';
+import unit3Level2ColtuStickerDefeatSceneImage from './assets/unit3-level2-coltu-sticker-defeat-scene.png';
+import unit3Level2ColtuStickerHitImage from './assets/unit3-level2-coltu-sticker-hit.png';
 import unit3Level3BbangAttackImage from './assets/unit3-level3-bbang-attack.webp';
 import unit3Level3BbangDefaultImage from './assets/unit3-level3-bbang-default.webp';
 import unit3Level3BbangDefeatSceneImage from './assets/unit3-level3-bbang-defeat-scene.webp';
 import unit3Level3BbangHitImage from './assets/unit3-level3-bbang-hit.webp';
+import unit3Level3StairmanAttackImage from './assets/unit3-level3-stairman-attack.png';
+import unit3Level3StairmanDefaultImage from './assets/unit3-level3-stairman-default.png';
+import unit3Level3StairmanDefeatSceneImage from './assets/unit3-level3-stairman-defeat-scene.png';
+import unit3Level3StairmanHitImage from './assets/unit3-level3-stairman-hit.png';
 import unit3Level4HeartpingAttackImage from './assets/unit3-level4-heartping-attack.webp';
 import unit3Level4HeartpingDefaultImage from './assets/unit3-level4-heartping-default.webp';
 import unit3Level4HeartpingDefeatSceneImage from './assets/unit3-level4-heartping-defeat-scene.webp';
 import unit3Level4HeartpingHitImage from './assets/unit3-level4-heartping-hit.webp';
+import unit3Level4WangjagaeguriStickerAttackImage from './assets/unit3-level4-wangjagaeguri-sticker-attack.png';
+import unit3Level4WangjagaeguriStickerDefaultImage from './assets/unit3-level4-wangjagaeguri-sticker-default.png';
+import unit3Level4WangjagaeguriStickerDefeatSceneImage from './assets/unit3-level4-wangjagaeguri-sticker-defeat-scene.png';
+import unit3Level4WangjagaeguriStickerHitImage from './assets/unit3-level4-wangjagaeguri-sticker-hit.png';
 import unit3Level5TraleroAttackImage from './assets/unit3-level5-tralero-attack.webp';
 import unit3Level5TraleroDefaultImage from './assets/unit3-level5-tralero-default.webp';
 import unit3Level5TraleroDefeatSceneImage from './assets/unit3-level5-tralero-defeat-scene.webp';
 import unit3Level5TraleroHitImage from './assets/unit3-level5-tralero-hit.webp';
+import unit3Level5BlockingStickerAttackImage from './assets/unit3-level5-blocking-sticker-attack.png';
+import unit3Level5BlockingStickerDefaultImage from './assets/unit3-level5-blocking-sticker-default.png';
+import unit3Level5BlockingStickerDefeatSceneImage from './assets/unit3-level5-blocking-sticker-defeat-scene.png';
+import unit3Level5BlockingStickerHitImage from './assets/unit3-level5-blocking-sticker-hit.png';
 import unit3Level6DeongdeongiDetectiveAttackImage from './assets/unit3-level6-deongdeongi-detective-attack.webp';
 import unit3Level6DeongdeongiDetectiveDefaultImage from './assets/unit3-level6-deongdeongi-detective-default.webp';
 import unit3Level6DeongdeongiDetectiveDefeatSceneImage from './assets/unit3-level6-deongdeongi-detective-defeat-scene.webp';
 import unit3Level6DeongdeongiDetectiveHitImage from './assets/unit3-level6-deongdeongi-detective-hit.webp';
+import unit3Level6KeoppiStickerAttackImage from './assets/unit3-level6-keoppi-sticker-attack.png';
+import unit3Level6KeoppiStickerDefaultImage from './assets/unit3-level6-keoppi-sticker-default.png';
+import unit3Level6KeoppiStickerDefeatSceneImage from './assets/unit3-level6-keoppi-sticker-defeat-scene.png';
+import unit3Level6KeoppiStickerHitImage from './assets/unit3-level6-keoppi-sticker-hit.png';
 import unit3Level7MochiengelAttackImage from './assets/unit3-level7-mochiengel-attack.webp';
 import unit3Level7MochiengelDefaultImage from './assets/unit3-level7-mochiengel-default.webp';
 import unit3Level7MochiengelDefeatSceneImage from './assets/unit3-level7-mochiengel-defeat-scene.webp';
 import unit3Level7MochiengelHitImage from './assets/unit3-level7-mochiengel-hit.webp';
+import unit3Level7PeakmanAttackImage from './assets/unit3-level7-peakman-attack.png';
+import unit3Level7PeakmanDefaultImage from './assets/unit3-level7-peakman-default.png';
+import unit3Level7PeakmanDefeatSceneImage from './assets/unit3-level7-peakman-defeat-scene.png';
+import unit3Level7PeakmanHitImage from './assets/unit3-level7-peakman-hit.png';
 import unit3Level8LabulabuAttackImage from './assets/unit3-level8-labulabu-attack.webp';
 import unit3Level8LabulabuDefaultImage from './assets/unit3-level8-labulabu-default.webp';
 import unit3Level8LabulabuDefeatSceneImage from './assets/unit3-level8-labulabu-defeat-scene.webp';
 import unit3Level8LabulabuHitImage from './assets/unit3-level8-labulabu-hit.webp';
+import unit3Level8PeapodStickerAttackImage from './assets/unit3-level8-peapod-sticker-attack.png';
+import unit3Level8PeapodStickerDefaultImage from './assets/unit3-level8-peapod-sticker-default.png';
+import unit3Level8PeapodStickerDefeatSceneImage from './assets/unit3-level8-peapod-sticker-defeat-scene.png';
+import unit3Level8PeapodStickerHitImage from './assets/unit3-level8-peapod-sticker-hit.png';
 import unit6Level1RedStickerAttackImage from './assets/unit6-level1-red-sticker-attack.webp';
 import unit6Level1RedStickerDefaultImage from './assets/unit6-level1-red-sticker-default.webp';
 import unit6Level1RedStickerDefeatSceneImage from './assets/unit6-level1-red-sticker-defeat-scene.webp';
@@ -507,14 +559,26 @@ import unit3Level9GimgangrimAttackImage from './assets/unit3-level9-gimgangrim-a
 import unit3Level9GimgangrimDefaultImage from './assets/unit3-level9-gimgangrim-default.jpeg';
 import unit3Level9GimgangrimDefeatSceneImage from './assets/unit3-level9-gimgangrim-defeat-scene.jpeg';
 import unit3Level9GimgangrimHitImage from './assets/unit3-level9-gimgangrim-hit.jpeg';
+import unit3Level9WakppuballStickerAttackImage from './assets/unit3-level9-wakppuball-sticker-attack.png';
+import unit3Level9WakppuballStickerDefaultImage from './assets/unit3-level9-wakppuball-sticker-default.png';
+import unit3Level9WakppuballStickerDefeatSceneImage from './assets/unit3-level9-wakppuball-sticker-defeat-scene.png';
+import unit3Level9WakppuballStickerHitImage from './assets/unit3-level9-wakppuball-sticker-hit.png';
 import unit3Level10RobloxAttackImage from './assets/unit3-level10-roblox-attack.jpeg';
 import unit3Level10RobloxDefaultImage from './assets/unit3-level10-roblox-default.jpeg';
 import unit3Level10RobloxDefeatSceneImage from './assets/unit3-level10-roblox-defeat-scene.jpeg';
 import unit3Level10RobloxHitImage from './assets/unit3-level10-roblox-hit.jpeg';
+import unit3Level10SejongAttackImage from './assets/unit3-level10-sejong-attack.png';
+import unit3Level10SejongDefaultImage from './assets/unit3-level10-sejong-default.png';
+import unit3Level10SejongDefeatSceneImage from './assets/unit3-level10-sejong-defeat-scene.png';
+import unit3Level10SejongHitImage from './assets/unit3-level10-sejong-hit.png';
 import unit3Level11EnglishBirdAttackImage from './assets/unit3-level11-english-bird-attack.jpeg';
 import unit3Level11EnglishBirdDefaultImage from './assets/unit3-level11-english-bird-default.jpeg';
 import unit3Level11EnglishBirdDefeatSceneImage from './assets/unit3-level11-english-bird-defeat-scene.jpeg';
 import unit3Level11EnglishBirdHitImage from './assets/unit3-level11-english-bird-hit.jpeg';
+import unit3Level11SellyStickerAttackImage from './assets/unit3-level11-selly-sticker-attack.png';
+import unit3Level11SellyStickerDefaultImage from './assets/unit3-level11-selly-sticker-default.png';
+import unit3Level11SellyStickerDefeatSceneImage from './assets/unit3-level11-selly-sticker-defeat-scene.png';
+import unit3Level11SellyStickerHitImage from './assets/unit3-level11-selly-sticker-hit.png';
 import unit3Level12AkmagomaAttackImage from './assets/unit3-level12-akmagoma-attack.jpeg';
 import unit3Level12AkmagomaDefaultImage from './assets/unit3-level12-akmagoma-default.jpeg';
 import unit3Level12AkmagomaDefeatSceneImage from './assets/unit3-level12-akmagoma-defeat-scene.jpeg';
@@ -1968,6 +2032,22 @@ type Level4OpponentId = 'koronan' | 'baekgeurigoa';
 type Level5OpponentId = 'niiik' | 'jurdi';
 type Level6OpponentId = 'syuppeolboi' | 'anheunhannammae';
 type Level7OpponentId = 'anijeuko' | 'arnya';
+type Unit1Level1OpponentId = 'olrapo' | 'baseball-lion';
+type Unit1Level2OpponentId = 'marimario' | 'gwiyomi';
+type Unit1Level3OpponentId = 'hoppangboy' | 'gumiho';
+type Unit1Level4OpponentId = 'dog-pig-toast' | 'maengpal';
+type Unit1Level5OpponentId = 'penguinsu' | 'keycap';
+type Unit3Level1OpponentId = 'yorsi' | 'juumin';
+type Unit3Level2OpponentId = 'jjeojjeomi' | 'coltu';
+type Unit3Level3OpponentId = 'bbang' | 'stairman';
+type Unit3Level4OpponentId = 'heartping' | 'wangjagaeguri';
+type Unit3Level5OpponentId = 'tralero' | 'blocking';
+type Unit3Level6OpponentId = 'deongdeongi-detective' | 'keoppi';
+type Unit3Level7OpponentId = 'mochiengel' | 'peakman';
+type Unit3Level8OpponentId = 'labulabu' | 'peapod';
+type Unit3Level9OpponentId = 'gimgangrim' | 'wakppuball';
+type Unit3Level10OpponentId = 'roblox' | 'sejong';
+type Unit3Level11OpponentId = 'english-bird' | 'selly';
 type Unit4Level1OpponentId = 'wayipa' | 'green-alien';
 type Unit4Level2OpponentId = 'capybara' | 'beret-puppy';
 type Unit4Level3OpponentId = 'black-cat' | 'crying-baby';
@@ -2002,6 +2082,22 @@ interface SpecialOpponentSelections {
   level5: Level5OpponentId;
   level6: Level6OpponentId;
   level7: Level7OpponentId;
+  unit1Level1: Unit1Level1OpponentId;
+  unit1Level2: Unit1Level2OpponentId;
+  unit1Level3: Unit1Level3OpponentId;
+  unit1Level4: Unit1Level4OpponentId;
+  unit1Level5: Unit1Level5OpponentId;
+  unit3Level1: Unit3Level1OpponentId;
+  unit3Level2: Unit3Level2OpponentId;
+  unit3Level3: Unit3Level3OpponentId;
+  unit3Level4: Unit3Level4OpponentId;
+  unit3Level5: Unit3Level5OpponentId;
+  unit3Level6: Unit3Level6OpponentId;
+  unit3Level7: Unit3Level7OpponentId;
+  unit3Level8: Unit3Level8OpponentId;
+  unit3Level9: Unit3Level9OpponentId;
+  unit3Level10: Unit3Level10OpponentId;
+  unit3Level11: Unit3Level11OpponentId;
   unit4Level1: Unit4Level1OpponentId;
   unit4Level2: Unit4Level2OpponentId;
   unit4Level3: Unit4Level3OpponentId;
@@ -2807,6 +2903,22 @@ const DEFAULT_LEVEL4_OPPONENT_ID: Level4OpponentId = 'koronan';
 const DEFAULT_LEVEL5_OPPONENT_ID: Level5OpponentId = 'niiik';
 const DEFAULT_LEVEL6_OPPONENT_ID: Level6OpponentId = 'syuppeolboi';
 const DEFAULT_LEVEL7_OPPONENT_ID: Level7OpponentId = 'anijeuko';
+const DEFAULT_UNIT1_LEVEL1_OPPONENT_ID: Unit1Level1OpponentId = 'olrapo';
+const DEFAULT_UNIT1_LEVEL2_OPPONENT_ID: Unit1Level2OpponentId = 'marimario';
+const DEFAULT_UNIT1_LEVEL3_OPPONENT_ID: Unit1Level3OpponentId = 'hoppangboy';
+const DEFAULT_UNIT1_LEVEL4_OPPONENT_ID: Unit1Level4OpponentId = 'dog-pig-toast';
+const DEFAULT_UNIT1_LEVEL5_OPPONENT_ID: Unit1Level5OpponentId = 'penguinsu';
+const DEFAULT_UNIT3_LEVEL1_OPPONENT_ID: Unit3Level1OpponentId = 'yorsi';
+const DEFAULT_UNIT3_LEVEL2_OPPONENT_ID: Unit3Level2OpponentId = 'jjeojjeomi';
+const DEFAULT_UNIT3_LEVEL3_OPPONENT_ID: Unit3Level3OpponentId = 'bbang';
+const DEFAULT_UNIT3_LEVEL4_OPPONENT_ID: Unit3Level4OpponentId = 'heartping';
+const DEFAULT_UNIT3_LEVEL5_OPPONENT_ID: Unit3Level5OpponentId = 'tralero';
+const DEFAULT_UNIT3_LEVEL6_OPPONENT_ID: Unit3Level6OpponentId = 'deongdeongi-detective';
+const DEFAULT_UNIT3_LEVEL7_OPPONENT_ID: Unit3Level7OpponentId = 'mochiengel';
+const DEFAULT_UNIT3_LEVEL8_OPPONENT_ID: Unit3Level8OpponentId = 'labulabu';
+const DEFAULT_UNIT3_LEVEL9_OPPONENT_ID: Unit3Level9OpponentId = 'gimgangrim';
+const DEFAULT_UNIT3_LEVEL10_OPPONENT_ID: Unit3Level10OpponentId = 'roblox';
+const DEFAULT_UNIT3_LEVEL11_OPPONENT_ID: Unit3Level11OpponentId = 'english-bird';
 const DEFAULT_UNIT4_LEVEL1_OPPONENT_ID: Unit4Level1OpponentId = 'wayipa';
 const DEFAULT_UNIT4_LEVEL2_OPPONENT_ID: Unit4Level2OpponentId = 'capybara';
 const DEFAULT_UNIT4_LEVEL3_OPPONENT_ID: Unit4Level3OpponentId = 'black-cat';
@@ -2830,6 +2942,22 @@ const DEFAULT_SPECIAL_OPPONENT_SELECTIONS: SpecialOpponentSelections = {
   level5: DEFAULT_LEVEL5_OPPONENT_ID,
   level6: DEFAULT_LEVEL6_OPPONENT_ID,
   level7: DEFAULT_LEVEL7_OPPONENT_ID,
+  unit1Level1: DEFAULT_UNIT1_LEVEL1_OPPONENT_ID,
+  unit1Level2: DEFAULT_UNIT1_LEVEL2_OPPONENT_ID,
+  unit1Level3: DEFAULT_UNIT1_LEVEL3_OPPONENT_ID,
+  unit1Level4: DEFAULT_UNIT1_LEVEL4_OPPONENT_ID,
+  unit1Level5: DEFAULT_UNIT1_LEVEL5_OPPONENT_ID,
+  unit3Level1: DEFAULT_UNIT3_LEVEL1_OPPONENT_ID,
+  unit3Level2: DEFAULT_UNIT3_LEVEL2_OPPONENT_ID,
+  unit3Level3: DEFAULT_UNIT3_LEVEL3_OPPONENT_ID,
+  unit3Level4: DEFAULT_UNIT3_LEVEL4_OPPONENT_ID,
+  unit3Level5: DEFAULT_UNIT3_LEVEL5_OPPONENT_ID,
+  unit3Level6: DEFAULT_UNIT3_LEVEL6_OPPONENT_ID,
+  unit3Level7: DEFAULT_UNIT3_LEVEL7_OPPONENT_ID,
+  unit3Level8: DEFAULT_UNIT3_LEVEL8_OPPONENT_ID,
+  unit3Level9: DEFAULT_UNIT3_LEVEL9_OPPONENT_ID,
+  unit3Level10: DEFAULT_UNIT3_LEVEL10_OPPONENT_ID,
+  unit3Level11: DEFAULT_UNIT3_LEVEL11_OPPONENT_ID,
   unit4Level1: DEFAULT_UNIT4_LEVEL1_OPPONENT_ID,
   unit4Level2: DEFAULT_UNIT4_LEVEL2_OPPONENT_ID,
   unit4Level3: DEFAULT_UNIT4_LEVEL3_OPPONENT_ID,
@@ -2987,8 +3115,8 @@ const LEVEL7_OPPONENT_VARIANTS: Record<Level7OpponentId, SpecialOpponentConfig> 
     defeatSceneImage: stage7ArnyaDefeatSceneImage,
   },
 };
-const UNIT1_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
-  1: {
+const UNIT1_LEVEL1_OPPONENT_VARIANTS: Record<Unit1Level1OpponentId, SpecialOpponentConfig> = {
+  olrapo: {
     name: '올라포',
     spriteSet: {
       attack: unit1Level1OlrapoAttackImage,
@@ -2997,7 +3125,18 @@ const UNIT1_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
     },
     defeatSceneImage: unit1Level1OlrapoDefeatSceneImage,
   },
-  2: {
+  'baseball-lion': {
+    name: '야구하는 사자',
+    spriteSet: {
+      attack: unit1Level1BaseballLionAttackImage,
+      default: unit1Level1BaseballLionDefaultImage,
+      hit: unit1Level1BaseballLionHitImage,
+    },
+    defeatSceneImage: unit1Level1BaseballLionDefeatSceneImage,
+  },
+};
+const UNIT1_LEVEL2_OPPONENT_VARIANTS: Record<Unit1Level2OpponentId, SpecialOpponentConfig> = {
+  marimario: {
     name: '마리마리오',
     spriteSet: {
       attack: unit1Level2MarimarioAttackImage,
@@ -3006,7 +3145,18 @@ const UNIT1_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
     },
     defeatSceneImage: unit1Level2MarimarioDefeatSceneImage,
   },
-  3: {
+  gwiyomi: {
+    name: '작은 귀요미',
+    spriteSet: {
+      attack: unit1Level2GwiyomiStickerAttackImage,
+      default: unit1Level2GwiyomiStickerDefaultImage,
+      hit: unit1Level2GwiyomiStickerHitImage,
+    },
+    defeatSceneImage: unit1Level2GwiyomiStickerDefeatSceneImage,
+  },
+};
+const UNIT1_LEVEL3_OPPONENT_VARIANTS: Record<Unit1Level3OpponentId, SpecialOpponentConfig> = {
+  hoppangboy: {
     name: '호빵보이',
     spriteSet: {
       attack: unit1Level3HoppangboyAttackImage,
@@ -3015,7 +3165,18 @@ const UNIT1_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
     },
     defeatSceneImage: unit1Level3HoppangboyDefeatSceneImage,
   },
-  4: {
+  gumiho: {
+    name: '구미호',
+    spriteSet: {
+      attack: unit1Level3GumihoAttackImage,
+      default: unit1Level3GumihoDefaultImage,
+      hit: unit1Level3GumihoHitImage,
+    },
+    defeatSceneImage: unit1Level3GumihoDefeatSceneImage,
+  },
+};
+const UNIT1_LEVEL4_OPPONENT_VARIANTS: Record<Unit1Level4OpponentId, SpecialOpponentConfig> = {
+  'dog-pig-toast': {
     name: '개, 돼지, 식빵',
     spriteSet: {
       attack: unit1Level4DogPigToastAttackImage,
@@ -3024,7 +3185,18 @@ const UNIT1_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
     },
     defeatSceneImage: unit1Level4DogPigToastDefeatSceneImage,
   },
-  5: {
+  maengpal: {
+    name: '맹팔',
+    spriteSet: {
+      attack: unit1Level4MaengpalAttackImage,
+      default: unit1Level4MaengpalDefaultImage,
+      hit: unit1Level4MaengpalHitImage,
+    },
+    defeatSceneImage: unit1Level4MaengpalDefeatSceneImage,
+  },
+};
+const UNIT1_LEVEL5_OPPONENT_VARIANTS: Record<Unit1Level5OpponentId, SpecialOpponentConfig> = {
+  penguinsu: {
     name: '펭귄수',
     spriteSet: {
       attack: unit1Level5PenguinsuAttackImage,
@@ -3033,6 +3205,17 @@ const UNIT1_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
     },
     defeatSceneImage: unit1Level5PenguinsuDefeatSceneImage,
   },
+  keycap: {
+    name: '키캡',
+    spriteSet: {
+      attack: unit1Level5KeycapStickerAttackImage,
+      default: unit1Level5KeycapStickerDefaultImage,
+      hit: unit1Level5KeycapStickerHitImage,
+    },
+    defeatSceneImage: unit1Level5KeycapStickerDefeatSceneImage,
+  },
+};
+const UNIT1_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
   6: {
     name: '메타몬',
     spriteSet: {
@@ -3070,8 +3253,8 @@ const UNIT1_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
     defeatSceneImage: unit1Level9ButterflyDefeatSceneImage,
   },
 };
-const UNIT3_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
-  1: {
+const UNIT3_LEVEL1_OPPONENT_VARIANTS: Record<Unit3Level1OpponentId, SpecialOpponentConfig> = {
+  yorsi: {
     name: '요르시',
     spriteSet: {
       attack: unit3Level1YorsiAttackImage,
@@ -3080,7 +3263,18 @@ const UNIT3_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
     },
     defeatSceneImage: unit3Level1YorsiDefeatSceneImage,
   },
-  2: {
+  juumin: {
+    name: '주우민',
+    spriteSet: {
+      attack: unit3Level1JuuminStickerAttackImage,
+      default: unit3Level1JuuminStickerDefaultImage,
+      hit: unit3Level1JuuminStickerHitImage,
+    },
+    defeatSceneImage: unit3Level1JuuminStickerDefeatSceneImage,
+  },
+};
+const UNIT3_LEVEL2_OPPONENT_VARIANTS: Record<Unit3Level2OpponentId, SpecialOpponentConfig> = {
+  jjeojjeomi: {
     name: '쩌쩌미',
     spriteSet: {
       attack: unit3Level2JjeojjeomiAttackImage,
@@ -3089,7 +3283,18 @@ const UNIT3_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
     },
     defeatSceneImage: unit3Level2JjeojjeomiDefeatSceneImage,
   },
-  3: {
+  coltu: {
+    name: '콜투',
+    spriteSet: {
+      attack: unit3Level2ColtuStickerAttackImage,
+      default: unit3Level2ColtuStickerDefaultImage,
+      hit: unit3Level2ColtuStickerHitImage,
+    },
+    defeatSceneImage: unit3Level2ColtuStickerDefeatSceneImage,
+  },
+};
+const UNIT3_LEVEL3_OPPONENT_VARIANTS: Record<Unit3Level3OpponentId, SpecialOpponentConfig> = {
+  bbang: {
     name: '빵',
     spriteSet: {
       attack: unit3Level3BbangAttackImage,
@@ -3098,7 +3303,18 @@ const UNIT3_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
     },
     defeatSceneImage: unit3Level3BbangDefeatSceneImage,
   },
-  4: {
+  stairman: {
+    name: '계단맨',
+    spriteSet: {
+      attack: unit3Level3StairmanAttackImage,
+      default: unit3Level3StairmanDefaultImage,
+      hit: unit3Level3StairmanHitImage,
+    },
+    defeatSceneImage: unit3Level3StairmanDefeatSceneImage,
+  },
+};
+const UNIT3_LEVEL4_OPPONENT_VARIANTS: Record<Unit3Level4OpponentId, SpecialOpponentConfig> = {
+  heartping: {
     name: '하트핑',
     spriteSet: {
       attack: unit3Level4HeartpingAttackImage,
@@ -3107,7 +3323,18 @@ const UNIT3_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
     },
     defeatSceneImage: unit3Level4HeartpingDefeatSceneImage,
   },
-  5: {
+  wangjagaeguri: {
+    name: '왕자개구리',
+    spriteSet: {
+      attack: unit3Level4WangjagaeguriStickerAttackImage,
+      default: unit3Level4WangjagaeguriStickerDefaultImage,
+      hit: unit3Level4WangjagaeguriStickerHitImage,
+    },
+    defeatSceneImage: unit3Level4WangjagaeguriStickerDefeatSceneImage,
+  },
+};
+const UNIT3_LEVEL5_OPPONENT_VARIANTS: Record<Unit3Level5OpponentId, SpecialOpponentConfig> = {
+  tralero: {
     name: '트라레로',
     spriteSet: {
       attack: unit3Level5TraleroAttackImage,
@@ -3116,7 +3343,18 @@ const UNIT3_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
     },
     defeatSceneImage: unit3Level5TraleroDefeatSceneImage,
   },
-  6: {
+  blocking: {
+    name: '블록킹',
+    spriteSet: {
+      attack: unit3Level5BlockingStickerAttackImage,
+      default: unit3Level5BlockingStickerDefaultImage,
+      hit: unit3Level5BlockingStickerHitImage,
+    },
+    defeatSceneImage: unit3Level5BlockingStickerDefeatSceneImage,
+  },
+};
+const UNIT3_LEVEL6_OPPONENT_VARIANTS: Record<Unit3Level6OpponentId, SpecialOpponentConfig> = {
+  'deongdeongi-detective': {
     name: '덩덩이 탐정',
     spriteSet: {
       attack: unit3Level6DeongdeongiDetectiveAttackImage,
@@ -3125,7 +3363,18 @@ const UNIT3_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
     },
     defeatSceneImage: unit3Level6DeongdeongiDetectiveDefeatSceneImage,
   },
-  7: {
+  keoppi: {
+    name: '커삐',
+    spriteSet: {
+      attack: unit3Level6KeoppiStickerAttackImage,
+      default: unit3Level6KeoppiStickerDefaultImage,
+      hit: unit3Level6KeoppiStickerHitImage,
+    },
+    defeatSceneImage: unit3Level6KeoppiStickerDefeatSceneImage,
+  },
+};
+const UNIT3_LEVEL7_OPPONENT_VARIANTS: Record<Unit3Level7OpponentId, SpecialOpponentConfig> = {
+  mochiengel: {
     name: '모찌엔젤',
     spriteSet: {
       attack: unit3Level7MochiengelAttackImage,
@@ -3134,7 +3383,18 @@ const UNIT3_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
     },
     defeatSceneImage: unit3Level7MochiengelDefeatSceneImage,
   },
-  8: {
+  peakman: {
+    name: '피크맨',
+    spriteSet: {
+      attack: unit3Level7PeakmanAttackImage,
+      default: unit3Level7PeakmanDefaultImage,
+      hit: unit3Level7PeakmanHitImage,
+    },
+    defeatSceneImage: unit3Level7PeakmanDefeatSceneImage,
+  },
+};
+const UNIT3_LEVEL8_OPPONENT_VARIANTS: Record<Unit3Level8OpponentId, SpecialOpponentConfig> = {
+  labulabu: {
     name: '라부라부',
     spriteSet: {
       attack: unit3Level8LabulabuAttackImage,
@@ -3143,7 +3403,18 @@ const UNIT3_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
     },
     defeatSceneImage: unit3Level8LabulabuDefeatSceneImage,
   },
-  9: {
+  peapod: {
+    name: '완두콩',
+    spriteSet: {
+      attack: unit3Level8PeapodStickerAttackImage,
+      default: unit3Level8PeapodStickerDefaultImage,
+      hit: unit3Level8PeapodStickerHitImage,
+    },
+    defeatSceneImage: unit3Level8PeapodStickerDefeatSceneImage,
+  },
+};
+const UNIT3_LEVEL9_OPPONENT_VARIANTS: Record<Unit3Level9OpponentId, SpecialOpponentConfig> = {
+  gimgangrim: {
     name: '김강림',
     spriteSet: {
       attack: unit3Level9GimgangrimAttackImage,
@@ -3154,7 +3425,18 @@ const UNIT3_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
     removeSpriteBlackBackground: true,
     removeDefeatSceneBlackBackground: true,
   },
-  10: {
+  wakppuball: {
+    name: '왁뿌볼',
+    spriteSet: {
+      attack: unit3Level9WakppuballStickerAttackImage,
+      default: unit3Level9WakppuballStickerDefaultImage,
+      hit: unit3Level9WakppuballStickerHitImage,
+    },
+    defeatSceneImage: unit3Level9WakppuballStickerDefeatSceneImage,
+  },
+};
+const UNIT3_LEVEL10_OPPONENT_VARIANTS: Record<Unit3Level10OpponentId, SpecialOpponentConfig> = {
+  roblox: {
     name: '로블럭스',
     spriteSet: {
       attack: unit3Level10RobloxAttackImage,
@@ -3165,7 +3447,18 @@ const UNIT3_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
     removeSpriteBlackBackground: true,
     removeDefeatSceneBlackBackground: true,
   },
-  11: {
+  sejong: {
+    name: '세종대왕',
+    spriteSet: {
+      attack: unit3Level10SejongAttackImage,
+      default: unit3Level10SejongDefaultImage,
+      hit: unit3Level10SejongHitImage,
+    },
+    defeatSceneImage: unit3Level10SejongDefeatSceneImage,
+  },
+};
+const UNIT3_LEVEL11_OPPONENT_VARIANTS: Record<Unit3Level11OpponentId, SpecialOpponentConfig> = {
+  'english-bird': {
     name: '영어 잘하는 새',
     spriteSet: {
       attack: unit3Level11EnglishBirdAttackImage,
@@ -3175,6 +3468,26 @@ const UNIT3_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
     defeatSceneImage: unit3Level11EnglishBirdDefeatSceneImage,
     removeSpriteBlackBackground: true,
     removeDefeatSceneBlackBackground: true,
+  },
+  selly: {
+    name: '셀리반',
+    spriteSet: {
+      attack: unit3Level11SellyStickerAttackImage,
+      default: unit3Level11SellyStickerDefaultImage,
+      hit: unit3Level11SellyStickerHitImage,
+    },
+    defeatSceneImage: unit3Level11SellyStickerDefeatSceneImage,
+  },
+};
+const UNIT3_LEVEL_OPPONENTS: Partial<Record<number, SpecialOpponentConfig>> = {
+  5: {
+    name: '트라레로',
+    spriteSet: {
+      attack: unit3Level5TraleroAttackImage,
+      default: unit3Level5TraleroDefaultImage,
+      hit: unit3Level5TraleroHitImage,
+    },
+    defeatSceneImage: unit3Level5TraleroDefeatSceneImage,
   },
   12: {
     name: '악마고마',
@@ -5248,6 +5561,22 @@ function pickSpecialOpponentSelections(): SpecialOpponentSelections {
     level5: Math.random() < 0.5 ? DEFAULT_LEVEL5_OPPONENT_ID : 'jurdi',
     level6: Math.random() < 0.5 ? DEFAULT_LEVEL6_OPPONENT_ID : 'anheunhannammae',
     level7: Math.random() < 0.5 ? DEFAULT_LEVEL7_OPPONENT_ID : 'arnya',
+    unit1Level1: Math.random() < 0.5 ? DEFAULT_UNIT1_LEVEL1_OPPONENT_ID : 'baseball-lion',
+    unit1Level2: Math.random() < 0.5 ? DEFAULT_UNIT1_LEVEL2_OPPONENT_ID : 'gwiyomi',
+    unit1Level3: Math.random() < 0.5 ? DEFAULT_UNIT1_LEVEL3_OPPONENT_ID : 'gumiho',
+    unit1Level4: Math.random() < 0.5 ? DEFAULT_UNIT1_LEVEL4_OPPONENT_ID : 'maengpal',
+    unit1Level5: Math.random() < 0.5 ? DEFAULT_UNIT1_LEVEL5_OPPONENT_ID : 'keycap',
+    unit3Level1: Math.random() < 0.5 ? DEFAULT_UNIT3_LEVEL1_OPPONENT_ID : 'juumin',
+    unit3Level2: Math.random() < 0.5 ? DEFAULT_UNIT3_LEVEL2_OPPONENT_ID : 'coltu',
+    unit3Level3: Math.random() < 0.5 ? DEFAULT_UNIT3_LEVEL3_OPPONENT_ID : 'stairman',
+    unit3Level4: Math.random() < 0.5 ? DEFAULT_UNIT3_LEVEL4_OPPONENT_ID : 'wangjagaeguri',
+    unit3Level5: Math.random() < 0.5 ? DEFAULT_UNIT3_LEVEL5_OPPONENT_ID : 'blocking',
+    unit3Level6: Math.random() < 0.5 ? DEFAULT_UNIT3_LEVEL6_OPPONENT_ID : 'keoppi',
+    unit3Level7: Math.random() < 0.5 ? DEFAULT_UNIT3_LEVEL7_OPPONENT_ID : 'peakman',
+    unit3Level8: Math.random() < 0.5 ? DEFAULT_UNIT3_LEVEL8_OPPONENT_ID : 'peapod',
+    unit3Level9: Math.random() < 0.5 ? DEFAULT_UNIT3_LEVEL9_OPPONENT_ID : 'wakppuball',
+    unit3Level10: Math.random() < 0.5 ? DEFAULT_UNIT3_LEVEL10_OPPONENT_ID : 'sejong',
+    unit3Level11: Math.random() < 0.5 ? DEFAULT_UNIT3_LEVEL11_OPPONENT_ID : 'selly',
     unit4Level1: Math.random() < 0.5 ? DEFAULT_UNIT4_LEVEL1_OPPONENT_ID : 'green-alien',
     unit4Level2: Math.random() < 0.5 ? DEFAULT_UNIT4_LEVEL2_OPPONENT_ID : 'beret-puppy',
     unit4Level3: Math.random() < 0.5 ? DEFAULT_UNIT4_LEVEL3_OPPONENT_ID : 'crying-baby',
@@ -5280,6 +5609,166 @@ function pickDeveloperOpponentSelections(
   level: number,
   currentSelections: SpecialOpponentSelections,
 ): SpecialOpponentSelections {
+  if (unitId === 'unit1' && level === 1) {
+    return {
+      ...currentSelections,
+      unit1Level1: pickDifferentOption(currentSelections.unit1Level1, [
+        DEFAULT_UNIT1_LEVEL1_OPPONENT_ID,
+        'baseball-lion',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit1' && level === 2) {
+    return {
+      ...currentSelections,
+      unit1Level2: pickDifferentOption(currentSelections.unit1Level2, [
+        DEFAULT_UNIT1_LEVEL2_OPPONENT_ID,
+        'gwiyomi',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit1' && level === 3) {
+    return {
+      ...currentSelections,
+      unit1Level3: pickDifferentOption(currentSelections.unit1Level3, [
+        DEFAULT_UNIT1_LEVEL3_OPPONENT_ID,
+        'gumiho',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit1' && level === 4) {
+    return {
+      ...currentSelections,
+      unit1Level4: pickDifferentOption(currentSelections.unit1Level4, [
+        DEFAULT_UNIT1_LEVEL4_OPPONENT_ID,
+        'maengpal',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit1' && level === 5) {
+    return {
+      ...currentSelections,
+      unit1Level5: pickDifferentOption(currentSelections.unit1Level5, [
+        DEFAULT_UNIT1_LEVEL5_OPPONENT_ID,
+        'keycap',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit3' && level === 1) {
+    return {
+      ...currentSelections,
+      unit3Level1: pickDifferentOption(currentSelections.unit3Level1, [
+        DEFAULT_UNIT3_LEVEL1_OPPONENT_ID,
+        'juumin',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit3' && level === 2) {
+    return {
+      ...currentSelections,
+      unit3Level2: pickDifferentOption(currentSelections.unit3Level2, [
+        DEFAULT_UNIT3_LEVEL2_OPPONENT_ID,
+        'coltu',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit3' && level === 3) {
+    return {
+      ...currentSelections,
+      unit3Level3: pickDifferentOption(currentSelections.unit3Level3, [
+        DEFAULT_UNIT3_LEVEL3_OPPONENT_ID,
+        'stairman',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit3' && level === 4) {
+    return {
+      ...currentSelections,
+      unit3Level4: pickDifferentOption(currentSelections.unit3Level4, [
+        DEFAULT_UNIT3_LEVEL4_OPPONENT_ID,
+        'wangjagaeguri',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit3' && level === 5) {
+    return {
+      ...currentSelections,
+      unit3Level5: pickDifferentOption(currentSelections.unit3Level5, [
+        DEFAULT_UNIT3_LEVEL5_OPPONENT_ID,
+        'blocking',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit3' && level === 6) {
+    return {
+      ...currentSelections,
+      unit3Level6: pickDifferentOption(currentSelections.unit3Level6, [
+        DEFAULT_UNIT3_LEVEL6_OPPONENT_ID,
+        'keoppi',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit3' && level === 7) {
+    return {
+      ...currentSelections,
+      unit3Level7: pickDifferentOption(currentSelections.unit3Level7, [
+        DEFAULT_UNIT3_LEVEL7_OPPONENT_ID,
+        'peakman',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit3' && level === 8) {
+    return {
+      ...currentSelections,
+      unit3Level8: pickDifferentOption(currentSelections.unit3Level8, [
+        DEFAULT_UNIT3_LEVEL8_OPPONENT_ID,
+        'peapod',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit3' && level === 9) {
+    return {
+      ...currentSelections,
+      unit3Level9: pickDifferentOption(currentSelections.unit3Level9, [
+        DEFAULT_UNIT3_LEVEL9_OPPONENT_ID,
+        'wakppuball',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit3' && level === 10) {
+    return {
+      ...currentSelections,
+      unit3Level10: pickDifferentOption(currentSelections.unit3Level10, [
+        DEFAULT_UNIT3_LEVEL10_OPPONENT_ID,
+        'sejong',
+      ]),
+    };
+  }
+
+  if (unitId === 'unit3' && level === 11) {
+    return {
+      ...currentSelections,
+      unit3Level11: pickDifferentOption(currentSelections.unit3Level11, [
+        DEFAULT_UNIT3_LEVEL11_OPPONENT_ID,
+        'selly',
+      ]),
+    };
+  }
+
   if (unitId === 'unit4' && level === 1) {
     return {
       ...currentSelections,
@@ -5531,10 +6020,74 @@ function getConfiguredOpponentForUnit(
   selections: SpecialOpponentSelections,
 ) {
   if (unitId === 'unit1') {
+    if (level === 1) {
+      return UNIT1_LEVEL1_OPPONENT_VARIANTS[selections.unit1Level1] ?? UNIT1_LEVEL1_OPPONENT_VARIANTS[DEFAULT_UNIT1_LEVEL1_OPPONENT_ID];
+    }
+
+    if (level === 2) {
+      return UNIT1_LEVEL2_OPPONENT_VARIANTS[selections.unit1Level2] ?? UNIT1_LEVEL2_OPPONENT_VARIANTS[DEFAULT_UNIT1_LEVEL2_OPPONENT_ID];
+    }
+
+    if (level === 3) {
+      return UNIT1_LEVEL3_OPPONENT_VARIANTS[selections.unit1Level3] ?? UNIT1_LEVEL3_OPPONENT_VARIANTS[DEFAULT_UNIT1_LEVEL3_OPPONENT_ID];
+    }
+
+    if (level === 4) {
+      return UNIT1_LEVEL4_OPPONENT_VARIANTS[selections.unit1Level4] ?? UNIT1_LEVEL4_OPPONENT_VARIANTS[DEFAULT_UNIT1_LEVEL4_OPPONENT_ID];
+    }
+
+    if (level === 5) {
+      return UNIT1_LEVEL5_OPPONENT_VARIANTS[selections.unit1Level5] ?? UNIT1_LEVEL5_OPPONENT_VARIANTS[DEFAULT_UNIT1_LEVEL5_OPPONENT_ID];
+    }
+
     return UNIT1_LEVEL_OPPONENTS[level] ?? null;
   }
 
   if (unitId === 'unit3') {
+    if (level === 1) {
+      return UNIT3_LEVEL1_OPPONENT_VARIANTS[selections.unit3Level1] ?? UNIT3_LEVEL1_OPPONENT_VARIANTS[DEFAULT_UNIT3_LEVEL1_OPPONENT_ID];
+    }
+
+    if (level === 2) {
+      return UNIT3_LEVEL2_OPPONENT_VARIANTS[selections.unit3Level2] ?? UNIT3_LEVEL2_OPPONENT_VARIANTS[DEFAULT_UNIT3_LEVEL2_OPPONENT_ID];
+    }
+
+    if (level === 3) {
+      return UNIT3_LEVEL3_OPPONENT_VARIANTS[selections.unit3Level3] ?? UNIT3_LEVEL3_OPPONENT_VARIANTS[DEFAULT_UNIT3_LEVEL3_OPPONENT_ID];
+    }
+
+    if (level === 4) {
+      return UNIT3_LEVEL4_OPPONENT_VARIANTS[selections.unit3Level4] ?? UNIT3_LEVEL4_OPPONENT_VARIANTS[DEFAULT_UNIT3_LEVEL4_OPPONENT_ID];
+    }
+
+    if (level === 5) {
+      return UNIT3_LEVEL5_OPPONENT_VARIANTS[selections.unit3Level5] ?? UNIT3_LEVEL5_OPPONENT_VARIANTS[DEFAULT_UNIT3_LEVEL5_OPPONENT_ID];
+    }
+
+    if (level === 6) {
+      return UNIT3_LEVEL6_OPPONENT_VARIANTS[selections.unit3Level6] ?? UNIT3_LEVEL6_OPPONENT_VARIANTS[DEFAULT_UNIT3_LEVEL6_OPPONENT_ID];
+    }
+
+    if (level === 7) {
+      return UNIT3_LEVEL7_OPPONENT_VARIANTS[selections.unit3Level7] ?? UNIT3_LEVEL7_OPPONENT_VARIANTS[DEFAULT_UNIT3_LEVEL7_OPPONENT_ID];
+    }
+
+    if (level === 8) {
+      return UNIT3_LEVEL8_OPPONENT_VARIANTS[selections.unit3Level8] ?? UNIT3_LEVEL8_OPPONENT_VARIANTS[DEFAULT_UNIT3_LEVEL8_OPPONENT_ID];
+    }
+
+    if (level === 9) {
+      return UNIT3_LEVEL9_OPPONENT_VARIANTS[selections.unit3Level9] ?? UNIT3_LEVEL9_OPPONENT_VARIANTS[DEFAULT_UNIT3_LEVEL9_OPPONENT_ID];
+    }
+
+    if (level === 10) {
+      return UNIT3_LEVEL10_OPPONENT_VARIANTS[selections.unit3Level10] ?? UNIT3_LEVEL10_OPPONENT_VARIANTS[DEFAULT_UNIT3_LEVEL10_OPPONENT_ID];
+    }
+
+    if (level === 11) {
+      return UNIT3_LEVEL11_OPPONENT_VARIANTS[selections.unit3Level11] ?? UNIT3_LEVEL11_OPPONENT_VARIANTS[DEFAULT_UNIT3_LEVEL11_OPPONENT_ID];
+    }
+
     return UNIT3_LEVEL_OPPONENTS[level] ?? null;
   }
 
@@ -18835,13 +19388,13 @@ function FractionIntroProblemCard({
                         1/10 =
                         <FractionInline numerator={1} denominator={10} className="mx-2 text-4xl" />
                       </p>
-                      <div className="flex flex-wrap items-center gap-3">
-                        <FractionInline numerator={1} denominator={10} className="text-4xl" />
-                        <span>=</span>
-                        <FractionBlankInput value={getKeyValueAnswer(answerValue, 'decimal')} onChange={(value) => setTextAnswer('decimal', value)} ariaLabel="1/10의 소수" text />
-                      </div>
-                    </>
-                  )}
+		                      <div className="flex flex-wrap items-center gap-3">
+		                        <FractionInline numerator={1} denominator={10} className="text-4xl" />
+		                        <span>=</span>
+		                        <FractionBlankInput value={getKeyValueAnswer(answerValue, 'decimal')} onChange={(value) => setTextAnswer('decimal', value)} ariaLabel="1/10의 소수" text />
+			        </div>
+			      </>
+			      )}
                   <div className="flex flex-wrap items-center gap-3">
                     <span>0.1은</span>
                     <FractionBlankInput value={getKeyValueAnswer(answerValue, 'read')} onChange={(value) => setTextAnswer('read', value)} ariaLabel="0.1 읽기" text />
@@ -20436,15 +20989,15 @@ function ClockReadingProblemCard({
   ];
 
   return (
-    <div className="mx-auto flex w-full max-w-[56rem] flex-col gap-4 text-left text-slate-900 sm:gap-5">
-      <div className="rounded-[2rem] border border-slate-200 bg-slate-50/85 px-4 py-4 shadow-sm sm:px-6 sm:py-5 md:px-8 md:py-7">
-        <p className="text-[1.1rem] font-black leading-[1.5] text-slate-900 sm:text-[1.4rem] md:text-[1.85rem]">
+    <div className="mx-auto flex w-full max-w-[56rem] flex-col gap-3 text-left text-slate-900 sm:gap-4">
+      <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50/85 px-4 py-3 shadow-sm sm:px-5 sm:py-4 md:px-6 md:py-5">
+        <p className="text-[1.05rem] font-black leading-[1.35] text-slate-900 sm:text-[1.3rem] md:text-[1.65rem]">
           {clockReading.title}
         </p>
 
-        <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(15rem,18rem)] lg:items-center">
-          <div className="overflow-hidden rounded-[1.75rem] border border-sky-200 bg-white p-3 shadow-[inset_0_2px_14px_rgba(148,163,184,0.12)] sm:p-4">
-            <div className="mx-auto w-full max-w-[20rem]">
+        <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(14rem,17rem)] lg:items-center">
+          <div className="overflow-hidden rounded-[1.35rem] border border-sky-200 bg-white p-2.5 shadow-[inset_0_2px_14px_rgba(148,163,184,0.12)] sm:p-3">
+            <div className="mx-auto w-full max-w-[17.5rem]">
               <AnalogClockFigure
                 hour={clockReading.hour}
                 minute={clockReading.minute}
@@ -20454,17 +21007,17 @@ function ClockReadingProblemCard({
             </div>
           </div>
 
-          <div className="rounded-[1.75rem] border border-emerald-200 bg-emerald-50/85 px-4 py-4 shadow-sm sm:px-5">
+          <div className="rounded-[1.35rem] border border-emerald-200 bg-emerald-50/85 px-3 py-3 shadow-sm sm:px-4">
             <div className="grid gap-2 text-sm font-bold text-slate-700 sm:text-base">
-              <div className="flex items-center gap-2 rounded-2xl bg-white/80 px-3 py-2">
+              <div className="flex items-center gap-2 rounded-xl bg-white/80 px-3 py-1.5">
                 <span className="inline-block h-3 w-3 rounded-full bg-[#23a34a]" />
                 <span>짧고 굵은 초록색은 시침</span>
               </div>
-              <div className="flex items-center gap-2 rounded-2xl bg-white/80 px-3 py-2">
+              <div className="flex items-center gap-2 rounded-xl bg-white/80 px-3 py-1.5">
                 <span className="inline-block h-3 w-3 rounded-full bg-[#ef4444]" />
                 <span>길고 굵은 빨간색은 분침</span>
               </div>
-              <div className="flex items-center gap-2 rounded-2xl bg-white/80 px-3 py-2">
+              <div className="flex items-center gap-2 rounded-xl bg-white/80 px-3 py-1.5">
                 <span className="inline-block h-3 w-3 rounded-full bg-[#1f2937]" />
                 <span>가늘고 긴 검은색은 초침</span>
               </div>
@@ -20472,7 +21025,7 @@ function ClockReadingProblemCard({
           </div>
         </div>
 
-        <div className="mt-4 grid grid-cols-3 gap-3 sm:gap-4">
+        <div className="mt-3 grid grid-cols-3 gap-2 sm:gap-3">
           {fields.map((field) => (
             (() => {
               const isEditable = clockReading.editableParts.includes(field.key);
@@ -20483,7 +21036,7 @@ function ClockReadingProblemCard({
               return (
                 <label
                   key={field.key}
-                  className={`flex items-center justify-center gap-2 rounded-[1.5rem] border px-3 py-3 shadow-sm sm:gap-3 sm:px-4 sm:py-4 ${
+                  className={`flex items-center justify-center gap-2 rounded-[1.15rem] border px-2.5 py-2.5 shadow-sm sm:gap-3 sm:px-3 sm:py-3 ${
                     isEditable
                       ? 'border-slate-200 bg-white'
                       : 'border-emerald-200 bg-emerald-50/80'
@@ -20504,7 +21057,7 @@ function ClockReadingProblemCard({
                         onSubmit();
                       }
                     }}
-                    className={`w-full min-w-0 rounded-2xl border-2 px-3 py-3 text-center text-xl font-black text-slate-900 outline-none transition sm:text-2xl ${
+                    className={`w-full min-w-0 rounded-xl border-2 px-2.5 py-2 text-center text-xl font-black text-slate-900 outline-none transition sm:text-2xl ${
                       isEditable
                         ? 'border-slate-200 bg-slate-50 focus:border-sky-400 focus:bg-white'
                         : 'border-emerald-200 bg-white text-emerald-700'
@@ -20512,7 +21065,7 @@ function ClockReadingProblemCard({
                     placeholder={isEditable ? field.placeholder : ''}
                     aria-label={field.label}
                   />
-                  <span className="shrink-0 text-2xl font-black text-slate-900 sm:text-3xl">{field.label}</span>
+                  <span className="shrink-0 text-xl font-black text-slate-900 sm:text-2xl">{field.label}</span>
                 </label>
               );
             })()
@@ -23345,9 +23898,9 @@ function DistanceCompareProblemCard({
       )}
       rightBadge={(
         <div className="rounded-full bg-white px-4 py-2 text-lg font-black text-slate-900 sm:text-xl">
-          집 → {distanceMap.targetLabel}
-        </div>
-      )}
+	          집 → {distanceMap.targetLabel}
+	        </div>
+	      )}
       onReset={resetMeasure}
       panelClassName="bg-sky-50"
     >
@@ -27499,8 +28052,12 @@ function ShapeIdentifyProblemCard({
     const anglePartViewBox = `${anglePartMinX} ${anglePartMinY} ${anglePartMaxX - anglePartMinX} ${anglePartMaxY - anglePartMinY}`;
 
     return (
-      <div className="h-full min-h-[20rem] w-full px-3 py-3">
-        <svg viewBox={anglePartViewBox} className="h-full w-full rounded-2xl bg-white" style={{ backgroundColor: '#ffffff' }}>
+      <div className={`flex h-full min-h-0 w-full items-center justify-center px-3 py-3 ${condensed ? 'py-2' : ''}`}>
+        <svg
+          viewBox={anglePartViewBox}
+          className={`${condensed ? 'h-72' : 'h-80'} max-h-full w-full rounded-2xl bg-white`}
+          style={{ backgroundColor: '#ffffff' }}
+        >
           <rect x={anglePartMinX} y={anglePartMinY} width={anglePartMaxX - anglePartMinX} height={anglePartMaxY - anglePartMinY} fill="#ffffff" />
           {anglePartRayTips.map((rayTip, index) => (
             <g key={`angle-part-arm-${index}`}>
@@ -28954,6 +29511,8 @@ export default function App() {
   const currentOpponentName = getOpponentNameForLevel(activeLearningUnitId, level, specialOpponentSelections);
   const opponentImageClassName = currentSpecialOpponent?.spriteClassName ?? '';
   const defeatSceneImageClassName = currentSpecialOpponent?.defeatSceneClassName ?? '';
+  const isAkmagomaOpponentAction = activeLearningUnitId === 'unit3' && level === 12 && (isOpponentHit || isOpponentAttacking);
+  const akmagomaInfernoDuration = isOpponentAttacking ? ATTACK_MOTION_DURATION_S : HIT_MOTION_DURATION_S;
   const displayPlayerName = playerName.trim() || DEFAULT_PLAYER_NAME;
   const trimmedPendingPlayerName = pendingPlayerName.trim();
   const hasPendingPlayerName = trimmedPendingPlayerName.length > 0;
@@ -29514,15 +30073,15 @@ export default function App() {
   const battleShellResponsiveClass = isShortViewport
     ? 'lg:h-auto lg:max-h-none lg:gap-2 lg:p-3'
     : isCompactBattleViewport
-      ? 'lg:h-[48rem] lg:max-h-[calc(100svh-3rem)] lg:gap-2 lg:p-3'
-      : 'lg:h-[47.5rem] lg:max-h-[calc(100svh-2.5rem)] lg:gap-4 lg:p-6';
+      ? 'lg:h-[44rem] lg:max-h-[calc(100svh-3rem)] lg:gap-2 lg:p-3'
+      : 'lg:h-[44.5rem] lg:max-h-[calc(100svh-2.5rem)] lg:gap-3 lg:p-4';
   const battleSidebarResponsiveClass = isCompactBattleViewport
     ? 'lg:w-[27%] lg:p-2.5'
     : 'lg:w-[29.5%] lg:p-4';
   const battleSectionResponsiveClass = isCompactBattleViewport ? 'p-2.5 sm:p-3' : 'p-3 sm:p-4';
   const battleStageResponsiveClass = isCompactBattleViewport
-    ? 'lg:h-[clamp(12rem,25vh,16rem)]'
-    : 'lg:h-[clamp(18.5rem,33vh,23rem)]';
+    ? 'lg:h-[clamp(10.5rem,23vh,14rem)]'
+    : 'lg:h-[clamp(15.5rem,28vh,19rem)]';
   const battleStageImageResponsiveClass = isCompactBattleViewport
     ? 'h-auto max-h-[calc(100%-1rem)]'
     : 'h-auto max-h-[calc(100%-1rem)]';
@@ -31759,8 +32318,82 @@ export default function App() {
         </motion.div>
       )}
 
-      {gameState === 'playing' && (
-        <div className={`flex w-full min-h-0 flex-col gap-3 overflow-visible rounded-3xl border-4 border-slate-700 bg-slate-800 p-3 shadow-2xl sm:p-4 lg:flex-row lg:overflow-hidden ${battleShellWidthClass} ${battleShellResponsiveClass}`}>
+	      {gameState === 'playing' && (
+	        <>
+	          <AnimatePresence>
+	            {isAkmagomaOpponentAction && (
+	              <motion.div
+	                key={`akmagoma-page-inferno-${isOpponentAttacking ? 'attack' : 'hit'}`}
+	                className="pointer-events-none fixed inset-0 z-40 overflow-hidden"
+	                initial={{ opacity: 0 }}
+	                animate={{ opacity: [0, 1, 0.82, 0] }}
+	                exit={{ opacity: 0 }}
+	                transition={{ duration: akmagomaInfernoDuration, ease: 'easeOut' }}
+	              >
+	                <motion.div
+	                  className="absolute inset-0 bg-[radial-gradient(circle_at_22%_34%,rgba(254,240,138,0.46)_0%,rgba(251,146,60,0.32)_18%,rgba(185,28,28,0.22)_34%,transparent_54%),radial-gradient(circle_at_62%_48%,rgba(248,113,113,0.28)_0%,rgba(127,29,29,0.18)_30%,transparent_58%),linear-gradient(180deg,rgba(15,23,42,0)_0%,rgba(127,29,29,0.14)_48%,rgba(15,23,42,0.12)_100%)]"
+	                  animate={{ scale: [1, 1.04, 1], filter: ['saturate(1)', 'saturate(1.5)', 'saturate(1.1)'] }}
+	                  transition={{ duration: akmagomaInfernoDuration, ease: 'easeOut' }}
+	                />
+	                <motion.div
+	                  className="absolute left-[-6%] top-[12%] h-[86%] w-[48%] rounded-[50%] bg-[radial-gradient(ellipse_at_center,rgba(253,186,116,0.44)_0%,rgba(249,115,22,0.34)_30%,rgba(153,27,27,0.18)_55%,transparent_76%)] blur-xl"
+	                  animate={{ x: isOpponentAttacking ? [0, 170, 330] : [0, 34, -18], scale: [0.72, 1.08, 0.9], rotate: [-8, 9, -4] }}
+	                  transition={{ duration: akmagomaInfernoDuration, ease: 'easeOut' }}
+	                />
+	                <motion.div
+	                  className="absolute inset-x-[-10%] bottom-[-22%] h-[58%] bg-[radial-gradient(ellipse_at_bottom,rgba(254,240,138,0.72)_0%,rgba(251,146,60,0.58)_22%,rgba(220,38,38,0.36)_48%,rgba(88,28,28,0)_76%)] blur-[2px]"
+	                  animate={{ y: [54, -22, 18], scaleX: [0.82, 1.08, 0.94], scaleY: [0.58, 1.18, 0.72] }}
+	                  transition={{ duration: akmagomaInfernoDuration, ease: 'backOut' }}
+	                />
+	                <motion.div
+	                  className="absolute left-[17%] top-[18%] h-[44vw] max-h-[34rem] w-[44vw] max-w-[34rem] rounded-full border-[clamp(0.18rem,0.55vw,0.38rem)] border-orange-200/70 shadow-[0_0_46px_rgba(251,146,60,0.78),inset_0_0_44px_rgba(220,38,38,0.54)]"
+	                  animate={{ scale: [0.35, 1.18], opacity: [0.95, 0], rotate: [0, isOpponentAttacking ? 34 : -20] }}
+	                  transition={{ duration: akmagomaInfernoDuration, ease: 'easeOut' }}
+	                />
+	                <motion.div
+	                  className="absolute left-[8%] top-[5%] h-[82%] w-[14%] origin-bottom rounded-full bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(254,215,170,0.76)_26%,rgba(249,115,22,0.38)_58%,rgba(127,29,29,0)_84%)] blur-[2px]"
+	                  animate={{ rotate: [-28, -46, -30], scaleY: [0.36, 1.16, 0.66], opacity: [0, 0.9, 0] }}
+	                  transition={{ duration: akmagomaInfernoDuration, ease: 'easeOut' }}
+	                />
+	                <motion.div
+	                  className="absolute left-[38%] top-[-4%] h-[96%] w-[16%] origin-bottom rounded-full bg-[linear-gradient(180deg,rgba(254,249,195,0.9),rgba(251,146,60,0.62)_38%,rgba(185,28,28,0.12)_78%,rgba(127,29,29,0)_92%)] blur-[2px]"
+	                  animate={{ rotate: [-4, 12, -2], scaleY: [0.28, 1.08, 0.62], opacity: [0, 0.86, 0] }}
+	                  transition={{ duration: akmagomaInfernoDuration, ease: 'easeOut' }}
+	                />
+	                <motion.div
+	                  className="absolute right-[8%] top-[10%] h-[82%] w-[15%] origin-bottom rounded-full bg-[linear-gradient(180deg,rgba(255,237,213,0.86),rgba(249,115,22,0.58)_42%,rgba(127,29,29,0)_84%)] blur-[2px]"
+	                  animate={{ rotate: [28, 48, 31], scaleY: [0.34, 1.14, 0.66], opacity: [0, 0.82, 0] }}
+	                  transition={{ duration: akmagomaInfernoDuration, ease: 'easeOut' }}
+	                />
+	                {[
+	                  { left: '9%', top: '32%', x: -42, y: -82, rotate: -28, size: 'h-3 w-3' },
+	                  { left: '18%', top: '20%', x: -20, y: -108, rotate: 24, size: 'h-2.5 w-2.5' },
+	                  { left: '31%', top: '24%', x: 18, y: -126, rotate: -10, size: 'h-4 w-4' },
+	                  { left: '44%', top: '18%', x: 58, y: -112, rotate: 32, size: 'h-3 w-3' },
+	                  { left: '59%', top: '28%', x: 86, y: -82, rotate: 18, size: 'h-2.5 w-2.5' },
+	                  { left: '72%', top: '42%', x: 118, y: -66, rotate: 46, size: 'h-3.5 w-3.5' },
+	                  { left: '84%', top: '58%', x: 80, y: -44, rotate: -34, size: 'h-2.5 w-2.5' },
+	                  { left: '24%', top: '70%', x: -64, y: -38, rotate: -44, size: 'h-3 w-3' },
+	                  { left: '52%', top: '76%', x: 38, y: -58, rotate: 52, size: 'h-2 w-2' },
+	                ].map((spark, index) => (
+	                  <motion.span
+	                    key={`akmagoma-page-spark-${index}`}
+	                    className={`absolute ${spark.size} rounded-full bg-amber-200 shadow-[0_0_14px_rgba(251,191,36,0.98)]`}
+	                    style={{ left: spark.left, top: spark.top }}
+	                    animate={{
+	                      x: [0, spark.x],
+	                      y: [0, spark.y],
+	                      rotate: [0, spark.rotate],
+	                      scale: [0.36, 1.55, 0.18],
+	                      opacity: [0, 1, 0],
+	                    }}
+	                    transition={{ duration: akmagomaInfernoDuration, ease: 'easeOut', delay: index * 0.016 }}
+	                  />
+	                ))}
+	              </motion.div>
+	            )}
+	          </AnimatePresence>
+	        <div className={`flex w-full min-h-0 flex-col gap-3 overflow-visible rounded-3xl border-4 border-slate-700 bg-slate-800 p-3 shadow-2xl sm:p-4 lg:flex-row lg:overflow-hidden ${battleShellWidthClass} ${battleShellResponsiveClass}`}>
           {/* Left: Character Visuals & Messages */}
           <div className={`relative flex w-full min-h-0 flex-col gap-3 overflow-visible rounded-2xl border-2 border-slate-600 bg-slate-900 p-3 lg:overflow-hidden ${battleSidebarResponsiveClass}`}>
             <section className={`flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.75rem] border border-slate-700/80 bg-slate-950/70 shadow-[inset_0_1px_0_rgba(148,163,184,0.08)] ${battleSectionResponsiveClass}`}>
@@ -31781,19 +32414,27 @@ export default function App() {
               </div>
 
               <div className={`relative mt-3 flex h-[clamp(10.75rem,30vh,16rem)] min-h-0 items-center justify-center overflow-hidden rounded-[1.5rem] border border-red-400/10 bg-[radial-gradient(circle_at_top,rgba(248,113,113,0.14),transparent_52%),linear-gradient(180deg,rgba(15,23,42,0.98),rgba(15,23,42,0.78))] px-2 py-1.5 sm:h-[clamp(13.75rem,32vh,19rem)] sm:px-3 sm:py-2.5 ${battleStageResponsiveClass}`}>
-                <p className="pointer-events-none absolute left-4 top-3 z-10 text-sm font-bold text-red-200/85">
-                  {currentOpponentName}
-                </p>
-                <motion.div
-                  animate={{
-                    x: isOpponentAttacking ? [0, 50, -300, 0] : isOpponentHit ? [0, -20, 20, -20, 0] : 0,
-                    rotate: isOpponentAttacking ? [0, 30, -60, 0] : 0,
-                    scale: isOpponentAttacking ? [1, 0.7, 2.5, 1] : isOpponentHit ? [1, 0.9, 1] : 1,
-                    filter: isOpponentAttacking ? 'brightness(1.06) drop-shadow(0 0 4px rgba(239, 68, 68, 0.22))' : isOpponentHit ? 'brightness(1.75) saturate(1.65)' : 'brightness(1)'
-                  }}
-                  transition={{ duration: isOpponentAttacking ? ATTACK_MOTION_DURATION_S : HIT_MOTION_DURATION_S, ease: "backOut" }}
-                  className="relative flex h-full max-h-full w-full max-w-full items-center justify-center overflow-visible"
-                >
+	                <p className="pointer-events-none absolute left-4 top-3 z-10 text-sm font-bold text-red-200/85">
+	                  {currentOpponentName}
+	                </p>
+	                <motion.div
+	                  animate={{
+	                    x: isOpponentAttacking ? [0, 50, -300, 0] : isOpponentHit ? [0, -20, 20, -20, 0] : 0,
+	                    rotate: isOpponentAttacking ? [0, 30, -60, 0] : 0,
+	                    scale: isOpponentAttacking ? [1, 0.7, 2.5, 1] : isOpponentHit ? [1, 0.9, 1] : 1,
+		                    filter: isOpponentAttacking
+		                      ? isAkmagomaOpponentAction
+		                        ? 'brightness(1.45) saturate(1.8) drop-shadow(0 0 18px rgba(249,115,22,0.78)) drop-shadow(0 0 32px rgba(185,28,28,0.44))'
+		                        : 'brightness(1.06) drop-shadow(0 0 4px rgba(239, 68, 68, 0.22))'
+		                      : isAkmagomaOpponentAction
+		                        ? 'brightness(2.05) saturate(1.9) drop-shadow(0 0 18px rgba(249,115,22,0.75)) drop-shadow(0 0 32px rgba(185,28,28,0.42))'
+	                        : isOpponentHit
+	                          ? 'brightness(1.75) saturate(1.65)'
+	                          : 'brightness(1)'
+	                  }}
+	                  transition={{ duration: isOpponentAttacking ? ATTACK_MOTION_DURATION_S : HIT_MOTION_DURATION_S, ease: "backOut" }}
+	                  className="relative z-[2] flex h-full max-h-full w-full max-w-full items-center justify-center overflow-visible"
+	                >
                   {opponentSpriteSet && opponentCharacterImage ? (
                     <img
                       src={processedOpponentCharacterImage ?? opponentCharacterImage}
@@ -31992,9 +32633,9 @@ export default function App() {
                       같은 유형으로 추정되는 아카이브 문제가 없어요.
                     </p>
                   )}
-                </div>
-              </div>
-            )}
+	                </div>
+		        </div>
+	      )}
 
             {!isSpecialChallengeActive && problemCoachmark && (
               <div className="rounded-[28px] border border-sky-200 bg-sky-50 px-4 py-3 shadow-sm sm:px-5 sm:py-4">
@@ -32008,9 +32649,9 @@ export default function App() {
                       {problemCoachmark}
                     </p>
                   </div>
-                </div>
-              </div>
-            )}
+	                </div>
+		      </div>
+		      )}
 
             <div className={`${canUseHint && showHint ? 'flex-none' : 'flex-1'} flex min-h-0 flex-col`}>
               {isEstimation ? (
@@ -32094,9 +32735,9 @@ export default function App() {
                             문제만 계속하기
                           </button>
                         </div>
-                      </div>
-                    </div>
-                  )}
+	                      </div>
+		        </div>
+		      )}
                 >
                   <Suspense
                     fallback={
@@ -32744,6 +33385,7 @@ export default function App() {
             )}
           </div>
         </div>
+        </>
       )}
 
       <AnimatePresence>
