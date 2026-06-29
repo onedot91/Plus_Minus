@@ -1,6 +1,6 @@
 ﻿import React, { Suspense, lazy, useState, useEffect, useRef, useEffectEvent, useMemo, useId } from 'react';
 import { Sword, Heart, RotateCcw, Play, Sparkles, Star, ChevronDown, Check, History, Lock, X, Crown, Archive, ArrowRight } from 'lucide-react';
-import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
+import { motion, AnimatePresence, LayoutGroup, useReducedMotion } from 'motion/react';
 import type { VisualControlSound } from './components/VisualCalculator';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import startHeroImage from './assets/start-hero-math-adventure.png';
@@ -262,6 +262,66 @@ import playerNinjaHitImage from './assets/player-ninja-hit.png';
 import playerRobotAttackImage from './assets/player-robot-attack.png';
 import playerRobotDefaultImage from './assets/player-robot-default.png';
 import playerRobotHitImage from './assets/player-robot-hit.png';
+import playerArcticFoxAttackImage from './assets/player-arctic-fox-attack.png';
+import playerArcticFoxDefaultImage from './assets/player-arctic-fox-default.png';
+import playerArcticFoxHitImage from './assets/player-arctic-fox-hit.png';
+import playerOtterAttackImage from './assets/player-otter-attack.png';
+import playerOtterDefaultImage from './assets/player-otter-default.png';
+import playerOtterHitImage from './assets/player-otter-hit.png';
+import playerFireAttackImage from './assets/player-fire-attack.png';
+import playerFireDefaultImage from './assets/player-fire-default.png';
+import playerFireHitImage from './assets/player-fire-hit.png';
+import playerGrayscaleAttackImage from './assets/player-grayscale-attack.png';
+import playerGrayscaleDefaultImage from './assets/player-grayscale-default.png';
+import playerGrayscaleHitImage from './assets/player-grayscale-hit.png';
+import playerMummyAttackImage from './assets/player-mummy-attack.png';
+import playerMummyDefaultImage from './assets/player-mummy-default.png';
+import playerMummyHitImage from './assets/player-mummy-hit.png';
+import playerSpiritAttackImage from './assets/player-spirit-attack.png';
+import playerSpiritDefaultImage from './assets/player-spirit-default.png';
+import playerSpiritHitImage from './assets/player-spirit-hit.png';
+import playerPeanutAttackImage from './assets/player-peanut-attack.png';
+import playerPeanutDefaultImage from './assets/player-peanut-default.png';
+import playerPeanutHitImage from './assets/player-peanut-hit.png';
+import playerWorldcupAttackImage from './assets/player-worldcup-attack.png';
+import playerWorldcupDefaultImage from './assets/player-worldcup-default.png';
+import playerWorldcupHitImage from './assets/player-worldcup-hit.png';
+import playerSandwichAttackImage from './assets/player-sandwich-attack.png';
+import playerSandwichDefaultImage from './assets/player-sandwich-default.png';
+import playerSandwichHitImage from './assets/player-sandwich-hit.png';
+import playerHamburgerAttackImage from './assets/player-hamburger-attack.png';
+import playerHamburgerDefaultImage from './assets/player-hamburger-default.png';
+import playerHamburgerHitImage from './assets/player-hamburger-hit.png';
+import playerFriesAttackImage from './assets/player-fries-attack.png';
+import playerFriesDefaultImage from './assets/player-fries-default.png';
+import playerFriesHitImage from './assets/player-fries-hit.png';
+import playerSoldierAttackImage from './assets/player-soldier-attack.png';
+import playerSoldierDefaultImage from './assets/player-soldier-default.png';
+import playerSoldierHitImage from './assets/player-soldier-hit.png';
+import playerMalatangAttackImage from './assets/player-malatang-attack.png';
+import playerMalatangDefaultImage from './assets/player-malatang-default.png';
+import playerMalatangHitImage from './assets/player-malatang-hit.png';
+import playerRabbitAttackImage from './assets/player-rabbit-attack.png';
+import playerRabbitDefaultImage from './assets/player-rabbit-default.png';
+import playerRabbitHitImage from './assets/player-rabbit-hit.png';
+import playerDragonCostumeAttackImage from './assets/player-dragon-costume-attack.png';
+import playerDragonCostumeDefaultImage from './assets/player-dragon-costume-default.png';
+import playerDragonCostumeHitImage from './assets/player-dragon-costume-hit.png';
+import playerFoxPajamaAttackImage from './assets/player-fox-pajama-attack.png';
+import playerFoxPajamaDefaultImage from './assets/player-fox-pajama-default.png';
+import playerFoxPajamaHitImage from './assets/player-fox-pajama-hit.png';
+import playerPuppyPajamaAttackImage from './assets/player-puppy-pajama-attack.png';
+import playerPuppyPajamaDefaultImage from './assets/player-puppy-pajama-default.png';
+import playerPuppyPajamaHitImage from './assets/player-puppy-pajama-hit.png';
+import playerSurvivalSwimAttackImage from './assets/player-survival-swim-attack.png';
+import playerSurvivalSwimDefaultImage from './assets/player-survival-swim-default.png';
+import playerSurvivalSwimHitImage from './assets/player-survival-swim-hit.png';
+import playerCutoutArtAttackImage from './assets/player-cutout-art-attack.png';
+import playerCutoutArtDefaultImage from './assets/player-cutout-art-default.png';
+import playerCutoutArtHitImage from './assets/player-cutout-art-hit.png';
+import playerPointillismAttackImage from './assets/player-pointillism-attack.png';
+import playerPointillismDefaultImage from './assets/player-pointillism-default.png';
+import playerPointillismHitImage from './assets/player-pointillism-hit.png';
 import playerFractionPicnicAttackImage from './assets/player-fraction-picnic-attack.png';
 import playerFractionPicnicDefaultImage from './assets/player-fraction-picnic-default.png';
 import playerFractionPicnicHitImage from './assets/player-fraction-picnic-hit.png';
@@ -2075,7 +2135,7 @@ interface CharacterSpriteSet {
   hit: string;
 }
 
-type PlayerSkinId = 'default' | 'champion' | 'wizard' | 'cape' | 'detective' | 'knight' | 'space' | 'chef' | 'pirate' | 'firefighter' | 'fairy' | 'patissier' | 'catpajama' | 'rainbowartist' | 'heartwizard' | 'eraser' | 'safety' | 'duck' | 'wolf' | 'fox' | 'ribbon' | 'babo' | 'student' | 'fish' | 'hamster' | 'pizza' | 'ghost' | 'police' | 'spain' | 'goguma' | 'baby-potato' | 'tornadopotato' | 'smart' | 'honey' | 'tiger' | 'gumiho' | 'cat' | 'princess' | 'teacher' | 'clock' | 'mom' | 'thief' | 'diver' | 'wing' | 'scientist' | 'rainbow-dye' | 'taegeukgi' | 'tire' | 'bald' | 'mohawk' | 'soccer-player' | 'baseball-player' | 'basketball-player' | 'taekwondo' | 'swimmer' | 'gardener' | 'musician' | 'doctor' | 'pilot' | 'ninja' | 'robot' | 'fraction-picnic' | 'decimal-beads' | 'black-cat' | 'dumpling' | 'teary-cat' | 'sprout-suit' | 'weird-goma' | 'water-hyacinth' | 'aloe' | 'cocklebur' | 'sprout-helmet' | 'dragon' | 'kangaroo' | 'chick' | 'rainbow-bear' | 'octopus' | 'squid' | 'alien-glasses' | 'timeline' | 'village-teacher';
+type PlayerSkinId = 'default' | 'champion' | 'wizard' | 'cape' | 'detective' | 'knight' | 'space' | 'chef' | 'pirate' | 'firefighter' | 'fairy' | 'patissier' | 'catpajama' | 'rainbowartist' | 'heartwizard' | 'eraser' | 'safety' | 'duck' | 'wolf' | 'fox' | 'ribbon' | 'babo' | 'student' | 'fish' | 'hamster' | 'pizza' | 'ghost' | 'police' | 'spain' | 'goguma' | 'baby-potato' | 'tornadopotato' | 'smart' | 'honey' | 'tiger' | 'gumiho' | 'cat' | 'princess' | 'teacher' | 'clock' | 'mom' | 'thief' | 'diver' | 'wing' | 'scientist' | 'rainbow-dye' | 'taegeukgi' | 'tire' | 'bald' | 'mohawk' | 'soccer-player' | 'baseball-player' | 'basketball-player' | 'taekwondo' | 'swimmer' | 'gardener' | 'musician' | 'doctor' | 'pilot' | 'ninja' | 'robot' | 'arctic-fox' | 'otter' | 'fire' | 'grayscale' | 'mummy' | 'spirit' | 'peanut' | 'worldcup' | 'sandwich' | 'hamburger' | 'fries' | 'soldier' | 'malatang' | 'rabbit' | 'dragon-costume' | 'fox-pajama' | 'puppy-pajama' | 'survival-swim' | 'cutout-art' | 'pointillism' | 'fraction-picnic' | 'decimal-beads' | 'black-cat' | 'dumpling' | 'teary-cat' | 'sprout-suit' | 'weird-goma' | 'water-hyacinth' | 'aloe' | 'cocklebur' | 'sprout-helmet' | 'dragon' | 'kangaroo' | 'chick' | 'rainbow-bear' | 'octopus' | 'squid' | 'alien-glasses' | 'timeline' | 'village-teacher';
 
 interface PlayerSkinConfig {
   id: PlayerSkinId;
@@ -2449,15 +2509,15 @@ type CompatibleWindow = Window & typeof globalThis & {
   webkitAudioContext?: typeof AudioContext;
 };
 
-const LAYER_GAIN_BOOST = 1.8;
+const LAYER_GAIN_BOOST = 1.65;
 const MASTER_EFFECT_GAIN = 1.71;
-const EFFECT_VOLUME_ATTENUATION = 0.45;
+const EFFECT_VOLUME_ATTENUATION = 0.36;
 const POST_COMPRESSOR_GAIN = 3.2;
-const AUDIO_ENGINE_VERSION = 11;
+const AUDIO_ENGINE_VERSION = 12;
 
 const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
   start: {
-    output: 0.88,
+    output: 0.78,
     layers: [
       { kind: 'noise', duration: 0.08, gain: 0.01, attack: 0.002, release: 0.05, filter: { type: 'highpass', frequency: 2200, sweepTo: 7200, q: 0.8 }, reverbSend: 0.04, delaySend: 0.02 },
       { kind: 'oscillator', wave: 'triangle', frequency: 360, glideTo: 540, duration: 0.12, gain: 0.032, attack: 0.003, release: 0.08, filter: { type: 'lowpass', frequency: 3600, sweepTo: 2200, q: 0.7 }, reverbSend: 0.05, delaySend: 0.03, pan: -0.08 },
@@ -2466,7 +2526,7 @@ const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
     ],
   },
   correct: {
-    output: 0.9,
+    output: 0.82,
     layers: [
       { kind: 'noise', duration: 0.04, gain: 0.007, attack: 0.001, release: 0.03, filter: { type: 'highpass', frequency: 3400, sweepTo: 9000, q: 0.8 }, reverbSend: 0.02 },
       { kind: 'oscillator', wave: 'triangle', frequency: 660, glideTo: 990, duration: 0.09, gain: 0.034, attack: 0.0015, release: 0.06, detuneJitter: 5, filter: { type: 'lowpass', frequency: 4800, sweepTo: 2800, q: 0.8 }, delaySend: 0.03, reverbSend: 0.05, pan: -0.08, panJitter: 0.04 },
@@ -2476,7 +2536,7 @@ const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
     ],
   },
   alert: {
-    output: 0.84,
+    output: 0.76,
     layers: [
       { kind: 'noise', duration: 0.12, gain: 0.008, attack: 0.002, release: 0.1, filter: { type: 'bandpass', frequency: 2200, sweepTo: 3400, q: 1.3 }, delaySend: 0.02, reverbSend: 0.04 },
       { kind: 'oscillator', wave: 'triangle', frequency: 440, glideTo: 660, duration: 0.09, gain: 0.022, attack: 0.002, release: 0.06, filter: { type: 'bandpass', frequency: 1100, sweepTo: 1700, q: 2.6 }, reverbSend: 0.04, pan: -0.18 },
@@ -2485,7 +2545,7 @@ const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
     ],
   },
   enemyHit: {
-    output: 0.92,
+    output: 0.8,
     layers: [
       { kind: 'noise', duration: 0.058, gain: 0.015, attack: 0.001, release: 0.04, filter: { type: 'bandpass', frequency: 1500, sweepTo: 650, q: 1.1 }, reverbSend: 0.02, pan: 0.12 },
       { kind: 'oscillator', wave: 'triangle', frequency: 240, glideTo: 160, duration: 0.095, gain: 0.024, attack: 0.0015, release: 0.06, filter: { type: 'lowpass', frequency: 1800, sweepTo: 420, q: 0.9 }, pan: -0.08 },
@@ -2495,7 +2555,7 @@ const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
     ],
   },
   playerHit: {
-    output: 0.88,
+    output: 0.78,
     layers: [
       { kind: 'noise', duration: 0.075, gain: 0.015, attack: 0.001, release: 0.06, filter: { type: 'bandpass', frequency: 900, sweepTo: 320, q: 1.4 }, reverbSend: 0.03, pan: -0.14 },
       { kind: 'oscillator', wave: 'triangle', frequency: 180, glideTo: 120, duration: 0.125, gain: 0.026, attack: 0.0015, release: 0.085, filter: { type: 'lowpass', frequency: 1200, sweepTo: 260, q: 0.9 }, pan: 0.12 },
@@ -2505,7 +2565,7 @@ const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
     ],
   },
   akmagomaFlame: {
-    output: 0.72,
+    output: 0.64,
     layers: [
       { kind: 'noise', duration: 0.42, gain: 0.011, attack: 0.018, release: 0.24, playbackRate: 0.58, filter: { type: 'bandpass', frequency: 520, sweepTo: 1200, q: 0.8 }, reverbSend: 0.08, delaySend: 0.03, pan: -0.22, panJitter: 0.18 },
       { kind: 'noise', startAt: 0.045, duration: 0.25, gain: 0.008, attack: 0.01, release: 0.16, playbackRate: 1.24, filter: { type: 'highpass', frequency: 1800, sweepTo: 4200, q: 0.7 }, reverbSend: 0.04, pan: 0.2, panJitter: 0.16 },
@@ -2514,7 +2574,7 @@ const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
     ],
   },
   akmagomaImpact: {
-    output: 0.86,
+    output: 0.74,
     layers: [
       { kind: 'noise', duration: 0.08, gain: 0.017, attack: 0.001, release: 0.055, playbackRate: 0.82, filter: { type: 'bandpass', frequency: 980, sweepTo: 360, q: 1.1 }, reverbSend: 0.06, panJitter: 0.22 },
       { kind: 'noise', startAt: 0.018, duration: 0.16, gain: 0.009, attack: 0.003, release: 0.12, playbackRate: 1.35, filter: { type: 'highpass', frequency: 2400, sweepTo: 6800, q: 0.7 }, reverbSend: 0.05, delaySend: 0.025, pan: 0.18 },
@@ -2523,7 +2583,7 @@ const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
     ],
   },
   wrong: {
-    output: 0.84,
+    output: 0.78,
     layers: [
       { kind: 'noise', duration: 0.09, gain: 0.009, attack: 0.001, release: 0.07, filter: { type: 'lowpass', frequency: 1600, sweepTo: 450, q: 0.8 }, reverbSend: 0.02 },
       { kind: 'oscillator', wave: 'triangle', frequency: 320, glideTo: 220, duration: 0.18, gain: 0.028, attack: 0.002, release: 0.12, detuneJitter: 6, filter: { type: 'lowpass', frequency: 1500, sweepTo: 520, q: 0.7 }, reverbSend: 0.02, pan: -0.08 },
@@ -2532,7 +2592,7 @@ const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
     ],
   },
   levelUp: {
-    output: 0.92,
+    output: 0.82,
     layers: [
       { kind: 'noise', duration: 0.14, gain: 0.009, attack: 0.002, release: 0.1, filter: { type: 'highpass', frequency: 4000, sweepTo: 9000, q: 0.8 }, reverbSend: 0.12 },
       { kind: 'oscillator', wave: 'triangle', frequency: 523.25, duration: 0.1, gain: 0.022, attack: 0.002, release: 0.07, delaySend: 0.03, reverbSend: 0.09, pan: -0.16 },
@@ -2642,7 +2702,7 @@ const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
     ],
   },
   lose: {
-    output: 0.82,
+    output: 0.76,
     layers: [
       { kind: 'noise', duration: 0.32, gain: 0.01, attack: 0.003, release: 0.22, filter: { type: 'lowpass', frequency: 1200, sweepTo: 260, q: 0.7 }, reverbSend: 0.05 },
       { kind: 'oscillator', wave: 'triangle', frequency: 261.63, glideTo: 196, duration: 0.16, gain: 0.026, attack: 0.003, release: 0.11, filter: { type: 'lowpass', frequency: 1500, sweepTo: 500, q: 0.9 }, pan: -0.12 },
@@ -2651,7 +2711,7 @@ const SOUND_EFFECTS: Record<SoundEffectName, SoundEffectDefinition> = {
     ],
   },
   win: {
-    output: 0.96,
+    output: 0.78,
     layers: [
       { kind: 'noise', duration: 0.42, gain: 0.01, attack: 0.002, release: 0.28, filter: { type: 'highpass', frequency: 3600, sweepTo: 9800, q: 0.8 }, reverbSend: 0.18, delaySend: 0.04 },
       { kind: 'oscillator', wave: 'sine', frequency: 261.63, glideTo: 392, duration: 0.24, gain: 0.014, attack: 0.003, release: 0.16, filter: { type: 'lowpass', frequency: 760, sweepTo: 320, q: 0.8 }, reverbSend: 0.08, pan: -0.08 },
@@ -4441,6 +4501,106 @@ const ROBOT_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
   default: playerRobotDefaultImage,
   hit: playerRobotHitImage,
 };
+const ARCTIC_FOX_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerArcticFoxAttackImage,
+  default: playerArcticFoxDefaultImage,
+  hit: playerArcticFoxHitImage,
+};
+const OTTER_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerOtterAttackImage,
+  default: playerOtterDefaultImage,
+  hit: playerOtterHitImage,
+};
+const FIRE_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerFireAttackImage,
+  default: playerFireDefaultImage,
+  hit: playerFireHitImage,
+};
+const GRAYSCALE_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerGrayscaleAttackImage,
+  default: playerGrayscaleDefaultImage,
+  hit: playerGrayscaleHitImage,
+};
+const MUMMY_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerMummyAttackImage,
+  default: playerMummyDefaultImage,
+  hit: playerMummyHitImage,
+};
+const SPIRIT_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerSpiritAttackImage,
+  default: playerSpiritDefaultImage,
+  hit: playerSpiritHitImage,
+};
+const PEANUT_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerPeanutAttackImage,
+  default: playerPeanutDefaultImage,
+  hit: playerPeanutHitImage,
+};
+const WORLDCUP_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerWorldcupAttackImage,
+  default: playerWorldcupDefaultImage,
+  hit: playerWorldcupHitImage,
+};
+const SANDWICH_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerSandwichAttackImage,
+  default: playerSandwichDefaultImage,
+  hit: playerSandwichHitImage,
+};
+const HAMBURGER_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerHamburgerAttackImage,
+  default: playerHamburgerDefaultImage,
+  hit: playerHamburgerHitImage,
+};
+const FRIES_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerFriesAttackImage,
+  default: playerFriesDefaultImage,
+  hit: playerFriesHitImage,
+};
+const SOLDIER_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerSoldierAttackImage,
+  default: playerSoldierDefaultImage,
+  hit: playerSoldierHitImage,
+};
+const MALATANG_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerMalatangAttackImage,
+  default: playerMalatangDefaultImage,
+  hit: playerMalatangHitImage,
+};
+const RABBIT_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerRabbitAttackImage,
+  default: playerRabbitDefaultImage,
+  hit: playerRabbitHitImage,
+};
+const DRAGON_COSTUME_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerDragonCostumeAttackImage,
+  default: playerDragonCostumeDefaultImage,
+  hit: playerDragonCostumeHitImage,
+};
+const FOX_PAJAMA_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerFoxPajamaAttackImage,
+  default: playerFoxPajamaDefaultImage,
+  hit: playerFoxPajamaHitImage,
+};
+const PUPPY_PAJAMA_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerPuppyPajamaAttackImage,
+  default: playerPuppyPajamaDefaultImage,
+  hit: playerPuppyPajamaHitImage,
+};
+const SURVIVAL_SWIM_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerSurvivalSwimAttackImage,
+  default: playerSurvivalSwimDefaultImage,
+  hit: playerSurvivalSwimHitImage,
+};
+const CUTOUT_ART_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerCutoutArtAttackImage,
+  default: playerCutoutArtDefaultImage,
+  hit: playerCutoutArtHitImage,
+};
+const POINTILLISM_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
+  attack: playerPointillismAttackImage,
+  default: playerPointillismDefaultImage,
+  hit: playerPointillismHitImage,
+};
 const FRACTION_PICNIC_GOMA_PLAYER_SPRITES: CharacterSpriteSet = {
   attack: playerFractionPicnicAttackImage,
   default: playerFractionPicnicDefaultImage,
@@ -4969,6 +5129,146 @@ const PLAYER_SKINS: PlayerSkinConfig[] = [
     isReward: true,
   },
   {
+    id: 'arctic-fox',
+    label: '북극 여우 고마',
+    badge: '랜덤 보상',
+    spriteSet: ARCTIC_FOX_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'otter',
+    label: '수달 고마',
+    badge: '랜덤 보상',
+    spriteSet: OTTER_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'fire',
+    label: '불 고마',
+    badge: '랜덤 보상',
+    spriteSet: FIRE_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'grayscale',
+    label: '무채색 고마',
+    badge: '랜덤 보상',
+    spriteSet: GRAYSCALE_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'mummy',
+    label: '미라 고마',
+    badge: '랜덤 보상',
+    spriteSet: MUMMY_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'spirit',
+    label: '귀신 고마',
+    badge: '랜덤 보상',
+    spriteSet: SPIRIT_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'peanut',
+    label: '땅콩 고마',
+    badge: '랜덤 보상',
+    spriteSet: PEANUT_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'worldcup',
+    label: '월드컵 고마',
+    badge: '랜덤 보상',
+    spriteSet: WORLDCUP_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'sandwich',
+    label: '샌드위치 고마',
+    badge: '랜덤 보상',
+    spriteSet: SANDWICH_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'hamburger',
+    label: '햄버거 고마',
+    badge: '랜덤 보상',
+    spriteSet: HAMBURGER_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'fries',
+    label: '감튀 고마',
+    badge: '랜덤 보상',
+    spriteSet: FRIES_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'soldier',
+    label: '군인 고마',
+    badge: '랜덤 보상',
+    spriteSet: SOLDIER_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'malatang',
+    label: '마라탕 고마',
+    badge: '랜덤 보상',
+    spriteSet: MALATANG_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'rabbit',
+    label: '토끼 고마',
+    badge: '랜덤 보상',
+    spriteSet: RABBIT_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'dragon-costume',
+    label: '용 고마',
+    badge: '랜덤 보상',
+    spriteSet: DRAGON_COSTUME_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'fox-pajama',
+    label: '여우 잠옷 고마',
+    badge: '랜덤 보상',
+    spriteSet: FOX_PAJAMA_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'puppy-pajama',
+    label: '강아지 잠옷 고마',
+    badge: '랜덤 보상',
+    spriteSet: PUPPY_PAJAMA_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'survival-swim',
+    label: '생존수영 고마',
+    badge: '랜덤 보상',
+    spriteSet: SURVIVAL_SWIM_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'cutout-art',
+    label: '컷 아웃 고마',
+    badge: '랜덤 보상',
+    spriteSet: CUTOUT_ART_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
+    id: 'pointillism',
+    label: '점묘법 고마',
+    badge: '랜덤 보상',
+    spriteSet: POINTILLISM_GOMA_PLAYER_SPRITES,
+    isReward: true,
+  },
+  {
     id: 'fraction-picnic',
     label: '분수 고마',
     badge: '랜덤 보상',
@@ -5115,9 +5415,9 @@ const REWARD_PLAYER_SKINS_BY_UNIT: Record<LearningUnitId, PlayerSkinConfig[]> = 
   unit1: REWARD_PLAYER_SKINS.slice(0, 20),
   unit2: REWARD_PLAYER_SKINS.slice(20, 40),
   unit3: REWARD_PLAYER_SKINS.slice(40, 60),
-  unit4: [],
+  unit4: REWARD_PLAYER_SKINS.slice(60, 80),
   unit5: [],
-  unit6: REWARD_PLAYER_SKINS.slice(60),
+  unit6: REWARD_PLAYER_SKINS.slice(80),
 };
 
 function isPlayerSkinUnlocked(skin: PlayerSkinConfig, unlockedSkinIds: PlayerSkinId[]) {
@@ -25524,9 +25824,9 @@ function EqualShareItemGlyph({
     trayCompact: isTall ? { width: 32, height: 56 } : { width: 46, height: 46 },
     groupingTray: isTall ? { width: 62, height: 110 } : { width: 92, height: 92 },
     groupingTrayCompact: isTall ? { width: 44, height: 78 } : { width: 64, height: 64 },
-    placed: isTall ? { width: 52, height: 92 } : { width: 58, height: 58 },
+    placed: isTall ? { width: 64, height: 112 } : { width: 72, height: 72 },
     animation: isTall ? { width: 54, height: 96 } : { width: 68, height: 68 },
-    animationPlaced: isTall ? { width: 26, height: 46 } : { width: 38, height: 38 },
+    animationPlaced: isTall ? { width: 34, height: 60 } : { width: 48, height: 48 },
   }[size];
 
   return (
@@ -25688,6 +25988,9 @@ function EqualShareDivisionProblemCard({
   const shouldUseCompactTrayItems = data.total > 8;
   const trayColumnCount = data.total <= 8 ? data.total : data.total <= 12 ? 6 : data.total <= 18 ? 9 : 12;
 
+  const getTrayItemFrameClass = (compact = false) =>
+    compact ? 'h-14 w-14' : shouldUseCompactTrayItems ? 'h-14 w-14' : 'h-[6.25rem] w-[6.25rem]';
+
   const renderDraggableItem = (itemIndex: number, compact = false) => (
     <button
       key={`equal-share-item-${itemIndex}`}
@@ -25700,7 +26003,7 @@ function EqualShareDivisionProblemCard({
       onDragEnd={() => setDraggingItem(null)}
       onClick={() => setSelectedItem((previous) => (previous === itemIndex ? null : itemIndex))}
       className={`equal-share-item-button grid shrink-0 appearance-none place-items-center border-0 bg-transparent p-0 shadow-none outline-none transition ${
-        compact ? 'h-14 w-14' : shouldUseCompactTrayItems ? 'h-14 w-14' : 'h-[6.25rem] w-[6.25rem]'
+        getTrayItemFrameClass(compact)
       } ${
         selectedItem === itemIndex
           ? 'ring-4 ring-emerald-500/40'
@@ -25710,9 +26013,27 @@ function EqualShareDivisionProblemCard({
       }`}
       aria-label={`${data.itemLabel} ${itemIndex + 1}`}
     >
-      <EqualShareItemGlyph kind={data.itemKind} size={compact ? 'placed' : shouldUseCompactTrayItems ? 'trayCompact' : 'tray'} />
+      <motion.span
+        layout
+        layoutId={`equal-share-item-${data.answerToken}-${itemIndex}`}
+        className="grid place-items-center"
+        transition={prefersReducedMotion ? { duration: 0 } : { type: 'spring', stiffness: 520, damping: 38 }}
+      >
+        <EqualShareItemGlyph kind={data.itemKind} size={compact ? 'placed' : shouldUseCompactTrayItems ? 'trayCompact' : 'tray'} />
+      </motion.span>
     </button>
   );
+
+  const renderTraySlot = (placement: number | null, itemIndex: number) =>
+    placement === null ? (
+      renderDraggableItem(itemIndex)
+    ) : (
+      <div
+        key={`equal-share-empty-slot-${itemIndex}`}
+        className={`grid shrink-0 place-items-center rounded-[1.1rem] border border-dashed border-slate-600/55 bg-slate-950/20 ${getTrayItemFrameClass()}`}
+        aria-hidden="true"
+      />
+    );
 
   const animationTargets = Array.from({ length: data.total }, (_, index) => ({
     itemIndex: index,
@@ -25744,6 +26065,7 @@ function EqualShareDivisionProblemCard({
   };
 
   return (
+    <LayoutGroup id={`equal-share-manipulate-${data.answerToken}`}>
     <div className="flex h-full min-h-0 w-full flex-col gap-3 text-slate-900">
       {data.activity === 'manipulate' ? (
         <div className="grid min-h-0 flex-1 grid-rows-[minmax(8.5rem,0.44fr)_minmax(16rem,1fr)_auto] gap-4">
@@ -25756,7 +26078,7 @@ function EqualShareDivisionProblemCard({
               className="grid h-full min-h-0 content-center justify-items-center gap-2 px-2"
               style={{ gridTemplateColumns: `repeat(${trayColumnCount}, minmax(0, 1fr))` }}
             >
-              {placements.map((placement, itemIndex) => (placement === null ? renderDraggableItem(itemIndex) : null))}
+              {placements.map((placement, itemIndex) => renderTraySlot(placement, itemIndex))}
             </div>
           </div>
 
@@ -25799,7 +26121,14 @@ function EqualShareDivisionProblemCard({
                           }}
                           className="equal-share-item-button -mx-1 grid place-items-center border-0 bg-transparent p-0 shadow-none outline-none transition hover:scale-105 focus-visible:ring-2 focus-visible:ring-emerald-300"
                         >
-                          <EqualShareItemGlyph kind={data.itemKind} size="placed" />
+                          <motion.span
+                            layout
+                            layoutId={`equal-share-item-${data.answerToken}-${itemIndex}`}
+                            className="grid place-items-center"
+                            transition={prefersReducedMotion ? { duration: 0 } : { type: 'spring', stiffness: 520, damping: 38 }}
+                          >
+                            <EqualShareItemGlyph kind={data.itemKind} size="placed" />
+                          </motion.span>
                         </button>
                       </span>
                     ) : null,
@@ -25937,6 +26266,7 @@ function EqualShareDivisionProblemCard({
         </div>
       )}
     </div>
+    </LayoutGroup>
   );
 }
 
@@ -25967,7 +26297,6 @@ function EqualGroupingDivisionProblemCard({
   const parsedAnswerInput = /^\d+$/.test(answerInput.trim()) ? Number.parseInt(answerInput.trim(), 10) : Number.NaN;
   const displayItems = Array.from({ length: data.total }, (_, index) => index);
   const groupedItemSet = new Set(groupedItems.flat());
-  const ungroupedItems = displayItems.filter((itemIndex) => !groupedItemSet.has(itemIndex));
   const groupCounts = groupedItems.map((group) => group.length);
   const allGroupsCreated =
     groupedItems.length === groupCount &&
@@ -25985,6 +26314,46 @@ function EqualGroupingDivisionProblemCard({
         : data.total <= 15
           ? 5
           : 6;
+  const getGroupingGridPosition = (itemIndex: number) => ({
+    row: Math.floor(itemIndex / groupingLayoutColumnCount),
+    col: itemIndex % groupingLayoutColumnCount,
+  });
+  const getGroupingBounds = (items: number[]) => {
+    const positions = items.map(getGroupingGridPosition);
+    const rows = positions.map((position) => position.row);
+    const cols = positions.map((position) => position.col);
+    const minRow = Math.min(...rows);
+    const maxRow = Math.max(...rows);
+    const minCol = Math.min(...cols);
+    const maxCol = Math.max(...cols);
+
+    return { minRow, maxRow, minCol, maxCol };
+  };
+  const isAdjacentRectangularGroup = (items: number[]) => {
+    if (items.length === 0) {
+      return false;
+    }
+
+    const itemSet = new Set(items);
+    const { minRow, maxRow, minCol, maxCol } = getGroupingBounds(items);
+    const rowSpan = maxRow - minRow + 1;
+    const colSpan = maxCol - minCol + 1;
+
+    if (rowSpan * colSpan !== items.length) {
+      return false;
+    }
+
+    for (let row = minRow; row <= maxRow; row += 1) {
+      for (let col = minCol; col <= maxCol; col += 1) {
+        if (!itemSet.has(row * groupingLayoutColumnCount + col)) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  };
+  const selectedItemsCanCreateGroup = isAdjacentRectangularGroup(selectedItems);
   const itemCounterUnit =
     data.itemLabel === '연필' || data.itemLabel === '색연필'
       ? '자루'
@@ -26068,11 +26437,11 @@ function EqualGroupingDivisionProblemCard({
   };
 
   const createSelectedGroup = () => {
-    if (selectedItems.length === 0) {
+    if (!selectedItemsCanCreateGroup) {
       return;
     }
 
-    setGroupedItems((previous) => [...previous, selectedItems]);
+    setGroupedItems((previous) => [...previous, [...selectedItems].sort((a, b) => a - b)]);
     setSelectedItems([]);
   };
 
@@ -26083,9 +26452,11 @@ function EqualGroupingDivisionProblemCard({
 
   const renderItemButton = (itemIndex: number, compact = false) => {
     const isSelected = selectedItems.includes(itemIndex);
+    const isGrouped = groupedItemSet.has(itemIndex);
     const isSelectable = data.activity === 'groupManipulate' && !groupedItemSet.has(itemIndex);
     const groupingItemSize = data.total <= 8 ? 'h-[6.5rem] w-[6.5rem]' : data.total <= 12 ? 'h-[5.75rem] w-[5.75rem]' : 'h-[5rem] w-[5rem]';
     const groupingGlyphSize = data.total <= 12 ? 'groupingTray' : 'groupingTrayCompact';
+    const gridPosition = getGroupingGridPosition(itemIndex);
 
     return (
       <button
@@ -26093,16 +26464,20 @@ function EqualGroupingDivisionProblemCard({
         type="button"
         onClick={() => toggleSelectedItem(itemIndex)}
         aria-pressed={isSelected}
-        className={`equal-share-item-button relative grid shrink-0 place-items-center outline-none transition ${
+        disabled={isGrouped}
+        style={data.activity === 'groupManipulate' && !compact ? { gridColumn: gridPosition.col + 1, gridRow: gridPosition.row + 1 } : undefined}
+        className={`equal-share-item-button relative z-[2] grid shrink-0 place-items-center outline-none transition ${
           compact ? 'h-12 w-12' : data.activity === 'groupManipulate' ? groupingItemSize : shouldUseCompactItems ? 'h-[4.25rem] w-[4.25rem]' : 'h-[5.25rem] w-[5.25rem]'
         } ${
           isSelected
             ? 'scale-110 ring-4 ring-emerald-300/70'
             : isSelectable
               ? 'hover:scale-105 focus-visible:ring-4 focus-visible:ring-sky-300/45'
-              : ''
+              : isGrouped
+                ? 'cursor-default'
+                : ''
         }`}
-        aria-label={`${data.itemLabel} ${itemIndex + 1}${isSelected ? ' 선택됨' : ''}`}
+        aria-label={`${data.itemLabel} ${itemIndex + 1}${isSelected ? ' 선택됨' : isGrouped ? ' 묶음에 포함됨' : ''}`}
       >
         {isSelected ? (
           <span className="absolute -right-2 -top-2 grid h-7 w-7 place-items-center rounded-full border-2 border-slate-950 bg-emerald-300 text-slate-950 shadow-lg">
@@ -26111,9 +26486,40 @@ function EqualGroupingDivisionProblemCard({
         ) : null}
         <EqualShareItemGlyph
           kind={data.itemKind}
+          className={isGrouped ? 'drop-shadow-[0_0_10px_rgba(52,211,153,0.42)]' : ''}
           size={compact ? 'trayCompact' : data.activity === 'groupManipulate' ? groupingGlyphSize : shouldUseCompactItems ? 'trayCompact' : 'tray'}
         />
       </button>
+    );
+  };
+
+  const renderCreatedGroupOverlay = (groupItems: number[], groupIndex: number) => {
+    const { minRow, maxRow, minCol, maxCol } = getGroupingBounds(groupItems);
+
+    return (
+      <motion.div
+        key={`equal-grouping-created-group-${groupIndex}`}
+        initial={{ opacity: 0, scale: 0.96 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.18 }}
+        className="pointer-events-none relative z-[4] self-stretch justify-self-stretch rounded-[1.35rem] border-[3px] border-emerald-300 bg-emerald-300/12 shadow-[0_0_0_5px_rgba(52,211,153,0.16),0_14px_26px_rgba(0,0,0,0.2)]"
+        style={{
+          gridColumn: `${minCol + 1} / span ${maxCol - minCol + 1}`,
+          gridRow: `${minRow + 1} / span ${maxRow - minRow + 1}`,
+        }}
+      >
+        <div className="pointer-events-none absolute left-2 top-2 whitespace-nowrap rounded-full bg-emerald-300 px-2.5 py-1 text-xs font-black text-slate-950">
+          {groupIndex + 1}묶음
+        </div>
+        <button
+          type="button"
+          onClick={() => returnGroupToTray(groupIndex)}
+          className="pointer-events-auto absolute right-2 top-2 z-[5] grid h-7 w-7 place-items-center rounded-full border border-slate-600 bg-slate-900 text-sm font-black text-slate-100 shadow-none transition hover:bg-slate-700"
+          aria-label={`${groupIndex + 1}묶음 다시 풀기`}
+        >
+          ×
+        </button>
+      </motion.div>
     );
   };
 
@@ -26121,10 +26527,7 @@ function EqualGroupingDivisionProblemCard({
     <button
       type="button"
       onClick={onSubmit}
-      aria-disabled={!canSubmit}
-      className={`inline-flex min-h-[4.25rem] min-w-[9rem] items-center justify-center gap-2 rounded-2xl px-7 text-xl font-black text-white shadow-lg transition ${
-        canSubmit ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-slate-700 hover:bg-slate-600'
-      }`}
+      className="inline-flex min-h-[4.25rem] min-w-[9rem] items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-7 text-xl font-black text-white shadow-lg transition hover:bg-emerald-500"
     >
       <Sword size={22} /> 공격!
     </button>
@@ -26155,10 +26558,10 @@ function EqualGroupingDivisionProblemCard({
               </p>
               <button
                 type="button"
-                disabled={selectedItems.length === 0}
+                disabled={!selectedItemsCanCreateGroup}
                 onClick={createSelectedGroup}
                 className={`inline-flex min-h-[3.25rem] items-center justify-center rounded-2xl px-5 text-base font-black shadow-lg transition sm:min-w-[9rem] sm:text-lg ${
-                  selectedItems.length > 0
+                  selectedItemsCanCreateGroup
                     ? 'bg-emerald-500 text-slate-950 hover:bg-emerald-400'
                     : 'cursor-not-allowed bg-slate-600 text-slate-300'
                 }`}
@@ -26171,36 +26574,8 @@ function EqualGroupingDivisionProblemCard({
                 className="grid w-full max-w-[66rem] content-center justify-items-center gap-x-10 gap-y-8"
                 style={{ gridTemplateColumns: `repeat(${groupingLayoutColumnCount}, minmax(0, 1fr))` }}
               >
-                {groupedItems.map((groupItems, groupIndex) => (
-                  <motion.div
-                    key={`equal-grouping-created-group-${groupIndex}`}
-                    initial={{ opacity: 0, scale: 0.92, y: 8 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.18 }}
-                    className="relative flex min-h-[7.25rem] min-w-[10rem] flex-col items-center justify-center rounded-[1.25rem] border-2 border-emerald-400 bg-emerald-400/10 px-4 py-3 shadow-[0_0_0_4px_rgba(52,211,153,0.12),0_14px_26px_rgba(0,0,0,0.22)]"
-                  >
-                    <div className="absolute left-3 top-2 rounded-full bg-emerald-400 px-2.5 py-1 text-xs font-black text-slate-950">
-                      {groupIndex + 1}묶음
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => returnGroupToTray(groupIndex)}
-                      className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full border border-slate-600 bg-slate-900 text-sm font-black text-slate-100 shadow-none transition hover:bg-slate-700"
-                      aria-label={`${groupIndex + 1}묶음 다시 풀기`}
-                    >
-                      ×
-                    </button>
-                    <div className="mt-6 flex flex-wrap items-center justify-center gap-0.5">
-                      {groupItems.map((itemIndex) => (
-                        <span key={`equal-grouping-inline-created-${itemIndex}`} className="grid place-items-center">
-                          <EqualShareItemGlyph kind={data.itemKind} size="trayCompact" />
-                        </span>
-                      ))}
-                    </div>
-                  </motion.div>
-                ))}
-
-                {ungroupedItems.map((itemIndex) => renderItemButton(itemIndex))}
+                {groupedItems.map((groupItems, groupIndex) => renderCreatedGroupOverlay(groupItems, groupIndex))}
+                {displayItems.map((itemIndex) => renderItemButton(itemIndex))}
               </div>
             </div>
           </div>
@@ -32541,12 +32916,13 @@ export default function App() {
     }
 
     if (problem.kind === 'equalGroupingDivision' && problem.equalGroupingDivision) {
-      if (!isEqualGroupingDivisionAnswerReady(inputValue, problem.equalGroupingDivision)) {
+      if (
+        problem.equalGroupingDivision.activity !== 'groupManipulate' &&
+        !isEqualGroupingDivisionAnswerReady(inputValue, problem.equalGroupingDivision)
+      ) {
         playSound('ui');
         updateMessage(
-          problem.equalGroupingDivision.activity === 'groupManipulate'
-            ? '모든 물건을 같은 수씩 묶은 뒤 공격해요!'
-            : problem.equalGroupingDivision.activity === 'repeatedSubtraction'
+          problem.equalGroupingDivision.activity === 'repeatedSubtraction'
               ? '0이 될 때까지 덜어 내고 횟수를 쓴 뒤 공격해요!'
               : '뺄셈식과 나눗셈식을 모두 쓴 뒤 공격해요!',
         );
