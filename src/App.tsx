@@ -7,6 +7,7 @@ import startHeroImage from './assets/start-hero-math-adventure.png';
 import readingActivityWarningImage from './assets/reading-activity-warning.webp';
 import equalShareEmptyContainersImage from './assets/unit4/equal-share-empty-containers.png';
 import equalShareSpritesImage from './assets/unit4/equal-share-sprites.png';
+import unit4DivisionIntroComicImage from './assets/unit4/unit4-division-intro-comic.png';
 import unit4Level1WayipaAttackImage from './assets/unit4/unit4-level1-wayipa-attack-cutout.png';
 import unit4Level1WayipaDefaultImage from './assets/unit4/unit4-level1-wayipa-default-cutout.png';
 import unit4Level1WayipaDefeatSceneImage from './assets/unit4/unit4-level1-wayipa-defeat-scene-cutout.png';
@@ -7527,25 +7528,25 @@ const UNIT4_LEVEL1_MANIPULATION_VARIANTS: EqualShareDivisionProblemInput[] = [
   {
     activity: 'manipulate',
     title: '사과 나누기',
-    instruction: '사과 24개를 바구니 8개에 똑같이 나누어 담아 보세요.',
+    instruction: '사과 24개를 바구니 6개에 똑같이 나누어 담아 보세요.',
     helperText: '바구니마다 같은 수가 되게 담아요.',
     itemKind: 'apple',
     itemLabel: '사과',
     containerKind: 'basket',
     containerLabel: '바구니',
     total: 24,
-    groups: 8,
+    groups: 6,
   },
   {
     activity: 'manipulate',
     title: '구슬 나누기',
-    instruction: '구슬 30개를 컵 5개에 똑같이 나누어 담아 보세요.',
+    instruction: '구슬 20개를 컵 5개에 똑같이 나누어 담아 보세요.',
     helperText: '컵마다 같은 수가 되게 담아요.',
     itemKind: 'marble',
     itemLabel: '구슬',
     containerKind: 'pencilCup',
     containerLabel: '컵',
-    total: 30,
+    total: 20,
     groups: 5,
   },
 ];
@@ -7933,55 +7934,55 @@ const UNIT4_LEVEL2_GROUP_MANIPULATION_VARIANTS: EqualGroupingDivisionProblemInpu
   {
     activity: 'groupManipulate',
     title: '구슬 묶기',
-    instruction: '구슬 28개를 4개씩 묶어 보세요.',
+    instruction: '구슬 24개를 4개씩 묶어 보세요.',
     helperText: '구슬을 4개씩 같은 묶음으로 만들어요.',
     itemKind: 'marble',
     itemLabel: '구슬',
-    total: 28,
+    total: 24,
     groupSize: 4,
     answerUnit: '묶음',
   },
   {
     activity: 'groupManipulate',
     title: '색연필 묶기',
-    instruction: '색연필 35자루를 5자루씩 묶어 보세요.',
+    instruction: '색연필 20자루를 5자루씩 묶어 보세요.',
     helperText: '한 묶음에 색연필 5자루씩 들어가야 해요.',
     itemKind: 'coloredPencil',
     itemLabel: '색연필',
-    total: 35,
+    total: 20,
     groupSize: 5,
     answerUnit: '묶음',
   },
   {
     activity: 'groupManipulate',
     title: '사탕 묶기',
-    instruction: '사탕 42개를 7개씩 묶어 보세요.',
+    instruction: '사탕 21개를 7개씩 묶어 보세요.',
     helperText: '사탕 7개가 한 묶음이에요.',
     itemKind: 'candy',
     itemLabel: '사탕',
-    total: 42,
+    total: 21,
     groupSize: 7,
     answerUnit: '묶음',
   },
   {
     activity: 'groupManipulate',
     title: '카드 묶기',
-    instruction: '카드 48장을 8장씩 묶어 보세요.',
+    instruction: '카드 24장을 8장씩 묶어 보세요.',
     helperText: '카드를 8장씩 같은 묶음으로 만들어요.',
     itemKind: 'sticker',
     itemLabel: '카드',
-    total: 48,
+    total: 24,
     groupSize: 8,
     answerUnit: '묶음',
   },
   {
     activity: 'groupManipulate',
     title: '쿠키 묶기',
-    instruction: '쿠키 54개를 9개씩 묶어 보세요.',
+    instruction: '쿠키 18개를 9개씩 묶어 보세요.',
     helperText: '쿠키를 9개씩 같은 묶음으로 옮겨요.',
     itemKind: 'cookie',
     itemLabel: '쿠키',
-    total: 54,
+    total: 18,
     groupSize: 9,
     answerUnit: '묶음',
   },
@@ -8068,44 +8069,44 @@ const UNIT4_LEVEL2_REPEATED_SUBTRACTION_VARIANTS: EqualGroupingDivisionProblemIn
   {
     activity: 'repeatedSubtraction',
     title: '쿠키 덜어 내기',
-    instruction: '쿠키 32개를 8개씩 덜어 내면 몇 번 덜어 낼 수 있나요?',
+    instruction: '쿠키 24개를 8개씩 덜어 내면 몇 번 덜어 낼 수 있나요?',
     helperText: '남은 수가 0이 될 때까지 8개씩 덜어 내요.',
     itemKind: 'cookie',
     itemLabel: '쿠키',
-    total: 32,
+    total: 24,
     groupSize: 8,
     answerUnit: '번',
   },
   {
     activity: 'repeatedSubtraction',
     title: '스티커 덜어 내기',
-    instruction: '스티커 35장을 5장씩 덜어 내면 몇 번 덜어 낼 수 있나요?',
+    instruction: '스티커 20장을 5장씩 덜어 내면 몇 번 덜어 낼 수 있나요?',
     helperText: '5장씩 덜어 낸 횟수가 답이에요.',
     itemKind: 'sticker',
     itemLabel: '스티커',
-    total: 35,
+    total: 20,
     groupSize: 5,
     answerUnit: '번',
   },
   {
     activity: 'repeatedSubtraction',
     title: '블록 덜어 내기',
-    instruction: '블록 42개를 7개씩 덜어 내면 몇 번 덜어 낼 수 있나요?',
+    instruction: '블록 21개를 7개씩 덜어 내면 몇 번 덜어 낼 수 있나요?',
     helperText: '7개씩 덜어 내며 식을 살펴봐요.',
     itemKind: 'block',
     itemLabel: '블록',
-    total: 42,
+    total: 21,
     groupSize: 7,
     answerUnit: '번',
   },
   {
     activity: 'repeatedSubtraction',
     title: '공책 덜어 내기',
-    instruction: '공책 54권을 9권씩 덜어 내면 몇 번 덜어 낼 수 있나요?',
+    instruction: '공책 18권을 9권씩 덜어 내면 몇 번 덜어 낼 수 있나요?',
     helperText: '9권씩 덜어 낸 횟수를 답으로 써요.',
     itemKind: 'notebook',
     itemLabel: '공책',
-    total: 54,
+    total: 18,
     groupSize: 9,
     answerUnit: '번',
   },
@@ -8137,11 +8138,11 @@ const UNIT4_LEVEL2_SUBTRACTION_TO_DIVISION_VARIANTS: EqualGroupingDivisionProble
   {
     activity: 'subtractionToDivision',
     title: '사탕 상자 만들기',
-    instruction: '사탕 30개를 한 상자에 5개씩 넣으려고 합니다.',
+    instruction: '사탕 20개를 한 상자에 5개씩 넣으려고 합니다.',
     helperText: '5개씩 덜어 낸 횟수가 상자 수예요.',
     itemKind: 'candy',
     itemLabel: '사탕',
-    total: 30,
+    total: 20,
     groupSize: 5,
     answerUnit: '상자',
   },
@@ -8181,55 +8182,55 @@ const UNIT4_LEVEL2_SUBTRACTION_TO_DIVISION_VARIANTS: EqualGroupingDivisionProble
   {
     activity: 'subtractionToDivision',
     title: '딸기 접시 만들기',
-    instruction: '딸기 28개를 한 접시에 7개씩 담으려고 합니다.',
+    instruction: '딸기 21개를 한 접시에 7개씩 담으려고 합니다.',
     helperText: '7개씩 덜어 낸 횟수가 접시 수예요.',
     itemKind: 'strawberry',
     itemLabel: '딸기',
-    total: 28,
+    total: 21,
     groupSize: 7,
     answerUnit: '접시',
   },
   {
     activity: 'subtractionToDivision',
     title: '구슬 컵 만들기',
-    instruction: '구슬 32개를 한 컵에 8개씩 담으려고 합니다.',
+    instruction: '구슬 24개를 한 컵에 8개씩 담으려고 합니다.',
     helperText: '8개씩 몇 번 덜어 내는지 나눗셈식으로 이어 봐요.',
     itemKind: 'marble',
     itemLabel: '구슬',
-    total: 32,
+    total: 24,
     groupSize: 8,
     answerUnit: '컵',
   },
   {
     activity: 'subtractionToDivision',
     title: '연필 통 만들기',
-    instruction: '연필 36자루를 한 통에 6자루씩 꽂으려고 합니다.',
+    instruction: '연필 24자루를 한 통에 6자루씩 꽂으려고 합니다.',
     helperText: '6자루씩 덜어 낸 횟수가 통 수예요.',
     itemKind: 'pencil',
     itemLabel: '연필',
-    total: 36,
+    total: 24,
     groupSize: 6,
     answerUnit: '통',
   },
   {
     activity: 'subtractionToDivision',
     title: '귤 바구니 만들기',
-    instruction: '귤 45개를 한 바구니에 9개씩 담으려고 합니다.',
+    instruction: '귤 18개를 한 바구니에 9개씩 담으려고 합니다.',
     helperText: '9개씩 덜어 낸 횟수를 나눗셈식으로 써요.',
     itemKind: 'tangerine',
     itemLabel: '귤',
-    total: 45,
+    total: 18,
     groupSize: 9,
     answerUnit: '바구니',
   },
   {
     activity: 'subtractionToDivision',
     title: '카드 묶음 만들기',
-    instruction: '카드 48장을 한 묶음에 6장씩 묶으려고 합니다.',
+    instruction: '카드 24장을 한 묶음에 6장씩 묶으려고 합니다.',
     helperText: '반복 뺄셈식과 나눗셈식이 같은 답을 가리켜요.',
     itemKind: 'sticker',
     itemLabel: '카드',
-    total: 48,
+    total: 24,
     groupSize: 6,
     answerUnit: '묶음',
   },
@@ -31426,6 +31427,7 @@ export default function App() {
   const developerProblemHistoryRef = useRef<DeveloperProblemSnapshot[]>([]);
   const developerProblemHistoryIndexRef = useRef(-1);
   const currentPlayRunIdRef = useRef(0);
+  const unit4IntroComicShownRunIdRef = useRef<number | null>(null);
   const currentPlayUnitIdRef = useRef<LearningUnitId>(DEFAULT_LEARNING_UNIT_ID);
   const recordedPlayRunIdRef = useRef<number | null>(null);
   const isBattleActionResolvingRef = useRef(false);
@@ -31473,11 +31475,28 @@ export default function App() {
   const [storedPlayRecords, setStoredPlayRecords] = useState<StoredPlayRecord[]>(readStoredPlayRecords);
   const [storedBattleProgress, setStoredBattleProgress] = useState<StoredBattleProgress | null>(readStoredBattleProgress);
   const [selectedLearningUnitId, setSelectedLearningUnitId] = useState<LearningUnitId | null>(null);
+  const [isUnit4IntroComicOpen, setIsUnit4IntroComicOpen] = useState(false);
   const [selectedArchiveUnitId, setSelectedArchiveUnitId] = useState<LearningUnitId>(DEFAULT_LEARNING_UNIT_ID);
   const [selectedArchiveLevel, setSelectedArchiveLevel] = useState(1);
   const [selectedArchiveProblemId, setSelectedArchiveProblemId] = useState<string | null>(null);
   const [isSimilarProblemPanelOpen, setIsSimilarProblemPanelOpen] = useState(false);
   const activeLearningUnitId = selectedLearningUnitId ?? DEFAULT_LEARNING_UNIT_ID;
+  useEffect(() => {
+    if (gameState !== 'playing' || activeLearningUnitId !== 'unit4') {
+      return;
+    }
+
+    if (level !== 1 || playerHP !== 100 || opponentHP !== 100) {
+      return;
+    }
+
+    if (unit4IntroComicShownRunIdRef.current === currentPlayRunIdRef.current) {
+      return;
+    }
+
+    unit4IntroComicShownRunIdRef.current = currentPlayRunIdRef.current;
+    setIsUnit4IntroComicOpen(true);
+  }, [activeLearningUnitId, gameState, level, opponentHP, playerHP]);
   const [isEstimation, setIsEstimation] = useState(false);
   const [estimationProblem, setEstimationProblem] = useState<EstimationProblem | null>(null);
   const [isUnitSelectionChallenge, setIsUnitSelectionChallenge] = useState(false);
@@ -32318,6 +32337,7 @@ export default function App() {
     setIsUnitSelectionChallenge(false);
     setUnitSelectionChallenge(null);
     setIsSpecialChallengeResolving(false);
+    setIsUnit4IntroComicOpen(activeLearningUnitId === 'unit4');
     setTimeLeft(ESTIMATION_TIME_LIMIT_SECONDS);
     setIsRewardPoolDepleted(false);
     setInputValue('');
@@ -34202,6 +34222,7 @@ export default function App() {
     clearBattleTimeouts();
     isBattleActionResolvingRef.current = false;
     currentPlayRunIdRef.current += 1;
+    unit4IntroComicShownRunIdRef.current = null;
     currentPlayUnitIdRef.current = activeLearningUnitId;
     recordedPlayRunIdRef.current = null;
     warmAudio();
@@ -34236,6 +34257,7 @@ export default function App() {
     setIsUnitSelectionChallenge(false);
     setUnitSelectionChallenge(null);
     setIsSpecialChallengeResolving(false);
+    setIsUnit4IntroComicOpen(false);
     setTimeLeft(ESTIMATION_TIME_LIMIT_SECONDS);
     resetSecretCodePrompt();
     setProblemWithCoachmark(getNextProblemForTurn(activeLearningUnitId, 1, 100), 1, { opponentHP: 100 });
@@ -34278,6 +34300,7 @@ export default function App() {
     clearBattleTimeouts();
     isBattleActionResolvingRef.current = false;
     currentPlayRunIdRef.current += 1;
+    unit4IntroComicShownRunIdRef.current = null;
     currentPlayUnitIdRef.current = progress.unitId;
     recordedPlayRunIdRef.current = null;
     warmAudio();
@@ -34321,6 +34344,7 @@ export default function App() {
     setIsUnitSelectionChallenge(false);
     setUnitSelectionChallenge(null);
     setIsSpecialChallengeResolving(false);
+    setIsUnit4IntroComicOpen(false);
     setTimeLeft(ESTIMATION_TIME_LIMIT_SECONDS);
 	    resetSecretCodePrompt();
 	    setUnitFractionCompareStreak(0);
@@ -34344,6 +34368,7 @@ export default function App() {
     clearBattleTimeouts();
     isBattleActionResolvingRef.current = false;
     currentPlayRunIdRef.current += 1;
+    unit4IntroComicShownRunIdRef.current = null;
     warmAudio();
     playSound('ui');
     gameStateRef.current = 'start';
@@ -34400,6 +34425,13 @@ export default function App() {
     warmAudio();
     playSound('ui');
     setIsRecordModalOpen(false);
+  };
+
+  const closeUnit4IntroComic = () => {
+    warmAudio();
+    playSound('ui');
+    unit4IntroComicShownRunIdRef.current = currentPlayRunIdRef.current;
+    setIsUnit4IntroComicOpen(false);
   };
 
   const openArchive = () => {
@@ -36791,6 +36823,44 @@ export default function App() {
                   )}
                 </div>
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isUnit4IntroComicOpen && gameState === 'playing' && activeLearningUnitId === 'unit4' && (
+          <motion.div
+            key="unit4-intro-comic"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[950] flex items-center justify-center overflow-y-auto bg-slate-950/88 p-5 backdrop-blur-md sm:p-8"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 12 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className="relative max-h-[calc(100svh-2.5rem)] w-full max-w-5xl overflow-hidden rounded-[1.35rem] border border-white/12 bg-slate-950 shadow-[0_28px_90px_rgba(0,0,0,0.62)] sm:max-h-[calc(100svh-4rem)]"
+              role="dialog"
+              aria-modal="true"
+              aria-label="4단원 나눗셈 상황 안내"
+            >
+              <button
+                type="button"
+                onClick={closeUnit4IntroComic}
+                className="absolute right-2.5 top-2.5 z-20 grid h-9 w-9 place-items-center rounded-full border border-slate-200/20 bg-slate-950/72 text-white shadow-[0_8px_22px_rgba(0,0,0,0.38)] transition hover:border-white/55 hover:bg-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 sm:right-3 sm:top-3 sm:h-10 sm:w-10"
+                aria-label="닫기"
+              >
+                <X className="h-5 w-5" aria-hidden="true" />
+              </button>
+              <img
+                src={unit4DivisionIntroComicImage}
+                alt="나눗셈 상황 알아보기 만화"
+                className="block max-h-[calc(100svh-2.5rem)] w-full object-contain sm:max-h-[calc(100svh-4rem)]"
+                draggable={false}
+              />
             </motion.div>
           </motion.div>
         )}
