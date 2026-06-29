@@ -4034,8 +4034,8 @@ const UNIT_LEVEL_DESCRIPTIONS: Record<LearningUnitId, string[]> = {
   ],
   unit4: [
     '',
-    '1단계: 똑같이 나누기',
-    '2단계: 똑같이 묶기',
+    '1단계: 분배 상황',
+    '2단계: 묶음 상황',
     '3단계: 나눗셈식',
     '4단계: 곱셈과 나눗셈의 관계',
     '5단계: 곱셈식 활용하기',
@@ -5898,7 +5898,7 @@ const LEARNING_UNITS: LearningUnitConfig[] = [
   },
 ];
 const IN_PROGRESS_LEARNING_UNIT_IDS = new Set<LearningUnitId>();
-const DEVELOPER_ONLY_LEARNING_UNIT_IDS = new Set<LearningUnitId>(['unit4', 'unit5']);
+const DEVELOPER_ONLY_LEARNING_UNIT_IDS = new Set<LearningUnitId>(['unit5']);
 const isLearningUnitInProgress = (unitId: LearningUnitId) => IN_PROGRESS_LEARNING_UNIT_IDS.has(unitId);
 const isDeveloperOnlyLearningUnit = (unitId: LearningUnitId) => DEVELOPER_ONLY_LEARNING_UNIT_IDS.has(unitId);
 const canEnterLearningUnit = (unit: LearningUnitConfig, isDeveloperMode: boolean) =>
@@ -7464,6 +7464,90 @@ const UNIT4_LEVEL1_MANIPULATION_VARIANTS: EqualShareDivisionProblemInput[] = [
     total: 12,
     groups: 4,
   },
+  {
+    activity: 'manipulate',
+    title: '초콜릿 나누기',
+    instruction: '초콜릿 18개를 접시 3개에 똑같이 나누어 담아 보세요.',
+    helperText: '접시마다 같은 수가 되게 담아요.',
+    itemKind: 'candy',
+    itemLabel: '초콜릿',
+    containerKind: 'plate',
+    containerLabel: '접시',
+    total: 18,
+    groups: 3,
+  },
+  {
+    activity: 'manipulate',
+    title: '카드 나누기',
+    instruction: '카드 16장을 상자 4개에 똑같이 나누어 담아 보세요.',
+    helperText: '상자마다 같은 수가 되게 담아요.',
+    itemKind: 'sticker',
+    itemLabel: '카드',
+    containerKind: 'box',
+    containerLabel: '상자',
+    total: 16,
+    groups: 4,
+  },
+  {
+    activity: 'manipulate',
+    title: '블록 나누기',
+    instruction: '블록 18개를 바구니 6개에 똑같이 나누어 담아 보세요.',
+    helperText: '바구니마다 같은 수가 되게 담아요.',
+    itemKind: 'block',
+    itemLabel: '블록',
+    containerKind: 'basket',
+    containerLabel: '바구니',
+    total: 18,
+    groups: 6,
+  },
+  {
+    activity: 'manipulate',
+    title: '공책 나누기',
+    instruction: '공책 20권을 상자 5개에 똑같이 나누어 담아 보세요.',
+    helperText: '상자마다 같은 수가 되게 담아요.',
+    itemKind: 'notebook',
+    itemLabel: '공책',
+    containerKind: 'box',
+    containerLabel: '상자',
+    total: 20,
+    groups: 5,
+  },
+  {
+    activity: 'manipulate',
+    title: '색연필 나누기',
+    instruction: '색연필 24자루를 연필꽂이 4개에 똑같이 나누어 넣어 보세요.',
+    helperText: '연필꽂이마다 같은 수가 되게 넣어요.',
+    itemKind: 'coloredPencil',
+    itemLabel: '색연필',
+    containerKind: 'pencilCup',
+    containerLabel: '연필꽂이',
+    total: 24,
+    groups: 4,
+  },
+  {
+    activity: 'manipulate',
+    title: '사과 나누기',
+    instruction: '사과 24개를 바구니 8개에 똑같이 나누어 담아 보세요.',
+    helperText: '바구니마다 같은 수가 되게 담아요.',
+    itemKind: 'apple',
+    itemLabel: '사과',
+    containerKind: 'basket',
+    containerLabel: '바구니',
+    total: 24,
+    groups: 8,
+  },
+  {
+    activity: 'manipulate',
+    title: '구슬 나누기',
+    instruction: '구슬 30개를 컵 5개에 똑같이 나누어 담아 보세요.',
+    helperText: '컵마다 같은 수가 되게 담아요.',
+    itemKind: 'marble',
+    itemLabel: '구슬',
+    containerKind: 'pencilCup',
+    containerLabel: '컵',
+    total: 30,
+    groups: 5,
+  },
 ];
 
 const UNIT4_LEVEL1_ANIMATION_VARIANTS: EqualShareDivisionProblemInput[] = [
@@ -7599,6 +7683,78 @@ const UNIT4_LEVEL1_ANIMATION_VARIANTS: EqualShareDivisionProblemInput[] = [
     total: 24,
     groups: 4,
   },
+  {
+    activity: 'animationEquation',
+    title: '식 쓰기',
+    instruction: '블록 18개가 상자 6개에 똑같이 나누어 들어갑니다.',
+    helperText: '움직임을 보고 식을 완성해요.',
+    itemKind: 'block',
+    itemLabel: '블록',
+    containerKind: 'box',
+    containerLabel: '상자',
+    total: 18,
+    groups: 6,
+  },
+  {
+    activity: 'animationEquation',
+    title: '식 쓰기',
+    instruction: '쿠키 27개가 접시 9개에 똑같이 나누어 놓입니다.',
+    helperText: '움직임을 보고 식을 완성해요.',
+    itemKind: 'cookie',
+    itemLabel: '쿠키',
+    containerKind: 'plate',
+    containerLabel: '접시',
+    total: 27,
+    groups: 9,
+  },
+  {
+    activity: 'animationEquation',
+    title: '식 쓰기',
+    instruction: '사과 30개가 바구니 5개에 똑같이 나누어 들어갑니다.',
+    helperText: '움직임을 보고 식을 완성해요.',
+    itemKind: 'apple',
+    itemLabel: '사과',
+    containerKind: 'basket',
+    containerLabel: '바구니',
+    total: 30,
+    groups: 5,
+  },
+  {
+    activity: 'animationEquation',
+    title: '식 쓰기',
+    instruction: '사탕 36개가 상자 6개에 똑같이 나누어 들어갑니다.',
+    helperText: '움직임을 보고 식을 완성해요.',
+    itemKind: 'candy',
+    itemLabel: '사탕',
+    containerKind: 'box',
+    containerLabel: '상자',
+    total: 36,
+    groups: 6,
+  },
+  {
+    activity: 'animationEquation',
+    title: '식 쓰기',
+    instruction: '구슬 40개가 컵 8개에 똑같이 나누어 들어갑니다.',
+    helperText: '움직임을 보고 식을 완성해요.',
+    itemKind: 'marble',
+    itemLabel: '구슬',
+    containerKind: 'pencilCup',
+    containerLabel: '컵',
+    total: 40,
+    groups: 8,
+  },
+  {
+    activity: 'animationEquation',
+    title: '식 쓰기',
+    instruction: '색연필 45자루가 연필꽂이 5개에 똑같이 나누어 들어갑니다.',
+    helperText: '움직임을 보고 식을 완성해요.',
+    itemKind: 'coloredPencil',
+    itemLabel: '색연필',
+    containerKind: 'pencilCup',
+    containerLabel: '연필꽂이',
+    total: 45,
+    groups: 5,
+  },
 ];
 
 const UNIT4_LEVEL1_STORY_VARIANTS: Array<{ prompt: string; answer: number; answerUnit: string }> = [
@@ -7621,7 +7777,17 @@ const UNIT4_LEVEL1_STORY_VARIANTS: Array<{ prompt: string; answer: number; answe
   { prompt: '연필 54자루를 9명에게 똑같이 나누어 줍니다.\n한 명이 몇 자루씩 갖나요?', answer: 6, answerUnit: '자루' },
   { prompt: '책 56권을 책장 7칸에 똑같이 나누어 꽂습니다.\n한 칸에 몇 권씩 꽂나요?', answer: 8, answerUnit: '권' },
   { prompt: '쿠키 63개를 9명에게 똑같이 나누어 줍니다.\n한 명에게 몇 개씩 줄 수 있나요?', answer: 7, answerUnit: '개' },
-  { prompt: '색연필 72자루를 상자 8개에 똑같이 나누어 담습니다.\n한 상자에 몇 자루씩 들어가나요?', answer: 9, answerUnit: '자루' },
+  { prompt: '색연필 54자루를 상자 6개에 똑같이 나누어 담습니다.\n한 상자에 몇 자루씩 들어가나요?', answer: 9, answerUnit: '자루' },
+  { prompt: '도화지 18장을 6명에게 똑같이 나누어 줍니다.\n한 명이 몇 장씩 갖나요?', answer: 3, answerUnit: '장' },
+  { prompt: '공 20개를 바구니 4개에 똑같이 나누어 담습니다.\n한 바구니에 몇 개씩 들어가나요?', answer: 5, answerUnit: '개' },
+  { prompt: '색 테이프 24개를 6개 모둠에 똑같이 나누어 줍니다.\n한 모둠은 몇 개씩 받나요?', answer: 4, answerUnit: '개' },
+  { prompt: '간식 27개를 9명에게 똑같이 나누어 줍니다.\n한 명이 몇 개씩 받나요?', answer: 3, answerUnit: '개' },
+  { prompt: '풍선 30개를 5개 줄에 똑같이 묶어 걸었습니다.\n한 줄에는 몇 개씩 있나요?', answer: 6, answerUnit: '개' },
+  { prompt: '책갈피 35개를 7명에게 똑같이 나누어 줍니다.\n한 명이 몇 개씩 받나요?', answer: 5, answerUnit: '개' },
+  { prompt: '붙임딱지 40장을 8명에게 똑같이 나누어 줍니다.\n한 명이 몇 장씩 갖나요?', answer: 5, answerUnit: '장' },
+  { prompt: '클립 36개를 6개 상자에 똑같이 나누어 담습니다.\n한 상자에는 몇 개씩 들어가나요?', answer: 6, answerUnit: '개' },
+  { prompt: '종이컵 64개를 8개 모둠에 똑같이 나누어 줍니다.\n한 모둠은 몇 개씩 받나요?', answer: 8, answerUnit: '개' },
+  { prompt: '초대장 81장을 9개 반에 똑같이 나누어 줍니다.\n한 반은 몇 장씩 받나요?', answer: 9, answerUnit: '장' },
 ];
 
 const UNIT4_LEVEL1_COMPLETE_VARIANT_SET_COUNT = Math.max(
@@ -7638,7 +7804,8 @@ function getInitialUnit4ProblemSequence(level: number) {
     return 1;
   }
 
-  return Math.floor(Math.random() * UNIT4_LEVEL1_COMPLETE_VARIANT_SET_COUNT) * 4 + 1;
+  const factories = UNIT4_PROBLEM_FACTORIES[level] ?? [];
+  return factories.length > 0 ? randomInt(1, factories.length) : 1;
 }
 
 function buildUnit4Level1ProblemFactories(): Array<() => Problem> {
@@ -7752,6 +7919,72 @@ const UNIT4_LEVEL2_GROUP_MANIPULATION_VARIANTS: EqualGroupingDivisionProblemInpu
     groupSize: 6,
     answerUnit: '묶음',
   },
+  {
+    activity: 'groupManipulate',
+    title: '복숭아 묶기',
+    instruction: '복숭아 18개를 3개씩 묶어 보세요.',
+    helperText: '한 묶음에 복숭아 3개씩 들어가게 만들어요.',
+    itemKind: 'peach',
+    itemLabel: '복숭아',
+    total: 18,
+    groupSize: 3,
+    answerUnit: '묶음',
+  },
+  {
+    activity: 'groupManipulate',
+    title: '구슬 묶기',
+    instruction: '구슬 28개를 4개씩 묶어 보세요.',
+    helperText: '구슬을 4개씩 같은 묶음으로 만들어요.',
+    itemKind: 'marble',
+    itemLabel: '구슬',
+    total: 28,
+    groupSize: 4,
+    answerUnit: '묶음',
+  },
+  {
+    activity: 'groupManipulate',
+    title: '색연필 묶기',
+    instruction: '색연필 35자루를 5자루씩 묶어 보세요.',
+    helperText: '한 묶음에 색연필 5자루씩 들어가야 해요.',
+    itemKind: 'coloredPencil',
+    itemLabel: '색연필',
+    total: 35,
+    groupSize: 5,
+    answerUnit: '묶음',
+  },
+  {
+    activity: 'groupManipulate',
+    title: '사탕 묶기',
+    instruction: '사탕 42개를 7개씩 묶어 보세요.',
+    helperText: '사탕 7개가 한 묶음이에요.',
+    itemKind: 'candy',
+    itemLabel: '사탕',
+    total: 42,
+    groupSize: 7,
+    answerUnit: '묶음',
+  },
+  {
+    activity: 'groupManipulate',
+    title: '카드 묶기',
+    instruction: '카드 48장을 8장씩 묶어 보세요.',
+    helperText: '카드를 8장씩 같은 묶음으로 만들어요.',
+    itemKind: 'sticker',
+    itemLabel: '카드',
+    total: 48,
+    groupSize: 8,
+    answerUnit: '묶음',
+  },
+  {
+    activity: 'groupManipulate',
+    title: '쿠키 묶기',
+    instruction: '쿠키 54개를 9개씩 묶어 보세요.',
+    helperText: '쿠키를 9개씩 같은 묶음으로 옮겨요.',
+    itemKind: 'cookie',
+    itemLabel: '쿠키',
+    total: 54,
+    groupSize: 9,
+    answerUnit: '묶음',
+  },
 ];
 
 const UNIT4_LEVEL2_REPEATED_SUBTRACTION_VARIANTS: EqualGroupingDivisionProblemInput[] = [
@@ -7821,12 +8054,67 @@ const UNIT4_LEVEL2_REPEATED_SUBTRACTION_VARIANTS: EqualGroupingDivisionProblemIn
     groupSize: 4,
     answerUnit: '번',
   },
+  {
+    activity: 'repeatedSubtraction',
+    title: '사과 덜어 내기',
+    instruction: '사과 24개를 6개씩 덜어 내면 몇 번 덜어 낼 수 있나요?',
+    helperText: '6개씩 덜어 낸 횟수를 세어 봐요.',
+    itemKind: 'apple',
+    itemLabel: '사과',
+    total: 24,
+    groupSize: 6,
+    answerUnit: '번',
+  },
+  {
+    activity: 'repeatedSubtraction',
+    title: '쿠키 덜어 내기',
+    instruction: '쿠키 32개를 8개씩 덜어 내면 몇 번 덜어 낼 수 있나요?',
+    helperText: '남은 수가 0이 될 때까지 8개씩 덜어 내요.',
+    itemKind: 'cookie',
+    itemLabel: '쿠키',
+    total: 32,
+    groupSize: 8,
+    answerUnit: '번',
+  },
+  {
+    activity: 'repeatedSubtraction',
+    title: '스티커 덜어 내기',
+    instruction: '스티커 35장을 5장씩 덜어 내면 몇 번 덜어 낼 수 있나요?',
+    helperText: '5장씩 덜어 낸 횟수가 답이에요.',
+    itemKind: 'sticker',
+    itemLabel: '스티커',
+    total: 35,
+    groupSize: 5,
+    answerUnit: '번',
+  },
+  {
+    activity: 'repeatedSubtraction',
+    title: '블록 덜어 내기',
+    instruction: '블록 42개를 7개씩 덜어 내면 몇 번 덜어 낼 수 있나요?',
+    helperText: '7개씩 덜어 내며 식을 살펴봐요.',
+    itemKind: 'block',
+    itemLabel: '블록',
+    total: 42,
+    groupSize: 7,
+    answerUnit: '번',
+  },
+  {
+    activity: 'repeatedSubtraction',
+    title: '공책 덜어 내기',
+    instruction: '공책 54권을 9권씩 덜어 내면 몇 번 덜어 낼 수 있나요?',
+    helperText: '9권씩 덜어 낸 횟수를 답으로 써요.',
+    itemKind: 'notebook',
+    itemLabel: '공책',
+    total: 54,
+    groupSize: 9,
+    answerUnit: '번',
+  },
 ];
 
 const UNIT4_LEVEL2_SUBTRACTION_TO_DIVISION_VARIANTS: EqualGroupingDivisionProblemInput[] = [
   {
     activity: 'subtractionToDivision',
-    title: '당근 대신 사과 담기',
+    title: '사과 바구니 담기',
     instruction: '사과 18개를 한 바구니에 6개씩 담으려고 합니다.',
     helperText: '6개씩 덜어 낸 횟수를 나눗셈식의 답으로 써요.',
     itemKind: 'apple',
@@ -7890,6 +8178,61 @@ const UNIT4_LEVEL2_SUBTRACTION_TO_DIVISION_VARIANTS: EqualGroupingDivisionProble
     groupSize: 4,
     answerUnit: '줄',
   },
+  {
+    activity: 'subtractionToDivision',
+    title: '딸기 접시 만들기',
+    instruction: '딸기 28개를 한 접시에 7개씩 담으려고 합니다.',
+    helperText: '7개씩 덜어 낸 횟수가 접시 수예요.',
+    itemKind: 'strawberry',
+    itemLabel: '딸기',
+    total: 28,
+    groupSize: 7,
+    answerUnit: '접시',
+  },
+  {
+    activity: 'subtractionToDivision',
+    title: '구슬 컵 만들기',
+    instruction: '구슬 32개를 한 컵에 8개씩 담으려고 합니다.',
+    helperText: '8개씩 몇 번 덜어 내는지 나눗셈식으로 이어 봐요.',
+    itemKind: 'marble',
+    itemLabel: '구슬',
+    total: 32,
+    groupSize: 8,
+    answerUnit: '컵',
+  },
+  {
+    activity: 'subtractionToDivision',
+    title: '연필 통 만들기',
+    instruction: '연필 36자루를 한 통에 6자루씩 꽂으려고 합니다.',
+    helperText: '6자루씩 덜어 낸 횟수가 통 수예요.',
+    itemKind: 'pencil',
+    itemLabel: '연필',
+    total: 36,
+    groupSize: 6,
+    answerUnit: '통',
+  },
+  {
+    activity: 'subtractionToDivision',
+    title: '귤 바구니 만들기',
+    instruction: '귤 45개를 한 바구니에 9개씩 담으려고 합니다.',
+    helperText: '9개씩 덜어 낸 횟수를 나눗셈식으로 써요.',
+    itemKind: 'tangerine',
+    itemLabel: '귤',
+    total: 45,
+    groupSize: 9,
+    answerUnit: '바구니',
+  },
+  {
+    activity: 'subtractionToDivision',
+    title: '카드 묶음 만들기',
+    instruction: '카드 48장을 한 묶음에 6장씩 묶으려고 합니다.',
+    helperText: '반복 뺄셈식과 나눗셈식이 같은 답을 가리켜요.',
+    itemKind: 'sticker',
+    itemLabel: '카드',
+    total: 48,
+    groupSize: 6,
+    answerUnit: '묶음',
+  },
 ];
 
 const UNIT4_LEVEL2_STORY_VARIANTS: Array<{ prompt: string; answer: number; answerUnit: string }> = [
@@ -7901,6 +8244,12 @@ const UNIT4_LEVEL2_STORY_VARIANTS: Array<{ prompt: string; answer: number; answe
   { prompt: '54쪽짜리 책을 매일 9쪽씩 읽습니다.\n모두 읽으려면 며칠이 걸리나요?', answer: 6, answerUnit: '일' },
   { prompt: '학생 42명이 7명씩 한 모둠을 만듭니다.\n몇 모둠이 되나요?', answer: 6, answerUnit: '모둠' },
   { prompt: '리본 72cm를 8cm씩 자릅니다.\n몇 조각이 되나요?', answer: 9, answerUnit: '조각' },
+  { prompt: '색종이 32장을 한 사람에게 4장씩 나누어 줍니다.\n몇 명에게 나누어 줄 수 있나요?', answer: 8, answerUnit: '명' },
+  { prompt: '우유 36개를 한 상자에 6개씩 넣습니다.\n몇 상자를 만들 수 있나요?', answer: 6, answerUnit: '상자' },
+  { prompt: '연필 40자루를 한 통에 5자루씩 꽂습니다.\n몇 통이 필요한가요?', answer: 8, answerUnit: '통' },
+  { prompt: '쿠키 48개를 한 봉지에 8개씩 담습니다.\n몇 봉지를 만들 수 있나요?', answer: 6, answerUnit: '봉지' },
+  { prompt: '구슬 56개를 한 컵에 7개씩 담습니다.\n몇 컵이 필요한가요?', answer: 8, answerUnit: '컵' },
+  { prompt: '초대장 63장을 한 묶음에 9장씩 묶습니다.\n몇 묶음이 되나요?', answer: 7, answerUnit: '묶음' },
 ];
 
 function buildUnit4Level2ProblemFactories(): Array<() => Problem> {
@@ -7944,6 +8293,12 @@ const UNIT4_LEVEL3_EQUATION_PART_VARIANTS: DivisionEquationPartsProblemInput[] =
   { title: '나눗셈식의 세 수', instruction: '나눗셈식에서 알맞은 이름에 맞게 수를 써넣으세요.', dividend: 32, divisor: 4, quotient: 8 },
   { title: '나눗셈식의 세 수', instruction: '나눗셈식을 보고 세 수의 뜻을 확인해 보세요.', dividend: 42, divisor: 7, quotient: 6 },
   { title: '나눗셈식의 세 수', instruction: '나눗셈식을 보고 빈칸을 모두 채우세요.', dividend: 48, divisor: 8, quotient: 6 },
+  { title: '나눗셈식의 세 수', instruction: '나눗셈식을 보고 나누어지는 수, 나누는 수, 몫을 써 보세요.', dividend: 36, divisor: 6, quotient: 6 },
+  { title: '나눗셈식의 세 수', instruction: '나눗셈식에서 세 수가 각각 무엇을 뜻하는지 확인해 보세요.', dividend: 45, divisor: 5, quotient: 9 },
+  { title: '나눗셈식의 세 수', instruction: '나눗셈식을 보고 알맞은 자리에 수를 넣으세요.', dividend: 56, divisor: 7, quotient: 8 },
+  { title: '나눗셈식의 세 수', instruction: '나눗셈식의 세 수를 이름에 맞게 구별해 보세요.', dividend: 63, divisor: 9, quotient: 7 },
+  { title: '나눗셈식의 세 수', instruction: '나눗셈식에서 빈칸을 모두 완성하세요.', dividend: 72, divisor: 8, quotient: 9 },
+  { title: '나눗셈식의 세 수', instruction: '나누어지는 수, 나누는 수, 몫을 차례대로 써 보세요.', dividend: 81, divisor: 9, quotient: 9 },
 ];
 
 const UNIT4_LEVEL3_SITUATION_CLASSIFY_VARIANTS: Array<Omit<DivisionSituationClassifyProblemData, 'answerToken'>> = [
@@ -7982,6 +8337,54 @@ const UNIT4_LEVEL3_SITUATION_CLASSIFY_VARIANTS: Array<Omit<DivisionSituationClas
     instruction: '어떤 상황인가요?',
     helperText: '',
     situation: { id: 'group-block-20-5', kind: 'equalGrouping', text: '블록 20개를 5개씩 묶습니다. 몇 묶음이 되나요?' },
+  },
+  {
+    title: '상황 구별하기',
+    instruction: '어떤 상황인가요?',
+    helperText: '',
+    situation: { id: 'share-bookmark-36-6', kind: 'equalShare', text: '책갈피 36개를 6명에게 똑같이 나누어 줍니다. 한 명이 몇 개씩 갖나요?' },
+  },
+  {
+    title: '상황 구별하기',
+    instruction: '어떤 상황인가요?',
+    helperText: '',
+    situation: { id: 'group-cookie-36-6', kind: 'equalGrouping', text: '쿠키 36개를 6개씩 봉지에 담습니다. 몇 봉지를 만들 수 있나요?' },
+  },
+  {
+    title: '상황 구별하기',
+    instruction: '어떤 상황인가요?',
+    helperText: '',
+    situation: { id: 'share-card-45-5', kind: 'equalShare', text: '카드 45장을 5개 모둠에 똑같이 나누어 줍니다. 한 모둠은 몇 장씩 받나요?' },
+  },
+  {
+    title: '상황 구별하기',
+    instruction: '어떤 상황인가요?',
+    helperText: '',
+    situation: { id: 'group-ribbon-45-5', kind: 'equalGrouping', text: '리본 45cm를 5cm씩 자릅니다. 몇 조각이 되나요?' },
+  },
+  {
+    title: '상황 구별하기',
+    instruction: '어떤 상황인가요?',
+    helperText: '',
+    situation: { id: 'share-sticker-56-7', kind: 'equalShare', text: '스티커 56장을 7명에게 똑같이 나누어 줍니다. 한 명이 몇 장씩 갖나요?' },
+  },
+  {
+    title: '상황 구별하기',
+    instruction: '어떤 상황인가요?',
+    helperText: '',
+    situation: { id: 'group-pencil-56-7', kind: 'equalGrouping', text: '연필 56자루를 7자루씩 통에 꽂습니다. 몇 통을 만들 수 있나요?' },
+  },
+  {
+    title: '상황 구별하기',
+    instruction: '어떤 상황인가요?',
+    helperText: '',
+    situation: { id: 'share-paper-72-8', kind: 'equalShare', text: '도화지 72장을 8개 반에 똑같이 나누어 줍니다. 한 반은 몇 장씩 받나요?' },
+  },
+  {
+    title: '상황 구별하기',
+    instruction: '어떤 상황인가요?',
+    helperText: '',
+    situation: { id: 'group-bead-72-8', kind: 'equalGrouping', text: '구슬 72개를 8개씩 컵에 담습니다. 몇 컵이 필요한가요?' },
   },
 ];
 
@@ -8135,6 +8538,78 @@ const UNIT4_LEVEL7_STORY_VARIANTS: Array<{
       rows: [{ cells: ['56장', '7장씩', '봉투 수'] }],
     },
   },
+  {
+    prompt: '학교 방송실에서는 안내문 64장을 각 교실에 나누어 주려고 합니다.\n8개 교실에 같은 수만큼 놓아야 모든 반이 똑같이 안내문을 받을 수 있습니다.\n안내문이 남거나 한 교실에만 더 많으면 안 되므로 먼저 한 교실의 수를 구합니다.\n한 교실에는 안내문이 몇 장씩 놓이나요?',
+    answer: 8,
+    answerUnit: '장',
+    storyTable: {
+      headers: ['안내문', '교실 수', '나누는 방법'],
+      rows: [{ cells: ['64장', '8개 교실', '똑같이 나누기'] }],
+    },
+  },
+  {
+    prompt: '체험 부스에서 사용할 도장 45개를 준비했습니다.\n한 활동 꾸러미에는 도장 5개씩 들어가야 하고, 꾸러미마다 들어가는 도장 수는 같습니다.\n도장을 모두 사용하면 활동 꾸러미는 몇 개가 되나요?',
+    answer: 9,
+    answerUnit: '개',
+    storyTable: {
+      headers: ['도장', '꾸러미 1개', '구해야 할 것'],
+      rows: [{ cells: ['45개', '5개씩', '꾸러미 수'] }],
+    },
+  },
+  {
+    prompt: '과학 시간에 관찰 렌즈 36개를 6개 모둠에 나누어 주려고 합니다.\n모둠마다 같은 수의 렌즈를 받아야 관찰 활동을 동시에 시작할 수 있습니다.\n한 모둠은 관찰 렌즈를 몇 개씩 받나요?',
+    answer: 6,
+    answerUnit: '개',
+    storyTable: {
+      headers: ['관찰 렌즈', '모둠 수', '나누는 방법'],
+      rows: [{ cells: ['36개', '6모둠', '똑같이 나누기'] }],
+    },
+  },
+  {
+    prompt: '학급 행사에서 사용할 이름표 72장을 준비했습니다.\n한 줄에 이름표 8장씩 가지런히 놓아 확인하려고 합니다.\n이름표를 모두 놓으면 몇 줄이 만들어지나요?',
+    answer: 9,
+    answerUnit: '줄',
+    storyTable: {
+      headers: ['이름표', '한 줄', '구해야 할 것'],
+      rows: [{ cells: ['72장', '8장씩', '줄 수'] }],
+    },
+  },
+  {
+    prompt: '미술실에는 새 붓 27자루가 있습니다.\n3개의 붓 통에 같은 수만큼 꽂아 두어야 친구들이 찾기 쉽습니다.\n붓 통 하나에는 붓이 몇 자루씩 들어가나요?',
+    answer: 9,
+    answerUnit: '자루',
+    storyTable: {
+      headers: ['붓', '붓 통', '나누는 방법'],
+      rows: [{ cells: ['27자루', '3개', '똑같이 나누기'] }],
+    },
+  },
+  {
+    prompt: '운동장 게임 준비로 번호 카드 42장을 만들었습니다.\n한 경기장에는 번호 카드 6장씩 필요합니다.\n번호 카드를 모두 사용하면 몇 경기장을 준비할 수 있나요?',
+    answer: 7,
+    answerUnit: '개',
+    storyTable: {
+      headers: ['번호 카드', '경기장 1개', '구해야 할 것'],
+      rows: [{ cells: ['42장', '6장씩', '경기장 수'] }],
+    },
+  },
+  {
+    prompt: '도서부는 추천 책갈피 54개를 책상 위에 정리하고 있습니다.\n한 바구니에 책갈피 9개씩 담아 두면 친구들이 가져가기 쉽습니다.\n책갈피를 모두 담으려면 바구니는 몇 개 필요한가요?',
+    answer: 6,
+    answerUnit: '개',
+    storyTable: {
+      headers: ['책갈피', '바구니 1개', '구해야 할 것'],
+      rows: [{ cells: ['54개', '9개씩', '바구니 수'] }],
+    },
+  },
+  {
+    prompt: '교실 놀이 시간에 사용할 말 32개를 준비했습니다.\n4개 모둠이 같은 수만큼 말을 가져야 놀이판을 똑같이 시작할 수 있습니다.\n한 모둠은 말을 몇 개씩 가져가나요?',
+    answer: 8,
+    answerUnit: '개',
+    storyTable: {
+      headers: ['말', '모둠 수', '나누는 방법'],
+      rows: [{ cells: ['32개', '4모둠', '똑같이 나누기'] }],
+    },
+  },
 ];
 
 function buildUnit4Level3ProblemFactories(): Array<() => Problem> {
@@ -8165,6 +8640,36 @@ const UNIT4_PROBLEM_FACTORIES: Record<number, Array<() => Problem>> = {
       factorA: 8,
       factorB: 3,
     }),
+    () => createMultiplicationDivisionLinkProblem({
+      title: '곱셈식에서 나눗셈식 만들기',
+      instruction: '곱셈식과 관계있는 나눗셈식 2개를 완성하세요.',
+      factorA: 6,
+      factorB: 7,
+    }),
+    () => createMultiplicationDivisionLinkProblem({
+      title: '곱셈식에서 나눗셈식 만들기',
+      instruction: '곱셈식 하나로 만들 수 있는 나눗셈식 2개를 완성하세요.',
+      factorA: 9,
+      factorB: 5,
+    }),
+    () => createMultiplicationDivisionLinkProblem({
+      title: '곱셈식에서 나눗셈식 만들기',
+      instruction: '곱셈식과 관계있는 나눗셈식 2개를 완성하세요.',
+      factorA: 4,
+      factorB: 8,
+    }),
+    () => createMultiplicationDivisionLinkProblem({
+      title: '곱셈식에서 나눗셈식 만들기',
+      instruction: '곱셈식 하나로 만들 수 있는 나눗셈식 2개를 완성하세요.',
+      factorA: 7,
+      factorB: 9,
+    }),
+    () => createMultiplicationDivisionLinkProblem({
+      title: '곱셈식에서 나눗셈식 만들기',
+      instruction: '곱셈식과 관계있는 나눗셈식 2개를 완성하세요.',
+      factorA: 5,
+      factorB: 6,
+    }),
     () => createArrayEquationDerivationProblem({
       title: '그림에서 식 찾기',
       instruction: '그림을 보고 곱셈식과 나눗셈식을 각각 2개씩 써 보세요.',
@@ -8173,6 +8678,51 @@ const UNIT4_PROBLEM_FACTORIES: Record<number, Array<() => Problem>> = {
       itemLabel: '딸기',
       rows: 4,
       columns: 6,
+    }),
+    () => createArrayEquationDerivationProblem({
+      title: '그림에서 식 찾기',
+      instruction: '그림을 보고 곱셈식과 나눗셈식을 각각 2개씩 써 보세요.',
+      helperText: '줄의 수와 한 줄의 수를 모두 식에 넣어 보세요.',
+      itemKind: 'cookie',
+      itemLabel: '쿠키',
+      rows: 3,
+      columns: 8,
+    }),
+    () => createArrayEquationDerivationProblem({
+      title: '그림에서 식 찾기',
+      instruction: '배열 그림을 보고 서로 관계있는 곱셈식과 나눗셈식을 완성하세요.',
+      helperText: '전체 수, 줄의 수, 한 줄의 수를 식에 넣어 보세요.',
+      itemKind: 'apple',
+      itemLabel: '사과',
+      rows: 5,
+      columns: 7,
+    }),
+    () => createArrayEquationDerivationProblem({
+      title: '그림에서 식 찾기',
+      instruction: '배열 그림을 보고 곱셈식과 나눗셈식을 각각 2개씩 써 보세요.',
+      helperText: '가로와 세로를 바꾸어 식을 만들어 보세요.',
+      itemKind: 'candy',
+      itemLabel: '사탕',
+      rows: 6,
+      columns: 6,
+    }),
+    () => createArrayEquationDerivationProblem({
+      title: '그림에서 식 찾기',
+      instruction: '그림을 보고 관계있는 곱셈식과 나눗셈식을 완성하세요.',
+      helperText: '전체 수, 줄의 수, 한 줄의 수를 식에 넣어 보세요.',
+      itemKind: 'marble',
+      itemLabel: '구슬',
+      rows: 2,
+      columns: 9,
+    }),
+    () => createArrayEquationDerivationProblem({
+      title: '그림에서 식 찾기',
+      instruction: '배열 그림을 보고 서로 바꾼 곱셈식과 나눗셈식을 써 보세요.',
+      helperText: '두 곱셈식과 두 나눗셈식이 모두 같은 전체 수를 나타내요.',
+      itemKind: 'block',
+      itemLabel: '블록',
+      rows: 7,
+      columns: 4,
     }),
     () => createDivisionInterpretationProblem({
       title: '같은 수를 다른 식으로 해석하기',
@@ -8196,6 +8746,72 @@ const UNIT4_PROBLEM_FACTORIES: Record<number, Array<() => Problem>> = {
       equalGroupingText: '스티커 36장을 한 봉지에 9장씩 넣으면 몇 봉지를 만들 수 있나요?',
       equalShareText: '스티커 36장을 4명에게 똑같이 나누어 주면 한 명이 몇 장씩 갖나요?',
     }),
+    () => createDivisionInterpretationProblem({
+      title: '같은 수를 다른 식으로 해석하기',
+      instruction: '그림과 문장을 보고 곱셈식과 나눗셈식을 완성하세요.',
+      helperText: '같은 전체 수를 묶음 상황과 분배 상황으로 나누어 생각해요.',
+      itemKind: 'marble',
+      itemLabel: '구슬',
+      total: 40,
+      multiplier: 8,
+      equalGroupingText: '구슬 40개를 한 컵에 8개씩 담으면 몇 컵을 만들 수 있나요?',
+      equalShareText: '구슬 40개를 5명에게 똑같이 나누어 주면 한 명이 몇 개씩 갖나요?',
+    }),
+    () => createDivisionInterpretationProblem({
+      title: '같은 수를 다른 식으로 해석하기',
+      instruction: '그림과 문장을 보고 곱셈식과 나눗셈식을 완성하세요.',
+      helperText: '곱셈식 하나에서 서로 다른 나눗셈식 2개가 나와요.',
+      itemKind: 'notebook',
+      itemLabel: '공책',
+      total: 36,
+      multiplier: 6,
+      equalGroupingText: '공책 36권을 한 줄에 6권씩 놓으면 몇 줄이 되나요?',
+      equalShareText: '공책 36권을 6개 상자에 똑같이 담으면 한 상자에 몇 권씩 들어가나요?',
+    }),
+    () => createDivisionInterpretationProblem({
+      title: '같은 수를 다른 식으로 해석하기',
+      instruction: '그림과 문장을 보고 곱셈식과 나눗셈식을 완성하세요.',
+      helperText: '나누는 기준이 달라지면 나눗셈식도 달라져요.',
+      itemKind: 'block',
+      itemLabel: '블록',
+      total: 54,
+      multiplier: 9,
+      equalGroupingText: '블록 54개를 9개씩 묶으면 몇 묶음이 되나요?',
+      equalShareText: '블록 54개를 6명에게 똑같이 나누어 주면 한 명이 몇 개씩 갖나요?',
+    }),
+    () => createDivisionInterpretationProblem({
+      title: '같은 수를 다른 식으로 해석하기',
+      instruction: '그림과 문장을 보고 곱셈식과 나눗셈식을 완성하세요.',
+      helperText: '같은 전체 수를 두 가지 나눗셈 상황으로 해석해요.',
+      itemKind: 'cookie',
+      itemLabel: '쿠키',
+      total: 32,
+      multiplier: 4,
+      equalGroupingText: '쿠키 32개를 한 봉지에 4개씩 담으면 몇 봉지를 만들 수 있나요?',
+      equalShareText: '쿠키 32개를 8명에게 똑같이 나누어 주면 한 명이 몇 개씩 갖나요?',
+    }),
+    () => createDivisionInterpretationProblem({
+      title: '같은 수를 다른 식으로 해석하기',
+      instruction: '그림과 문장을 보고 곱셈식과 나눗셈식을 완성하세요.',
+      helperText: '나누는 기준에 따라 나눗셈식의 나누는 수와 몫이 바뀌어요.',
+      itemKind: 'coloredPencil',
+      itemLabel: '색연필',
+      total: 42,
+      multiplier: 7,
+      equalGroupingText: '색연필 42자루를 7자루씩 묶으면 몇 묶음이 되나요?',
+      equalShareText: '색연필 42자루를 6명에게 똑같이 나누어 주면 한 명이 몇 자루씩 갖나요?',
+    }),
+    () => createDivisionInterpretationProblem({
+      title: '같은 수를 다른 식으로 해석하기',
+      instruction: '그림과 문장을 보고 곱셈식과 나눗셈식을 완성하세요.',
+      helperText: '곱셈식 하나에서 관계있는 나눗셈식 2개를 만들어요.',
+      itemKind: 'apple',
+      itemLabel: '사과',
+      total: 56,
+      multiplier: 8,
+      equalGroupingText: '사과 56개를 한 바구니에 8개씩 담으면 몇 바구니를 만들 수 있나요?',
+      equalShareText: '사과 56개를 7개 모둠에 똑같이 나누어 주면 한 모둠은 몇 개씩 받나요?',
+    }),
   ],
   5: [
     () => createDivisionCardPlacementProblem({
@@ -8214,6 +8830,70 @@ const UNIT4_PROBLEM_FACTORIES: Record<number, Array<() => Problem>> = {
       divisor: 6,
       quotient: 7,
     }),
+    () => createDivisionCardPlacementProblem({
+      title: '수 카드 배치',
+      instruction: '수 카드를 한 번씩만 사용하여 몫이 가장 큰 나눗셈식을 만들고, 곱셈식으로 바꾸세요.',
+      cards: [8, 56, 7],
+      dividend: 56,
+      divisor: 7,
+      quotient: 8,
+    }),
+    () => createDivisionCardPlacementProblem({
+      title: '수 카드 배치',
+      instruction: '수 카드를 한 번씩만 사용하여 몫이 가장 큰 나눗셈식을 만들고, 곱셈식으로 바꾸세요.',
+      cards: [9, 72, 8],
+      dividend: 72,
+      divisor: 8,
+      quotient: 9,
+    }),
+    () => createDivisionCardPlacementProblem({
+      title: '수 카드 배치',
+      instruction: '수 카드를 한 번씩만 사용하여 몫이 가장 큰 나눗셈식을 만들고, 곱셈식으로 바꾸세요.',
+      cards: [6, 54, 9],
+      dividend: 54,
+      divisor: 6,
+      quotient: 9,
+    }),
+    () => createDivisionCardPlacementProblem({
+      title: '수 카드 배치',
+      instruction: '수 카드를 한 번씩만 사용하여 몫이 가장 큰 나눗셈식을 만들고, 곱셈식으로 바꾸세요.',
+      cards: [7, 63, 9],
+      dividend: 63,
+      divisor: 7,
+      quotient: 9,
+    }),
+    () => createDivisionCardPlacementProblem({
+      title: '수 카드 배치',
+      instruction: '수 카드를 한 번씩만 사용하여 몫이 가장 큰 나눗셈식을 만들고, 곱셈식으로 바꾸세요.',
+      cards: [4, 32, 8],
+      dividend: 32,
+      divisor: 4,
+      quotient: 8,
+    }),
+    () => createDivisionCardPlacementProblem({
+      title: '수 카드 배치',
+      instruction: '수 카드를 한 번씩만 사용하여 몫이 가장 큰 나눗셈식을 만들고, 곱셈식으로 바꾸세요.',
+      cards: [5, 40, 8],
+      dividend: 40,
+      divisor: 5,
+      quotient: 8,
+    }),
+    () => createDivisionCardPlacementProblem({
+      title: '수 카드 배치',
+      instruction: '수 카드를 한 번씩만 사용하여 몫이 가장 큰 나눗셈식을 만들고, 곱셈식으로 바꾸세요.',
+      cards: [7, 49, 7],
+      dividend: 49,
+      divisor: 7,
+      quotient: 7,
+    }),
+    () => createDivisionCardPlacementProblem({
+      title: '수 카드 배치',
+      instruction: '수 카드를 한 번씩만 사용하여 몫이 가장 큰 나눗셈식을 만들고, 곱셈식으로 바꾸세요.',
+      cards: [8, 64, 8],
+      dividend: 64,
+      divisor: 8,
+      quotient: 8,
+    }),
     () => createMultiplicationQuotientProblem({
       title: '곱셈식으로 몫 구하기',
       instruction: '나눗셈의 몫을 구하기 위해 필요한 곱셈식을 완성하세요.',
@@ -8228,8 +8908,94 @@ const UNIT4_PROBLEM_FACTORIES: Record<number, Array<() => Problem>> = {
       divisor: 7,
       quotient: 8,
     }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈식으로 몫 구하기',
+      instruction: '나눗셈의 몫을 구하기 위해 필요한 곱셈식을 완성하세요.',
+      dividend: 35,
+      divisor: 5,
+      quotient: 7,
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈식으로 몫 구하기',
+      instruction: '나눗셈의 몫을 구하기 위해 필요한 곱셈식을 완성하세요.',
+      dividend: 48,
+      divisor: 6,
+      quotient: 8,
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈식으로 몫 구하기',
+      instruction: '나눗셈의 몫을 구하기 위해 필요한 곱셈식을 완성하세요.',
+      dividend: 72,
+      divisor: 9,
+      quotient: 8,
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈식으로 몫 구하기',
+      instruction: '나눗셈의 몫을 구하기 위해 필요한 곱셈식을 완성하세요.',
+      dividend: 81,
+      divisor: 9,
+      quotient: 9,
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈식으로 몫 구하기',
+      instruction: '나눗셈의 몫을 구하기 위해 필요한 곱셈식을 완성하세요.',
+      dividend: 28,
+      divisor: 4,
+      quotient: 7,
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈식으로 몫 구하기',
+      instruction: '나눗셈의 몫을 구하기 위해 필요한 곱셈식을 완성하세요.',
+      dividend: 36,
+      divisor: 4,
+      quotient: 9,
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈식으로 몫 구하기',
+      instruction: '나눗셈의 몫을 구하기 위해 필요한 곱셈식을 완성하세요.',
+      dividend: 42,
+      divisor: 6,
+      quotient: 7,
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈식으로 몫 구하기',
+      instruction: '나눗셈의 몫을 구하기 위해 필요한 곱셈식을 완성하세요.',
+      dividend: 54,
+      divisor: 9,
+      quotient: 6,
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈식으로 몫 구하기',
+      instruction: '나눗셈의 몫을 구하기 위해 필요한 곱셈식을 완성하세요.',
+      dividend: 63,
+      divisor: 9,
+      quotient: 7,
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈식으로 몫 구하기',
+      instruction: '나눗셈의 몫을 구하기 위해 필요한 곱셈식을 완성하세요.',
+      dividend: 64,
+      divisor: 8,
+      quotient: 8,
+    }),
   ],
   6: [
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈표로 몫 구하기',
+      instruction: '곱셈표에서 2단을 찾고 18이 있는 칸을 눌러 몫을 구하세요.',
+      dividend: 18,
+      divisor: 2,
+      quotient: 9,
+      strategy: 'multiplicationTable',
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈표로 몫 구하기',
+      instruction: '곱셈표에서 3단을 찾고 24가 있는 칸을 눌러 몫을 구하세요.',
+      dividend: 24,
+      divisor: 3,
+      quotient: 8,
+      strategy: 'multiplicationTable',
+    }),
     () => createMultiplicationQuotientProblem({
       title: '곱셈표로 몫 구하기',
       instruction: '곱셈표에서 4단을 찾고 36이 있는 칸을 눌러 몫을 구하세요.',
@@ -8263,6 +9029,46 @@ const UNIT4_PROBLEM_FACTORIES: Record<number, Array<() => Problem>> = {
       strategy: 'multiplicationTable',
     }),
     () => createMultiplicationQuotientProblem({
+      title: '곱셈표로 몫 구하기',
+      instruction: '곱셈표에서 5단을 찾고 45가 있는 칸을 눌러 몫을 구하세요.',
+      dividend: 45,
+      divisor: 5,
+      quotient: 9,
+      strategy: 'multiplicationTable',
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈표로 몫 구하기',
+      instruction: '곱셈표에서 6단을 찾고 36이 있는 칸을 눌러 몫을 구하세요.',
+      dividend: 36,
+      divisor: 6,
+      quotient: 6,
+      strategy: 'multiplicationTable',
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈표로 몫 구하기',
+      instruction: '곱셈표에서 7단을 찾고 49가 있는 칸을 눌러 몫을 구하세요.',
+      dividend: 49,
+      divisor: 7,
+      quotient: 7,
+      strategy: 'multiplicationTable',
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈표로 몫 구하기',
+      instruction: '곱셈표에서 8단을 찾고 64가 있는 칸을 눌러 몫을 구하세요.',
+      dividend: 64,
+      divisor: 8,
+      quotient: 8,
+      strategy: 'multiplicationTable',
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈표로 몫 구하기',
+      instruction: '곱셈표에서 9단을 찾고 81이 있는 칸을 눌러 몫을 구하세요.',
+      dividend: 81,
+      divisor: 9,
+      quotient: 9,
+      strategy: 'multiplicationTable',
+    }),
+    () => createMultiplicationQuotientProblem({
       title: '곱셈표로 나누어 주기',
       instruction: '구슬 42개를 6명에게 똑같이 나누어 줍니다. 곱셈표에서 6단을 찾아 한 명에게 몇 개씩 줄 수 있는지 구하세요.',
       dividend: 42,
@@ -8281,6 +9087,96 @@ const UNIT4_PROBLEM_FACTORIES: Record<number, Array<() => Problem>> = {
       strategy: 'multiplicationTable',
       storyPrompt: '색종이 63장을 9명에게 똑같이 나누어 줍니다.',
       answerUnit: '장',
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈표로 나누어 주기',
+      instruction: '쿠키 32개를 4명에게 똑같이 나누어 줍니다. 곱셈표에서 4단을 찾아 한 명에게 몇 개씩 줄 수 있는지 구하세요.',
+      dividend: 32,
+      divisor: 4,
+      quotient: 8,
+      strategy: 'multiplicationTable',
+      storyPrompt: '쿠키 32개를 4명에게 똑같이 나누어 줍니다.',
+      answerUnit: '개',
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈표로 상자 수 구하기',
+      instruction: '사과 35개를 한 상자에 5개씩 담습니다. 곱셈표에서 5단을 찾아 필요한 상자 수를 구하세요.',
+      dividend: 35,
+      divisor: 5,
+      quotient: 7,
+      strategy: 'multiplicationTable',
+      storyPrompt: '사과 35개를 한 상자에 5개씩 담습니다.',
+      answerUnit: '상자',
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈표로 묶음 수 구하기',
+      instruction: '스티커 48장을 8장씩 묶습니다. 곱셈표에서 8단을 찾아 몇 묶음인지 구하세요.',
+      dividend: 48,
+      divisor: 8,
+      quotient: 6,
+      strategy: 'multiplicationTable',
+      storyPrompt: '스티커 48장을 8장씩 묶습니다.',
+      answerUnit: '묶음',
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈표로 몫 구하기',
+      instruction: '공책 72권을 9권씩 정리합니다. 곱셈표에서 9단을 찾아 몇 줄이 되는지 구하세요.',
+      dividend: 72,
+      divisor: 9,
+      quotient: 8,
+      strategy: 'multiplicationTable',
+      storyPrompt: '공책 72권을 9권씩 정리합니다.',
+      answerUnit: '줄',
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈표로 나누어 주기',
+      instruction: '사탕 28개를 7명에게 똑같이 나누어 줍니다. 곱셈표에서 7단을 찾아 한 명에게 몇 개씩 줄 수 있는지 구하세요.',
+      dividend: 28,
+      divisor: 7,
+      quotient: 4,
+      strategy: 'multiplicationTable',
+      storyPrompt: '사탕 28개를 7명에게 똑같이 나누어 줍니다.',
+      answerUnit: '개',
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈표로 봉지 수 구하기',
+      instruction: '쿠키 54개를 한 봉지에 6개씩 담습니다. 곱셈표에서 6단을 찾아 봉지 수를 구하세요.',
+      dividend: 54,
+      divisor: 6,
+      quotient: 9,
+      strategy: 'multiplicationTable',
+      storyPrompt: '쿠키 54개를 한 봉지에 6개씩 담습니다.',
+      answerUnit: '봉지',
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈표로 상자 수 구하기',
+      instruction: '연필 40자루를 한 상자에 8자루씩 담습니다. 곱셈표에서 8단을 찾아 상자 수를 구하세요.',
+      dividend: 40,
+      divisor: 8,
+      quotient: 5,
+      strategy: 'multiplicationTable',
+      storyPrompt: '연필 40자루를 한 상자에 8자루씩 담습니다.',
+      answerUnit: '상자',
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈표로 모둠 수 구하기',
+      instruction: '학생 45명이 5명씩 한 모둠을 만듭니다. 곱셈표에서 5단을 찾아 몇 모둠인지 구하세요.',
+      dividend: 45,
+      divisor: 5,
+      quotient: 9,
+      strategy: 'multiplicationTable',
+      storyPrompt: '학생 45명이 5명씩 한 모둠을 만듭니다.',
+      answerUnit: '모둠',
+    }),
+    () => createMultiplicationQuotientProblem({
+      title: '곱셈표로 접시 수 구하기',
+      instruction: '딸기 56개를 한 접시에 7개씩 담습니다. 곱셈표에서 7단을 찾아 접시 수를 구하세요.',
+      dividend: 56,
+      divisor: 7,
+      quotient: 8,
+      strategy: 'multiplicationTable',
+      storyPrompt: '딸기 56개를 한 접시에 7개씩 담습니다.',
+      answerUnit: '접시',
     }),
   ],
   7: UNIT4_LEVEL7_STORY_VARIANTS.map((storyVariant) => () =>
@@ -16052,6 +16948,12 @@ function getProblemKindLabel(problem: Problem) {
   return problem.kind;
 }
 
+function getDivisionQuotientBand(quotient: number) {
+  if (quotient <= 3) return 'small';
+  if (quotient <= 6) return 'medium';
+  return 'large';
+}
+
 function getProblemVariantSignature(problem: Problem) {
   if (problem.kind === 'shapeDraw' && problem.shapeDraw) {
     return [
@@ -16082,24 +16984,20 @@ function getProblemVariantSignature(problem: Problem) {
     return [
       problem.kind,
       problem.equalGroupingDivision.activity,
-      problem.equalGroupingDivision.total,
-      problem.equalGroupingDivision.groupSize,
+      `groupSize-${problem.equalGroupingDivision.groupSize}`,
     ].join(':');
   }
 
   if (problem.kind === 'divisionEquationParts' && problem.divisionEquationParts) {
     return [
       problem.kind,
-      problem.divisionEquationParts.dividend,
       problem.divisionEquationParts.divisor,
-      problem.divisionEquationParts.quotient,
     ].join(':');
   }
 
   if (problem.kind === 'divisionSituationClassify' && problem.divisionSituationClassify) {
     return [
       problem.kind,
-      problem.divisionSituationClassify.situation.id,
       problem.divisionSituationClassify.situation.kind,
     ].join(':');
   }
@@ -16107,41 +17005,44 @@ function getProblemVariantSignature(problem: Problem) {
   if (problem.kind === 'multiplicationDivisionLink' && problem.multiplicationDivisionLink) {
     return [
       problem.kind,
-      problem.multiplicationDivisionLink.factorA,
-      problem.multiplicationDivisionLink.factorB,
+      getDivisionQuotientBand(Math.max(
+        problem.multiplicationDivisionLink.factorA,
+        problem.multiplicationDivisionLink.factorB,
+      )),
     ].join(':');
   }
 
   if (problem.kind === 'arrayEquationDerivation' && problem.arrayEquationDerivation) {
     return [
       problem.kind,
-      problem.arrayEquationDerivation.rows,
-      problem.arrayEquationDerivation.columns,
-      problem.arrayEquationDerivation.itemKind,
+      getDivisionQuotientBand(Math.max(
+        problem.arrayEquationDerivation.rows,
+        problem.arrayEquationDerivation.columns,
+      )),
     ].join(':');
   }
 
   if (problem.kind === 'divisionInterpretation' && problem.divisionInterpretation) {
+    const counterpart = problem.divisionInterpretation.total / problem.divisionInterpretation.multiplier;
     return [
       problem.kind,
-      problem.divisionInterpretation.total,
-      problem.divisionInterpretation.multiplier,
-      problem.divisionInterpretation.itemKind,
+      `multiplier-${problem.divisionInterpretation.multiplier}`,
+      getDivisionQuotientBand(counterpart),
     ].join(':');
   }
 
   if (problem.kind === 'divisionCardPlacement' && problem.divisionCardPlacement) {
     return [
       problem.kind,
-      problem.divisionCardPlacement.cards.join('-'),
+      getDivisionQuotientBand(problem.divisionCardPlacement.quotient),
     ].join(':');
   }
 
   if (problem.kind === 'multiplicationQuotient' && problem.multiplicationQuotient) {
     return [
       problem.kind,
-      problem.multiplicationQuotient.dividend,
-      problem.multiplicationQuotient.divisor,
+      problem.multiplicationQuotient.strategy ?? 'equation',
+      getDivisionQuotientBand(problem.multiplicationQuotient.quotient),
     ].join(':');
   }
 
@@ -16379,7 +17280,7 @@ function getProblemArchiveAnswer(problem: Problem) {
   }
 
   if (problem.kind === 'divisionSituationClassify' && problem.divisionSituationClassify) {
-    return problem.divisionSituationClassify.situation.kind === 'equalShare' ? '나누기 상황' : '묶기 상황';
+    return problem.divisionSituationClassify.situation.kind === 'equalShare' ? '분배 상황' : '묶음 상황';
   }
 
   if (problem.kind === 'multiplicationDivisionLink' && problem.multiplicationDivisionLink) {
@@ -25815,7 +26716,7 @@ function EqualShareItemGlyph({
 }: {
   kind: EqualShareDivisionItemKind;
   className?: string;
-  size?: 'default' | 'tray' | 'trayCompact' | 'groupingTray' | 'groupingTrayCompact' | 'placed' | 'animation' | 'animationPlaced';
+  size?: 'default' | 'tray' | 'trayCompact' | 'groupingTray' | 'groupingTrayCompact' | 'placed' | 'placedCompact' | 'animation' | 'animationPlaced' | 'animationPlacedCompact';
 }) {
   const isTall = kind === 'pencil' || kind === 'coloredPencil';
   const dimensions = {
@@ -25825,8 +26726,10 @@ function EqualShareItemGlyph({
     groupingTray: isTall ? { width: 62, height: 110 } : { width: 92, height: 92 },
     groupingTrayCompact: isTall ? { width: 44, height: 78 } : { width: 64, height: 64 },
     placed: isTall ? { width: 64, height: 112 } : { width: 72, height: 72 },
+    placedCompact: isTall ? { width: 52, height: 92 } : { width: 58, height: 58 },
     animation: isTall ? { width: 54, height: 96 } : { width: 68, height: 68 },
     animationPlaced: isTall ? { width: 34, height: 60 } : { width: 48, height: 48 },
+    animationPlacedCompact: isTall ? { width: 28, height: 50 } : { width: 38, height: 38 },
   }[size];
 
   return (
@@ -26019,7 +26922,7 @@ function EqualShareDivisionProblemCard({
         className="grid place-items-center"
         transition={prefersReducedMotion ? { duration: 0 } : { type: 'spring', stiffness: 520, damping: 38 }}
       >
-        <EqualShareItemGlyph kind={data.itemKind} size={compact ? 'placed' : shouldUseCompactTrayItems ? 'trayCompact' : 'tray'} />
+        <EqualShareItemGlyph kind={data.itemKind} size={compact ? 'placedCompact' : shouldUseCompactTrayItems ? 'trayCompact' : 'tray'} />
       </motion.span>
     </button>
   );
@@ -26047,8 +26950,25 @@ function EqualShareDivisionProblemCard({
         ? Math.min(data.groups, condensed ? 2 : 4)
         : Math.min(data.groups, condensed ? 3 : 4);
   const shouldUseCompactContainer = data.groups >= 5 || (condensed && data.groups >= 4);
+  const getPlacedItemGlyphSize = (groupIndex: number): Parameters<typeof EqualShareItemGlyph>[0]['size'] => {
+    const itemCount = counts[groupIndex] ?? 0;
+
+    if (itemCount >= 6) {
+      return 'animationPlaced';
+    }
+
+    if (itemCount >= 4 || (shouldUseCompactContainer && itemCount >= 3)) {
+      return 'placedCompact';
+    }
+
+    return 'placed';
+  };
   const animationColumnCount = data.groups <= 4 ? Math.min(data.groups, 2) : Math.min(data.groups, 3);
   const animationRowCount = Math.ceil(data.groups / animationColumnCount);
+  const shouldUseCompactAnimationItems = quotient >= 5 || data.groups >= 5;
+  const animationContainerPanelClass = shouldUseCompactAnimationItems
+    ? 'absolute inset-x-6 bottom-5 min-h-[13rem] rounded-[1.25rem] border border-slate-600 bg-slate-950/30 p-3'
+    : 'absolute inset-x-6 bottom-5 rounded-[1.25rem] border border-slate-600 bg-slate-950/30 p-3';
   const getAnimationContainerPosition = (groupIndex: number) => {
     const columnIndex = groupIndex % animationColumnCount;
     const rowIndex = Math.floor(groupIndex / animationColumnCount);
@@ -26127,7 +27047,7 @@ function EqualShareDivisionProblemCard({
                             className="grid place-items-center"
                             transition={prefersReducedMotion ? { duration: 0 } : { type: 'spring', stiffness: 520, damping: 38 }}
                           >
-                            <EqualShareItemGlyph kind={data.itemKind} size="placed" />
+                            <EqualShareItemGlyph kind={data.itemKind} size={getPlacedItemGlyphSize(groupIndex)} />
                           </motion.span>
                         </button>
                       </span>
@@ -26156,7 +27076,7 @@ function EqualShareDivisionProblemCard({
         <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto] gap-4">
           <div className="relative min-h-[24rem] overflow-hidden rounded-[1.35rem] border border-slate-600 bg-[radial-gradient(circle_at_50%_0%,rgba(16,185,129,0.18),transparent_32%),linear-gradient(180deg,#111827,#0f172a)] p-4 shadow-inner">
             <div className="absolute inset-x-6 top-5 h-24 rounded-[1.25rem] border border-slate-600 bg-slate-950/35" />
-            <div className="absolute inset-x-6 bottom-5 rounded-[1.25rem] border border-slate-600 bg-slate-950/30 p-3">
+            <div className={animationContainerPanelClass}>
               <div className="grid h-full gap-3" style={{ gridTemplateColumns: `repeat(${animationColumnCount}, minmax(0, 1fr))` }}>
                 {Array.from({ length: data.groups }, (_, groupIndex) => (
                   <div key={`animation-container-${groupIndex}`} className="min-w-0">
@@ -26172,7 +27092,7 @@ function EqualShareDivisionProblemCard({
                             animate={{ opacity: 1, scale: 1 }}
                             transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.18, delay: itemIndex * 0.13 + 0.88, ease: 'easeOut' }}
                           >
-                            <EqualShareItemGlyph kind={data.itemKind} size="animationPlaced" />
+                            <EqualShareItemGlyph kind={data.itemKind} size={shouldUseCompactAnimationItems ? 'animationPlacedCompact' : 'animationPlaced'} />
                           </motion.span>
                         ))}
                     </EqualShareContainerGlyph>
@@ -27027,18 +27947,18 @@ function DivisionInterpretationProblemCard({
             <div className="mb-1 inline-flex rounded-full bg-emerald-400/18 px-2.5 py-0.5 text-sm font-black text-emerald-200">{data.multiplier}개씩</div>
             <div className="grid grid-cols-[auto_minmax(2.8rem,4.8rem)_auto_minmax(2.8rem,4.8rem)] items-center justify-start gap-2 text-xl font-black text-slate-100 sm:text-2xl">
               <span>{total} ÷</span>
-              {renderInput(2, '묶기 상황 나누는 수')}
+              {renderInput(2, '묶음 상황 나누는 수')}
               <span>=</span>
-              {renderInput(3, '묶기 상황 몫')}
+              {renderInput(3, '묶음 상황 몫')}
             </div>
           </div>
           <div className="min-w-0 rounded-xl border border-cyan-400/35 bg-slate-900 p-2 shadow-[0_12px_22px_rgba(0,0,0,0.24)]">
             <div className="mb-1 inline-flex rounded-full bg-cyan-400/18 px-2.5 py-0.5 text-sm font-black text-cyan-200">{equalShareDivisor}명에게</div>
             <div className="grid grid-cols-[auto_minmax(2.8rem,4.8rem)_auto_minmax(2.8rem,4.8rem)] items-center justify-start gap-2 text-xl font-black text-slate-100 sm:text-2xl">
               <span>{total} ÷</span>
-              {renderInput(4, '나누기 상황 나누는 수')}
+              {renderInput(4, '분배 상황 나누는 수')}
               <span>=</span>
-              {renderInput(5, '나누기 상황 몫')}
+              {renderInput(5, '분배 상황 몫')}
             </div>
           </div>
         </div>
@@ -27550,13 +28470,13 @@ function DivisionSituationClassifyProblemCard({
   const choices = [
     {
       kind: 'equalShare',
-      label: '나누기 상황',
+      label: '분배 상황',
       className: 'border-cyan-300/45 bg-cyan-300/12 text-cyan-100 hover:bg-cyan-300/18',
       selectedClassName: 'border-cyan-200 bg-cyan-300 text-slate-950 shadow-[0_14px_28px_rgba(103,232,249,0.22)]',
     },
     {
       kind: 'equalGrouping',
-      label: '묶기 상황',
+      label: '묶음 상황',
       className: 'border-amber-300/45 bg-amber-300/12 text-amber-100 hover:bg-amber-300/18',
       selectedClassName: 'border-amber-200 bg-amber-300 text-slate-950 shadow-[0_14px_28px_rgba(252,211,77,0.2)]',
     },
@@ -32961,7 +33881,7 @@ export default function App() {
     if (problem.kind === 'divisionSituationClassify' && problem.divisionSituationClassify) {
       if (!isDivisionSituationClassifyAnswerReady(inputValue)) {
         playSound('ui');
-        updateMessage('나누기 상황인지 묶기 상황인지 고른 뒤 공격해요!');
+        updateMessage('분배 상황인지 묶음 상황인지 고른 뒤 공격해요!');
         return;
       }
 
