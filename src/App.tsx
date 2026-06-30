@@ -26900,6 +26900,24 @@ function EqualShareDivisionProblemCard({
 
   const shouldUseCompactTrayItems = data.total > 8;
   const trayColumnCount = data.total <= 8 ? data.total : data.total <= 12 ? 6 : data.total <= 18 ? 9 : 12;
+  const manipulationGridRowsClass = condensed
+    ? 'grid-rows-[minmax(6rem,0.35fr)_minmax(10rem,1fr)_auto] gap-3'
+    : 'grid-rows-[minmax(8.5rem,0.44fr)_minmax(16rem,1fr)_auto] gap-4';
+  const animationGridRowsClass = condensed
+    ? 'grid-rows-[minmax(0,1fr)_auto] gap-3'
+    : 'grid-rows-[minmax(0,1fr)_auto] gap-4';
+  const animationSceneClass = condensed
+    ? 'min-h-[14rem] sm:min-h-[16rem] lg:min-h-[15rem]'
+    : 'min-h-[24rem]';
+  const equationPanelClass = condensed
+    ? 'grid gap-2 rounded-[1.35rem] border border-slate-600 bg-slate-900 p-3 shadow-sm sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-stretch'
+    : 'grid gap-3 rounded-[1.35rem] border border-slate-600 bg-slate-900 p-4 shadow-sm sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-stretch';
+  const equationInputClass = condensed
+    ? 'h-12 w-full rounded-2xl border-4 border-slate-600 bg-slate-950 text-center text-2xl font-black text-white outline-none focus:border-emerald-400 sm:h-14 sm:text-3xl'
+    : 'h-16 w-full rounded-2xl border-4 border-slate-600 bg-slate-950 text-center text-3xl font-black text-white outline-none focus:border-emerald-400';
+  const equationSubmitClass = condensed
+    ? 'inline-flex min-h-[3.25rem] items-center justify-center gap-2 rounded-2xl px-5 text-base font-black text-white shadow-lg transition sm:text-lg'
+    : 'inline-flex min-h-[4.25rem] items-center justify-center gap-2 rounded-2xl px-7 text-xl font-black text-white shadow-lg transition';
 
   const getTrayItemFrameClass = (compact = false) =>
     compact ? 'h-14 w-14' : shouldUseCompactTrayItems ? 'h-14 w-14' : 'h-[6.25rem] w-[6.25rem]';
@@ -26998,7 +27016,7 @@ function EqualShareDivisionProblemCard({
     <LayoutGroup id={`equal-share-manipulate-${data.answerToken}`}>
     <div className="flex h-full min-h-0 w-full flex-col gap-3 text-slate-900">
       {data.activity === 'manipulate' ? (
-        <div className="grid min-h-0 flex-1 grid-rows-[minmax(8.5rem,0.44fr)_minmax(16rem,1fr)_auto] gap-4">
+        <div className={`grid min-h-0 flex-1 ${manipulationGridRowsClass}`}>
           <div
             className="relative min-h-0 overflow-hidden rounded-[1.35rem] border border-slate-600 bg-[linear-gradient(180deg,#111827,#0f172a)] p-3 shadow-inner"
             onDragOver={(event) => event.preventDefault()}
@@ -27083,8 +27101,8 @@ function EqualShareDivisionProblemCard({
           </div>
         </div>
       ) : (
-        <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto] gap-4">
-          <div className="relative min-h-[24rem] overflow-hidden rounded-[1.35rem] border border-slate-600 bg-[radial-gradient(circle_at_50%_0%,rgba(16,185,129,0.18),transparent_32%),linear-gradient(180deg,#111827,#0f172a)] p-4 shadow-inner">
+        <div className={`grid min-h-0 flex-1 ${animationGridRowsClass}`}>
+          <div className={`relative overflow-hidden rounded-[1.35rem] border border-slate-600 bg-[radial-gradient(circle_at_50%_0%,rgba(16,185,129,0.18),transparent_32%),linear-gradient(180deg,#111827,#0f172a)] p-3 shadow-inner sm:p-4 ${animationSceneClass}`}>
             <div className="absolute inset-x-6 top-5 h-24 rounded-[1.25rem] border border-slate-600 bg-slate-950/35" />
             <div className={animationContainerPanelClass}>
               <div className="grid h-full gap-3" style={{ gridTemplateColumns: `repeat(${animationColumnCount}, minmax(0, 1fr))` }}>
@@ -27150,7 +27168,7 @@ function EqualShareDivisionProblemCard({
             })}
           </div>
 
-          <div className="grid gap-3 rounded-[1.35rem] border border-slate-600 bg-slate-900 p-4 shadow-sm sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-stretch">
+          <div className={equationPanelClass}>
             <div className="grid min-w-0 grid-cols-[1fr_auto_1fr_auto_1fr] items-center gap-2">
               {([
                 ['total', '전체'],
@@ -27172,7 +27190,7 @@ function EqualShareDivisionProblemCard({
                           onSubmit();
                         }
                       }}
-                      className="h-16 w-full rounded-2xl border-4 border-slate-600 bg-slate-950 text-center text-3xl font-black text-white outline-none focus:border-emerald-400"
+                      className={equationInputClass}
                       placeholder="?"
                     />
                   </label>
@@ -27186,7 +27204,7 @@ function EqualShareDivisionProblemCard({
               type="button"
               disabled={!canSubmit}
               onClick={onSubmit}
-              className={`inline-flex min-h-[4.25rem] items-center justify-center gap-2 rounded-2xl px-7 text-xl font-black text-white shadow-lg transition ${
+              className={`${equationSubmitClass} ${
                 canSubmit ? 'bg-emerald-600 hover:bg-emerald-500' : 'cursor-not-allowed bg-slate-500 opacity-60'
               }`}
             >
@@ -32787,6 +32805,16 @@ export default function App() {
   const battleRightPanelResponsiveClass = isCompactBattleViewport ? 'gap-2' : 'gap-3';
   const battleTopGroupResponsiveClass = isCompactBattleViewport ? 'gap-2' : 'gap-3';
   const battleInputResponsiveClass = isCompactBattleViewport ? 'gap-2' : 'gap-3';
+  const shouldAllowSpecialProblemScroll =
+    problem.kind === 'equalShareDivision' ||
+    problem.kind === 'equalGroupingDivision' ||
+    problem.kind === 'divisionEquationParts' ||
+    problem.kind === 'divisionSituationClassify' ||
+    problem.kind === 'multiplicationDivisionLink' ||
+    problem.kind === 'arrayEquationDerivation' ||
+    problem.kind === 'divisionInterpretation' ||
+    problem.kind === 'divisionCardPlacement' ||
+    problem.kind === 'multiplicationQuotient';
 
   useEffect(() => {
     setShowHint(isHintForced);
@@ -35602,7 +35630,7 @@ export default function App() {
                   problem.kind === 'distanceMap' || problem.kind === 'distanceWorksheet'
                     ? 'flex flex-col overflow-y-auto p-2 sm:p-3 lg:p-3'
                     : problem.kind === 'shapeDraw' || problem.kind === 'shapeRain' || problem.kind === 'equalPartition' || problem.kind === 'fractionIntro' || problem.kind === 'equalShareDivision' || problem.kind === 'equalGroupingDivision' || problem.kind === 'divisionEquationParts' || problem.kind === 'divisionSituationClassify' || problem.kind === 'multiplicationDivisionLink' || problem.kind === 'arrayEquationDerivation' || problem.kind === 'divisionInterpretation' || problem.kind === 'divisionCardPlacement' || problem.kind === 'multiplicationQuotient'
-                      ? 'flex flex-col overflow-hidden p-3 sm:p-4 lg:p-5'
+                      ? `flex flex-col p-3 sm:p-4 lg:p-5 ${shouldAllowSpecialProblemScroll ? 'overflow-y-auto overflow-x-hidden' : 'overflow-hidden'}`
                     : problem.kind === 'timeAddition' && isStoryTimeAdditionProblem
                       ? `flex flex-col justify-center ${isCompactBattleViewport ? 'overflow-hidden p-3 sm:p-4 lg:p-5' : 'overflow-y-auto p-4 sm:p-6 lg:p-8'}`
                     : problem.kind === 'timeAddition' && isVerticalTimeAdditionProblem
