@@ -7162,10 +7162,19 @@ function isMultiplicationDivisionLinkAnswerReady(answerValue: string) {
 
 function isMultiplicationDivisionLinkAnswerCorrect(answerValue: string, data: MultiplicationDivisionLinkProblemData) {
   const [firstDivisor, firstQuotient, secondDivisor, secondQuotient] = parsePrefixedNumbers(answerValue, MULTIPLICATION_DIVISION_LINK_PREFIX);
-  return firstDivisor === data.factorA &&
-    firstQuotient === data.factorB &&
-    secondDivisor === data.factorB &&
-    secondQuotient === data.factorA;
+  const expectedRows = [
+    [data.factorA, data.factorB],
+    [data.factorB, data.factorA],
+  ];
+  const submittedRows = [
+    [firstDivisor, firstQuotient],
+    [secondDivisor, secondQuotient],
+  ];
+  const matchesRow = ([divisor, quotient]: number[], [expectedDivisor, expectedQuotient]: number[]) =>
+    divisor === expectedDivisor && quotient === expectedQuotient;
+
+  return expectedRows.every((expectedRow) => submittedRows.some((submittedRow) => matchesRow(submittedRow, expectedRow))) &&
+    submittedRows.every((submittedRow) => expectedRows.some((expectedRow) => matchesRow(submittedRow, expectedRow)));
 }
 
 function createArrayEquationDerivationProblem(data: Omit<ArrayEquationDerivationProblemData, 'answerToken'>): Problem {
