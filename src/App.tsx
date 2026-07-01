@@ -7744,18 +7744,6 @@ const UNIT4_LEVEL1_ANIMATION_VARIANTS: EqualShareDivisionProblemInput[] = [
   {
     activity: 'animationEquation',
     title: '식 쓰기',
-    instruction: '구슬 40개가 컵 8개에 똑같이 나누어 들어갑니다.',
-    helperText: '움직임을 보고 식을 완성해요.',
-    itemKind: 'marble',
-    itemLabel: '구슬',
-    containerKind: 'pencilCup',
-    containerLabel: '컵',
-    total: 40,
-    groups: 8,
-  },
-  {
-    activity: 'animationEquation',
-    title: '식 쓰기',
     instruction: '색연필 45자루가 연필꽂이 5개에 똑같이 나누어 들어갑니다.',
     helperText: '움직임을 보고 식을 완성해요.',
     itemKind: 'coloredPencil',
