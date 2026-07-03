@@ -34729,7 +34729,7 @@ export default function App() {
                   <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(52,211,153,0.18),transparent_40%),radial-gradient(circle_at_bottom_right,rgba(251,191,36,0.18),transparent_28%)]" />
 
                   <div className="relative">
-                    <h2 className="text-3xl font-black text-white">이름 입력</h2>
+                    <h2 className="text-3xl font-black text-white">닉네임 입력</h2>
                     <p className="mt-2 text-sm font-semibold text-slate-300">최대 8글자</p>
 
                     <input
@@ -34737,7 +34737,7 @@ export default function App() {
                       type="text"
                       value={pendingPlayerName}
                       onChange={(event) => setPendingPlayerName(event.target.value.slice(0, 8))}
-                      placeholder="이름"
+                      placeholder="닉네임"
                       className="mt-4 w-full rounded-2xl border-2 border-slate-600 bg-slate-950 px-4 py-3 text-xl font-black text-white outline-none transition focus:border-emerald-400 sm:mt-5 sm:px-5 sm:py-4 sm:text-2xl"
                     />
                     <div className={`mt-5 flex flex-col-reverse gap-3 ${
