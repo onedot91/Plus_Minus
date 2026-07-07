@@ -4122,7 +4122,7 @@ const DEFEAT_SCENE_IMAGES: Partial<Record<number, string>> = {
 };
 const PLAY_RECORDS_STORAGE_KEY = 'plusMinusChromebookPlayRecords';
 const BATTLE_PROGRESS_STORAGE_KEY = 'plusMinusChromebookBattleProgress';
-const MAX_STORED_PLAY_RECORDS = 30;
+const MAX_STORED_PLAY_RECORDS = 100;
 const RECORD_CLEAR_HOLD_DURATION_MS = 5000;
 const STORED_PLAY_RECORD_UNIT_THEMES: Record<LearningUnitId, StoredPlayRecordUnitTheme> = {
   unit1: {
@@ -32283,7 +32283,7 @@ export default function App() {
     ? [...rewardRouletteSkins, ...rewardRouletteSkins, ...rewardRouletteSkins, pendingRewardSkin]
     : rewardRouletteSkins;
   const rewardSlotMachineStopY = -Math.max(0, rewardSlotMachineItems.length - 1) * 96;
-  const visibleStoredPlayRecords = storedPlayRecords.slice(0, 30);
+  const visibleStoredPlayRecords = storedPlayRecords.slice(0, MAX_STORED_PLAY_RECORDS);
   const hasStoredPlayRecords = visibleStoredPlayRecords.length > 0;
   const visibleStoredPlayRecordSections = visibleStoredPlayRecords.reduce<Array<{
     unitId: LearningUnitId;
